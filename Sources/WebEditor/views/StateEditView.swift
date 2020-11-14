@@ -33,7 +33,8 @@ struct StateEditView: View {
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity, alignment: .center)
             ForEach(state.actions.sorted(by: { $0.0 < $1.0 }), id: \.0) { (key, value) in
-                
+                CodeView(machine: $machine, path: path.actions[key].wrappedValue, label: key, language: .swift)
+                    .frame(minHeight: 720.0 / CGFloat(state.actions.count))
             }
         }
     }

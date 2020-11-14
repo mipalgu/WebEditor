@@ -7,11 +7,20 @@ import TokamakDOM
 import SwiftUI
 #endif
 
-
-
-
-
 struct WebEditor: App {
+    
+    #if !canImport(TokamakDOM) && canImport(SwiftUI)
+    class AppDelegate: NSObject, NSApplicationDelegate {
+        
+        func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+            return true
+        }
+        
+    }
+    
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate: AppDelegate
+    #endif
+    
     var body: some Scene {
         WindowGroup("Web Editor") {
             ContentView()
@@ -29,11 +38,23 @@ struct ContentView: View {
     
     
     var body: some View {
-        VStack {
-            Text("Hello, world!")
-            BoolView(machine: $machine, label: "Use Custom Ringlet",path: Machine.path.attributes[2].attributes["use_custom_ringlet"].wrappedValue.lineAttribute.boolValue)
-            AttributeGroupView(machine: $machine, path: Machine.path.attributes[4], label: "First Attribute")
-        }.frame(minWidth: 1280, minHeight: 720)
+        ScrollView {
+            VStack {
+                /*HStack {
+                    StateEditView(machine: $machine, path: Machine.path.states[0])
+                        .frame(minWidth: 900)
+                    ScrollView(.horizontal, showsIndicators: true) {
+                        AttributeGroupsView(machine: $machine, path: Machine.path.states[0].attributes, label: "All Attributes")
+                            .frame(minWidth: 500)
+                    }
+                }*/
+                StateCollapsedView(machine: $machine, path: Machine.path.states[0])
+                StateExpandedView(machine: $machine, path: Machine.path.states[0])
+                
+            }
+            .background(Color.white)
+            .frame(minWidth: 1280, minHeight: 720)
+        }
     }
 }
 
