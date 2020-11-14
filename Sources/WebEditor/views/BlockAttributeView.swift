@@ -22,11 +22,11 @@ struct BlockAttributeView<Path: PathProtocol>: View where Path.Root == Machine, 
     var body: some View {
         switch machine[keyPath: path.path] {
         case .code(_, let language):
-            CodeView(machine: $machine, path: path, label: label, language: language)
+            CodeView(machine: $machine, path: path.codeValue, label: label, language: language)
         case .text:
-            TextView(machine: $machine, path: path, label: label)
+            TextView(machine: $machine, path: path.textValue, label: label)
         case .table(_, let columns):
-            TableView(machine: $machine, path: path, label: label, columns: columns)
+            TableView(machine: $machine, path: path.tableValue, label: label, columns: columns)
         default:
             Text("Not Yet Implemented")
         }

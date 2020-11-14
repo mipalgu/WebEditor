@@ -28,7 +28,7 @@ struct TableView: View {
                     LineAttributeView(
                         machine: $machine,
                         path: Attributes.Path(
-                            path: path.path.appending(path: \.tableValue[rowIndex][columnIndex]),
+                            path: path.path.appending(path: \.[rowIndex][columnIndex]),
                             ancestors: []
                         ),
                         label: label

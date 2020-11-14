@@ -24,15 +24,15 @@ struct LineAttributeView: View {
         case .bool:
             BoolView(machine: $machine, label: label, path: path.boolValue)
         case .integer:
-            IntegerView(machine: $machine, label: label, path: path)
+            IntegerView(machine: $machine, path: path.integerValue, label: label)
         case .float:
-            FloatView(machine: $machine, label: label, path: path)
+            FloatView(machine: $machine, path: path.floatValue, label: label)
         case .expression(_, let language):
-            ExpressionView(machine: $machine, label: label, language: language, path: path)
+            ExpressionView(machine: $machine, path: path.expressionValue, label: label, language: language)
         case .enumerated(_, let validValues):
-            EnumeratedView(machine: $machine, path: path, label: label, validValues: validValues)
+            EnumeratedView(machine: $machine, path: path.enumeratedValue, label: label, validValues: validValues)
         case .line:
-            LineView(machine: $machine, path: path, label: label)
+            LineView(machine: $machine, path: path.lineValue, label: label)
         }
     }
 }
