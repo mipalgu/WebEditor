@@ -13,16 +13,16 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct LineAttributeView<Path: PathProtocol>: View where Path.Root == Machine, Path.Value == LineAttribute {
+struct LineAttributeView: View {
     
     @Binding var machine: Machine
-    let path: Path
+    let path: Attributes.Path<Machine, LineAttribute>
     let label: String
     
     var body: some View {
         switch machine[keyPath: path.path] {
         case .bool:
-            BoolView(machine: $machine, label: label, path: path)
+            BoolView(machine: $machine, label: label, path: path.boolValue)
         case .integer:
             IntegerView(machine: $machine, label: label, path: path)
         case .float:

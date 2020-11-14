@@ -13,26 +13,23 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct EnumeratedView<Path: PathProtocol>: View where Path.Root == Machine, Path.Value == LineAttribute {
+struct EnumeratedView: View {
     
     @Binding var machine: Machine
-    let path: Path
+    let path: Attributes.Path<Machine, String>
     let label: String
     let validValues: Set<String>
     
     var body: some View {
         Picker(
             label,
-            selection: Binding(
-                get: {machine[keyPath: path.path].enumeratedValue ?? validValues.first ?? ""},
-                set: {
-                    do {
-                        try machine.modify(attribute: path, value: LineAttribute.enumerated($0, validValues: validValues))
-                    } catch let e {
-                        print("\(e)")
-                    }
+            selection: Binding(get: {machine[keyPath: path.path] }, set: {
+                do {
+                    try machine.modify(attribute: path, value: $0)
+                } catch let e {
+                    print("\(e)")
                 }
-            )
+            })
         ) {
             ForEach(validValues.sorted(), id: \.self) {
                 Text($0).tag($0)

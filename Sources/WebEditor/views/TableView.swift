@@ -13,18 +13,18 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct TableView<Path: PathProtocol>: View where Path.Root == Machine, Path.Value == BlockAttribute {
+struct TableView: View {
     
     @Binding var machine: Machine
-    let path: Path
+    let path: Attributes.Path<Machine, [[LineAttribute]]>
     let label: String
     let columns: [BlockAttributeType.TableColumn]
     
     var body: some View {
         VStack {
             Text(label.capitalized)
-            List(Array(machine[keyPath: path.path].tableValue.indices), id: \.self) { rowIndex in
-                ForEach(Array(machine[keyPath: path.path].tableValue[rowIndex].indices), id: \.self) { columnIndex in
+            List(Array(machine[keyPath: path.path].indices), id: \.self) { rowIndex in
+                ForEach(Array(machine[keyPath: path.path][rowIndex].indices), id: \.self) { columnIndex in
                     LineAttributeView(
                         machine: $machine,
                         path: Attributes.Path(

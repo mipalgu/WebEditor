@@ -13,17 +13,18 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct ExpressionView<Path: PathProtocol>: View where Path.Root == Machine, Path.Value == LineAttribute {
+struct ExpressionView: View {
     
     @Binding var machine: Machine
+    let path: Attributes.Path<Machine, Expression>
     let label: String
     let language: Language
-    let path: Path
+    
     
     var body: some View {
-        TextField(label, text: Binding(get: { String(machine[keyPath: path.path].expressionValue ?? Expression()) }, set: {
+        TextField(label, text: Binding(get: { String(machine[keyPath: path.path]) }, set: {
             do {
-                try machine.modify(attribute: path, value: LineAttribute.expression(Expression($0), language: language))
+                try machine.modify(attribute: path, value: Expression($0))
             } catch let e {
                 print("\(e)")
             }

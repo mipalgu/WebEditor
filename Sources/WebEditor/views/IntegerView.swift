@@ -13,19 +13,19 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct IntegerView<Path: PathProtocol>: View where Path.Root == Machine, Path.Value == LineAttribute {
+struct IntegerView: View {
 
     @Binding var machine: Machine
+    let path: Attributes.Path<Machine, Int>
     let label: String
-    let path: Path
     
     var body: some View {
-        TextField(label, text: Binding(get: { String(machine[keyPath: path.path].integerValue ?? 0) }, set: {
+        TextField(label, text: Binding(get: { String(machine[keyPath: path.path]) }, set: {
             guard let value = Int($0) else {
                 return
             }
             do {
-                try machine.modify(attribute: path, value: LineAttribute.integer(value))
+                try machine.modify(attribute: path, value: value)
             } catch let e {
                 print("\(e)")
             }

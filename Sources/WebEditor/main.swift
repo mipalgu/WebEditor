@@ -32,7 +32,7 @@ struct ContentView: View {
         VStack {
             Text("Hello, world!")
             BoolView(machine: $machine, label: "Use Custom Ringlet",path: Machine.path.attributes[2].attributes["use_custom_ringlet"].wrappedValue.lineAttribute)
-            AttributeGroupView(machine: $machine, path: Machine.path.attributes[1], label: "First Attribute")
+            AttributeGroupView(machine: $machine, path: Machine.path.attributes[4], label: "First Attribute")
         }.frame(minWidth: 1280, minHeight: 720)
     }
 }

@@ -13,16 +13,16 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct BoolView<Path: PathProtocol>: View where Path.Root == Machine, Path.Value == LineAttribute {
+struct BoolView: View {
     
     @Binding var machine: Machine
     let label: String
-    let path: Path
+    let path: Attributes.Path<Machine, Bool>
     
     var body: some View {
-        Toggle(label, isOn: Binding(get: { machine[keyPath: path.path].boolValue ?? false }, set: {
+        Toggle(label, isOn: Binding(get: { machine[keyPath: path.path] }, set: {
             do {
-                try machine.modify(attribute: path, value: LineAttribute.bool($0))
+                try machine.modify(attribute: path, value: $0)
             } catch let e {
                 print("\(e)")
             }

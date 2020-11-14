@@ -13,19 +13,19 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct CodeView<Path: PathProtocol>: View where Path.Root == Machine, Path.Value == BlockAttribute {
+struct CodeView: View {
     
     @Binding var machine: Machine
-    let path: Path
+    let path: Attributes.Path<Machine, Code>
     let label: String
     let language: Language
     
     var body: some View {
         VStack {
             Text(label.capitalized)
-            TextEditor(text: Binding(get: { machine[keyPath: path.path].codeValue ?? "" }, set: {
+            TextEditor(text: Binding(get: { machine[keyPath: path.path] }, set: {
                 do {
-                    try machine.modify(attribute: path, value: .code($0, language: language))
+                    try machine.modify(attribute: path, value: Code($0))
                 } catch let e {
                     print("\(e)")
                 }
