@@ -22,14 +22,32 @@ struct CodeView: View {
     
     var body: some View {
         VStack {
-            Text(label.capitalized)
-            TextEditor(text: Binding(get: { machine[keyPath: path.path] }, set: {
-                do {
-                    try machine.modify(attribute: path, value: Code($0))
-                } catch let e {
-                    print("\(e)")
+            GeometryReader { reader in
+                HStack {
+                    Text(label.capitalized)
+                        .font(.title3)
+                        .underline()
+                        .background(Color.white)
+                        .foregroundColor(Color.black)
+                    Spacer()
                 }
-            }))
+                .padding()
+                .scaledToFit()
+                TextEditor(text: Binding(get: { machine[keyPath: path.path] }, set: {
+                    do {
+                        try machine.modify(attribute: path, value: Code($0))
+                    } catch let e {
+                        print("\(e)")
+                    }
+                }))
+                    .font(.body)
+                    .padding()
+                    .disableAutocorrection(true)
+                    .background(Color.white)
+                    .foregroundColor(Color.black)
+                    .scaledToFill()
+                    //.frame(width: reader.size.width, height: floor(reader.size.height * 11.0/12.0))
+            }
         }
     }
 }

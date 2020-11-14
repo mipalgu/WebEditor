@@ -39,21 +39,25 @@ struct ContentView: View {
     
     var body: some View {
         ScrollView {
-            VStack {
-                /*HStack {
-                    StateEditView(machine: $machine, path: Machine.path.states[0])
-                        .frame(minWidth: 900)
-                    ScrollView(.horizontal, showsIndicators: true) {
-                        AttributeGroupsView(machine: $machine, path: Machine.path.states[0].attributes, label: "All Attributes")
-                            .frame(minWidth: 500)
-                    }
-                }*/
-                StateCollapsedView(machine: $machine, path: Machine.path.states[0])
-                StateExpandedView(machine: $machine, path: Machine.path.states[0])
-                
+            GeometryReader { reading in
+                VStack {
+                    /*HStack {
+                        StateEditView(machine: $machine, path: Machine.path.states[0])
+                            .frame(minWidth: 900)
+                        ScrollView(.horizontal, showsIndicators: true) {
+                            AttributeGroupsView(machine: $machine, path: Machine.path.states[0].attributes, label: "All Attributes")
+                                .frame(minWidth: 500)
+                        }
+                    }*/
+                    CodeView(machine: $machine, path: Machine.path.states[0].actions["main"].wrappedValue, label: "OnEntry", language: .swift)
+                        .scaledToFit()
+                    //StateCollapsedView(machine: $machine, path: Machine.path.states[0])
+                    //StateExpandedView(machine: $machine, path: Machine.path.states[0])
+                    
+                }
+                .frame(minWidth: 1280, minHeight: 720)
+                .padding([.all], 50)
             }
-            .background(Color.white)
-            .frame(minWidth: 1280, minHeight: 720)
         }
     }
 }
