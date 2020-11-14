@@ -14,37 +14,30 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct AttributeGroupView<Path: PathProtocol>: View where Path.Root == Machine, Path.Value == AttributeGroup {
+struct AttributeGroupView: View {
     
     @Binding var machine: Machine
-    let path: Path
+    let path: Attributes.Path<Machine, AttributeGroup>
     let label: String
-    let group: AttributeGroup
     
-    @ViewBuilder var body: some View {
+    @ViewBuilder
+    var body: some View {
         ScrollView {
             VStack {
-                Text(label.capitalized)
-                ForEach(Array(group.fields.enumerated()), id: \.0) { (index, field) in
+                ForEach(Array(machine[keyPath: path.keyPath].fields.enumerated()), id: \.0) { (index, field) -> AnyView in
                     switch field.type {
                     case .line:
-                        LineAttributeView(
+                        return AnyView(LineAttributeView(
                             machine: $machine,
-                            path: Attributes.Path(
-                                path: path.path.appending(path: \.attributes[field.name].wrappedValue),
-                                ancestors: []
-                            ),
+                            path: path.attributes[field.name].wrappedValue.lineAttribute,
                             label: field.name
-                        )
+                        ))
                     case .block:
-                        BlockAttributeView(
+                        return AnyView(BlockAttributeView(
                             machine: $machine,
-                            path: Attributes.Path(
-                                path: path.path.appending(path: \.attributes[field.name].wrappedValue),
-                                ancestors: []
-                            ),
+                            path: path.attributes[field.name].wrappedValue.blockAttribute,
                             label: field.name
-                        )
+                        ))
                     }
                 }
             }

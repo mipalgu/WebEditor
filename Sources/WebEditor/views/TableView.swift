@@ -23,18 +23,16 @@ struct TableView<Path: PathProtocol>: View where Path.Root == Machine, Path.Valu
     var body: some View {
         VStack {
             Text(label.capitalized)
-            List {
-                ForEach(Array((machine[keyPath: path.path].tableValue).indices)) { rowIndex in
-                    ForEach(Array(machine[keyPath: path.path].tableValue[rowIndex].indices)) { columnIndex in
-                        LineAttributeView(
-                            machine: $machine,
-                            path: Attributes.Path(
-                                path: path.path.appending(path: \.tableValue[rowIndex][columnIndex]),
-                                ancestors: []
-                            ),
-                            label: label
-                        )
-                    }
+            List(Array(machine[keyPath: path.path].tableValue.indices), id: \.self) { rowIndex in
+                ForEach(Array(machine[keyPath: path.path].tableValue[rowIndex].indices), id: \.self) { columnIndex in
+                    LineAttributeView(
+                        machine: $machine,
+                        path: Attributes.Path(
+                            path: path.path.appending(path: \.tableValue[rowIndex][columnIndex]),
+                            ancestors: []
+                        ),
+                        label: label
+                    )
                 }
             }
         }
