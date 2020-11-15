@@ -50,16 +50,13 @@ struct StateExpandedView: View {
                     ForEach(Array(viewModel.actions), id: \.0) { (action, _) in
                         CodeView(machine: $viewModel.machine, path: viewModel.path.actions[action].wrappedValue, language: .swift) { () -> AnyView in
                             if viewModel.isEmpty(forAction: action) {
-                                return AnyView(Text(action.capitalized + ":")
-                                    .font(.headline)
-                                    .underline()
-                                    .italic()
-                                    .foregroundColor(config.stateTextColour))
+                                return AnyView(
+                                    Text(action + ":").font(.headline).underline().italic().foregroundColor(config.stateTextColour)
+                                )
                             } else {
-                                return AnyView(Text(action.capitalized + ":")
-                                    .font(.headline)
-                                    .underline()
-                                    .foregroundColor(config.stateTextColour))
+                                return AnyView(
+                                    Text(action + ":").font(.headline).underline().foregroundColor(config.stateTextColour)
+                                )
                             }
                         }.frame(
                             minWidth: viewModel.elementMinWidth,

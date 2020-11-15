@@ -33,11 +33,20 @@ public struct StateEditView: View {
                     .foregroundColor(config.textColor)
                     .frame(minWidth: viewModel.minEditWidth, alignment: .center)
                 ForEach(viewModel.actions, id: \.0) { (key, value) in
-                    CodeView(machine: $viewModel.machine, path: viewModel.path.actions[key].wrappedValue, label: key, language: .swift)
-                        .frame(
-                            minWidth: viewModel.minEditWidth,
-                            minHeight: viewModel.minActionHeight
-                        )
+                    CodeView(machine: $viewModel.machine, path: viewModel.path.actions[key].wrappedValue, language: .swift) { () -> AnyView in
+                        if viewModel.isEmpty(forAction: key) {
+                            return AnyView(
+                                Text(key + ":").font(.headline).underline().italic().foregroundColor(config.stateTextColour)
+                            )
+                        } else {
+                            return AnyView(
+                                Text(key + ":").font(.headline).underline().foregroundColor(config.stateTextColour)
+                            )
+                        }
+                    }.frame(
+                        minWidth: viewModel.minEditWidth,
+                        minHeight: viewModel.minActionHeight
+                    )
                 }
             }
             //.scaledToFit()
