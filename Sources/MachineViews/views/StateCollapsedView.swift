@@ -26,12 +26,12 @@ struct StateCollapsedView: View {
                     .strokeBorder(Color.black, lineWidth: 2.0, antialiased: true)
                     .background(config.backgroundColor)
                     .padding(.bottom, 2)
-                    .frame(width: CGFloat(viewModel.collapsedWidth), height: CGFloat(viewModel.collapsedHeight))
+                    .frame(width: viewModel.collapsedWidth, height: viewModel.collapsedHeight)
                     .clipped()
                 Text(viewModel.name)
                     .font(.title2)
                     .foregroundColor(config.textColor)
-                    .frame(maxWidth: CGFloat(viewModel.collapsedWidth), maxHeight: CGFloat(viewModel.collapsedHeight))
+                    .frame(maxWidth: viewModel.collapsedWidth, maxHeight: viewModel.collapsedHeight)
                     .clipped()
             }
         }

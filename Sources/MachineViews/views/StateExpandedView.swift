@@ -33,12 +33,12 @@ struct StateExpandedView: View {
                     .background(config.fieldColor)
                     .foregroundColor(config.textColor)
                     .padding(.horizontal, 10)
-                    .frame(width: CGFloat(viewModel.titleWidth), height: CGFloat(viewModel.titleHeight))
+                    .frame(minWidth: viewModel.minWidth)
                     .clipped()
                 ForEach(Array(viewModel.actions), id: \.0) { (action, _) in
                     CodeView(machine: $viewModel.machine, path: viewModel.path.actions[action].wrappedValue, label: action, language: .swift)
                         .padding(.horizontal, 10)
-                        .frame(width: CGFloat(viewModel.width), height: CGFloat(viewModel.actionHeight))
+                        .frame(minWidth: viewModel.minWidth)
                 }
             }
         }

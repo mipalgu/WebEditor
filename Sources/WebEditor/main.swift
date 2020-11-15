@@ -47,7 +47,7 @@ struct ContentView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             VStack {
-                LineView(machine: $machine, path: machine.path.states[0].name, label: "State Name")
+                //LineView(machine: $machine, path: machine.path.states[0].name, label: "State Name")
                 /*HStack {
                     StateEditView(machine: $machine, path: Machine.path.states[0])
                         .frame(minWidth: 900)
@@ -68,7 +68,7 @@ struct ContentView: View {
             }
         }
         .background(config.backgroundColor)
-        .frame(width: CGFloat(config.width), height: CGFloat(config.height))
+        .frame(minWidth: CGFloat(config.width), minHeight: CGFloat(config.height))
     }
 }
 

@@ -31,23 +31,21 @@ public struct StateEditView: View {
                     .font(.title2)
                     .background(config.fieldColor)
                     .foregroundColor(config.textColor)
-                    .frame(width: CGFloat(config.width - viewModel.detailsWidth), height: CGFloat(viewModel.titleHeight), alignment: .center)
+                    .frame(minWidth: viewModel.minEditWidth, alignment: .center)
                 ForEach(viewModel.actions, id: \.0) { (key, value) in
                     CodeView(machine: $viewModel.machine, path: viewModel.path.actions[key].wrappedValue, label: key, language: .swift)
                         .frame(
-                            width: CGFloat(config.width - viewModel.detailsWidth),
-                            height: CGFloat(viewModel.editActionHeight(frameHeight: config.height))
+                            minWidth: viewModel.minEditWidth,
+                            minHeight: viewModel.minActionHeight
                         )
-                        //.frame(height: reader.size.height / CGFloat(state.actions.count))
                 }
             }
             .scaledToFit()
             .padding(.horizontal, 10)
             Divider()
                 .border(Color.black.opacity(0.6), width: 1)
-                .frame(height: CGFloat(config.height))
             AttributeGroupsView(machine: $viewModel.machine, path: viewModel.path.attributes, label: "State Attributes")
-                .frame(width: CGFloat(viewModel.detailsWidth), height: CGFloat(config.height))
+                .frame(minWidth: viewModel.minDetailsWidth, maxWidth: viewModel.maxDetailsWidth)
         }
         .padding(20)
     }
