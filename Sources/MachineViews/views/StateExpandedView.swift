@@ -22,8 +22,8 @@ struct StateExpandedView: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20.0)
-                .strokeBorder(Color.black, lineWidth: 3.0, antialiased: true)
-                .background(RoundedRectangle(cornerRadius: 20.0).foregroundColor(Color.white))
+                .strokeBorder(config.borderColour, lineWidth: 3.0, antialiased: true)
+                .background(RoundedRectangle(cornerRadius: 20.0).foregroundColor(config.stateColour))
                 .frame(width: viewModel.width, height: viewModel.height)
                 .clipped()
             VStack {

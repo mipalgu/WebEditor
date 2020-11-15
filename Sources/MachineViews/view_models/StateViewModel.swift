@@ -35,9 +35,13 @@ public class StateViewModel: ObservableObject {
     
     let minWidth: CGFloat = 75.0
     
+    let maxWidth: CGFloat = 1200.0
+    
     var minHeight: CGFloat {
         CGFloat(actions.count) * minActionHeight + minTitleHeight + bottomPadding + topPadding + 20.0
     }
+    
+    let maxHeight: CGFloat = 1200.0
     
     let minDetailsWidth: CGFloat = 100.0
     
@@ -57,19 +61,19 @@ public class StateViewModel: ObservableObject {
     
     var width: CGFloat {
         get {
-            max(_width, minWidth)
+            min(max(_width, minWidth), maxWidth)
         }
         set {
-            _width = max(minWidth, newValue)
+            _width = min(max(minWidth, newValue), maxWidth)
         }
     }
 
     var height: CGFloat {
         get {
-            max(_height, minHeight)
+            min(max(_height, minHeight), maxHeight)
         }
         set {
-            _height = max(minHeight, newValue)
+            _height = min(max(minHeight, newValue), maxHeight)
         }
     }
     

@@ -23,8 +23,8 @@ struct StateCollapsedView: View {
         GeometryReader { reader in
             ZStack {
                 Ellipse()
-                    .strokeBorder(Color.black, lineWidth: 2.0, antialiased: true)
-                    .background(Ellipse().foregroundColor(config.backgroundColor))
+                    .strokeBorder(config.borderColour, lineWidth: 2.0, antialiased: true)
+                    .background(Ellipse().foregroundColor(config.stateColour))
                     .padding(.bottom, 2)
                     .frame(width: viewModel.collapsedWidth, height: viewModel.collapsedHeight)
                     .clipped()
