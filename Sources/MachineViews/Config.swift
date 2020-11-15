@@ -28,7 +28,7 @@ public class Config: ObservableObject {
     #elseif canImport(AppKit)
     @Published public var backgroundColor = Color(NSColor.controlBackgroundColor)
     #elseif canImport(UIKit)
-    @Published public var backgroundColor = Color(UIColor.systemBackground)
+    @Published public var backgroundColor = Color(UIColor.secondarySystemBackground)
     #else
     @Published public var backgroundColor = Color.clear
     #endif
@@ -39,9 +39,25 @@ public class Config: ObservableObject {
     
     @Published public var height: Double = 720
     
+    #if canImport(TokamakShim)
     @Published public var stateColour = Color.white
+    #elseif canImport(AppKit)
+    @Published public var stateColour = Color(NSColor.controlBackgroundColor)
+    #elseif canImport(UIKit)
+    @Published public var stateColour = Color(UIColor.label)
+    #else
+    @Published public var stateColour = Color.white
+    #endif
     
+    #if canImport(TokamakShim)
     @Published public var borderColour = Color.white
+    #elseif canImport(AppKit)
+    @Published public var borderColour = Color(NSColor.separatorColor)
+    #elseif canImport(UIKit)
+    @Published public var borderColour = Color(UIColor.opaqueSeparator)
+    #else
+    @Published public var borderColour = Color.white
+    #endif
     
     public init() {}
     
