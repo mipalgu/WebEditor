@@ -37,13 +37,13 @@ public struct LineView: View {
             TextField(label, text: $text, onCommit: {
                 do {
                     try machine.modify(attribute: path, value: self.text)
-                    text = machine[keyPath: path.path]
                     error = nil
-                } catch let e as MachinesError {
+                } catch let e as MachinesError where e.path.isSame(as: path) {
                     error = e.message
                 } catch let e {
-                    error = "\(e)"
+                    print("\(e)", stderr)
                 }
+                text = machine[keyPath: path.path]
             })
             .font(.body)
             .background(config.fieldColor)
