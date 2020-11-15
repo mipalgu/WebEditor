@@ -13,23 +13,31 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct CodeView: View {
+struct CodeView<Label: View>: View {
     
     @Binding var machine: Machine
     let path: Attributes.Path<Machine, Code>
-    let label: String
     let language: Language
+    let label: () -> Label
     
     @EnvironmentObject var config: Config
+    
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Code>, label: String, language: Language) where Label == Text {
+        self.init(machine: machine, path: path, language: language) { Text(label.capitalized) }
+    }
+    
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Code>, language: Language, label: @escaping () -> Label) {
+        self._machine = machine
+        self.path = path
+        self.language = language
+        self.label = label
+    }
     
     var body: some View {
         GeometryReader { reader in
             VStack {
                 HStack {
-                    Text(label.capitalized + ":")
-                        .font(.headline)
-                        .underline()
-                        .foregroundColor(config.textColor)
+                    label()
                     Spacer()
                 }
                 .frame(maxHeight: floor(reader.size.height * 1.0/12.0))
