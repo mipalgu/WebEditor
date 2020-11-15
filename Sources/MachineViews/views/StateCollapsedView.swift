@@ -29,11 +29,20 @@ struct StateCollapsedView: View {
                     .frame(width: viewModel.collapsedWidth, height: viewModel.collapsedHeight)
                     .clipped()
                     .shadow(color: config.shadowColour, radius: 5, x: 0, y: 5)
-                Text(viewModel.name)
-                    .font(.title2)
-                    .foregroundColor(config.stateTextColour)
-                    .frame(maxWidth: viewModel.collapsedWidth, maxHeight: viewModel.collapsedHeight)
-                    .clipped()
+                if viewModel.isEmpty {
+                    Text(viewModel.name)
+                        .italic()
+                        .font(.title2)
+                        .foregroundColor(config.stateTextColour)
+                        .frame(maxWidth: viewModel.collapsedWidth, maxHeight: viewModel.collapsedHeight)
+                        .clipped()
+                } else {
+                    Text(viewModel.name)
+                        .font(.title2)
+                        .foregroundColor(config.stateTextColour)
+                        .frame(maxWidth: viewModel.collapsedWidth, maxHeight: viewModel.collapsedHeight)
+                        .clipped()
+                }
             }
         }
         
