@@ -20,34 +20,47 @@ struct StateExpandedView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 20.0)
-                .strokeBorder(config.borderColour, lineWidth: 3.0, antialiased: true)
-                .background(RoundedRectangle(cornerRadius: 20.0).foregroundColor(config.stateColour))
-                .frame(width: viewModel.width, height: viewModel.height)
-                .clipped()
-            VStack {
-                LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
-                    .multilineTextAlignment(.center)
-                    .font(.title2)
-                    .background(config.fieldColor)
-                    .foregroundColor(config.stateTextColour)
-                    .frame(minWidth: viewModel.elementMinWidth, maxWidth: viewModel.elementMaxWidth, minHeight: viewModel.minTitleHeight)
+        VStack {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20.0)
+                    .strokeBorder(config.borderColour, lineWidth: 3.0, antialiased: true)
+                    .background(RoundedRectangle(cornerRadius: 20.0).foregroundColor(config.stateColour))
+                    .frame(width: viewModel.width, height: viewModel.height)
                     .clipped()
-                ForEach(Array(viewModel.actions), id: \.0) { (action, _) in
-                    CodeView(machine: $viewModel.machine, path: viewModel.path.actions[action].wrappedValue, label: action, language: .swift)
-                        .frame(
+                    .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
+                VStack {
+                    LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
+                        .multilineTextAlignment(.center)
+                        .font(.title2)
+                        .background(config.fieldColor)
+                        .frame(minWidth: viewModel.elementMinWidth, maxWidth: viewModel.elementMaxWidth, minHeight: viewModel.minTitleHeight)
+                        .clipped()
+                    ForEach(Array(viewModel.actions), id: \.0) { (action, _) in
+                        CodeView(machine: $viewModel.machine, path: viewModel.path.actions[action].wrappedValue, language: .swift) { () -> AnyView in
+                            if viewModel.isEmpty(forAction: action) {
+                                return AnyView(Text(action.capitalized + ":")
+                                    .font(.headline)
+                                    .underline()
+                                    .italic()
+                                    .foregroundColor(config.stateTextColour))
+                            } else {
+                                return AnyView(Text(action.capitalized + ":")
+                                    .font(.headline)
+                                    .underline()
+                                    .foregroundColor(config.stateTextColour))
+                            }
+                        }.frame(
                             minWidth: viewModel.elementMinWidth,
                             maxWidth: viewModel.elementMaxWidth,
                             minHeight: viewModel.minActionHeight,
                             maxHeight: viewModel.maxActionHeight
                         )
+                    }
                 }
+                .padding(.bottom, viewModel.bottomPadding)
+                .padding(.top, viewModel.topPadding)
+                .frame(minHeight: viewModel.elementMinHeight, maxHeight: viewModel.elementMaxHeight)
             }
-            .padding(.bottom, viewModel.bottomPadding)
-            .padding(.top, viewModel.topPadding)
-            .frame(minHeight: viewModel.elementMinHeight, maxHeight: viewModel.elementMaxHeight)
         }
-        .shadow(color: config.shadowColour, radius: 2, x: 0, y: 20)
     }
 }
