@@ -69,6 +69,16 @@ public class Config: ObservableObject {
     @Published public var borderColour = Color.white
     #endif
     
+    #if canImport(TokamakShim)
+    @Published public var shadowColour = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5)
+    #elseif canImport(AppKit)
+    @Published public var shadowColour = Color(NSColor.shadowColor)
+    #elseif canImport(UIKit)
+    @Published public var shadowColour = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5)
+    #else
+    @Published public var shadowColour = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5)
+    #endif
+    
     public init() {}
     
 }

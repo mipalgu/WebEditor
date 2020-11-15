@@ -48,6 +48,6 @@ struct StateExpandedView: View {
             .padding(.top, viewModel.topPadding)
             .frame(minHeight: viewModel.elementMinHeight, maxHeight: viewModel.elementMaxHeight)
         }
-        .shadow(color: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5), radius: 20, x: 0, y: 20)
+        .shadow(color: config.shadowColour, radius: 20, x: 0, y: 20)
     }
 }

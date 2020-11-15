@@ -47,7 +47,7 @@ struct CodeView: View {
                         RoundedRectangle(cornerRadius: 5)
                             .stroke(Color.gray.opacity(0.3), lineWidth: 2)
                     )
-                    .shadow(color: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5), radius: 1, x: 0, y: 2)
+                    .shadow(color: config.shadowColour, radius: 1, x: 0, y: 2)
             }
         }
     }
