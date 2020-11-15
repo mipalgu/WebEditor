@@ -13,7 +13,15 @@ import SwiftUI
 
 public class Config: ObservableObject {
     
+    #if canImport(TokamakShim)
     @Published public var textColor = Color.black
+    #elseif canImport(AppKit)
+    @Published public var textColor = Color(NSColor.controlTextColor)
+    #elseif canImport(UIKit)
+    @Published public var textColor = Color(UIColor.label)
+    #else
+    @Published public var textColor = Color.black
+    #endif
     
     #if canImport(TokamakShim)
     @Published public var backgroundColor = Color.white
