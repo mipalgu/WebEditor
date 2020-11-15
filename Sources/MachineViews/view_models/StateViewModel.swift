@@ -113,6 +113,12 @@ public class StateViewModel: ObservableObject {
         machine[keyPath: path.path].transitions(in: machine).count == 0
     }
     
+    var isEmpty: Bool {
+        actions.reduce(true) {
+            $0 && $1.1.isEmpty
+        }
+    }
+    
     public init(machine: Machine, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
         self.machine = machine
         self.path = path
