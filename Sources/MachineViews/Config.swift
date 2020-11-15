@@ -15,7 +15,15 @@ public class Config: ObservableObject {
     
     @Published public var textColor = Color.black
     
+    #if canImport(TokamakShim)
     @Published public var backgroundColor = Color.white
+    #elseif canImport(AppKit)
+    @Published public var backgroundColor = Color(NSColor.controlBackgroundColor)
+    #elseif canImport(UIKit)
+    @Published public var backgroundColor = Color(UIColor.systemBackground)
+    #else
+    @Published public var backgroundColor = Color.clear
+    #endif
     
     @Published public var fieldColor = Color.black.opacity(0.2)
     
