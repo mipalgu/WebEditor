@@ -13,7 +13,7 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct AttributeGroupsView: View {
+public struct AttributeGroupsView: View {
     
     @Binding var machine: Machine
     let path: Attributes.Path<Machine, [AttributeGroup]>
@@ -21,7 +21,13 @@ struct AttributeGroupsView: View {
     
     @EnvironmentObject var config: Config
     
-    var body: some View {
+    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String) {
+        self._machine = machine
+        self.path = path
+        self.label = label
+    }
+    
+    public var body: some View {
         VStack {
             Text(label.capitalized)
                 .font(.title3)
