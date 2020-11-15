@@ -40,7 +40,6 @@ struct TextView: View {
                 RoundedRectangle(cornerRadius: 5)
                     .stroke(Color.gray.opacity(0.3), lineWidth: 2)
             )
-            .shadow(color: config.shadowColour, radius: 1, x: 0, y: 2)
         }
     }
 }

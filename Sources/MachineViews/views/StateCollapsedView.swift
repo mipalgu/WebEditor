@@ -28,6 +28,7 @@ struct StateCollapsedView: View {
                     .padding(.bottom, 2)
                     .frame(width: viewModel.collapsedWidth, height: viewModel.collapsedHeight)
                     .clipped()
+                    .shadow(color: config.shadowColour, radius: 5, x: 0, y: 5)
                 Text(viewModel.name)
                     .font(.title2)
                     .foregroundColor(config.stateTextColour)
