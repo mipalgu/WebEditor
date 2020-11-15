@@ -36,11 +36,13 @@ struct WebEditor: App {
 
 struct ContentView: View {
     
-    #if canImport(TokamakDOM)
-    @TokamakShim.State var machine = Machine.initialSwiftMachine
-    #else
-    @SwiftUI.State var machine = Machine.initialSwiftMachine
-    #endif
+    let machineRef: Ref<Machine> = Ref(Machine.initialSwiftMachine)
+//
+//    #if canImport(TokamakDOM)
+//    @TokamakShim.State var machine = Machine.initialSwiftMachine
+//    #else
+//    @SwiftUI.State var machine = Machine.initialSwiftMachine
+//    #endif
     
     @EnvironmentObject var config: Config
     
@@ -62,8 +64,8 @@ struct ContentView: View {
                 //StateExpandedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
                 //AttributeGroupsView(machine: $machine, path: Machine.path.attributes, label: "Attributes")
                 //StateEditView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
-                StateView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
-                StateView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[1], location: CGPoint(x: 100, y: 100), width: 300, height: 100, expanded: true))
+                StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
+                StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 100, y: 100), width: 300, height: 100, expanded: true))
                     
             }
         }
