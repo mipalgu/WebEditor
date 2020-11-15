@@ -19,6 +19,8 @@ struct BoolView: View {
     let label: String
     let path: Attributes.Path<Machine, Bool>
     
+    @EnvironmentObject var config: Config
+    
     var body: some View {
         Toggle(label, isOn: Binding(get: { machine[keyPath: path.path] }, set: {
             do {
@@ -27,6 +29,8 @@ struct BoolView: View {
                 print("\(e)")
             }
         }))
+            .font(.body)
+        .foregroundColor(config.textColor)
     }
 }
 

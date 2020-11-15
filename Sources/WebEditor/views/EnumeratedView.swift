@@ -20,6 +20,8 @@ struct EnumeratedView: View {
     let label: String
     let validValues: Set<String>
     
+    @EnvironmentObject var config: Config
+    
     var body: some View {
         Picker(
             label,
@@ -33,6 +35,7 @@ struct EnumeratedView: View {
         ) {
             ForEach(validValues.sorted(), id: \.self) {
                 Text($0).tag($0)
+                    .foregroundColor(config.textColor)
             }
         }
     }

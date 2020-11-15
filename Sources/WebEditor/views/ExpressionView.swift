@@ -20,6 +20,7 @@ struct ExpressionView: View {
     let label: String
     let language: Language
     
+    @EnvironmentObject var config: Config
     
     var body: some View {
         TextField(label, text: Binding(get: { String(machine[keyPath: path.path]) }, set: {
@@ -29,5 +30,8 @@ struct ExpressionView: View {
                 print("\(e)")
             }
         }))
+        .font(.body)
+        .background(config.fieldColor)
+        .foregroundColor(config.textColor)
     }
 }

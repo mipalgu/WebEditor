@@ -19,9 +19,13 @@ struct AttributeGroupsView: View {
     let path: Attributes.Path<Machine, [AttributeGroup]>
     let label: String
     
+    @EnvironmentObject var config: Config
+    
     var body: some View {
         VStack {
             Text(label.capitalized)
+                .font(.title3)
+                .foregroundColor(config.textColor)
             TabView() {
                 ForEach(Array(machine[keyPath: path.path].indices), id: \.self) { index in
                     AttributeGroupView(machine: $machine, path: path[index], label: machine[keyPath: path.path][index].name)
@@ -30,6 +34,7 @@ struct AttributeGroupsView: View {
                         }
                 }
             }
+            
         }
         .frame(minHeight: 720.0)
     }

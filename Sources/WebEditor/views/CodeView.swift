@@ -20,19 +20,19 @@ struct CodeView: View {
     let label: String
     let language: Language
     
+    @EnvironmentObject var config: Config
+    
     var body: some View {
-        VStack {
-            GeometryReader { reader in
+        GeometryReader { reader in
+            VStack {
                 HStack {
-                    Text(label.capitalized)
-                        .font(.title3)
+                    Text(label.capitalized + ":")
+                        .font(.headline)
                         .underline()
-                        .background(Color.white)
-                        .foregroundColor(Color.black)
+                        .foregroundColor(config.textColor)
                     Spacer()
                 }
-                .padding()
-                .scaledToFit()
+                .frame(maxHeight: floor(reader.size.height * 1.0/12.0))
                 TextEditor(text: Binding(get: { machine[keyPath: path.path] }, set: {
                     do {
                         try machine.modify(attribute: path, value: Code($0))
@@ -41,12 +41,14 @@ struct CodeView: View {
                     }
                 }))
                     .font(.body)
-                    .padding()
+                    .foregroundColor(config.textColor)
                     .disableAutocorrection(true)
-                    .background(Color.white)
-                    .foregroundColor(Color.black)
-                    .scaledToFill()
-                    //.frame(width: reader.size.width, height: floor(reader.size.height * 11.0/12.0))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 2)
+                    )
+                    .shadow(color: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5), radius: 1, x: 0, y: 2)
+                    .frame(width: reader.size.width, height: floor((reader.size.height - 40) * 11.0/12.0))
             }
         }
     }

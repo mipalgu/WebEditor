@@ -19,6 +19,8 @@ struct LineView: View {
     let path: Attributes.Path<Machine, String>
     let label: String
     
+    @EnvironmentObject var config: Config
+    
     var body: some View {
         TextField(label, text: Binding(get: { machine[keyPath: path.path] }, set: {
             do {
@@ -27,5 +29,8 @@ struct LineView: View {
                 print("\(e)")
             }
         }))
+        .font(.body)
+        .background(config.fieldColor)
+        .foregroundColor(config.textColor)
     }
 }

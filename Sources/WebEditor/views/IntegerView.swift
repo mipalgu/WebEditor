@@ -19,6 +19,8 @@ struct IntegerView: View {
     let path: Attributes.Path<Machine, Int>
     let label: String
     
+    @EnvironmentObject var config: Config
+    
     var body: some View {
         TextField(label, text: Binding(get: { String(machine[keyPath: path.path]) }, set: {
             guard let value = Int($0) else {
@@ -30,5 +32,8 @@ struct IntegerView: View {
                 print("\(e)")
             }
         }))
+        .font(.body)
+        .background(config.fieldColor)
+        .foregroundColor(config.textColor)
     }
 }

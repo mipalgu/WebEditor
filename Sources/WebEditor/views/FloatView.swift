@@ -19,6 +19,7 @@ struct FloatView: View {
     let path: Attributes.Path<Machine, Double>
     let label: String
     
+    @EnvironmentObject var config: Config
     
     var body: some View {
         TextField(label, text: Binding(get: { String(machine[keyPath: path.path]) }, set: {
@@ -31,5 +32,8 @@ struct FloatView: View {
                 print("\(e)")
             }
         }))
+        .font(.body)
+        .background(config.fieldColor)
+        .foregroundColor(config.textColor)
     }
 }
