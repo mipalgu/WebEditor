@@ -40,7 +40,7 @@ public struct StateEditView: View {
                         )
                 }
             }
-            .scaledToFit()
+            //.scaledToFit()
             .padding(.horizontal, 10)
             Divider()
                 .border(Color.black.opacity(0.6), width: 1)
