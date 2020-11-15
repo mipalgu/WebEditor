@@ -23,6 +23,7 @@ public class StateViewModel: ObservableObject {
         }
         set {
             _machine.value = newValue
+            self.objectWillChange.send()
         }
     }
     
@@ -123,9 +124,7 @@ public class StateViewModel: ObservableObject {
     }
     
     var isEmpty: Bool {
-        actions.reduce(true) {
-            $0 && $1.1.isEmpty
-        }
+        return nil == actions.first { !$1.isEmpty }
     }
     
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
@@ -137,8 +136,8 @@ public class StateViewModel: ObservableObject {
         self.expanded = expanded
     }
     
-    func isEmpty(forAction: String) -> Bool {
-        machine[keyPath: path.path].actions[forAction]?.isEmpty ?? false
+    func isEmpty(forAction action: String) -> Bool {
+        machine[keyPath: path.path].actions[action]?.isEmpty ?? true
     }
     
 }

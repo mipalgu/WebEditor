@@ -64,7 +64,11 @@ import SwiftUI
 
 public final class Ref<T>: ObservableObject {
     
-    @Published public var value: T
+    @Published public var value: T {
+        didSet {
+            self.objectWillChange.send()
+        }
+    }
     
     public init(_ value: T) {
         self.value = value

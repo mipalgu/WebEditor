@@ -43,7 +43,7 @@ struct StateCollapsedView: View {
                         .frame(maxWidth: viewModel.collapsedWidth, maxHeight: viewModel.collapsedHeight)
                         .clipped()
                 }
-            }
+            }.onChange(of: viewModel.isEmpty, perform: { print("\($0)") })
         }
         
     }

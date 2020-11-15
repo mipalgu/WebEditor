@@ -15,10 +15,10 @@ import Attributes
 
 public struct StateView: View {
     
-    @ObservedObject var viewModel: StateViewModel
+    @StateObject var viewModel: StateViewModel
     
     public init(viewModel: StateViewModel) {
-        self.viewModel = viewModel
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
     public var body: some View {

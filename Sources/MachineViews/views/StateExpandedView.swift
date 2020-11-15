@@ -61,6 +61,6 @@ struct StateExpandedView: View {
                 .padding(.top, viewModel.topPadding)
                 .frame(minHeight: viewModel.elementMinHeight, maxHeight: viewModel.elementMaxHeight)
             }
-        }
+        }.onChange(of: viewModel.isEmpty, perform: { print("change: \($0)") })
     }
 }
