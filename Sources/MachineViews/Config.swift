@@ -41,6 +41,8 @@ public class Config: ObservableObject {
     
     @Published public var stateColour = Color.white
     
+    @Published public var borderColour = Color.white
+    
     public init() {}
     
 }
