@@ -64,7 +64,7 @@ struct ContentView: View {
                 //StateExpandedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
                 //AttributeGroupsView(machine: $machine, path: Machine.path.attributes, label: "Attributes")
                 //StateEditView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
-                StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
+                //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
                 StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 100, y: 100), width: 300, height: 100, expanded: true))
                     
             }

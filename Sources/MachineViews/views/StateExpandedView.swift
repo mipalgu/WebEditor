@@ -29,12 +29,18 @@ struct StateExpandedView: View {
                     .clipped()
                     .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
                 VStack {
-                    LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
-                        .multilineTextAlignment(.center)
-                        .font(.title2)
-                        .background(config.fieldColor)
-                        .frame(minWidth: viewModel.elementMinWidth, maxWidth: viewModel.elementMaxWidth, minHeight: viewModel.minTitleHeight)
-                        .clipped()
+                    HStack {
+                        LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
+                            .multilineTextAlignment(.center)
+                            .font(.title2)
+                            .background(config.fieldColor)
+                            .frame(minWidth: viewModel.minTitleWidth, maxWidth: viewModel.maxTitleWidth, minHeight: viewModel.minTitleHeight)
+                            .clipped()
+                        Button(action: { viewModel.toggleExpand() }) {
+                            Image(systemName: "arrowtriangle.down.fill")
+                                .font(.system(size: viewModel.buttonSize, weight: .regular))
+                        }
+                    }
                     ForEach(Array(viewModel.actions), id: \.0) { (action, _) in
                         CodeView(machine: $viewModel.machine, path: viewModel.path.actions[action].wrappedValue, language: .swift) { () -> AnyView in
                             if viewModel.isEmpty(forAction: action) {

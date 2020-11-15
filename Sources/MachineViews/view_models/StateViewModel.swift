@@ -43,6 +43,14 @@ public class StateViewModel: ObservableObject {
     
     let minTitleHeight: CGFloat = 42.0
     
+    var minTitleWidth: CGFloat {
+        elementMinWidth - buttonSize
+    }
+    
+    var maxTitleWidth: CGFloat {
+        elementMaxWidth - buttonSize
+    }
+    
     let minWidth: CGFloat = 75.0
     
     let maxWidth: CGFloat = 1200.0
@@ -68,6 +76,8 @@ public class StateViewModel: ObservableObject {
     let rightPadding: CGFloat = 20.0
     
     let bottomPadding: CGFloat = 20.0
+    
+    let buttonSize: CGFloat = 8.0
     
     var width: CGFloat {
         get {
@@ -138,6 +148,10 @@ public class StateViewModel: ObservableObject {
     
     func isEmpty(forAction action: String) -> Bool {
         machine[keyPath: path.path].actions[action]?.isEmpty ?? true
+    }
+    
+    func toggleExpand() {
+        expanded = !expanded
     }
     
 }
