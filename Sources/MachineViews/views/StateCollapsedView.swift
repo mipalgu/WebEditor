@@ -24,7 +24,7 @@ struct StateCollapsedView: View {
             ZStack {
                 Ellipse()
                     .strokeBorder(Color.black, lineWidth: 2.0, antialiased: true)
-                    .background(config.backgroundColor)
+                    .background(Ellipse().foregroundColor(config.backgroundColor))
                     .padding(.bottom, 2)
                     .frame(width: viewModel.collapsedWidth, height: viewModel.collapsedHeight)
                     .clipped()
