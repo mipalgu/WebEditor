@@ -17,8 +17,13 @@ public class StateViewModel: ObservableObject {
     
     @Published var _machine: Ref<Machine>
     
-    fileprivate var machine: Machine {
-        _machine.value
+    var machine: Machine {
+        get {
+            _machine.value
+        }
+        set {
+            _machine.value = newValue
+        }
     }
     
     let path: Attributes.Path<Machine, Machines.State>
