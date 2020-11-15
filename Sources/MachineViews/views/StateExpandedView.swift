@@ -27,13 +27,7 @@ struct StateExpandedView: View {
                 .frame(width: CGFloat(viewModel.width), height: CGFloat(viewModel.height))
                 .clipped()
             VStack {
-                TextField(viewModel.name, text: Binding(get: { String(viewModel.name) }, set: {
-                    do {
-                        try viewModel.machine.modify(attribute: viewModel.path.name, value: StateName($0))
-                    } catch let e {
-                        print("\(e)")
-                    }
-                }))
+                LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
                     .multilineTextAlignment(.center)
                     .font(.title2)
                     .background(config.fieldColor)

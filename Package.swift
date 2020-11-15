@@ -21,10 +21,12 @@ let package = Package(
         )
     ],
     targets: [
+        .target(name: "MachineViews", dependencies: products + ["Machines"]),
         .target(
             name: "WebEditor",
             dependencies: products + [
-                "Machines"
+                "Machines",
+                "MachineViews"
             ]),
         .testTarget(
             name: "WebEditorTests",

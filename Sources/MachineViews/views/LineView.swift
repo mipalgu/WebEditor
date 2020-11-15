@@ -13,7 +13,7 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct LineView: View {
+public struct LineView: View {
     
     @Binding var machine: Machine
     let path: Attributes.Path<Machine, String>
@@ -25,14 +25,14 @@ struct LineView: View {
     
     @SwiftUI.State var error: String? = nil
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, String>, label: String) {
+    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, String>, label: String) {
         self._machine = machine
         self.path = path
         self.label = label
         self._text = SwiftUI.State(initialValue: machine.wrappedValue[keyPath: path.path])
     }
     
-    var body: some View {
+    public var body: some View {
         VStack {
             TextField(label, text: $text, onCommit: {
                 do {
@@ -53,4 +53,18 @@ struct LineView: View {
             }
         }
     }
+}
+
+struct LineView_Preview: PreviewProvider {
+    
+    static var machine: Machine = Machine.initialSwiftMachine
+    
+    static var previews: some View {
+        LineView(
+            machine: Binding(get: { Self.machine }, set: { Self.machine = $0 }),
+            path: Machine.path.states[0].name,
+            label: "State 0"
+        ).environmentObject(Config())
+    }
+    
 }

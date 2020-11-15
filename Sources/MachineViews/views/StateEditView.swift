@@ -13,27 +13,25 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct StateEditView: View {
+public struct StateEditView: View {
     
     @ObservedObject var viewModel: StateViewModel
     
     @EnvironmentObject var config: Config
     
-    var body: some View {
+    public init(viewModel: StateViewModel) {
+        self.viewModel = viewModel
+    }
+    
+    public var body: some View {
         HStack {
             VStack {
-                TextField(viewModel.name, text: Binding(get: { viewModel.name }, set: {
-                    do {
-                        try viewModel.machine.modify(attribute: viewModel.path.name, value: StateName($0))
-                    } catch let e {
-                        print("\(e)")
-                    }
-                }))
-                .multilineTextAlignment(.center)
-                .font(.title2)
-                .background(config.fieldColor)
-                .foregroundColor(config.textColor)
-                .frame(width: CGFloat(config.width - viewModel.detailsWidth), height: CGFloat(viewModel.titleHeight), alignment: .center)
+                LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
+                    .multilineTextAlignment(.center)
+                    .font(.title2)
+                    .background(config.fieldColor)
+                    .foregroundColor(config.textColor)
+                    .frame(width: CGFloat(config.width - viewModel.detailsWidth), height: CGFloat(viewModel.titleHeight), alignment: .center)
                 ForEach(viewModel.actions, id: \.0) { (key, value) in
                     CodeView(machine: $viewModel.machine, path: viewModel.path.actions[key].wrappedValue, label: key, language: .swift)
                         .frame(

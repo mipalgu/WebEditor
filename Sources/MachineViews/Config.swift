@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-class Config: ObservableObject {
+public class Config: ObservableObject {
     
     @Published public var textColor = Color.black
     
@@ -19,8 +19,10 @@ class Config: ObservableObject {
     
     @Published public var fieldColor = Color.black.opacity(0.2)
     
-    @Published var width: Double = 1280
+    @Published public var width: Double = 1280
     
-    @Published var height: Double = 720
+    @Published public var height: Double = 720
+    
+    public init() {}
     
 }

@@ -13,7 +13,7 @@ import SwiftUI
 import Machines
 import Attributes
 
-class StateViewModel: ObservableObject {
+public class StateViewModel: ObservableObject {
     
     @Published var machine: Machine
     
@@ -91,7 +91,7 @@ class StateViewModel: ObservableObject {
         width - 40.0
     }
     
-    init(machine: Machine, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: Double = 75.0, height: Double = 100.0, expanded: Bool = false, detailsWidth: Double = 200.0) {
+    public init(machine: Machine, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: Double = 75.0, height: Double = 100.0, expanded: Bool = false, detailsWidth: Double = 200.0) {
         self.machine = machine
         self.path = path
         self.location = location

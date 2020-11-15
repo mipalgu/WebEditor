@@ -7,6 +7,8 @@ import TokamakDOM
 import SwiftUI
 #endif
 
+import MachineViews
+
 struct WebEditor: App {
     
     #if !canImport(TokamakDOM) && canImport(SwiftUI)
@@ -14,6 +16,10 @@ struct WebEditor: App {
         
         func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
             return true
+        }
+        
+        func applicationWillFinishLaunching(_ notification: Notification) {
+            NSApp.setActivationPolicy(.regular)
         }
         
     }
@@ -39,8 +45,9 @@ struct ContentView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        ScrollView {
+        ScrollView(.vertical, showsIndicators: true) {
             VStack {
+                LineView(machine: $machine, path: machine.path.states[0].name, label: "State Name")
                 /*HStack {
                     StateEditView(machine: $machine, path: Machine.path.states[0])
                         .frame(minWidth: 900)
@@ -53,6 +60,7 @@ struct ContentView: View {
                 //    .scaledToFit()
                 //StateCollapsedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
                 //StateExpandedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
+                //AttributeGroupsView(machine: $machine, path: Machine.path.attributes, label: "Attributes")
                 StateEditView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
                 //StateView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100), width: 400, height: 200, expanded: true))
                 //StateView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
