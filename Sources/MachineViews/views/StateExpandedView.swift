@@ -31,7 +31,7 @@ struct StateExpandedView: View {
                     .multilineTextAlignment(.center)
                     .font(.title2)
                     .background(config.fieldColor)
-                    .foregroundColor(config.textColor)
+                    .foregroundColor(config.stateTextColour)
                     .frame(minWidth: viewModel.elementMinWidth, maxWidth: viewModel.elementMaxWidth, minHeight: viewModel.minTitleHeight)
                     .clipped()
                 ForEach(Array(viewModel.actions), id: \.0) { (action, _) in

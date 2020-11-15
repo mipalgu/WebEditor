@@ -30,7 +30,7 @@ struct StateCollapsedView: View {
                     .clipped()
                 Text(viewModel.name)
                     .font(.title2)
-                    .foregroundColor(config.textColor)
+                    .foregroundColor(config.stateTextColour)
                     .frame(maxWidth: viewModel.collapsedWidth, maxHeight: viewModel.collapsedHeight)
                     .clipped()
             }

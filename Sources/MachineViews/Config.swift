@@ -18,7 +18,7 @@ public class Config: ObservableObject {
     #elseif canImport(AppKit)
     @Published public var textColor = Color(NSColor.controlTextColor)
     #elseif canImport(UIKit)
-    @Published public var textColor = Color(UIColor.label)
+    @Published public var textColor = Color(UIColor.secondaryLabel)
     #else
     @Published public var textColor = Color.black
     #endif
@@ -42,11 +42,21 @@ public class Config: ObservableObject {
     #if canImport(TokamakShim)
     @Published public var stateColour = Color.white
     #elseif canImport(AppKit)
-    @Published public var stateColour = Color(NSColor.controlBackgroundColor)
+    @Published public var stateColour = Color(NSColor.windowBackgroundColor)
     #elseif canImport(UIKit)
-    @Published public var stateColour = Color(UIColor.label)
+    @Published public var stateColour = Color(UIColor.systemBackground)
     #else
     @Published public var stateColour = Color.white
+    #endif
+    
+    #if canImport(TokamakShim)
+    @Published public var stateTextColour = Color.black
+    #elseif canImport(AppKit)
+    @Published public var stateTextColour = Color(NSColor.labelColor)
+    #elseif canImport(UIKit)
+    @Published public var stateTextColour = Color(UIColor.label)
+    #else
+    @Published public var stateTextColour = Color.black
     #endif
     
     #if canImport(TokamakShim)
