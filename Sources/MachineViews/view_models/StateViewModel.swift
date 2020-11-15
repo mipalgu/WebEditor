@@ -31,9 +31,13 @@ public class StateViewModel: ObservableObject {
     
     let collapsedHeight: CGFloat = 100.0
     
+    let minTitleHeight: CGFloat = 42.0
+    
     let minWidth: CGFloat = 75.0
     
-    let minHeight: CGFloat = 100.0
+    var minHeight: CGFloat {
+        CGFloat(actions.count) * minActionHeight + minTitleHeight + bottomPadding + topPadding + 20.0
+    }
     
     let minDetailsWidth: CGFloat = 100.0
     
@@ -41,11 +45,19 @@ public class StateViewModel: ObservableObject {
     
     let minEditWidth: CGFloat = 800.0
     
-    let minActionHeight: CGFloat = 200.0
+    let minActionHeight: CGFloat = 50.0
+    
+    let topPadding: CGFloat = 10.0
+    
+    let leftPadding: CGFloat = 20.0
+    
+    let rightPadding: CGFloat = 20.0
+    
+    let bottomPadding: CGFloat = 20.0
     
     var width: CGFloat {
         get {
-            _width
+            max(_width, minWidth)
         }
         set {
             _width = max(minWidth, newValue)
@@ -54,7 +66,7 @@ public class StateViewModel: ObservableObject {
 
     var height: CGFloat {
         get {
-            _height
+            max(_height, minHeight)
         }
         set {
             _height = max(minHeight, newValue)
@@ -71,6 +83,26 @@ public class StateViewModel: ObservableObject {
     
     var attributes: [AttributeGroup] {
         machine[keyPath: path.path].attributes
+    }
+    
+    var maxActionHeight: CGFloat {
+        max((elementMaxHeight - minTitleHeight) / CGFloat(actions.count) , minActionHeight)
+    }
+    
+    var elementMinWidth: CGFloat {
+        minWidth - leftPadding - rightPadding
+    }
+    
+    var elementMaxWidth: CGFloat {
+        width - leftPadding - rightPadding
+    }
+    
+    var elementMinHeight: CGFloat {
+        minHeight - topPadding - bottomPadding
+    }
+    
+    var elementMaxHeight: CGFloat {
+        height - topPadding - bottomPadding
     }
     
     public init(machine: Machine, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {

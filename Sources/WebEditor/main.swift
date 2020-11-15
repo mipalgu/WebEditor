@@ -60,10 +60,10 @@ struct ContentView: View {
                 //    .scaledToFit()
                 //StateCollapsedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
                 //StateExpandedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
-                AttributeGroupsView(machine: $machine, path: Machine.path.attributes, label: "Attributes")
+                //AttributeGroupsView(machine: $machine, path: Machine.path.attributes, label: "Attributes")
                 //StateEditView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
-                //StateView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100), width: 400, height: 200, expanded: true))
-                //StateView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
+                StateView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100), width: 1000, height: 600, expanded: true))
+                StateView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
                     
             }
         }

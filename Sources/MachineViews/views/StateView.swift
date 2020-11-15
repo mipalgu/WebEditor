@@ -13,11 +13,15 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct StateView: View {
+public struct StateView: View {
     
     @ObservedObject var viewModel: StateViewModel
     
-    var body: some View {
+    public init(viewModel: StateViewModel) {
+        self.viewModel = viewModel
+    }
+    
+    public var body: some View {
         if viewModel.expanded {
             return AnyView(StateExpandedView(viewModel: viewModel))
         }
