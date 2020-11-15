@@ -21,16 +21,36 @@ struct LineView: View {
     
     @EnvironmentObject var config: Config
     
+    @SwiftUI.State var text: String
+    
+    @SwiftUI.State var error: String? = nil
+    
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, String>, label: String) {
+        self._machine = machine
+        self.path = path
+        self.label = label
+        self._text = SwiftUI.State(initialValue: machine.wrappedValue[keyPath: path.path])
+    }
+    
     var body: some View {
-        TextField(label, text: Binding(get: { machine[keyPath: path.path] }, set: {
-            do {
-                try machine.modify(attribute: path, value: $0)
-            } catch let e {
-                print("\(e)")
+        VStack {
+            TextField(label, text: $text, onCommit: {
+                do {
+                    try machine.modify(attribute: path, value: self.text)
+                    text = machine[keyPath: path.path]
+                    error = nil
+                } catch let e as MachinesError {
+                    error = e.message
+                } catch let e {
+                    error = "\(e)"
+                }
+            })
+            .font(.body)
+            .background(config.fieldColor)
+            .foregroundColor(config.textColor)
+            if let error = self.error {
+                Text(error).foregroundColor(.red)
             }
-        }))
-        .font(.body)
-        .background(config.fieldColor)
-        .foregroundColor(config.textColor)
+        }
     }
 }
