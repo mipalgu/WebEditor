@@ -34,11 +34,17 @@ struct StateExpandedView: View {
                             .multilineTextAlignment(.center)
                             .font(.title2)
                             .background(config.fieldColor)
-                            .frame(minWidth: viewModel.minTitleWidth, maxWidth: viewModel.maxTitleWidth, minHeight: viewModel.minTitleHeight)
+                            .padding(.leading, viewModel.buttonDimensions)
+                            .frame(
+                                minWidth: viewModel.minTitleWidth - viewModel.buttonDimensions,
+                                maxWidth: viewModel.maxTitleWidth - viewModel.buttonDimensions,
+                                minHeight: viewModel.minTitleHeight
+                            )
                             .clipped()
                         Button(action: { viewModel.toggleExpand() }) {
                             Image(systemName: "arrowtriangle.down.fill")
                                 .font(.system(size: viewModel.buttonSize, weight: .regular))
+                                .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
                         }
                     }
                     ForEach(Array(viewModel.actions), id: \.0) { (action, _) in

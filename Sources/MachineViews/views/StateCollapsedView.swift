@@ -34,8 +34,11 @@ struct StateCollapsedView: View {
                             .italic()
                             .font(.title2)
                             .foregroundColor(config.stateTextColour)
-                            .padding(.leading, 20)
-                            .frame(maxWidth: viewModel.collapsedWidth - 20, maxHeight: viewModel.collapsedHeight)
+                            .padding(.leading, viewModel.buttonDimensions)
+                            .frame(
+                                maxWidth: viewModel.collapsedWidth - viewModel.buttonDimensions,
+                                maxHeight: viewModel.collapsedHeight
+                            )
                             .clipped()
                     } else {
                         Text(viewModel.name)
@@ -47,6 +50,7 @@ struct StateCollapsedView: View {
                     Button(action: { viewModel.toggleExpand() }) {
                         Image(systemName: "arrowtriangle.left.fill")
                             .font(.system(size: viewModel.buttonSize, weight: .regular))
+                            .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
                     }
                 }
                 .background(
