@@ -39,6 +39,8 @@ public class Config: ObservableObject {
     
     @Published public var height: Double = 720
     
+    @Published public var stateColour = Color.white
+    
     public init() {}
     
 }
