@@ -15,7 +15,11 @@ import Attributes
 
 public class StateViewModel: ObservableObject {
     
-    @Published var machine: Machine
+    @Published var _machine: Ref<Machine>
+    
+    fileprivate var machine: Machine {
+        _machine.value
+    }
     
     let path: Attributes.Path<Machine, Machines.State>
     
@@ -119,8 +123,8 @@ public class StateViewModel: ObservableObject {
         }
     }
     
-    public init(machine: Machine, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
-        self.machine = machine
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
+        self._machine = machine
         self.path = path
         self.location = location
         self._width = max(minWidth, width)
