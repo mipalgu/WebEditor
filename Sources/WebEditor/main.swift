@@ -51,17 +51,16 @@ struct ContentView: View {
                 }*/
                 //CodeView(machine: $machine, path: Machine.path.states[0].actions["main"].wrappedValue, label: "OnEntry", language: .swift)
                 //    .scaledToFit()
-                //StateCollapsedView(machine: $machine, path: Machine.path.states[0])
-                StateExpandedView(machine: $machine, path: Machine.path.states[1])
-                //StateEditView(machine: $machine, path: Machine.path.states[0])
+                //StateCollapsedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
+                //StateExpandedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
+                StateEditView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
+                //StateView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100), width: 400, height: 200, expanded: true))
+                //StateView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
                     
             }
-            .frame(minWidth: 1650, minHeight: 720)
-            .background(config.backgroundColor)
-            .padding([.all], 50)
         }
         .background(config.backgroundColor)
-        
+        .frame(width: CGFloat(config.width), height: CGFloat(config.height))
     }
 }
 

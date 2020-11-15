@@ -48,7 +48,6 @@ struct CodeView: View {
                             .stroke(Color.gray.opacity(0.3), lineWidth: 2)
                     )
                     .shadow(color: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5), radius: 1, x: 0, y: 2)
-                    .frame(width: reader.size.width, height: floor((reader.size.height - 40) * 11.0/12.0))
             }
         }
     }

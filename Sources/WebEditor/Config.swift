@@ -19,4 +19,8 @@ class Config: ObservableObject {
     
     @Published public var fieldColor = Color.black.opacity(0.2)
     
+    @Published var width: Double = 1280
+    
+    @Published var height: Double = 720
+    
 }
