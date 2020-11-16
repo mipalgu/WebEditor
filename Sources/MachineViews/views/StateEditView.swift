@@ -24,7 +24,7 @@ public struct StateEditView: View {
     }
     
     public var body: some View {
-        HStack {
+        ScrollView {
             VStack {
                 LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
                     .multilineTextAlignment(.center)
@@ -43,19 +43,20 @@ public struct StateEditView: View {
                                 Text(action.name + ":").font(.headline).underline().foregroundColor(config.stateTextColour)
                             )
                         }
-                    }.frame(
+                    }
+                    .padding(.top, 20)
+                    .frame(
                         minWidth: viewModel.minEditWidth,
-                        minHeight: viewModel.minActionHeight
+                        minHeight: viewModel.minEditActionHeight
                     )
                 }
             }
-            //.scaledToFit()
-            .padding(.horizontal, 10)
-            Divider()
+        }
+        .padding(10)
+        //.frame(maxHeight: .infinity)
+            /*Divider()
                 .border(Color.black.opacity(0.6), width: 1)
             AttributeGroupsView(machine: $viewModel.machine, path: viewModel.path.attributes, label: "State Attributes")
-                .frame(minWidth: viewModel.minDetailsWidth, maxWidth: viewModel.maxDetailsWidth)
-        }
-        .padding(20)
+                .frame(minWidth: viewModel.minDetailsWidth, maxWidth: viewModel.maxDetailsWidth)*/
     }
 }
