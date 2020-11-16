@@ -51,7 +51,7 @@ struct StateCollapsedView: View {
                         Image(systemName: "arrowtriangle.left.fill")
                             .font(.system(size: viewModel.buttonSize, weight: .regular))
                             .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
-                    }
+                    }.buttonStyle(PlainButtonStyle())
                 }
                 .background(
                     Ellipse()

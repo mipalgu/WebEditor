@@ -45,7 +45,7 @@ struct StateExpandedView: View {
                             Image(systemName: "arrowtriangle.down.fill")
                                 .font(.system(size: viewModel.buttonSize, weight: .regular))
                                 .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
-                        }
+                        }.buttonStyle(PlainButtonStyle())
                     }
                     ForEach(Array(viewModel.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
                         CodeView(machine: $viewModel.machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
