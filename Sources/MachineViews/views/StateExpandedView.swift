@@ -50,7 +50,7 @@ struct StateExpandedView: View {
                     }
                     ScrollView {
                         ForEach(Array(viewModel.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
-                            CodeView(machine: $viewModel.machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
+                            CodeViewWithDropDown(machine: $viewModel.machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
                                 if viewModel.isEmpty(forAction: action) {
                                     return AnyView(
                                         Text(action + ":").font(.headline).underline().italic().foregroundColor(config.stateTextColour)
