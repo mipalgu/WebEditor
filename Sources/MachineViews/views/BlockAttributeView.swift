@@ -25,6 +25,8 @@ struct BlockAttributeView: View{
             CodeView(machine: $machine, path: path.codeValue, label: label, language: language)
         case .text:
             TextView(machine: $machine, path: path.textValue, label: label)
+        case .collection:
+            CollectionView(machine: $machine, path: path.collectionValue, label: label)
         case .table(_, let columns):
             TableView(machine: $machine, path: path.tableValue, label: label, columns: columns)
         default:
