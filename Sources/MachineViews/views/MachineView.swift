@@ -1,0 +1,29 @@
+//
+//  MachineView.swift
+//  
+//
+//  Created by Morgan McColl on 16/11/20.
+//
+
+#if canImport(TokamakShim)
+import TokamakShim
+#else
+import SwiftUI
+#endif
+import Machines
+import Attributes
+
+struct MachineView: View {
+    
+    @ObservedObject var viewModel: MachineViewModel
+    
+    @EnvironmentObject var config: Config
+    
+    var body: some View {
+        ForEach(viewModel.states, id: \.name) {
+            StateView(viewModel: $0)
+                .position($0.location)
+        }
+    }
+}
+
