@@ -29,6 +29,8 @@ struct BlockAttributeView: View{
             CollectionView(machine: $machine, path: path.collectionValue, label: label)
         case .table(_, let columns):
             TableView(machine: $machine, path: path.tableValue, label: label, columns: columns)
+        case .complex(_, let fields):
+            ComplexView(machine: $machine, path: path.complexValue, label: label, fields: fields)
         default:
             Text("Not Yet Implemented")
         }
