@@ -205,4 +205,22 @@ public class StateViewModel: ObservableObject {
         expanded = !expanded
     }
     
+    func createTitleView(forAction action: String, color: Color) -> AnyView {
+        if self.isEmpty(forAction: action) {
+            return AnyView(
+                Text(action + ":").font(.headline).underline().italic().foregroundColor(color)
+            )
+        }
+        return AnyView(
+            Text(action + ":").font(.headline).underline().foregroundColor(color)
+        )
+    }
+    
+    func createCollapsedBinding(forAction action: String) -> Binding<Bool> {
+        Binding(
+            get: { self.collapsedActions[action] ?? false },
+            set: { self.collapsedActions[action] = $0 }
+        )
+    }
+    
 }

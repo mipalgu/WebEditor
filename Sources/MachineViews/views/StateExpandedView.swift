@@ -54,19 +54,9 @@ struct StateExpandedView: View {
                                 machine: $viewModel.machine,
                                 path: viewModel.path.actions[index].implementation,
                                 language: .swift,
-                                collapsed: Binding(
-                                    get: { viewModel.collapsedActions[action] ?? false },
-                                    set: { viewModel.collapsedActions[action] = $0 })
-                            ) { () -> AnyView in
-                                if viewModel.isEmpty(forAction: action) {
-                                    return AnyView(
-                                        Text(action + ":").font(.headline).underline().italic().foregroundColor(config.stateTextColour)
-                                    )
-                                } else {
-                                    return AnyView(
-                                        Text(action + ":").font(.headline).underline().foregroundColor(config.stateTextColour)
-                                    )
-                                }
+                                collapsed: viewModel.createCollapsedBinding(forAction: action)
+                            ) {
+                                viewModel.createTitleView(forAction: action, color: config.stateTextColour)
                             }.frame(
                                 minWidth: viewModel.elementMinWidth,
                                 maxWidth: viewModel.elementMaxWidth
