@@ -62,6 +62,8 @@ import TokamakShim
 import SwiftUI
 #endif
 
+import Attributes
+
 @dynamicMemberLookup
 public final class Ref<T>: ObservableObject {
     
@@ -81,6 +83,14 @@ public final class Ref<T>: ObservableObject {
         } set {
             self.value[keyPath: keyPath] = newValue
         }
+    }
+    
+    public func binding<U>(_ keyPath: WritableKeyPath<T, U>) -> Binding<U> {
+        return Binding(get: { self.value[keyPath: keyPath] }, set: { self.value[keyPath: keyPath] = $0 })
+    }
+    
+    public func binding<Path: PathProtocol>(_ path: Path) -> Binding<Path.Value> where Path.Root == T {
+        return binding(path.path)
     }
     
 }
