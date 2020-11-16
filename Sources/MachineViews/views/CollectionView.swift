@@ -81,17 +81,42 @@ struct CollectionView: View{
                     HStack(spacing: 1) {
                         AttributeView(machine: $machine, path: path[index], label: "")
                         Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
+                    }.contextMenu {
+                        Button("Delete", action: {
+                            do {
+                                print(selection)
+                                try machine.deleteItems(table: path, items: IndexSet(selection))
+                            } catch let e {
+                                print("\(e)", stderr)
+                            }
+                        }).keyboardShortcut(.delete)
                     }
                 }.onMove { (source, destination) in
                     do {
                         try machine.moveItems(table: path, from: source, to: destination)
-                        $machine.wrappedValue = machine
+                    } catch let e {
+                        print("\(e)", stderr)
+                    }
+                }.onDelete {
+                    do {
+                        try machine.deleteItems(table: path, items: $0)
                     } catch let e {
                         print("\(e)", stderr)
                     }
                 }
-            }
-            .frame(minHeight: CGFloat(machine[keyPath: path.path].count * (type == .line ? 40 : 80)))
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        do {
+                            try machine.deleteItems(table: path, items: IndexSet(selection))
+                        } catch let e {
+                            print("\(e)", stderr)
+                        }
+                    }, label: {
+                        Image(systemName: "trash").font(.system(size: 16, weight: .regular))
+                    })
+                }.padding(.top, 5)
+            }.frame(minHeight: CGFloat(machine[keyPath: path.path].count * (type == .line ? 40 : 80) + 20))
         }
     }
 }
