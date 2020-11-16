@@ -21,15 +21,15 @@ public struct LineView: View {
     
     @EnvironmentObject var config: Config
     
-    @SwiftUI.State var text: String
+    @State var text: String
     
-    @SwiftUI.State var error: String? = nil
+    @State var error: String? = nil
     
     public init(machine: Binding<Machine>, path: Attributes.Path<Machine, String>, label: String) {
         self._machine = machine
         self.path = path
         self.label = label
-        self._text = SwiftUI.State(initialValue: machine.wrappedValue[keyPath: path.path])
+        self._text = State(initialValue: machine.wrappedValue[keyPath: path.path])
     }
     
     public var body: some View {
