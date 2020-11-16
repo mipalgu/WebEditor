@@ -75,8 +75,30 @@ struct CollectionView: View{
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text(label + ":").fontWeight(.bold)
             List(selection: $selection) {
+                HStack {
+                    Text(label + ":").fontWeight(.bold)
+                    Spacer()
+                    Button(action: {
+                        do {
+                            try machine.deleteItems(table: path, items: IndexSet(selection))
+                        } catch let e {
+                            print("\(e)", stderr)
+                        }
+                    }, label: {
+                        Image(systemName: "minus").font(.system(size: 16, weight: .regular))
+                    }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+                    Button(action: {
+                        do {
+                            try machine.addItem(table: path)
+                        } catch let e {
+                            print("\(e)", stderr)
+                        }
+                    }, label: {
+                        Image(systemName: "plus").font(.system(size: 16, weight: .regular))
+                    }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+                }.padding(.bottom, 5)
+                Divider()
                 ForEach(Array(machine[keyPath: path.path].enumerated()), id: \.0) { (index, attribute) in
                     HStack(spacing: 1) {
                         AttributeView(machine: $machine, path: path[index], label: "")
@@ -104,19 +126,7 @@ struct CollectionView: View{
                         print("\(e)", stderr)
                     }
                 }
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        do {
-                            try machine.deleteItems(table: path, items: IndexSet(selection))
-                        } catch let e {
-                            print("\(e)", stderr)
-                        }
-                    }, label: {
-                        Image(systemName: "trash").font(.system(size: 16, weight: .regular))
-                    })
-                }.padding(.top, 5)
-            }.frame(minHeight: CGFloat(machine[keyPath: path.path].count * (type == .line ? 40 : 80) + 20))
+            }.frame(minHeight: CGFloat(machine[keyPath: path.path].count * (type == .line ? 25 : 80) + 70))
         }
     }
 }
