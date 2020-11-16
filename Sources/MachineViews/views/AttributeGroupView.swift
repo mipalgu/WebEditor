@@ -23,13 +23,15 @@ struct AttributeGroupView: View {
     @ViewBuilder
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
-            HStack {
-                VStack(alignment: .leading) {
-                    ForEach(Array(machine[keyPath: path.keyPath].fields.enumerated()), id: \.0) { (index, field) in
-                        AttributeView(machine: $machine, path: path.attributes[field.name].wrappedValue, label: field.name.pretty)
+            Form {
+                HStack {
+                    VStack(alignment: .leading) {
+                        ForEach(Array(machine[keyPath: path.keyPath].fields.enumerated()), id: \.0) { (index, field) in
+                            AttributeView(machine: $machine, path: path.attributes[field.name].wrappedValue, label: field.name.pretty)
+                        }
                     }
+                    Spacer()
                 }
-                Spacer()
             }
         }
     }

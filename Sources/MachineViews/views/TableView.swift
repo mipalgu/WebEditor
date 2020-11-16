@@ -22,24 +22,38 @@ struct TableView: View {
     
     @EnvironmentObject var config: Config
     
+    @State var selection: Set<Int> = []
+    
     var body: some View {
         VStack(alignment: .leading) {
             Text(label.capitalized)
                 .font(.headline)
                 .foregroundColor(config.textColor)
-            NavigationView {
-                List(Array(machine[keyPath: path.path].indices), id: \.self) { rowIndex in
-                    ForEach(Array(machine[keyPath: path.path][rowIndex].indices), id: \.self) { columnIndex in
-                        LineAttributeView(
-                            machine: $machine,
-                            path: Attributes.Path(
-                                path: path.path.appending(path: \.[rowIndex][columnIndex]),
-                                ancestors: []
-                            ),
-                            label: label
-                        )
+            List(selection: $selection) {
+                HStack {
+                    ForEach(Array(columns.indices), id: \.self) { index in
+                        Text(columns[index].name.pretty)
                     }
                 }
+                ForEach(Array(machine[keyPath: path.path].indices), id: \.self) { rowIndex in
+                    TableRowView(machine: $machine, path: path[rowIndex])
+                }
+            }.frame(minHeight: 100)
+        }
+    }
+}
+
+struct TableRowView: View {
+    
+    @Binding var machine: Machine
+    let path: Attributes.Path<Machine, [LineAttribute]>
+    
+    @EnvironmentObject var config: Config
+    
+    var body: some View {
+        HStack {
+            ForEach(Array(machine[keyPath: path.path].indices), id: \.self) { columnIndex in
+                LineAttributeView(machine: $machine, path: path[columnIndex], label: "")
             }
         }
     }
