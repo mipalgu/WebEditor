@@ -69,6 +69,8 @@ public class StateViewModel: ObservableObject {
     
     let minActionHeight: CGFloat = 50.0
     
+    let minEditActionHeight: CGFloat = 200.0
+    
     let topPadding: CGFloat = 10.0
     
     let leftPadding: CGFloat = 20.0
