@@ -32,7 +32,7 @@ struct StateCollapsedView: View {
                     if viewModel.isEmpty {
                         Text(viewModel.name)
                             .italic()
-                            .font(.title2)
+                            .font(config.fontTitle2)
                             .foregroundColor(config.stateTextColour)
                             .padding(.leading, viewModel.buttonDimensions)
                             .frame(
@@ -42,7 +42,7 @@ struct StateCollapsedView: View {
                             .clipped()
                     } else {
                         Text(viewModel.name)
-                            .font(.title2)
+                            .font(config.fontTitle2)
                             .foregroundColor(config.stateTextColour)
                             .frame(maxWidth: viewModel.collapsedWidth, maxHeight: viewModel.collapsedHeight)
                             .clipped()

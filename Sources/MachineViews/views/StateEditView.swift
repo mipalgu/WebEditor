@@ -24,32 +24,31 @@ public struct StateEditView: View {
     }
     
     public var body: some View {
-        ScrollView {
-            VStack {
-                LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
-                    .multilineTextAlignment(.center)
-                    .font(.title2)
-                    .background(config.fieldColor)
-                    .foregroundColor(config.textColor)
-                    .frame(minWidth: viewModel.minEditWidth, alignment: .center)
-                ForEach(Array(viewModel.actions.enumerated()), id: \.0) { (index, action) in
-                    CodeView(machine: $viewModel.machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
-                        if viewModel.isEmpty(forAction: action.name) {
-                            return AnyView(
-                                Text(action.name + ":").font(.headline).underline().italic().foregroundColor(config.stateTextColour)
-                            )
-                        } else {
-                            return AnyView(
-                                Text(action.name + ":").font(.headline).underline().foregroundColor(config.stateTextColour)
-                            )
-                        }
+        VStack {
+            LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
+                .multilineTextAlignment(.center)
+                .font(config.fontTitle2)
+                .background(config.fieldColor)
+                .foregroundColor(config.textColor)
+                .frame(minWidth: viewModel.minEditWidth, alignment: .center)
+            ForEach(Array(viewModel.actions.enumerated()), id: \.0) { (index, action) in
+                CodeView(machine: $viewModel.machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
+                    if viewModel.isEmpty(forAction: action.name) {
+                        return AnyView(
+                            Text(action.name + ":").font(config.fontHeading).underline().italic().foregroundColor(config.stateTextColour)
+                        )
+                    } else {
+                        return AnyView(
+                            Text(action.name + ":").font(config.fontHeading).underline().foregroundColor(config.stateTextColour)
+                        )
                     }
-                    .padding(.top, 20)
-                    .frame(
-                        minWidth: viewModel.minEditWidth,
-                        minHeight: viewModel.minEditActionHeight
-                    )
                 }
+                .padding(.top, 20)
+                .frame(
+                    minWidth: viewModel.minEditWidth,
+                    minHeight: viewModel.minEditActionHeight
+                )
+                .scaledToFit()
             }
         }
         .padding(10)

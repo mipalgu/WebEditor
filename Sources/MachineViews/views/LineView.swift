@@ -45,7 +45,6 @@ public struct LineView: View {
                 }
                 text = machine[keyPath: path.path]
             })
-            .font(.body)
             .background(config.fieldColor)
             .foregroundColor(config.textColor)
             if let error = self.error {
