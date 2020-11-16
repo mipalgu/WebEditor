@@ -51,7 +51,7 @@ public class StateViewModel: ObservableObject {
         elementMaxWidth - buttonSize
     }
     
-    let minWidth: CGFloat = 75.0
+    let minWidth: CGFloat = 150.0
     
     let maxWidth: CGFloat = 1200.0
     
