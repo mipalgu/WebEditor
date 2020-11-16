@@ -23,7 +23,7 @@ struct ComplexView: View {
     var body: some View {
         Section(header: Text(label.capitalized)) {
             ForEach(fields, id: \.name) { field in
-                AttributeView(machine: $machine, path: path[field.name].wrappedValue, label: field.name)
+                AttributeView(machine: $machine, path: path[field.name].wrappedValue, label: field.name.pretty)
             }
         }
     }
