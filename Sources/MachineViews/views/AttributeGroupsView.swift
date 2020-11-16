@@ -32,9 +32,10 @@ public struct AttributeGroupsView: View {
             Text(label.capitalized)
                 .font(.title3)
                 .foregroundColor(config.textColor)
-            TabView() {
+            TabView {
                 ForEach(Array(machine[keyPath: path.path].indices), id: \.self) { index in
                     AttributeGroupView(machine: $machine, path: path[index], label: machine[keyPath: path.path][index].name)
+                        .padding(.horizontal, 10)
                         .tabItem {
                             Text(machine[keyPath: path.path][index].name.capitalized)
                         }

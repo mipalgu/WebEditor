@@ -23,7 +23,7 @@ struct TableView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Text(label.capitalized)
                 .font(.headline)
                 .foregroundColor(config.textColor)

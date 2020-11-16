@@ -22,24 +22,27 @@ struct AttributeGroupView: View {
     
     @ViewBuilder
     var body: some View {
-        ScrollView {
-            VStack {
-                ForEach(Array(machine[keyPath: path.keyPath].fields.enumerated()), id: \.0) { (index, field) -> AnyView in
-                    switch field.type {
-                    case .line:
-                        return AnyView(LineAttributeView(
-                            machine: $machine,
-                            path: path.attributes[field.name].wrappedValue.lineAttribute,
-                            label: field.name
-                        ))
-                    case .block:
-                        return AnyView(BlockAttributeView(
-                            machine: $machine,
-                            path: path.attributes[field.name].wrappedValue.blockAttribute,
-                            label: field.name
-                        ))
+        ScrollView(.vertical, showsIndicators: true) {
+            HStack {
+                VStack(alignment: .leading) {
+                    ForEach(Array(machine[keyPath: path.keyPath].fields.enumerated()), id: \.0) { (index, field) -> AnyView in
+                        switch field.type {
+                        case .line:
+                            return AnyView(LineAttributeView(
+                                machine: $machine,
+                                path: path.attributes[field.name].wrappedValue.lineAttribute,
+                                label: field.name
+                            ))
+                        case .block:
+                            return AnyView(BlockAttributeView(
+                                machine: $machine,
+                                path: path.attributes[field.name].wrappedValue.blockAttribute,
+                                label: field.name
+                            ))
+                        }
                     }
                 }
+                Spacer()
             }
         }
     }

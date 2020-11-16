@@ -33,7 +33,7 @@ public struct LineView: View {
     }
     
     public var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             TextField(label, text: $text, onCommit: {
                 do {
                     try machine.modify(attribute: path, value: self.text)

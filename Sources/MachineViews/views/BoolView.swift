@@ -28,9 +28,7 @@ struct BoolView: View {
             } catch let e {
                 print("\(e)")
             }
-        }))
-            .font(.body)
-        .foregroundColor(config.textColor)
+        })).font(.body).foregroundColor(config.textColor)
     }
 }
 

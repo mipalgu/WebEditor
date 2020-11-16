@@ -35,11 +35,8 @@ struct CodeView<Label: View>: View {
     
     var body: some View {
         GeometryReader { reader in
-            VStack {
-                HStack {
-                    label()
-                    Spacer()
-                }
+            VStack(alignment: .leading) {
+                label()
                 .frame(maxHeight: floor(reader.size.height * 1.0/12.0))
                 TextEditor(text: Binding(get: { machine[keyPath: path.path] }, set: {
                     do {
