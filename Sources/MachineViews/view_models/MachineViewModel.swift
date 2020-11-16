@@ -13,7 +13,7 @@ import SwiftUI
 import Machines
 import Attributes
 
-class MachineViewModel: ObservableObject {
+public class MachineViewModel: ObservableObject {
     
     @Published var _machine: Ref<Machine>
     
@@ -31,7 +31,7 @@ class MachineViewModel: ObservableObject {
     
     let path: Attributes.Path<Machine, Machine>
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machine>, states: [StateViewModel]) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machine>, states: [StateViewModel]) {
         self._machine = machine
         self.path = path
         self.states = states

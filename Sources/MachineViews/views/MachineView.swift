@@ -13,13 +13,17 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct MachineView: View {
+public struct MachineView: View {
     
     @ObservedObject var viewModel: MachineViewModel
     
     @EnvironmentObject var config: Config
     
-    var body: some View {
+    public init(viewModel: MachineViewModel) {
+        self.viewModel = viewModel
+    }
+    
+    public var body: some View {
         ForEach(viewModel.states, id: \.name) {
             StateView(viewModel: $0)
                 .position($0.location)

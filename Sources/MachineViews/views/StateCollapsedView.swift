@@ -19,6 +19,8 @@ struct StateCollapsedView: View {
     
     @EnvironmentObject var config: Config
     
+    @State var originalPoint: CGPoint = CGPoint(x: 75.0, y: 100.0)
+    
     var body: some View {
         Ellipse()
             .strokeBorder(config.borderColour, lineWidth: 2.0, antialiased: true)
@@ -60,7 +62,13 @@ struct StateCollapsedView: View {
                         .opacity(viewModel.isAccepting ? 1.0 : 0.0)
                 )
             )
+            //.position(viewModel.location)
+            .onTapGesture {
+                self.originalPoint = viewModel.location
+            }
+            .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
+                self.viewModel.translate(originalPoint: originalPoint, translation: $0.translation)
+            })
             
     }
-    
 }

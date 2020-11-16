@@ -223,4 +223,9 @@ public class StateViewModel: ObservableObject {
         )
     }
     
+    func translate(originalPoint p0: CGPoint, translation dP: CGSize) {
+        self.location = CGPoint(x: p0.x + dP.width, y: p0.y + dP.height)
+        self.objectWillChange.send()
+    }
+    
 }
