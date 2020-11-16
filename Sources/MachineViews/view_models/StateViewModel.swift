@@ -78,11 +78,11 @@ public class StateViewModel: ObservableObject {
     let maxTitleHeight: CGFloat = 42.0
     
     var minTitleWidth: CGFloat {
-        elementMinWidth - buttonSize
+        elementMinWidth - buttonDimensions
     }
     
     var maxTitleWidth: CGFloat {
-        elementMaxWidth - buttonSize
+        elementMaxWidth - buttonDimensions
     }
     
     let minWidth: CGFloat = 200.0
