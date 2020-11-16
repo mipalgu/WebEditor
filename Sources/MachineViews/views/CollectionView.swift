@@ -72,7 +72,6 @@ struct CollectionView: View{
     let type: AttributeType
     
     @State private var selection: Set<Int> = []
-    @State private var presentSheet: Bool = false
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -93,12 +92,6 @@ struct CollectionView: View{
                 }
             }
             .frame(minHeight: CGFloat(machine[keyPath: path.path].count * (type == .line ? 40 : 80)))
-            
-//            .onTapGesture {
-//                presentSheet = true
-//            }.sheet(isPresented: Binding(get: { self.presentSheet && selection != nil }, set: { presentSheet = $0 })) {
-//                AttributeView(machine: $machine, path: path[selection ?? 0], label: "")
-//            }
         }
     }
 }
