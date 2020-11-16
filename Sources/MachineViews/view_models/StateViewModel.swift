@@ -37,9 +37,39 @@ public class StateViewModel: ObservableObject {
     
     @Published var expanded: Bool
     
-    let collapsedWidth: CGFloat = 150.0
+    @Published fileprivate var _collapsedWidth: CGFloat
     
-    let collapsedHeight: CGFloat = 100.0
+    @Published fileprivate var _collapsedHeight: CGFloat
+    
+    var collapsedWidth: CGFloat {
+        get {
+            min(max(collapsedMinWidth, _collapsedWidth), collapsedMaxWidth)
+        }
+        set {
+            let newWidth = min(max(collapsedMinWidth, newValue), collapsedMaxWidth)
+            _collapsedWidth = newWidth
+            _collapsedHeight = collapsedMinHeight / collapsedMinWidth * newWidth
+        }
+    }
+    
+    var collapsedHeight: CGFloat {
+        get {
+            min(max(collapsedMinHeight, _collapsedHeight), collapsedMaxHeight)
+        }
+        set {
+            let newHeight = min(max(collapsedMinHeight, newValue), collapsedMaxHeight)
+            _collapsedHeight = newHeight
+            _collapsedWidth = collapsedMinWidth / collapsedMinHeight * newHeight
+        }
+    }
+    
+    let collapsedMinWidth: CGFloat = 150.0
+    
+    let collapsedMinHeight: CGFloat = 100.0
+    
+    let collapsedMaxWidth: CGFloat = 750.0
+    
+    let collapsedMaxHeight: CGFloat = 500.0
     
     let minTitleHeight: CGFloat = 42.0
     
@@ -51,7 +81,7 @@ public class StateViewModel: ObservableObject {
         elementMaxWidth - buttonSize
     }
     
-    let minWidth: CGFloat = 150.0
+    let minWidth: CGFloat = 200.0
     
     let maxWidth: CGFloat = 1200.0
     
@@ -141,13 +171,30 @@ public class StateViewModel: ObservableObject {
         return nil == actions.first { !$0.implementation.isEmpty }
     }
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0) {
         self._machine = machine
         self.path = path
         self.location = location
-        self._width = max(minWidth, width)
+        self._width = min(max(minWidth, width), maxWidth)
         self._height = height
         self.expanded = expanded
+        self._collapsedHeight = collapsedHeight
+        self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
+    }
+    
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0) {
+        self._machine = machine
+        self.path = path
+        self.location = location
+        self._width = min(max(minWidth, width), maxWidth)
+        self._height = height
+        self.expanded = expanded
+        self._collapsedWidth = collapsedWidth
+        self._collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
+    }
+    
+    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
+        self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: 150.0)
     }
     
     func isEmpty(forAction action: String) -> Bool {

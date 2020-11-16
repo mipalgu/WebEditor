@@ -44,7 +44,7 @@ struct CodeView<Label: View>: View {
                         print("\(e)")
                     }
                 }))
-                    .font(.body)
+                .font(config.fontBody)
                     .foregroundColor(config.textColor)
                     .disableAutocorrection(true)
                     .overlay(

@@ -79,6 +79,12 @@ public class Config: ObservableObject {
     @Published public var shadowColour = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5)
     #endif
     
+    @Published var fontTitle1: Font = Font.system(size: 32.0)
+    @Published var fontTitle2: Font = Font.system(size: 24.0)
+    @Published var fontTitle3: Font = Font.system(size: 20.0)
+    @Published var fontHeading: Font = Font.system(size: 16.0)
+    @Published var fontBody: Font = Font.system(size: 12.0)
+    
     public init() {}
     
 }

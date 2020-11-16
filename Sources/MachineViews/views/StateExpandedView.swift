@@ -32,7 +32,7 @@ struct StateExpandedView: View {
                     HStack {
                         LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
                             .multilineTextAlignment(.center)
-                            .font(.title2)
+                            .font(config.fontTitle2)
                             .background(config.fieldColor)
                             .padding(.leading, viewModel.buttonDimensions)
                             .frame(
