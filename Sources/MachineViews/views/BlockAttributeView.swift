@@ -13,10 +13,10 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct BlockAttributeView<Path: PathProtocol>: View where Path.Root == Machine, Path.Value == BlockAttribute {
+struct BlockAttributeView: View{
     
     @Binding var machine: Machine
-    let path: Path
+    let path: Attributes.Path<Machine, BlockAttribute>
     let label: String
     
     var body: some View {

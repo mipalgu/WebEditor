@@ -103,8 +103,8 @@ public class StateViewModel: ObservableObject {
         String(machine[keyPath: path.path].name)
     }
     
-    var actions: [(String, String)] {
-        machine[keyPath: path.path].actions.sorted { $0.0 < $1.0 }
+    var actions: [Machines.Action] {
+        machine[keyPath: path.path].actions
     }
     
     var attributes: [AttributeGroup] {
@@ -136,7 +136,7 @@ public class StateViewModel: ObservableObject {
     }
     
     var isEmpty: Bool {
-        return nil == actions.first { !$1.isEmpty }
+        return nil == actions.first { !$0.implementation.isEmpty }
     }
     
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
@@ -149,7 +149,7 @@ public class StateViewModel: ObservableObject {
     }
     
     func isEmpty(forAction action: String) -> Bool {
-        machine[keyPath: path.path].actions[action]?.isEmpty ?? true
+        machine[keyPath: path.path].actions.first { $0.name == action }?.implementation.isEmpty ?? true
     }
     
     func toggleExpand() {

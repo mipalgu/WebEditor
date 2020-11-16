@@ -47,8 +47,8 @@ struct StateExpandedView: View {
                                 .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
                         }
                     }
-                    ForEach(Array(viewModel.actions), id: \.0) { (action, _) in
-                        CodeView(machine: $viewModel.machine, path: viewModel.path.actions[action].wrappedValue, language: .swift) { () -> AnyView in
+                    ForEach(Array(viewModel.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
+                        CodeView(machine: $viewModel.machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
                             if viewModel.isEmpty(forAction: action) {
                                 return AnyView(
                                     Text(action + ":").font(.headline).underline().italic().foregroundColor(config.stateTextColour)

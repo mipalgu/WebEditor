@@ -32,15 +32,15 @@ public struct StateEditView: View {
                     .background(config.fieldColor)
                     .foregroundColor(config.textColor)
                     .frame(minWidth: viewModel.minEditWidth, alignment: .center)
-                ForEach(viewModel.actions, id: \.0) { (key, value) in
-                    CodeView(machine: $viewModel.machine, path: viewModel.path.actions[key].wrappedValue, language: .swift) { () -> AnyView in
-                        if viewModel.isEmpty(forAction: key) {
+                ForEach(Array(viewModel.actions.enumerated()), id: \.0) { (index, action) in
+                    CodeView(machine: $viewModel.machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
+                        if viewModel.isEmpty(forAction: action.name) {
                             return AnyView(
-                                Text(key + ":").font(.headline).underline().italic().foregroundColor(config.stateTextColour)
+                                Text(action.name + ":").font(.headline).underline().italic().foregroundColor(config.stateTextColour)
                             )
                         } else {
                             return AnyView(
-                                Text(key + ":").font(.headline).underline().foregroundColor(config.stateTextColour)
+                                Text(action.name + ":").font(.headline).underline().foregroundColor(config.stateTextColour)
                             )
                         }
                     }.frame(
