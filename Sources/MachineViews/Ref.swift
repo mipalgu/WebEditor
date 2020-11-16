@@ -62,12 +62,25 @@ import TokamakShim
 import SwiftUI
 #endif
 
+@dynamicMemberLookup
 public final class Ref<T>: ObservableObject {
     
     @Published public var value: T
     
     public init(_ value: T) {
         self.value = value
+    }
+    
+    public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U {
+        return self.value[keyPath: keyPath]
+    }
+    
+    public subscript<U>(dynamicMember keyPath: WritableKeyPath<T, U>) -> U {
+        get {
+            return self.value[keyPath: keyPath]
+        } set {
+            self.value[keyPath: keyPath] = newValue
+        }
     }
     
 }
