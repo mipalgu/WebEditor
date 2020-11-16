@@ -1,5 +1,5 @@
 /*
- * CollectionView.swift
+ * State.swift
  * MachineViews
  *
  * Created by Callum McColl on 16/11/20.
@@ -56,40 +56,14 @@
  *
  */
 
-#if canImport(TokamakShim)
-import TokamakShim
+#if canImport(TokamakShims)
+import TokamakShims
+
+public typealias State = TokamakShims.State
 #else
 import SwiftUI
-#endif
-import Machines
-import Attributes
 
-struct CollectionView: View{
-    
-    @Binding var machine: Machine
-    let path: Attributes.Path<Machine, [Attribute]>
-    let label: String
-    
-    @State private var selection: Int? = nil
-    
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text(label + ":").fontWeight(.bold)
-            List(selection: $selection) {
-                ForEach(Array(machine[keyPath: path.path].enumerated()), id: \.0) { (index, attribute) in
-                    HStack(spacing: 1) {
-                        AttributeView(machine: $machine, path: path[index], label: "")
-                        Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
-                    }
-                }.onMove { (source, destination) in
-                    do {
-                        try machine.moveItems(table: path, from: source, to: destination)
-                        $machine.wrappedValue = machine
-                    } catch let e {
-                        print("\(e)", stderr)
-                    }
-                }.background(Color.clear)
-            }.frame(minHeight: 100)
-        }
-    }
-}
+public typealias State = SwiftUI.State
+#endif
+
+

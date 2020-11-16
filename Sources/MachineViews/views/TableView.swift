@@ -27,16 +27,18 @@ struct TableView: View {
             Text(label.capitalized)
                 .font(.headline)
                 .foregroundColor(config.textColor)
-            List(Array(machine[keyPath: path.path].indices), id: \.self) { rowIndex in
-                ForEach(Array(machine[keyPath: path.path][rowIndex].indices), id: \.self) { columnIndex in
-                    LineAttributeView(
-                        machine: $machine,
-                        path: Attributes.Path(
-                            path: path.path.appending(path: \.[rowIndex][columnIndex]),
-                            ancestors: []
-                        ),
-                        label: label
-                    )
+            NavigationView {
+                List(Array(machine[keyPath: path.path].indices), id: \.self) { rowIndex in
+                    ForEach(Array(machine[keyPath: path.path][rowIndex].indices), id: \.self) { columnIndex in
+                        LineAttributeView(
+                            machine: $machine,
+                            path: Attributes.Path(
+                                path: path.path.appending(path: \.[rowIndex][columnIndex]),
+                                ancestors: []
+                            ),
+                            label: label
+                        )
+                    }
                 }
             }
         }
