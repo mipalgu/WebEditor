@@ -20,18 +20,19 @@ struct CodeViewWithDropDown<Label: View>: View {
     let language: Language
     let label: () -> Label
     
-    @State var expanded: Bool = true
+    @Binding var collapsed: Bool
     
     @EnvironmentObject var config: Config
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Code>, label: String, language: Language) where Label == Text {
-        self.init(machine: machine, path: path, language: language) { Text(label.capitalized) }
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Code>, label: String, language: Language, collapsed: Binding<Bool>) where Label == Text {
+        self.init(machine: machine, path: path, language: language, collapsed: collapsed) { Text(label.capitalized) }
     }
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Code>, language: Language, label: @escaping () -> Label) {
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Code>, language: Language, collapsed: Binding<Bool>, label: @escaping () -> Label) {
         self._machine = machine
         self.path = path
         self.language = language
+        self._collapsed = collapsed
         self.label = label
     }
     
@@ -40,14 +41,14 @@ struct CodeViewWithDropDown<Label: View>: View {
         VStack(alignment: .leading) {
             HStack() {
                 label()
-                Button(action: { expanded = !expanded }) {
-                    Image(systemName: expanded ? "arrowtriangle.down.fill" : "arrowtriangle.left.fill")
+                Button(action: { collapsed = !collapsed }) {
+                    Image(systemName: collapsed ? "arrowtriangle.right.fill" : "arrowtriangle.down.fill")
                         .font(.system(size: 8.0, weight: .regular))
                         .frame(width: 12.0, height: 12.0)
                 }.buttonStyle(PlainButtonStyle())
                 Spacer()
             }
-            if expanded {
+            if !collapsed {
                 TextEditor(text: Binding(get: { machine[keyPath: path.path] }, set: {
                     do {
                         try machine.modify(attribute: path, value: Code($0))

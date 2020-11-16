@@ -41,6 +41,8 @@ public class StateViewModel: ObservableObject {
     
     @Published fileprivate var _collapsedHeight: CGFloat
     
+    @Published var collapsedActions: [String: Bool]
+    
     var collapsedWidth: CGFloat {
         get {
             min(max(collapsedMinWidth, _collapsedWidth), collapsedMaxWidth)
@@ -167,7 +169,7 @@ public class StateViewModel: ObservableObject {
         elementMaxHeight - maxTitleHeight
     }
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:]) {
         self._machine = machine
         self.path = path
         self.location = location
@@ -176,9 +178,10 @@ public class StateViewModel: ObservableObject {
         self.expanded = expanded
         self._collapsedHeight = collapsedHeight
         self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
+        self.collapsedActions = collapsedActions
     }
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:]) {
         self._machine = machine
         self.path = path
         self.location = location
@@ -187,6 +190,7 @@ public class StateViewModel: ObservableObject {
         self.expanded = expanded
         self._collapsedWidth = collapsedWidth
         self._collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
+        self.collapsedActions = collapsedActions
     }
     
     public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
