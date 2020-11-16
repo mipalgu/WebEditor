@@ -37,7 +37,7 @@ public struct AttributeGroupsView: View {
                     AttributeGroupView(machine: $machine, path: path[index], label: machine[keyPath: path.path][index].name)
                         .padding(.horizontal, 10)
                         .tabItem {
-                            Text(machine[keyPath: path.path][index].name.capitalized)
+                            Text(machine[keyPath: path.path][index].name.pretty)
                         }
                 }
             }
