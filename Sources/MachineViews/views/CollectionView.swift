@@ -73,10 +73,8 @@ struct CollectionView: View{
     var body: some View {
         VStack(alignment: .leading) {
             Text(label + ":").fontWeight(.bold)
-            List {
-                ForEach(Array(machine[keyPath: path.path].enumerated()), id: \.0) { (index, attribute) in
-                    AttributeView(machine: $machine, path: path[index], label: "")
-                }
+            ForEach(Array(machine[keyPath: path.path].indices), id: \.self) { index in
+                AttributeView(machine: $machine, path: path[index], label: "")
             }
             if machine[keyPath: path.path].isEmpty {
                 Text("Currently no elements.")
