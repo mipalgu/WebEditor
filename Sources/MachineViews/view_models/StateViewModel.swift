@@ -73,6 +73,8 @@ public class StateViewModel: ObservableObject {
     
     let minTitleHeight: CGFloat = 42.0
     
+    let maxTitleHeight: CGFloat = 42.0
+    
     var minTitleWidth: CGFloat {
         elementMinWidth - buttonSize
     }
@@ -169,6 +171,10 @@ public class StateViewModel: ObservableObject {
     
     var isEmpty: Bool {
         return nil == actions.first { !$0.implementation.isEmpty }
+    }
+    
+    var actionsMaxHeight: CGFloat {
+        elementMaxHeight - maxTitleHeight
     }
     
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0) {

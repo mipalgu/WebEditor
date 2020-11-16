@@ -47,24 +47,24 @@ struct StateExpandedView: View {
                                 .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
                         }.buttonStyle(PlainButtonStyle())
                     }
-                    ForEach(Array(viewModel.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
-                        CodeView(machine: $viewModel.machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
-                            if viewModel.isEmpty(forAction: action) {
-                                return AnyView(
-                                    Text(action + ":").font(.headline).underline().italic().foregroundColor(config.stateTextColour)
-                                )
-                            } else {
-                                return AnyView(
-                                    Text(action + ":").font(.headline).underline().foregroundColor(config.stateTextColour)
-                                )
-                            }
-                        }.frame(
-                            minWidth: viewModel.elementMinWidth,
-                            maxWidth: viewModel.elementMaxWidth,
-                            minHeight: viewModel.minActionHeight,
-                            maxHeight: viewModel.maxActionHeight
-                        )
-                    }
+                    ScrollView {
+                        ForEach(Array(viewModel.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
+                            CodeView(machine: $viewModel.machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
+                                if viewModel.isEmpty(forAction: action) {
+                                    return AnyView(
+                                        Text(action + ":").font(.headline).underline().italic().foregroundColor(config.stateTextColour)
+                                    )
+                                } else {
+                                    return AnyView(
+                                        Text(action + ":").font(.headline).underline().foregroundColor(config.stateTextColour)
+                                    )
+                                }
+                            }.frame(
+                                minWidth: viewModel.elementMinWidth,
+                                maxWidth: viewModel.elementMaxWidth
+                            )
+                        }
+                    }.frame(maxWidth: viewModel.elementMaxWidth, maxHeight: viewModel.actionsMaxHeight)
                 }
                 .padding(.bottom, viewModel.bottomPadding)
                 .padding(.top, viewModel.topPadding)
