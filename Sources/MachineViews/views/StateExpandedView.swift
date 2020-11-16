@@ -38,7 +38,8 @@ struct StateExpandedView: View {
                             .frame(
                                 minWidth: viewModel.minTitleWidth - viewModel.buttonDimensions,
                                 maxWidth: viewModel.maxTitleWidth - viewModel.buttonDimensions,
-                                minHeight: viewModel.minTitleHeight
+                                minHeight: viewModel.minTitleHeight,
+                                maxHeight: viewModel.maxTitleHeight
                             )
                             .clipped()
                         Button(action: { viewModel.toggleExpand() }) {

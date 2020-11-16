@@ -45,8 +45,7 @@ public struct StateEditView: View {
                 }
                 .padding(.top, 20)
                 .frame(
-                    minWidth: viewModel.minEditWidth,
-                    minHeight: viewModel.minEditActionHeight
+                    minWidth: viewModel.minEditWidth
                 )
                 .scaledToFit()
             }

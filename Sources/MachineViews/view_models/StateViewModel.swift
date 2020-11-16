@@ -93,15 +93,7 @@ public class StateViewModel: ObservableObject {
     
     let maxHeight: CGFloat = 1200.0
     
-    let minDetailsWidth: CGFloat = 100.0
-    
-    let maxDetailsWidth: CGFloat = 400.0
-    
     let minEditWidth: CGFloat = 800.0
-    
-    let minActionHeight: CGFloat = 50.0
-    
-    let minEditActionHeight: CGFloat = 200.0
     
     let topPadding: CGFloat = 10.0
     
@@ -114,6 +106,8 @@ public class StateViewModel: ObservableObject {
     let buttonSize: CGFloat = 8.0
     
     let buttonDimensions: CGFloat = 15.0
+    
+    let minActionHeight: CGFloat = 80.0
     
     var width: CGFloat {
         get {
@@ -143,10 +137,6 @@ public class StateViewModel: ObservableObject {
     
     var attributes: [AttributeGroup] {
         machine[keyPath: path.path].attributes
-    }
-    
-    var maxActionHeight: CGFloat {
-        max((elementMaxHeight - minTitleHeight) / CGFloat(actions.count) , minActionHeight)
     }
     
     var elementMinWidth: CGFloat {
