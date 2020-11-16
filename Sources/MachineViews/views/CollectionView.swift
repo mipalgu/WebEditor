@@ -69,8 +69,10 @@ struct CollectionView: View{
     @Binding var machine: Machine
     let path: Attributes.Path<Machine, [Attribute]>
     let label: String
+    let type: AttributeType
     
-    @State private var selection: Int? = nil
+    @State private var selection: Set<Int> = []
+    @State private var presentSheet: Bool = false
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -88,8 +90,15 @@ struct CollectionView: View{
                     } catch let e {
                         print("\(e)", stderr)
                     }
-                }.background(Color.clear)
-            }.frame(minHeight: 100)
+                }
+            }
+            .frame(minHeight: CGFloat(machine[keyPath: path.path].count * (type == .line ? 40 : 80)))
+            
+//            .onTapGesture {
+//                presentSheet = true
+//            }.sheet(isPresented: Binding(get: { self.presentSheet && selection != nil }, set: { presentSheet = $0 })) {
+//                AttributeView(machine: $machine, path: path[selection ?? 0], label: "")
+//            }
         }
     }
 }
