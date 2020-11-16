@@ -34,24 +34,23 @@ struct CodeView<Label: View>: View {
     }
     
     var body: some View {
-        GeometryReader { reader in
-            VStack(alignment: .leading) {
-                label()
-                TextEditor(text: Binding(get: { machine[keyPath: path.path] }, set: {
-                    do {
-                        try machine.modify(attribute: path, value: Code($0))
-                    } catch let e {
-                        print("\(e)")
-                    }
-                }))
-                .font(config.fontBody)
-                    .foregroundColor(config.textColor)
-                    .disableAutocorrection(true)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 2)
-                    )
-            }
+        VStack(alignment: .leading) {
+            label()
+            TextEditor(text: Binding(get: { machine[keyPath: path.path] }, set: {
+                do {
+                    try machine.modify(attribute: path, value: Code($0))
+                } catch let e {
+                    print("\(e)")
+                }
+            }))
+            .font(config.fontBody)
+            .foregroundColor(config.textColor)
+            .disableAutocorrection(true)
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 2)
+            )
+            .frame(minHeight: 80)
         }
     }
 }

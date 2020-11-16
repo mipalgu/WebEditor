@@ -40,6 +40,7 @@ struct TextView: View {
                 RoundedRectangle(cornerRadius: 5)
                     .stroke(Color.gray.opacity(0.3), lineWidth: 2)
             )
+            .frame(minHeight: 80)
         }
     }
 }
