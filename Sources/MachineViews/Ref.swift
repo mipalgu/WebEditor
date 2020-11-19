@@ -112,4 +112,16 @@ public final class Ref<T>: ObservableObject {
         }
     }
     
+    public subscript<Path: PathProtocol>(path path: Path) -> Ref<Path.Value> where Path.Root == T {
+        get {
+            return self[dynamicMember: path.path]
+        } set {
+            self[dynamicMember: path.path] = newValue
+        }
+    }
+    
+    public subscript<Path: PathProtocol>(bindingTo path: Path) -> Binding<Path.Value> where Path.Root == T {
+        self[path: path].asBinding
+    }
+    
 }

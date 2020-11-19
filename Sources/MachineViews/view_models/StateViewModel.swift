@@ -23,7 +23,6 @@ public class StateViewModel: ObservableObject {
         }
         set {
             _machine.value = newValue
-            self.objectWillChange.send()
         }
     }
     
