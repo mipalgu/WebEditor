@@ -111,7 +111,9 @@ public final class Ref<T>: ObservableObject {
                 }
             )
         } set {
-            self.value[keyPath: keyPath] = newValue.get()
+            var value = self.get()
+            value[keyPath: keyPath] = newValue.get()
+            self.set(value)
         }
     }
     
