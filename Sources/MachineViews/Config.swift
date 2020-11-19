@@ -35,9 +35,9 @@ public class Config: ObservableObject {
     
     @Published public var fieldColor = Color.black.opacity(0.2)
     
-    @Published public var width: Double = 300
+    @Published public var width: CGFloat = 300
     
-    @Published public var height: Double = 200
+    @Published public var height: CGFloat = 200
     
     #if canImport(TokamakShim)
     @Published public var stateColour = Color.white
