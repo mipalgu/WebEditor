@@ -89,7 +89,9 @@ public class StateViewModel: ObservableObject {
     let maxWidth: CGFloat = 1200.0
     
     var minHeight: CGFloat {
-        CGFloat(actions.count) * minActionHeight + minTitleHeight + bottomPadding + topPadding + 20.0
+        CGFloat(actions.count - collapsedActions.count) * minActionHeight +
+            CGFloat(collapsedActions.count) * minCollapsedActionHeight +
+            minTitleHeight + bottomPadding + topPadding + 20.0
     }
     
     let maxHeight: CGFloat = 1200.0
@@ -110,7 +112,9 @@ public class StateViewModel: ObservableObject {
     
     let minActionHeight: CGFloat = 80.0
     
-    let edgeTolerance: CGFloat = 2.0
+    let minCollapsedActionHeight: CGFloat = 20.0
+    
+    let edgeTolerance: CGFloat = 20.0
     
     var width: CGFloat {
         get {
@@ -171,6 +175,10 @@ public class StateViewModel: ObservableObject {
     }
     
     var isDragging: Bool = false
+    
+    var isStretchingX: Bool = false
+    
+    var isStretchingY: Bool = false
     
     var offset: CGPoint = CGPoint.zero
     
@@ -250,10 +258,22 @@ public class StateViewModel: ObservableObject {
         return (y >= topEdgeAbove && y <= topEdgeBelow) || (y >= bottomEdgeAbove && y <= bottomEdgeBelow)
     }
     
+    func onCorner(point: CGPoint) -> Bool {
+        return onHorizontalEdge(point: point) && onVerticalEdge(point: point)
+    }
+    
     func updateLocationWithOffset(newLocation: CGPoint) {
         let dx = newLocation.x - offset.x
         let dy = newLocation.y - offset.y
         self.location = CGPoint(x: dx, y: dy)
+    }
+    
+    func stretchWidth(gesture: DragGesture.Value) -> CGFloat {
+        (gesture.location.x - location.x) * 2.0
+    }
+    
+    func stretchHeight(gesture: DragGesture.Value) -> CGFloat {
+        (gesture.location.y - location.y) * 2.0
     }
     
     func handleDrag(gesture: DragGesture.Value) {
@@ -261,22 +281,33 @@ public class StateViewModel: ObservableObject {
             updateLocationWithOffset(newLocation: gesture.location)
             return
         }
-        if onVerticalEdge(point: gesture.startLocation) && onHorizontalEdge(point: gesture.startLocation) {
-            self.height += gesture.translation.height * 2.0
-            self.width += gesture.translation.width * 2.0
+        if isStretchingX {
+            self.width = stretchWidth(gesture: gesture)
+            return
+        }
+        if isStretchingY {
+            self.height = stretchHeight(gesture: gesture)
+            return
+        }
+        if onCorner(point: gesture.startLocation) {
+            self.height = stretchHeight(gesture: gesture)
+            self.width = stretchWidth(gesture: gesture)
+            isStretchingX = true
+            isStretchingY = true
             return
         }
         if onVerticalEdge(point: gesture.startLocation) {
-            self.width += gesture.translation.width * 2.0
+            self.width = stretchWidth(gesture: gesture)
+            isStretchingX = true
             return
         }
         if onHorizontalEdge(point: gesture.startLocation) {
-            self.height += gesture.translation.height * 2.0
+            self.height = stretchHeight(gesture: gesture)
+            isStretchingY = true
             return
         }
         offset = CGPoint(x: gesture.startLocation.x - location.x, y: gesture.startLocation.y - location.y)
         isDragging = true
-        updateLocationWithOffset(newLocation: gesture.location)
     }
     
     func handleCollapsedDrag(gesture: DragGesture.Value) {
@@ -290,6 +321,8 @@ public class StateViewModel: ObservableObject {
     func finishDrag(gesture: DragGesture.Value) {
         self.handleDrag(gesture: gesture)
         self.isDragging = false
+        self.isStretchingY = false
+        self.isStretchingX = false
     }
     
     func finishCollapsedDrag(gesture: DragGesture.Value) {
