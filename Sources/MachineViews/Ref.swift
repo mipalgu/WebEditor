@@ -67,30 +67,49 @@ import Attributes
 @dynamicMemberLookup
 public final class Ref<T>: ObservableObject {
     
-    @Published public var value: T
+    private var get: () -> T
     
-    public init(_ value: T) {
-        self.value = value
-    }
+    private var set: (T) -> Void
     
-    public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> U {
-        return self.value[keyPath: keyPath]
-    }
-    
-    public subscript<U>(dynamicMember keyPath: WritableKeyPath<T, U>) -> U {
+    public var value: T {
         get {
-            return self.value[keyPath: keyPath]
+            self.get()
         } set {
-            self.value[keyPath: keyPath] = newValue
+            self.objectWillChange.send()
+            self.set(newValue)
         }
     }
     
-    public func binding<U>(_ keyPath: WritableKeyPath<T, U>) -> Binding<U> {
-        return Binding(get: { self.value[keyPath: keyPath] }, set: { self.value[keyPath: keyPath] = $0 })
+    public var asBinding: Binding<T> {
+        return Binding(get: { self.value }, set: { self.value = $0 })
     }
     
-    public func binding<Path: PathProtocol>(_ path: Path) -> Binding<Path.Value> where Path.Root == T {
-        return binding(path.path)
+    public init(_ value: T) {
+        var value = value
+        self.get = { value }
+        self.set = { value = $0 }
+    }
+    
+    private init(get: @escaping () -> T, set: @escaping (T) -> Void) {
+        self.get = get
+        self.set = set
+    }
+    
+    public subscript<U>(dynamicMember keyPath: WritableKeyPath<T, U>) -> Ref<U> {
+        get {
+            return Ref<U>(
+                get: { self.get()[keyPath: keyPath] },
+                set: {
+                    var value = self.get()
+                    value[keyPath: keyPath] = $0
+                    self.set(value)
+                }
+            )
+        } set {
+            var value = self.get()
+            value[keyPath: keyPath] = newValue.get()
+            self.set(value)
+        }
     }
     
 }

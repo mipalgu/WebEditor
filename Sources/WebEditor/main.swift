@@ -37,10 +37,6 @@ struct WebEditor: App {
 struct ContentView: View {
     
     @StateObject var machineRef: Ref<Machine> = Ref(Machine.initialSwiftMachine)
-    
-    var machineBinding: Binding<Machine> {
-        Binding(get: { [machineRef] in machineRef.value }, set: { [machineRef] in machineRef.value = $0 })
-    }
 
 //    #if canImport(TokamakDOM)
 //    @TokamakShim.State var machine = Machine.initialSwiftMachine
@@ -66,7 +62,7 @@ struct ContentView: View {
                 //    .scaledToFit()
                 //StateCollapsedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
                 //StateExpandedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
-                AttributeGroupsView(machine: machineBinding, path: Machine.path.attributes, label: "Attributes")
+                AttributeGroupsView(machine: machineRef.asBinding, path: Machine.path.attributes, label: "Attributes")
                 //StateEditView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
                 StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
                 StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 100, y: 100), width: 300, height: 100, expanded: true))
