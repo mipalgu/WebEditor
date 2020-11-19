@@ -89,7 +89,7 @@ public final class Ref<T>: ObservableObject {
         self.set = { pointer.pointee = $0 }
     }
     
-    public init(_ value: T) {
+    public init(copying value: T) {
         var value = value
         self.get = { value }
         self.set = { value = $0 }

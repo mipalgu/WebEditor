@@ -36,7 +36,7 @@ struct WebEditor: App {
 
 struct ContentView: View {
     
-    @StateObject var machineRef: Ref<Machine> = Ref(Machine.initialSwiftMachine)
+    @StateObject var machineRef: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine)
 
 //    #if canImport(TokamakDOM)
 //    @TokamakShim.State var machine = Machine.initialSwiftMachine
