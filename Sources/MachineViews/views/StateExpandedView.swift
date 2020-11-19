@@ -69,5 +69,12 @@ struct StateExpandedView: View {
                 .frame(minHeight: viewModel.elementMinHeight, maxHeight: viewModel.elementMaxHeight)
             }
         }.onChange(of: viewModel.isEmpty, perform: { print("change: \($0)") })
+        .coordinateSpace(name: "MAIN_VIEW")
+        .position(viewModel.location)
+        .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
+            self.viewModel.location = $0.location
+        }.onEnded { value in
+            self.viewModel.location = value.location
+        })
     }
 }
