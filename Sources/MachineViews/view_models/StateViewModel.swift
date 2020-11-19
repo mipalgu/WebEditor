@@ -110,6 +110,8 @@ public class StateViewModel: ObservableObject {
     
     let minActionHeight: CGFloat = 80.0
     
+    let edgeTolerance: CGFloat = 2.0
+    
     var width: CGFloat {
         get {
             min(max(_width, minWidth), maxWidth)
@@ -168,6 +170,10 @@ public class StateViewModel: ObservableObject {
         elementMaxHeight - maxTitleHeight
     }
     
+    var isDragging: Bool = false
+    
+    var offset: CGPoint = CGPoint.zero
+    
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:]) {
         self._machine = machine
         self.path = path
@@ -220,6 +226,75 @@ public class StateViewModel: ObservableObject {
             get: { self.collapsedActions[action] ?? false },
             set: { self.collapsedActions[action] = $0 }
         )
+    }
+    
+    func onVerticalEdge(point: CGPoint) -> Bool {
+        let leftEdge = self.location.x - width / 2.0
+        let rightEdge = self.location.x + width / 2.0
+        let leftBoundLower = leftEdge - edgeTolerance
+        let leftBoundUpper = leftEdge + edgeTolerance
+        let rightBoundLower = rightEdge - edgeTolerance
+        let rightBoundUpper = rightEdge + edgeTolerance
+        let x = point.x
+        return (x >= leftBoundLower && x <= leftBoundUpper) || (x >= rightBoundLower && x <= rightBoundUpper)
+    }
+    
+    func onHorizontalEdge(point: CGPoint) -> Bool {
+        let topEdge = self.location.y - height / 2.0
+        let bottomEdge = self.location.y + height / 2.0
+        let topEdgeAbove = topEdge - edgeTolerance
+        let topEdgeBelow = topEdge + edgeTolerance
+        let bottomEdgeAbove = bottomEdge - edgeTolerance
+        let bottomEdgeBelow = bottomEdge + edgeTolerance
+        let y = point.y
+        return (y >= topEdgeAbove && y <= topEdgeBelow) || (y >= bottomEdgeAbove && y <= bottomEdgeBelow)
+    }
+    
+    func updateLocationWithOffset(newLocation: CGPoint) {
+        let dx = newLocation.x - offset.x
+        let dy = newLocation.y - offset.y
+        self.location = CGPoint(x: dx, y: dy)
+    }
+    
+    func handleDrag(gesture: DragGesture.Value) {
+        if isDragging {
+            updateLocationWithOffset(newLocation: gesture.location)
+            return
+        }
+        if onVerticalEdge(point: gesture.startLocation) && onHorizontalEdge(point: gesture.startLocation) {
+            self.height += gesture.translation.height * 2.0
+            self.width += gesture.translation.width * 2.0
+            return
+        }
+        if onVerticalEdge(point: gesture.startLocation) {
+            self.width += gesture.translation.width * 2.0
+            return
+        }
+        if onHorizontalEdge(point: gesture.startLocation) {
+            self.height += gesture.translation.height * 2.0
+            return
+        }
+        offset = CGPoint(x: gesture.startLocation.x - location.x, y: gesture.startLocation.y - location.y)
+        isDragging = true
+        updateLocationWithOffset(newLocation: gesture.location)
+    }
+    
+    func handleCollapsedDrag(gesture: DragGesture.Value) {
+        if !isDragging {
+            offset = CGPoint(x: gesture.startLocation.x - location.x, y: gesture.startLocation.y - location.y)
+            isDragging = true
+        }
+        updateLocationWithOffset(newLocation: gesture.location)
+    }
+    
+    func finishDrag(gesture: DragGesture.Value) {
+        self.handleDrag(gesture: gesture)
+        self.isDragging = false
+    }
+    
+    func finishCollapsedDrag(gesture: DragGesture.Value) {
+        self.handleCollapsedDrag(gesture: gesture)
+        self.isDragging = false
     }
     
 }

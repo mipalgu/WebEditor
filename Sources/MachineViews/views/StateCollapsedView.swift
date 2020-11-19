@@ -63,9 +63,9 @@ struct StateCollapsedView: View {
             .coordinateSpace(name: "MAIN_VIEW")
             .position(viewModel.location)
             .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
-                self.viewModel.location = $0.location
-            }.onEnded { value in
-                self.viewModel.location = value.location
+                self.viewModel.handleCollapsedDrag(gesture: $0)
+            }.onEnded {
+                self.viewModel.finishCollapsedDrag(gesture: $0)
             })
             
     }
