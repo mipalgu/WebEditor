@@ -94,7 +94,7 @@ public class StateViewModel: ObservableObject {
             minTitleHeight + bottomPadding + topPadding + 20.0
     }
     
-    let maxHeight: CGFloat = 1200.0
+    let maxHeight: CGFloat = 600.0
     
     let minEditWidth: CGFloat = 800.0
     
@@ -114,7 +114,9 @@ public class StateViewModel: ObservableObject {
     
     let minCollapsedActionHeight: CGFloat = 20.0
     
-    let edgeTolerance: CGFloat = 20.0
+    let horizontalEdgeTolerance: CGFloat = 20.0
+
+    let verticalEdgeTolerance: CGFloat = 20.0
     
     var width: CGFloat {
         get {
@@ -236,30 +238,52 @@ public class StateViewModel: ObservableObject {
         )
     }
     
-    func onVerticalEdge(point: CGPoint) -> Bool {
-        let leftEdge = self.location.x - width / 2.0
-        let rightEdge = self.location.x + width / 2.0
-        let leftBoundLower = leftEdge - edgeTolerance
-        let leftBoundUpper = leftEdge + edgeTolerance
-        let rightBoundLower = rightEdge - edgeTolerance
-        let rightBoundUpper = rightEdge + edgeTolerance
-        let x = point.x
-        return (x >= leftBoundLower && x <= leftBoundUpper) || (x >= rightBoundLower && x <= rightBoundUpper)
-    }
-    
-    func onHorizontalEdge(point: CGPoint) -> Bool {
+    func onTopEdge(point: CGPoint) -> Bool {
         let topEdge = self.location.y - height / 2.0
-        let bottomEdge = self.location.y + height / 2.0
-        let topEdgeAbove = topEdge - edgeTolerance
-        let topEdgeBelow = topEdge + edgeTolerance
-        let bottomEdgeAbove = bottomEdge - edgeTolerance
-        let bottomEdgeBelow = bottomEdge + edgeTolerance
+        let topEdgeAbove = topEdge - horizontalEdgeTolerance
+        let topEdgeBelow = topEdge + horizontalEdgeTolerance
         let y = point.y
-        return (y >= topEdgeAbove && y <= topEdgeBelow) || (y >= bottomEdgeAbove && y <= bottomEdgeBelow)
+        return y >= topEdgeAbove && y <= topEdgeBelow
     }
     
-    func onCorner(point: CGPoint) -> Bool {
-        return onHorizontalEdge(point: point) && onVerticalEdge(point: point)
+    func onBottomEdge(point: CGPoint) -> Bool {
+        let bottomEdge = self.location.y + height / 2.0
+        let bottomEdgeAbove = bottomEdge - horizontalEdgeTolerance
+        let bottomEdgeBelow = bottomEdge + horizontalEdgeTolerance
+        let y = point.y
+        return y >= bottomEdgeAbove && y <= bottomEdgeBelow
+    }
+    
+    func onLeftEdge(point: CGPoint) -> Bool {
+        let leftEdge = self.location.x - width / 2.0
+        let leftBoundLower = leftEdge - verticalEdgeTolerance
+        let leftBoundUpper = leftEdge + verticalEdgeTolerance
+        let x = point.x
+        return x >= leftBoundLower && x <= leftBoundUpper
+    }
+    
+    func onRightEdge(point: CGPoint) -> Bool {
+        let rightEdge = self.location.x + width / 2.0
+        let rightBoundLower = rightEdge - verticalEdgeTolerance
+        let rightBoundUpper = rightEdge + verticalEdgeTolerance
+        let x = point.x
+        return x >= rightBoundLower && x <= rightBoundUpper
+    }
+    
+    func onTopRightCorner(point: CGPoint) -> Bool {
+        return onTopEdge(point: point) && onRightEdge(point: point)
+    }
+    
+    func onBottomRightCorner(point: CGPoint) -> Bool {
+        return onBottomEdge(point: point) && onRightEdge(point: point)
+    }
+    
+    func onBottomLeftCorner(point: CGPoint) -> Bool {
+        return onBottomEdge(point: point) && onLeftEdge(point: point)
+    }
+    
+    func onTopLeftCorner(point: CGPoint) -> Bool {
+        return onTopEdge(point: point) && onLeftEdge(point: point)
     }
     
     func updateLocationWithOffset(newLocation: CGPoint) {
@@ -276,33 +300,83 @@ public class StateViewModel: ObservableObject {
         (gesture.location.y - location.y) * 2.0
     }
     
+    func stretchCorner(gesture: DragGesture.Value) {
+        let point = gesture.location
+        if onTopRightCorner(point: point) {
+            self.width = stretchWidth(gesture: gesture)
+            self.height = -stretchHeight(gesture: gesture)
+            return
+        }
+        if onBottomRightCorner(point: point) {
+            self.width = stretchWidth(gesture: gesture)
+            self.height = stretchHeight(gesture: gesture)
+            return
+        }
+        if onBottomLeftCorner(point: point) {
+            self.width = -stretchWidth(gesture: gesture)
+            self.height = stretchHeight(gesture: gesture)
+            return
+        }
+        self.width = -stretchWidth(gesture: gesture)
+        self.height = -stretchHeight(gesture: gesture)
+    }
+    
+    func stretchHorizontal(gesture: DragGesture.Value) {
+        if onRightEdge(point: gesture.location) {
+            self.width = stretchWidth(gesture: gesture)
+            return
+        }
+        self.width = -stretchWidth(gesture: gesture)
+    }
+    
+    func stretchVertical(gesture: DragGesture.Value) {
+        if onBottomEdge(point: gesture.location) {
+            self.height = stretchHeight(gesture: gesture)
+            return
+        }
+        self.height = -stretchHeight(gesture: gesture)
+    }
+    
+    func onCorner(point: CGPoint) -> Bool {
+        onTopRightCorner(point: point) || onBottomRightCorner(point: point) ||
+            onBottomLeftCorner(point: point) || onTopLeftCorner(point: point)
+    }
+    
+    func onVerticalEdge(point: CGPoint) -> Bool {
+        onLeftEdge(point: point) || onRightEdge(point: point)
+    }
+    
+    func onHorizontalEdge(point: CGPoint) -> Bool {
+        onTopEdge(point: point) || onBottomEdge(point: point)
+    }
+    
     func handleDrag(gesture: DragGesture.Value) {
         if isDragging {
             updateLocationWithOffset(newLocation: gesture.location)
             return
         }
+        if isStretchingX && isStretchingY {
+            stretchCorner(gesture: gesture)
+            return
+        }
         if isStretchingX {
-            self.width = stretchWidth(gesture: gesture)
+            stretchHorizontal(gesture: gesture)
             return
         }
         if isStretchingY {
-            self.height = stretchHeight(gesture: gesture)
+            stretchVertical(gesture: gesture)
             return
         }
         if onCorner(point: gesture.startLocation) {
-            self.height = stretchHeight(gesture: gesture)
-            self.width = stretchWidth(gesture: gesture)
             isStretchingX = true
             isStretchingY = true
             return
         }
         if onVerticalEdge(point: gesture.startLocation) {
-            self.width = stretchWidth(gesture: gesture)
             isStretchingX = true
             return
         }
         if onHorizontalEdge(point: gesture.startLocation) {
-            self.height = stretchHeight(gesture: gesture)
             isStretchingY = true
             return
         }

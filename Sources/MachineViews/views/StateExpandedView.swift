@@ -21,13 +21,13 @@ struct StateExpandedView: View {
     
     var body: some View {
         VStack {
-            ZStack {
-                RoundedRectangle(cornerRadius: 20.0)
-                    .strokeBorder(config.borderColour, lineWidth: 3.0, antialiased: true)
-                    .background(RoundedRectangle(cornerRadius: 20.0).foregroundColor(config.stateColour))
-                    .frame(width: viewModel.width, height: viewModel.height)
-                    .clipped()
-                    .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
+            RoundedRectangle(cornerRadius: 20.0)
+            .strokeBorder(config.borderColour, lineWidth: 3.0, antialiased: true)
+            .background(RoundedRectangle(cornerRadius: 20.0).foregroundColor(config.stateColour))
+            .frame(width: viewModel.width, height: viewModel.height)
+            .clipped()
+            .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
+            .overlay (
                 VStack {
                     HStack {
                         LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
@@ -67,7 +67,7 @@ struct StateExpandedView: View {
                 .padding(.bottom, viewModel.bottomPadding)
                 .padding(.top, viewModel.topPadding)
                 .frame(minHeight: viewModel.elementMinHeight, maxHeight: viewModel.elementMaxHeight)
-            }
+            )
         }.onChange(of: viewModel.isEmpty, perform: { print("change: \($0)") })
         .coordinateSpace(name: "MAIN_VIEW")
         .position(viewModel.location)
