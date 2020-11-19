@@ -1,5 +1,5 @@
 //
-//  EditorView.swift
+//  MenuView.swift
 //  
 //
 //  Created by Morgan McColl on 20/11/20.
@@ -13,15 +13,15 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct EditorView: View {
+struct MenuView: View {
     
-    @EnvironmentObject var config: Config
+    @State var openDialogue: Bool = false
     
     var body: some View {
         HStack {
-            config.leftPane
-            config.mainView
-            config.rightPane
+            Button(action: { openDialogue = true }) {
+                Image(systemName: "folder.fill")
+            }
         }
     }
 }

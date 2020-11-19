@@ -26,6 +26,7 @@ public struct MachineView: View {
     public var body: some View {
         ForEach(viewModel.states, id: \.name) {
             StateView(viewModel: $0)
+                .coordinateSpace(name: "MAIN_VIEW")
                 .position($0.location)
         }
     }

@@ -85,6 +85,10 @@ public class Config: ObservableObject {
     @Published public var fontHeading: Font = Font.system(size: 16.0)
     @Published public var fontBody: Font = Font.system(size: 12.0)
     
+    @Published var leftPane: AnyView = AnyView(EmptyView())
+    @Published var mainView: AnyView = AnyView(EmptyView())
+    @Published var rightPane: AnyView = AnyView(EmptyView())
+    
     public init() {}
     
 }
