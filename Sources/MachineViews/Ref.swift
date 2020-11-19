@@ -84,6 +84,11 @@ public final class Ref<T>: ObservableObject {
         return Binding(get: { self.value }, set: { self.value = $0 })
     }
     
+    public init(to pointer: UnsafeMutablePointer<T>) {
+        self.get = { pointer.pointee }
+        self.set = { pointer.pointee = $0 }
+    }
+    
     public init(_ value: T) {
         var value = value
         self.get = { value }
