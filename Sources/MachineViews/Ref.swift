@@ -105,15 +105,15 @@ public final class Ref<T>: ObservableObject {
             return Ref<U>(
                 get: { self.get()[keyPath: keyPath] },
                 set: {
-                    var value = self.get()
+                    var value = self.value
                     value[keyPath: keyPath] = $0
-                    self.set(value)
+                    self.value = value
                 }
             )
         } set {
-            var value = self.get()
+            var value = self.value
             value[keyPath: keyPath] = newValue.get()
-            self.set(value)
+            self.value = value
         }
     }
     
