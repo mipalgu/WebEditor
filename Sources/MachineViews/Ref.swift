@@ -101,28 +101,18 @@ public final class Ref<T>: ObservableObject {
     }
     
     public subscript<U>(dynamicMember keyPath: WritableKeyPath<T, U>) -> Ref<U> {
-        get {
-            return Ref<U>(
-                get: { self.get()[keyPath: keyPath] },
-                set: {
-                    var value = self.value
-                    value[keyPath: keyPath] = $0
-                    self.value = value
-                }
-            )
-        } set {
-            var value = self.value
-            value[keyPath: keyPath] = newValue.get()
-            self.value = value
-        }
+        return Ref<U>(
+            get: { self.get()[keyPath: keyPath] },
+            set: {
+                var value = self.value
+                value[keyPath: keyPath] = $0
+                self.value = value
+            }
+        )
     }
     
     public subscript<Path: PathProtocol>(path path: Path) -> Ref<Path.Value> where Path.Root == T {
-        get {
-            return self[dynamicMember: path.path]
-        } set {
-            self[dynamicMember: path.path] = newValue
-        }
+        return self[dynamicMember: path.path]
     }
     
     public subscript<Path: PathProtocol>(bindingTo path: Path) -> Binding<Path.Value> where Path.Root == T {
