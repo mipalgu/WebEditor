@@ -165,7 +165,7 @@ public class StateViewModel: ObservableObject {
     }
     
     var isAccepting: Bool {
-        machine[keyPath: path.path].transitions(in: machine).count == 0
+        machine[keyPath: path.path].transitions.isEmpty
     }
     
     var isEmpty: Bool {
