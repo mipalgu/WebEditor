@@ -31,8 +31,10 @@ struct TableView: View {
                 .foregroundColor(config.textColor)
             List(selection: $selection) {
                 HStack {
+                    Spacer()
                     ForEach(Array(columns.indices), id: \.self) { index in
                         Text(columns[index].name.pretty)
+                        Spacer()
                     }
                 }
                 ForEach(Array(machine[keyPath: path.path].indices), id: \.self) { rowIndex in
@@ -52,8 +54,10 @@ struct TableRowView: View {
     
     var body: some View {
         HStack {
+            Spacer()
             ForEach(Array(machine[keyPath: path.path].indices), id: \.self) { columnIndex in
                 LineAttributeView(machine: $machine, path: path[columnIndex], label: "")
+                Spacer()
             }
         }
     }
