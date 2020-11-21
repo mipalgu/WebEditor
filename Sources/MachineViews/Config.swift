@@ -89,18 +89,6 @@ public class Config: ObservableObject {
     @Published public var fontHeading: Font = Font.system(size: 16.0)
     @Published public var fontBody: Font = Font.system(size: 12.0)
     
-    @Published public var editorViewModel: EditorViewModel
-    
-    public init(machineRef: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine)) {
-        let view: ViewType = ViewType.machine(machine: MachineViewModel(
-            machine: machineRef,
-            path: machineRef.value.path
-        ))
-        self.editorViewModel = EditorViewModel(
-            machines: [MachineViewModel(machine: machineRef, path: machineRef.value.path)],
-            mainView: view,
-            focusedView: view
-        )
-    }
+    public init() {}
     
 }

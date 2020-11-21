@@ -14,8 +14,8 @@ import Machines
 import Attributes
 
 public enum ViewType {
-    case machine(machine: MachineViewModel)
-    case state(state: StateViewModel)
+    case machine
+    case state(stateIndex: Int)
     case transition(machine: Ref<Machine>, transition: Attributes.Path<Machine, Machines.Transition>)
     case none
 }

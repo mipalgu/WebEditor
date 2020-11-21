@@ -15,6 +15,8 @@ import Attributes
 
 struct StateCollapsedView: View {
     
+    @ObservedObject var editorViewModel: EditorViewModel
+    
     @ObservedObject var viewModel: StateViewModel
     
     @EnvironmentObject var config: Config
@@ -64,10 +66,10 @@ struct StateCollapsedView: View {
             .position(viewModel.location)
             .onTapGesture(count: 1) {
                 viewModel.highlighted = true
-                config.editorViewModel.changeFocus(machine: viewModel.machine.value.name, state: viewModel.name)
+                editorViewModel.changeFocus(machine: viewModel.machine.value.name, state: viewModel.name)
             }
             .onTapGesture(count: 2) {
-                config.editorViewModel.changeMainView(machine: viewModel.machine.value.name, state: viewModel.name)
+                editorViewModel.changeMainView(machine: viewModel.machine.value.name, state: viewModel.name)
             }
             .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
                 self.viewModel.handleCollapsedDrag(gesture: $0)

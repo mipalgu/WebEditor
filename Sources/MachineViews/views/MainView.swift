@@ -15,17 +15,21 @@ import Attributes
 
 struct MainView: View {
     
+    @ObservedObject var editorViewModel: EditorViewModel
+    
+    @ObservedObject var machineViewModel: MachineViewModel
+    
     @Binding var type: ViewType
     
     @EnvironmentObject var config: Config
     
     var body: some View {
         switch type {
-        case .machine(let machine):
-            MachineView(viewModel: machine)
+        case .machine:
+            MachineView(editorViewModel: editorViewModel, viewModel: machineViewModel)
                 .coordinateSpace(name: "MAIN_VIEW")
-        case .state(let state):
-            StateEditView(viewModel: state)
+        case .state(let stateIndex):
+            StateEditView(viewModel: machineViewModel.states[stateIndex])
         default:
             EmptyView()
         }

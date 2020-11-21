@@ -17,7 +17,7 @@ public class MachineViewModel: ObservableObject {
     
     @Published var machine: Ref<Machine>
     
-    @Published var states: [StateViewModel]
+    @Published public var states: [StateViewModel]
     
     let path: Attributes.Path<Machine, Machine>
     

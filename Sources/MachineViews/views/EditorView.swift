@@ -17,16 +17,19 @@ public struct EditorView: View {
     
     @ObservedObject var viewModel: EditorViewModel
     
+    @ObservedObject var machineViewModel: MachineViewModel
+    
     @EnvironmentObject var config: Config
     
-    public init(viewModel: EditorViewModel) {
+    public init(viewModel: EditorViewModel, machineViewModel: MachineViewModel) {
         self.viewModel = viewModel
+        self.machineViewModel = machineViewModel
     }
     
     public var body: some View {
         HStack {
-            MainView(type: $viewModel.mainView)
-            FocusedAttributesView(viewType: $viewModel.focusedView)
+            MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
+            FocusedAttributesView(machine: machineViewModel.machine.asBinding, viewType: $viewModel.focusedView)
         }
     }
 }

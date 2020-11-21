@@ -15,21 +15,23 @@ import Attributes
 
 struct FocusedAttributesView: View {
     
+    @Binding var machine: Machine
+    
     @Binding var viewType: ViewType
     
     var body: some View {
         switch viewType {
-        case .machine(let machine):
+        case .machine:
             AttributeGroupsView(
-                machine: machine.machine.asBinding,
-                path: machine.machine.value.path.attributes,
+                machine: $machine,
+                path: machine.path.attributes,
                 label: "\(machine.name) Attributes"
             )
-        case .state(let state):
+        case .state(let stateIndex):
             AttributeGroupsView(
-                machine: state.machine.asBinding,
-                path: state.path.attributes,
-                label: "\(state.name) Attributes")
+                machine: $machine,
+                path: machine.path.states[stateIndex].attributes,
+                label: "\(machine.states[stateIndex].name) Attributes")
         default:
             EmptyView()
         }

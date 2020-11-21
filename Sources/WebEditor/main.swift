@@ -29,9 +29,21 @@ struct WebEditor: App {
     
     var body: some Scene {
         WindowGroup("Web Editor") {
-            ContentView().environmentObject(Config())
+            WebEditorView().environmentObject(Config())
         }
     }
+}
+
+struct WebEditorView: View {
+    
+    @StateObject var machineRef: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine)
+    
+    @EnvironmentObject var config: Config
+    
+    var body: some View {
+        ContentView(machineRef: machineRef)
+    }
+    
 }
 
 struct ContentView: View {
@@ -43,6 +55,20 @@ struct ContentView: View {
 //    #endif
     
     @EnvironmentObject var config: Config
+    
+    @ObservedObject var machineRef: Ref<Machine>
+    
+    @StateObject var editorViewModel: EditorViewModel
+    
+    init(machineRef: Ref<Machine>) {
+        self.machineRef = machineRef
+        let view: ViewType = ViewType.machine
+        self._editorViewModel = StateObject(wrappedValue: EditorViewModel(
+            machines: [MachineViewModel(machine: machineRef, path: machineRef.value.path)],
+            mainView: view,
+            focusedView: view
+        ))
+    }
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
@@ -64,19 +90,19 @@ struct ContentView: View {
                 //StateEditView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
                 //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
                 //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 100, y: 100), width: 300, height: 100, expanded: true))
-                EditorView(viewModel: config.editorViewModel)
+                EditorView(viewModel: editorViewModel, machineViewModel: editorViewModel.machines[0])
             }
         }
         .background(config.backgroundColor)
         .frame(minWidth: CGFloat(config.width), minHeight: CGFloat(config.height))
         .onTapGesture(count: 1) {
-            let mainView = config.editorViewModel.mainView
+            let mainView = editorViewModel.mainView
             switch mainView {
-            case .machine(let machine):
-                machine.removeHighlights()
-                config.editorViewModel.changeFocus(machine: machine.name)
-            case .state(let state):
-                config.editorViewModel.changeFocus(machine: state.machine.value.name, state: state.name)
+            case .machine:
+                editorViewModel.machines[0].removeHighlights()
+                editorViewModel.changeFocus(machine: editorViewModel.machines[0].name)
+            case .state(let stateIndex):
+                editorViewModel.changeFocus(machine: editorViewModel.machines[0].name, state: editorViewModel.machines[0].states[stateIndex].name)
             default:
                 return
             }

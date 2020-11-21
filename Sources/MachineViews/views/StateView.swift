@@ -15,9 +15,12 @@ import Attributes
 
 public struct StateView: View {
     
+    @ObservedObject var editorViewModel: EditorViewModel
+    
     @StateObject var viewModel: StateViewModel
     
-    public init(viewModel: StateViewModel) {
+    public init(editorViewModel: EditorViewModel, viewModel: StateViewModel) {
+        self.editorViewModel = editorViewModel
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
@@ -25,6 +28,6 @@ public struct StateView: View {
         if viewModel.expanded {
             return AnyView(StateExpandedView(viewModel: viewModel))
         }
-        return AnyView(StateCollapsedView(viewModel: viewModel))
+        return AnyView(StateCollapsedView(editorViewModel: editorViewModel, viewModel: viewModel))
     }
 }
