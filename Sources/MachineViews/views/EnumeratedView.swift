@@ -37,6 +37,6 @@ struct EnumeratedView: View {
                 Text($0).tag($0)
                     .foregroundColor(config.textColor)
             }
-        }
+        }.pickerStyle(InlinePickerStyle())
     }
 }
