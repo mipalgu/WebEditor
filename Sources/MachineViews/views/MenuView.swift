@@ -23,20 +23,38 @@ struct MenuView: View {
         HStack {
             Button(action: {  }) {
                 // New Machine
-                Image(systemName: "folder.fill.badge.plus")
-                    .font(.system(size: 30.0, weight: .regular))
+                VStack {
+                    Image(systemName: "folder.fill.badge.plus")
+                        //.resizable()
+                        .scaledToFit()
+                        //.font(.system(size: 30.0, weight: .regular))
+                    Text("New")
+                        .font(config.fontBody)
+                }
             }
             Button(action: { openDialogue = true }) {
                 // Open Machine
-                Image(systemName: "folder.fill")
+                VStack {
+                    Image(systemName: "folder.fill")
+                    Text("Open")
+                        .font(config.fontBody)
+                }
             }
             Button(action: {  }) {
                 // Save Machine
-                Image(systemName: "folder.circle")
+                VStack {
+                    Image(systemName: "folder.circle")
+                    Text("Save")
+                        .font(config.fontBody)
+                }
             }
             Button(action: {  }) {
                 // Save-As
-                Image(systemName: "folder.circle.fill")
+                VStack {
+                    Image(systemName: "folder.circle.fill")
+                    Text("Save-As")
+                        .font(config.fontBody)
+                }
             }
             Spacer()
         }

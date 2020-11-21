@@ -31,7 +31,8 @@ struct FocusedAttributesView: View {
             AttributeGroupsView(
                 machine: $machine,
                 path: machine.path.states[stateIndex].attributes,
-                label: "\(machine.states[stateIndex].name) Attributes")
+                label: "\(machine.states[stateIndex].name) Attributes"
+            )
         default:
             EmptyView()
         }
