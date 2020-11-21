@@ -55,13 +55,20 @@ struct StateCollapsedView: View {
                 }
                 .background(
                     Ellipse()
-                        .strokeBorder(config.borderColour, lineWidth: 2.0, antialiased: true)
+                        .strokeBorder(viewModel.highlighted ? config.highlightColour : config.borderColour, lineWidth: 2.0, antialiased: true)
                         .frame(width: viewModel.collapsedWidth - 10.0, height: viewModel.collapsedHeight - 10.0)
                         .opacity(viewModel.isAccepting ? 1.0 : 0.0)
                 )
             )
             .coordinateSpace(name: "MAIN_VIEW")
             .position(viewModel.location)
+            .onTapGesture(count: 1) {
+                viewModel.highlighted = true
+                config.editorViewModel.changeFocus(machine: viewModel.machine.value.name, state: viewModel.name)
+            }
+            .onTapGesture(count: 2) {
+                config.editorViewModel.changeMainView(machine: viewModel.machine.value.name, state: viewModel.name)
+            }
             .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
                 self.viewModel.handleCollapsedDrag(gesture: $0)
             }.onEnded {

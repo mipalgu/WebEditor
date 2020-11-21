@@ -69,7 +69,18 @@ struct ContentView: View {
         }
         .background(config.backgroundColor)
         .frame(minWidth: CGFloat(config.width), minHeight: CGFloat(config.height))
-        
+        .onTapGesture(count: 1) {
+            let mainView = config.editorViewModel.mainView
+            switch mainView {
+            case .machine(let machine):
+                machine.removeHighlights()
+                config.editorViewModel.changeFocus(machine: machine.name)
+            case .state(let state):
+                config.editorViewModel.changeFocus(machine: state.machine.value.name, state: state.name)
+            default:
+                return
+            }
+        }
     }
 }
 

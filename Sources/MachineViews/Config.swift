@@ -81,6 +81,8 @@ public class Config: ObservableObject {
     @Published public var shadowColour = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5)
     #endif
     
+    @Published public var highlightColour = Color.blue
+    
     @Published public var fontTitle1: Font = Font.system(size: 32.0)
     @Published public var fontTitle2: Font = Font.system(size: 24.0)
     @Published public var fontTitle3: Font = Font.system(size: 20.0)
@@ -90,19 +92,12 @@ public class Config: ObservableObject {
     @Published public var editorViewModel: EditorViewModel
     
     public init(machineRef: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine)) {
-        let machine: Machine = machineRef.value
-        let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.path.states
-        let states: [Machines.State] = machine[keyPath: statesPath.path]
-        let stateViewModels: [StateViewModel] = states.indices.map {
-            StateViewModel(machine: machineRef, path: machineRef.value.path.states[$0])
-        }
         let view: ViewType = ViewType.machine(machine: MachineViewModel(
             machine: machineRef,
-            path: machineRef.value.path,
-            states: stateViewModels
+            path: machineRef.value.path
         ))
         self.editorViewModel = EditorViewModel(
-            machines: [machineRef],
+            machines: [MachineViewModel(machine: machineRef, path: machineRef.value.path)],
             mainView: view,
             focusedView: view
         )

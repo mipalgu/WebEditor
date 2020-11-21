@@ -15,16 +15,44 @@ import Attributes
 
 public class EditorViewModel: ObservableObject {
     
-    @Published var machines: [Ref<Machine>]
+    @Published var machines: [MachineViewModel]
     
-    @Published var mainView: ViewType = .none
+    @Published public var mainView: ViewType = .none
     
-    @Published var focusedView: ViewType = .none
+    @Published public var focusedView: ViewType = .none
     
-    public init(machines: [Ref<Machine>], mainView: ViewType = .none, focusedView: ViewType = .none) {
+    public init(machines: [MachineViewModel], mainView: ViewType = .none, focusedView: ViewType = .none) {
         self.machines = machines
         self.mainView = mainView
         self.focusedView = focusedView
+    }
+    
+    public func changeFocus(machine: String, state: String) {
+        guard let newFocus = (machines.first { $0.name == machine }?.states.first { $0.name == state }) else {
+            return
+        }
+        self.focusedView = .state(state: newFocus)
+    }
+    
+    public func changeFocus(machine: String) {
+        guard let newFocus = (machines.first { $0.name == machine }) else {
+            return
+        }
+        self.focusedView = .machine(machine: newFocus)
+    }
+    
+    public func changeMainView(machine: String, state: String) {
+        guard let newFocus = (machines.first { $0.name == machine }?.states.first { $0.name == state }) else {
+            return
+        }
+        self.mainView = .state(state: newFocus)
+    }
+    
+    public func changeMainView(machine: String) {
+        guard let newFocus = (machines.first { $0.name == machine }) else {
+            return
+        }
+        self.mainView = .machine(machine: newFocus)
     }
     
 }

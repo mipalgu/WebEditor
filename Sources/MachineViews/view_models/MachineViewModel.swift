@@ -21,14 +21,25 @@ public class MachineViewModel: ObservableObject {
     
     let path: Attributes.Path<Machine, Machine>
     
-    var name: String {
+    public var name: String {
         machine.value[keyPath: path.path].name
     }
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machine>, states: [StateViewModel]) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machine>) {
         self.machine = machine
         self.path = path
-        self.states = states
+        let statesPath: Attributes.Path<Machine, [Machines.State]> = path.states
+        let states: [Machines.State] = machine.value[keyPath: statesPath.path]
+        self.states = states.indices.map {
+            StateViewModel(machine: machine, path: path.states[$0])
+        }
+         
+    }
+    
+    public func removeHighlights() {
+        states.forEach {
+            $0.highlighted = false
+        }
     }
     
 }
