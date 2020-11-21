@@ -23,7 +23,7 @@ struct StateCollapsedView: View {
     
     var body: some View {
         Ellipse()
-            .strokeBorder(config.borderColour, lineWidth: 2.0, antialiased: true)
+            .strokeBorder(viewModel.highlighted ? config.highlightColour : config.borderColour, lineWidth: 2.0, antialiased: true)
             .background(Ellipse().foregroundColor(config.stateColour))
             .padding(.bottom, 2)
             .frame(width: viewModel.collapsedWidth, height: viewModel.collapsedHeight)
@@ -64,13 +64,13 @@ struct StateCollapsedView: View {
             )
             .coordinateSpace(name: "MAIN_VIEW")
             .position(viewModel.location)
+            .onTapGesture(count: 2) {
+                editorViewModel.changeMainView(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
+            }
             .onTapGesture(count: 1) {
                 editorViewModel.machines.first { viewModel.machine.value.name == $0.name }?.removeHighlights()
                 viewModel.highlighted = true
                 editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
-            }
-            .onTapGesture(count: 2) {
-                editorViewModel.changeMainView(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
             }
             .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
                 self.viewModel.handleCollapsedDrag(gesture: $0)
