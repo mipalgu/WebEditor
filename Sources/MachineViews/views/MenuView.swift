@@ -17,11 +17,14 @@ struct MenuView: View {
     
     @State var openDialogue: Bool = false
     
+    @EnvironmentObject var config: Config
+    
     var body: some View {
         HStack {
             Button(action: {  }) {
                 // New Machine
                 Image(systemName: "folder.fill.badge.plus")
+                    .font(.system(size: 30.0, weight: .regular))
             }
             Button(action: { openDialogue = true }) {
                 // Open Machine
@@ -35,6 +38,8 @@ struct MenuView: View {
                 // Save-As
                 Image(systemName: "folder.circle.fill")
             }
+            Spacer()
         }
+        .padding(20.0)
     }
 }

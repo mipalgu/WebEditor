@@ -27,9 +27,13 @@ public struct EditorView: View {
     }
     
     public var body: some View {
-        HStack {
-            MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
-            FocusedAttributesView(machine: machineViewModel.machine.asBinding, viewType: $viewModel.focusedView)
+        VStack {
+            MenuView()
+                .background(config.stateColour)
+            HStack {
+                MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
+                FocusedAttributesView(machine: machineViewModel.machine.asBinding, viewType: $viewModel.focusedView)
+            }
         }
     }
 }
