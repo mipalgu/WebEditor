@@ -38,28 +38,28 @@ public class EditorViewModel: ObservableObject {
         guard nil != self.state(machine: machine, stateIndex: stateIndex) else {
             return
         }
-        self.focusedView = .state(stateIndex: stateIndex)
+        self.focusedView = .state(machine: machine, stateIndex: stateIndex)
     }
     
     public func changeFocus(machine: UUID) {
         guard nil != self.machine(id: machine) else {
             return
         }
-        self.focusedView = .machine
+        self.focusedView = .machine(id: machine)
     }
     
     public func changeMainView(machine: UUID, stateIndex: Int) {
         guard nil != self.state(machine: machine, stateIndex: stateIndex) else {
             return
         }
-        self.mainView = .state(stateIndex: stateIndex)
+        self.mainView = .state(machine: machine, stateIndex: stateIndex)
     }
     
     public func changeMainView(machine: UUID) {
         guard nil != self.machine(id: machine) else {
             return
         }
-        self.mainView = .machine
+        self.mainView = .machine(id: machine)
     }
     
     public func machine(id: UUID) -> MachineViewModel? {

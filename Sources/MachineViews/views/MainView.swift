@@ -25,10 +25,10 @@ struct MainView: View {
     
     var body: some View {
         switch type {
-        case .machine:
+        case .machine(_):
             MachineView(editorViewModel: editorViewModel, viewModel: machineViewModel)
                 .coordinateSpace(name: "MAIN_VIEW")
-        case .state(let stateIndex):
+        case .state(_, let stateIndex):
             StateEditView(viewModel: machineViewModel.states[stateIndex])
         default:
             EmptyView()
