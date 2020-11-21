@@ -25,6 +25,10 @@ public class MachineViewModel: ObservableObject {
         machine.value[keyPath: path.path].name
     }
     
+    public var id: UUID {
+        machine.value.id
+    }
+    
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machine>) {
         self.machine = machine
         self.path = path

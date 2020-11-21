@@ -99,10 +99,10 @@ struct ContentView: View {
             let mainView = editorViewModel.mainView
             switch mainView {
             case .machine:
-                editorViewModel.machines[0].removeHighlights()
-                editorViewModel.changeFocus(machine: editorViewModel.machines[0].name)
+                editorViewModel.currentMachine.removeHighlights()
+                editorViewModel.changeFocus(machine: editorViewModel.currentMachine.id)
             case .state(let stateIndex):
-                editorViewModel.changeFocus(machine: editorViewModel.machines[0].name, state: editorViewModel.machines[0].states[stateIndex].name)
+                editorViewModel.changeFocus(machine: editorViewModel.currentMachine.id, stateIndex: stateIndex)
             default:
                 return
             }
