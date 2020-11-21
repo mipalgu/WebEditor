@@ -32,19 +32,22 @@ struct EnumerableCollectionView: View {
                     Spacer()
                 }
             } else {
-                ForEach(Array(validValues.sorted()), id: \.self) { value in
-                    Toggle(value, isOn: Binding(
-                        get: { machine[keyPath: path.path].contains(value) },
-                        set: { (isChecked) in
-                            if isChecked {
-                                machine[keyPath: path.path].insert(value)
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: .infinity), spacing: 10, alignment: .topLeading)]) {
+                    ForEach(Array(validValues.sorted()), id: \.self) { value in
+                        Toggle(value, isOn: Binding(
+                            get: { machine[keyPath: path.path].contains(value) },
+                            set: { (isChecked) in
+                                if isChecked {
+                                    machine[keyPath: path.path].insert(value)
+                                    return
+                                }
+                                machine[keyPath: path.path].remove(value)
                                 return
                             }
-                            machine[keyPath: path.path].remove(value)
-                            return
-                        }
-                    ))
+                        ))
+                    }
                 }
+                
             }
         }
     }
