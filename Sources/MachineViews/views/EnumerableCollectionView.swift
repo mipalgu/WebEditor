@@ -23,20 +23,28 @@ struct EnumerableCollectionView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Text(label + ":").font(config.fontHeading).fontWeight(.bold)
-            ForEach(Array(validValues), id: \.self) { value in
-                Toggle(value, isOn: Binding(
-                    get: { machine[keyPath: path.path].contains(value) },
-                    set: { (isChecked) in
-                        if isChecked {
-                            machine[keyPath: path.path].insert(value)
+            if validValues.isEmpty {
+                HStack {
+                    Spacer()
+                    Text("There are currently no values.")
+                    Spacer()
+                }
+            } else {
+                ForEach(Array(validValues.sorted()), id: \.self) { value in
+                    Toggle(value, isOn: Binding(
+                        get: { machine[keyPath: path.path].contains(value) },
+                        set: { (isChecked) in
+                            if isChecked {
+                                machine[keyPath: path.path].insert(value)
+                                return
+                            }
+                            machine[keyPath: path.path].remove(value)
                             return
                         }
-                        machine[keyPath: path.path].remove(value)
-                        return
-                    }
-                ))
+                    ))
+                }
             }
         }
     }

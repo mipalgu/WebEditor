@@ -83,10 +83,11 @@ struct ContentView: View {
                     AttributeGroupsView(
                         machine: machineRef.asBinding,
                         path: Machine.path.attributes,
-                        label: "\(machineRef.value.name) Attributes"
+                        label: "Machine Attributes"
                     )
                     //.frame(minWidth: 200.0, maxWidth: max(200.0, config.width / 3.0), maxHeight: config.height)
                 }
+                AttributeGroupsView(machine: machineRef.asBinding, path: Machine.path.states[0].attributes, label: "State Attributes")
             }
         }
         .background(config.backgroundColor)

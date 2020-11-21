@@ -31,6 +31,8 @@ struct BlockAttributeView: View{
             TableView(machine: $machine, path: path.tableValue, label: label, columns: columns)
         case .complex(_, let fields):
             ComplexView(machine: $machine, path: path.complexValue, label: label, fields: fields)
+        case .enumerableCollection(_, let validValues):
+            EnumerableCollectionView(machine: $machine, path: path.enumerableCollectionValue, label: label, validValues: validValues)
         default:
             Text("Not Yet Implemented")
         }
