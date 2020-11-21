@@ -15,6 +15,8 @@ import Attributes
 
 struct StateExpandedView: View {
     
+    @ObservedObject var editorViewModel: EditorViewModel
+    
     @ObservedObject var viewModel: StateViewModel
     
     @EnvironmentObject var config: Config
@@ -22,7 +24,7 @@ struct StateExpandedView: View {
     var body: some View {
         VStack {
             RoundedRectangle(cornerRadius: 20.0)
-            .strokeBorder(config.borderColour, lineWidth: 3.0, antialiased: true)
+            .strokeBorder(viewModel.highlighted ? config.highlightColour : config.borderColour, lineWidth: 3.0, antialiased: true)
             .background(RoundedRectangle(cornerRadius: 20.0).foregroundColor(config.stateColour))
             .frame(width: viewModel.width, height: viewModel.height)
             .clipped()
@@ -67,10 +69,24 @@ struct StateExpandedView: View {
                 .padding(.bottom, viewModel.bottomPadding)
                 .padding(.top, viewModel.topPadding)
                 .frame(minHeight: viewModel.elementMinHeight, maxHeight: viewModel.elementMaxHeight)
+                .background(
+                    RoundedRectangle(cornerRadius: 20.0)
+                    .strokeBorder(viewModel.highlighted ? config.highlightColour : config.borderColour, lineWidth: 3.0, antialiased: true)
+                    .frame(width: viewModel.width - 10.0, height: viewModel.height - 10.0)
+                    .opacity(viewModel.isAccepting ? 1.0 : 0.0)
+                )
             )
         }.onChange(of: viewModel.isEmpty, perform: { print("change: \($0)") })
         .coordinateSpace(name: "MAIN_VIEW")
         .position(viewModel.location)
+        .onTapGesture(count: 2) {
+            editorViewModel.changeMainView(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
+        }
+        .onTapGesture(count: 1) {
+            editorViewModel.machines.first { viewModel.machine.value.name == $0.name }?.removeHighlights()
+            viewModel.highlighted = true
+            editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
+        }
         .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
             .onChanged {
                 self.viewModel.handleDrag(gesture: $0)

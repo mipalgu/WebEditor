@@ -177,6 +177,18 @@ public class StateViewModel: ObservableObject {
     
     @Published var highlighted: Bool
     
+    var machineName: String {
+        self.machine.value.name
+    }
+    
+    var machineId: UUID {
+        self.machine.value.id
+    }
+    
+    var stateIndex: Int {
+        self.machine.value.states.firstIndex(of: self.machine.value[keyPath: path.path]).wrappedValue
+    }
+    
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false) {
         self.machine = machine
         self.path = path

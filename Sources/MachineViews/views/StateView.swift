@@ -26,7 +26,7 @@ public struct StateView: View {
     
     public var body: some View {
         if viewModel.expanded {
-            return AnyView(StateExpandedView(viewModel: viewModel))
+            return AnyView(StateExpandedView(editorViewModel: editorViewModel, viewModel: viewModel))
         }
         return AnyView(StateCollapsedView(editorViewModel: editorViewModel, viewModel: viewModel))
     }

@@ -62,7 +62,7 @@ struct ContentView: View {
     
     init(machineRef: Ref<Machine>) {
         self.machineRef = machineRef
-        let view: ViewType = ViewType.machine
+        let view: ViewType = ViewType.machine(id: machineRef.value.id)
         self._editorViewModel = StateObject(wrappedValue: EditorViewModel(
             machines: [MachineViewModel(machine: machineRef, path: machineRef.value.path)],
             mainView: view,
@@ -99,10 +99,10 @@ struct ContentView: View {
             let mainView = editorViewModel.mainView
             switch mainView {
             case .machine:
-                editorViewModel.machines[0].removeHighlights()
-                editorViewModel.changeFocus(machine: editorViewModel.machines[0].name)
-            case .state(let stateIndex):
-                editorViewModel.changeFocus(machine: editorViewModel.machines[0].name, state: editorViewModel.machines[0].states[stateIndex].name)
+                editorViewModel.currentMachine.removeHighlights()
+                editorViewModel.changeFocus(machine: editorViewModel.currentMachine.id)
+            case .state(_, let stateIndex):
+                editorViewModel.changeFocus(machine: editorViewModel.currentMachine.id, stateIndex: stateIndex)
             default:
                 return
             }
