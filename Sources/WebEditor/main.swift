@@ -35,8 +35,6 @@ struct WebEditor: App {
 }
 
 struct ContentView: View {
-    
-    @StateObject var machineRef: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine)
 
 //    #if canImport(TokamakDOM)
 //    @TokamakShim.State var machine = Machine.initialSwiftMachine
@@ -66,27 +64,7 @@ struct ContentView: View {
                 //StateEditView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
                 //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
                 //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 100, y: 100), width: 300, height: 100, expanded: true))
-                HStack {
-                    /*AttributeGroupsView(
-                        machine: machineRef,
-                        path: Machine.path.attributes["dependencies"],
-                        label: "\(machineRef.value.name) Dependencies"
-                    )*/
-                    MachineView(
-                        viewModel: MachineViewModel(
-                            machine: machineRef,
-                            path: Machine.path,
-                            states: machineRef.value.states.indices.map { StateViewModel(machine: machineRef, path: Machine.path.states[$0]) }
-                        )
-                    )
-                    .coordinateSpace(name: "MAIN_VIEW")
-                    AttributeGroupsView(
-                        machine: machineRef.asBinding,
-                        path: Machine.path.attributes,
-                        label: "\(machineRef.value.name) Attributes"
-                    )
-                    //.frame(minWidth: 200.0, maxWidth: max(200.0, config.width / 3.0), maxHeight: config.height)
-                }
+                EditorView(viewModel: config.editorViewModel)
             }
         }
         .background(config.backgroundColor)

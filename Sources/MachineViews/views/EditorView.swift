@@ -13,15 +13,20 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct EditorView: View {
+public struct EditorView: View {
+    
+    @ObservedObject var viewModel: EditorViewModel
     
     @EnvironmentObject var config: Config
     
-    var body: some View {
+    public init(viewModel: EditorViewModel) {
+        self.viewModel = viewModel
+    }
+    
+    public var body: some View {
         HStack {
-            config.leftPane
-            config.mainView
-            config.rightPane
+            MainView(type: $viewModel.mainView)
+            FocusedAttributesView(viewType: $viewModel.focusedView)
         }
     }
 }

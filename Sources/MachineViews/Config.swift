@@ -10,6 +10,8 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+import Machines
+import Attributes
 
 public class Config: ObservableObject {
     
@@ -85,10 +87,25 @@ public class Config: ObservableObject {
     @Published public var fontHeading: Font = Font.system(size: 16.0)
     @Published public var fontBody: Font = Font.system(size: 12.0)
     
-    @Published var leftPane: AnyView = AnyView(EmptyView())
-    @Published var mainView: AnyView = AnyView(EmptyView())
-    @Published var rightPane: AnyView = AnyView(EmptyView())
+    @Published public var editorViewModel: EditorViewModel
     
-    public init() {}
+    public init(machineRef: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine)) {
+        let machine: Machine = machineRef.value
+        let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.path.states
+        let states: [Machines.State] = machine[keyPath: statesPath.path]
+        let stateViewModels: [StateViewModel] = states.indices.map {
+            StateViewModel(machine: machineRef, path: machineRef.value.path.states[$0])
+        }
+        let view: ViewType = ViewType.machine(machine: MachineViewModel(
+            machine: machineRef,
+            path: machineRef.value.path,
+            states: stateViewModels
+        ))
+        self.editorViewModel = EditorViewModel(
+            machines: [machineRef],
+            mainView: view,
+            focusedView: view
+        )
+    }
     
 }

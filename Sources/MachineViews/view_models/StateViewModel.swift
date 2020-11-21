@@ -15,16 +15,7 @@ import Attributes
 
 public class StateViewModel: ObservableObject {
     
-    @Published var _machine: Ref<Machine>
-    
-    var machine: Machine {
-        get {
-            _machine.value
-        }
-        set {
-            _machine.value = newValue
-        }
-    }
+    @Published var machine: Ref<Machine>
     
     let path: Attributes.Path<Machine, Machines.State>
     
@@ -137,15 +128,15 @@ public class StateViewModel: ObservableObject {
     }
     
     var name: String {
-        String(machine[keyPath: path.path].name)
+        String(machine.value[keyPath: path.path].name)
     }
     
     var actions: [Machines.Action] {
-        machine[keyPath: path.path].actions
+        machine.value[keyPath: path.path].actions
     }
     
     var attributes: [AttributeGroup] {
-        machine[keyPath: path.path].attributes
+        machine.value[keyPath: path.path].attributes
     }
     
     var elementMinWidth: CGFloat {
@@ -165,7 +156,7 @@ public class StateViewModel: ObservableObject {
     }
     
     var isAccepting: Bool {
-        machine[keyPath: path.path].transitions.isEmpty
+        machine.value[keyPath: path.path].transitions.isEmpty
     }
     
     var isEmpty: Bool {
@@ -185,7 +176,7 @@ public class StateViewModel: ObservableObject {
     var offset: CGPoint = CGPoint.zero
     
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:]) {
-        self._machine = machine
+        self.machine = machine
         self.path = path
         self.location = location
         self._width = min(max(minWidth, width), maxWidth)
@@ -197,7 +188,7 @@ public class StateViewModel: ObservableObject {
     }
     
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:]) {
-        self._machine = machine
+        self.machine = machine
         self.path = path
         self.location = location
         self._width = min(max(minWidth, width), maxWidth)
@@ -213,7 +204,7 @@ public class StateViewModel: ObservableObject {
     }
     
     func isEmpty(forAction action: String) -> Bool {
-        machine[keyPath: path.path].actions.first { $0.name == action }?.implementation.isEmpty ?? true
+        machine.value[keyPath: path.path].actions.first { $0.name == action }?.implementation.isEmpty ?? true
     }
     
     func toggleExpand() {

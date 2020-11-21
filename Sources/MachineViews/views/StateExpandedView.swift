@@ -30,7 +30,7 @@ struct StateExpandedView: View {
             .overlay (
                 VStack {
                     HStack {
-                        LineView(machine: $viewModel.machine, path: viewModel.path.name, label: viewModel.name)
+                        LineView(machine: viewModel.machine.asBinding, path: viewModel.path.name, label: viewModel.name)
                             .multilineTextAlignment(.center)
                             .font(config.fontTitle2)
                             .background(config.fieldColor)
@@ -51,7 +51,7 @@ struct StateExpandedView: View {
                     ScrollView {
                         ForEach(Array(viewModel.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
                             CodeViewWithDropDown(
-                                machine: $viewModel.machine,
+                                machine: viewModel.machine.asBinding,
                                 path: viewModel.path.actions[index].implementation,
                                 language: .swift,
                                 collapsed: viewModel.createCollapsedBinding(forAction: action)
