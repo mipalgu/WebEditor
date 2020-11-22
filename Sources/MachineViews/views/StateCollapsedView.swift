@@ -66,6 +66,7 @@ struct StateCollapsedView: View {
             .position(viewModel.location)
             .onTapGesture(count: 2) {
                 editorViewModel.changeMainView(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
+                editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
             }
             .onTapGesture(count: 1) {
                 editorViewModel.machines.first { viewModel.machineName == $0.name }?.removeHighlights()

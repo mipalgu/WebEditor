@@ -23,15 +23,34 @@ public class EditorViewModel: ObservableObject {
     
     @Published public var currentMachineIndex: Int
     
+    @Published public var errorLog: [Error]
+    
+    public let logSize: UInt16
+    
     public var currentMachine: MachineViewModel {
         machines[currentMachineIndex]
     }
     
-    public init(machines: [MachineViewModel], mainView: ViewType = .none, focusedView: ViewType = .none, currentMachineIndex: Int = 0) {
+    public var log: String {
+        errorLog.map { $0.localizedDescription }.reduce("") {
+            if $0 == "" {
+                return $1
+            }
+            if $1 == "" {
+                return $0
+            }
+            return $0 + "\n" + $1
+        }
+    }
+    
+    public init(machines: [MachineViewModel], mainView: ViewType = .none, focusedView: ViewType = .none, currentMachineIndex: Int = 0, logSize: UInt16 = 50) {
         self.machines = machines
         self.mainView = mainView
         self.focusedView = focusedView
         self.currentMachineIndex = currentMachineIndex
+        self.logSize = logSize
+        self.errorLog = []
+        self.errorLog.reserveCapacity(Int(logSize))
     }
     
     public func changeFocus(machine: UUID, stateIndex: Int) {
@@ -68,6 +87,13 @@ public class EditorViewModel: ObservableObject {
     
     public func state(machine: UUID, stateIndex: Int) -> StateViewModel? {
         self.machine(id: machine)?.states[stateIndex]
+    }
+    
+    public func addError(error: Error) {
+        if errorLog.count > logSize {
+            let _ = errorLog.popLast()
+        }
+        errorLog.insert(error, at: 0)
     }
     
 }

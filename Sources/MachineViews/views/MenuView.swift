@@ -61,6 +61,12 @@ struct MenuView: View {
                             .font(config.fontBody)
                     }
                 }
+                VStack {
+                    Text(machine.semantics.rawValue)
+                        .font(config.fontBody)
+                    Text("Semantics")
+                        .font(config.fontHeading)
+                }
                 Spacer()
             }
         }
