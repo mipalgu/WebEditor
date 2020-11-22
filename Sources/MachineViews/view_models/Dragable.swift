@@ -11,12 +11,12 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol Dragable {
+protocol Dragable: class {
     
     var isDragging: Bool {get set}
     
-    mutating func handleDrag(gesture: DragGesture.Value)
+    func handleDrag(gesture: DragGesture.Value)
     
-    mutating func finishDrag(gesture: DragGesture.Value)
+    func finishDrag(gesture: DragGesture.Value)
     
 }

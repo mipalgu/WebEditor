@@ -11,9 +11,11 @@ import TokamakShim
 import SwiftUI
 #endif
 
-extension Moveable {
+protocol _Moveable: class {}
+
+extension Moveable where Self: _Moveable {
     
-    mutating func updateLocationWithOffset(newLocation: CGPoint) {
+    func updateLocationWithOffset(newLocation: CGPoint) {
         let dx = newLocation.x - offset.x
         let dy = newLocation.y - offset.y
         self.location = CGPoint(x: dx, y: dy)

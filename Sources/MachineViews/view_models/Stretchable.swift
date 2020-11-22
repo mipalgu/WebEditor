@@ -17,10 +17,10 @@ protocol Stretchable: Rigidable {
     
     var isStretchingY: Bool { get set }
     
-    mutating func stretchCorner(gesture: DragGesture.Value)
+    func stretchCorner(gesture: DragGesture.Value)
     
-    mutating func stretchHorizontal(gesture: DragGesture.Value)
+    func stretchHorizontal(gesture: DragGesture.Value)
     
-    mutating func stretchVertical(gesture: DragGesture.Value)
+    func stretchVertical(gesture: DragGesture.Value)
     
 }
