@@ -13,6 +13,10 @@ import SwiftUI
 
 protocol Stretchable {
     
+    var horizontalEdgeTolerance: CGFloat {get}
+
+    var verticalEdgeTolerance: CGFloat {get}
+    
     var width: CGFloat { get set }
     
     var height: CGFloat { get set }
@@ -20,6 +24,8 @@ protocol Stretchable {
     var isStretchingX: Bool { get set }
     
     var isStretchingY: Bool { get set }
+    
+    mutating func stretchCorner(gesture: DragGesture.Value)
     
     mutating func stretchHorizontal(gesture: DragGesture.Value)
     

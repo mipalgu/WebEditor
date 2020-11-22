@@ -88,10 +88,10 @@ struct StateExpandedView: View {
             editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
         }
         .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
-            .onChanged {_ in
-                //self.viewModel.handleDrag(gesture: $0)
-            }.onEnded {_ in
-                //self.viewModel.finishDrag(gesture: $0)
+            .onChanged {
+                self.viewModel.handleDrag(gesture: $0)
+            }.onEnded {
+                self.viewModel.finishDrag(gesture: $0)
             }
         )
     }
