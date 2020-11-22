@@ -15,19 +15,6 @@ protocol MoveAndStretchFromDrag: Dragable, Moveable, BoundedStretchable {}
 
 extension Dragable where Self: MoveAndStretchFromDrag {
     
-    func onCorner(point: CGPoint) -> Bool {
-        onTopRightCorner(point: point) || onBottomRightCorner(point: point) ||
-            onBottomLeftCorner(point: point) || onTopLeftCorner(point: point)
-    }
-    
-    func onVerticalEdge(point: CGPoint) -> Bool {
-        onLeftEdge(point: point) || onRightEdge(point: point)
-    }
-    
-    func onHorizontalEdge(point: CGPoint) -> Bool {
-        onTopEdge(point: point) || onBottomEdge(point: point)
-    }
-    
     mutating func handleDrag(gesture: DragGesture.Value) {
         if isDragging {
             updateLocationWithOffset(newLocation: gesture.location)

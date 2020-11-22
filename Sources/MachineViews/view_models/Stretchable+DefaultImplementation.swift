@@ -19,7 +19,7 @@ protocol _BoundedStretchable: class {
     
 }
 
-protocol BoundedStretchable: Stretchable, EdgeableAction {
+protocol BoundedStretchable: Stretchable, EdgeDetector {
     
     var minWidth: CGFloat { get }
     
@@ -49,8 +49,6 @@ extension BoundedStretchable where Self: _BoundedStretchable {
             self._height = min(max(self.minHeight, newValue), self.maxHeight)
         }
     }
-    
-    
     
     func stretchWidth(gesture: DragGesture.Value) -> CGFloat {
         (gesture.location.x - location.x) * 2.0

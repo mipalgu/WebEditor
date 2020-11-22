@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  EdgeDetector+DefaultImplementation.swift
 //  
 //
 //  Created by Morgan McColl on 22/11/20.
@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-extension EdgeableAction {
+extension EdgeDetector {
     
     func onTopEdge(point: CGPoint) -> Bool {
         let topEdge = self.location.y - height / 2.0
@@ -59,6 +59,19 @@ extension EdgeableAction {
     
     func onTopLeftCorner(point: CGPoint) -> Bool {
         return onTopEdge(point: point) && onLeftEdge(point: point)
+    }
+    
+    func onCorner(point: CGPoint) -> Bool {
+        onTopRightCorner(point: point) || onBottomRightCorner(point: point) ||
+            onBottomLeftCorner(point: point) || onTopLeftCorner(point: point)
+    }
+    
+    func onVerticalEdge(point: CGPoint) -> Bool {
+        onLeftEdge(point: point) || onRightEdge(point: point)
+    }
+    
+    func onHorizontalEdge(point: CGPoint) -> Bool {
+        onTopEdge(point: point) || onBottomEdge(point: point)
     }
     
 }

@@ -1,5 +1,5 @@
 //
-//  EdgeableAction.swift
+//  EdgeableDetector.swift
 //  
 //
 //  Created by Morgan McColl on 22/11/20.
@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol EdgeableAction: Rigidable {
+protocol EdgeDetector: Rigidable {
     
     var horizontalEdgeTolerance: CGFloat {get}
 
