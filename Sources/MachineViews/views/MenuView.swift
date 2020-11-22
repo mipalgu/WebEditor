@@ -23,8 +23,12 @@ struct MenuView: View {
     
     var body: some View {
         ZStack {
-            Text(machine.name)
-                .font(config.fontTitle1)
+            VStack {
+                Text(machine.name)
+                    .font(config.fontTitle1)
+                Text(machine.filePath.absoluteString)
+                    .font(config.fontHeading)
+            }
             HStack {
                 Button(action: {  }) {
                     // New Machine
