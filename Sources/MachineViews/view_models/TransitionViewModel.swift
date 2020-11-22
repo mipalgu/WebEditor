@@ -13,7 +13,7 @@ import SwiftUI
 import Machines
 import Attributes
 
-class TransitionViewModel: ObservedObject {
+class TransitionViewModel: ObservableObject {
     
     @Reference var machine: Machine
     
@@ -31,7 +31,7 @@ class TransitionViewModel: ObservedObject {
     
     var condition: String {
         get {
-            String(machine[keyPath: path.path].condition) ?? ""
+            String(machine[keyPath: path.path].condition ?? "")
         }
         set {
             do {

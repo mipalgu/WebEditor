@@ -15,13 +15,11 @@ import Attributes
 
 struct TransitionView: View {
     
-    @ObservedObject viewModel: TransitionViewModel
+    @ObservedObject var viewModel: TransitionViewModel
     
     @EnvironmentObject var config: Config
     
     var body: some View {
-        Path {
-            
-        }
+        Text("Not yet implemented!")
     }
 }
