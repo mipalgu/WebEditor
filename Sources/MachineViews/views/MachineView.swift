@@ -27,10 +27,10 @@ public struct MachineView: View {
     }
     
     public var body: some View {
-        ForEach(viewModel.states, id: \.name) {
-            StateView(editorViewModel: editorViewModel, viewModel: $0)
-                .coordinateSpace(name: "MAIN_VIEW")
-                .position($0.location)
+        ZStack {
+            ForEach(viewModel.states, id: \.name) {
+                StateView(editorViewModel: editorViewModel, viewModel: $0)
+            }
         }
     }
 }

@@ -21,7 +21,18 @@ public class StateViewModel: ObservableObject {
     
     let path: Attributes.Path<Machine, Machines.State>
     
-    @Published var location: CGPoint
+    @Published var _location: CGPoint
+    
+    var location: CGPoint {
+        get {
+            _location
+        }
+        set {
+            let minX = expanded ? width / 2.0 : collapsedWidth / 2.0
+            let minY = expanded ? height / 2.0 : collapsedHeight / 2.0
+            self._location = CGPoint(x: max(minX, newValue.x), y: max(minY, newValue.y))
+        }
+    }
     
     @Published fileprivate var _width: CGFloat
     
@@ -194,7 +205,7 @@ public class StateViewModel: ObservableObject {
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false) {
         self._machine = Reference(reference: machine)
         self.path = path
-        self.location = location
+        self._location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
         self._width = min(max(minWidth, width), maxWidth)
         self._height = height
         self.expanded = expanded
@@ -208,7 +219,7 @@ public class StateViewModel: ObservableObject {
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false) {
         self._machine = Reference(reference: machine)
         self.path = path
-        self.location = location
+        self._location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
         self._width = min(max(minWidth, width), maxWidth)
         self._height = height
         self.expanded = expanded
@@ -229,6 +240,7 @@ public class StateViewModel: ObservableObject {
     
     func toggleExpand() {
         expanded = !expanded
+        self.location = _location
     }
     
     func createTitleView(forAction action: String, color: Color) -> AnyView {
