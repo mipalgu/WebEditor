@@ -49,4 +49,11 @@ public class MachineViewModel: ObservableObject {
         }
     }
     
+    public func getStateViewModel(stateName: String) -> StateViewModel {
+        guard let vm = self.states.first(where: { $0.name == stateName }) else {
+            fatalError("Tried to access state view model that didn't exist")
+        }
+        return vm
+    }
+    
 }

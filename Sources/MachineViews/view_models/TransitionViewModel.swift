@@ -29,6 +29,8 @@ class TransitionViewModel: ObservableObject {
     
     @Published var priority: UInt8
     
+    let pointDiameter: CGFloat = 5.0
+    
     var condition: String {
         get {
             String(machine[keyPath: path.path].condition ?? "")
@@ -40,6 +42,32 @@ class TransitionViewModel: ObservableObject {
                 print(error)
             }
         }
+    }
+    
+    var conditionPosition: CGPoint {
+        let dx = (point2.x - point1.x) / 2.0
+        let dy = (point2.y - point1.y) / 2.0
+        return CGPoint(x: point1.x + dx, y: point1.y + dy)
+    }
+    
+    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8) {
+        self._machine = Reference(reference: machine)
+        self.path = path
+        self.point0 = source
+        self.point3 = destination
+        let dx = destination.x - source.x
+        let dy = destination.y - source.y
+        let r = sqrt(dx * dx + dy * dy)
+        let theta = atan2(Double(dy), Double(dx))
+        let rcost = r * CGFloat(cos(theta))
+        let rsint = r * CGFloat(sin(theta))
+        let p1x = source.x + 0.33 * rcost
+        let p1y = source.y + 0.33 * rsint
+        let p2x = source.x + 0.66 * rcost
+        let p2y = source.y + 0.66 * rsint
+        self.point1 = CGPoint(x: p1x, y: p1y)
+        self.point2 = CGPoint(x: p2x, y: p2y)
+        self.priority = priority
     }
     
     init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint, priority: UInt8) {

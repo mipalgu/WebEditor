@@ -15,7 +15,7 @@ import Attributes
 
 import Combine
 
-public final class StateViewModel: DynamicViewModel {
+public final class StateViewModel: DynamicViewModel, Identifiable {
     
     @Reference public var machine: Machine
     
@@ -152,6 +152,10 @@ public final class StateViewModel: DynamicViewModel {
         machine[keyPath: path.path].attributes
     }
     
+    var transitions: [Transition] {
+        machine[keyPath: path.path].transitions
+    }
+    
     var elementMinWidth: CGFloat {
         minWidth - leftPadding - rightPadding
     }
@@ -272,6 +276,59 @@ public final class StateViewModel: DynamicViewModel {
     func finishCollapsedDrag(gesture: DragGesture.Value) {
         self.handleCollapsedDrag(gesture: gesture)
         self.isDragging = false
+    }
+    
+    fileprivate func collapsedEdge(theta: Double) -> CGPoint {
+        rectEdge(theta: theta)
+    }
+    
+    fileprivate func staticHeightEdge(theta: Double) -> CGPoint {
+        let pctTheta = 1.0 - (abs(theta) / (Double.pi / 4.0)).truncatingRemainder(dividingBy: 1.0)
+        let dx = CGFloat(pctTheta * Double(abs(theta) > Double.pi / 2.0 ? -width : width))
+        let dy = theta > 0 ? -height : height
+        return CGPoint(x: location.x + dx, y: location.y + dy)
+    }
+    
+    fileprivate func staticWidthEdge(theta: Double) -> CGPoint {
+        let pctTheta = (abs(theta) / (Double.pi / 4.0)).truncatingRemainder(dividingBy: 1.0)
+        let dx = abs(theta) <= Double.pi / 4.0 ? width : -width
+        let dy = CGFloat(pctTheta * Double(theta > 0  ? -height : height ))
+        return CGPoint(x: location.x + dx, y: location.y + dy)
+    }
+    
+    fileprivate func rectEdge(theta: Double) -> CGPoint {
+        if abs(theta) <= Double.pi / 4.0 {
+            return staticWidthEdge(theta: theta)
+        }
+        if abs(theta) >= 3 * Double.pi / 4.0 {
+            return staticWidthEdge(theta: theta)
+        }
+        return staticHeightEdge(theta: theta)
+    }
+    
+    func edge(theta: Double) -> CGPoint {
+        if expanded {
+            return rectEdge(theta: theta)
+        }
+        return collapsedEdge(theta: theta)
+    }
+    
+    func transitionViewModel(transition: Transition, index: Int, target destinationViewModel: StateViewModel) -> TransitionViewModel {
+        let dx = destinationViewModel.location.x - location.x
+        let dy = destinationViewModel.location.y - location.y
+        let theta = atan2(Double(dy), Double(dx))
+        let sourceEdge = edge(theta: theta)
+        let destinationTheta = theta + Double.pi > Double.pi ? theta - Double.pi : theta + Double.pi
+        let destinationEdge = destinationViewModel.edge(theta: destinationTheta)
+        let tPath: Attributes.Path<Machine, Transition> = path.transitions[index]
+        let priority = UInt8(index)
+        return TransitionViewModel(
+            machine: $machine,
+            path: tPath,
+            source: sourceEdge,
+            destination: destinationEdge,
+            priority: priority
+        )
     }
     
 }

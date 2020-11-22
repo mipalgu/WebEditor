@@ -20,6 +20,27 @@ struct TransitionView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        Text("Not yet implemented!")
+        Path { path in
+            path.move(to: viewModel.point0)
+            path.addCurve(to: viewModel.point3, control1: viewModel.point2, control2: viewModel.point1)
+        }.overlay(
+            ZStack {
+                Circle()
+                    .frame(width: viewModel.pointDiameter, height: viewModel.pointDiameter)
+                    .background(Color.red)
+                    .position(viewModel.point1)
+                Circle()
+                    .frame(width: viewModel.pointDiameter, height: viewModel.pointDiameter)
+                    .background(Color.blue)
+                    .position(viewModel.point2)
+                ExpressionView(
+                    machine: viewModel.$machine.asBinding,
+                    path: viewModel.path.condition.wrappedValue,
+                    label: viewModel.condition,
+                    language: .swift
+                )
+                    .position(viewModel.conditionPosition)
+            }
+        )
     }
 }
