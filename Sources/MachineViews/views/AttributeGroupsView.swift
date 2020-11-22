@@ -43,6 +43,5 @@ public struct AttributeGroupsView: View {
             }
             
         }
-        .frame(minHeight: 720.0)
     }
 }
