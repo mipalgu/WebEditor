@@ -59,24 +59,8 @@ extension BoundedStretchable where Self: _BoundedStretchable {
     }
     
     func stretchCorner(gesture: DragGesture.Value) {
-        let point = gesture.location
-        if onTopRightCorner(point: point) {
-            self.width = stretchWidth(gesture: gesture)
-            self.height = -stretchHeight(gesture: gesture)
-            return
-        }
-        if onBottomRightCorner(point: point) {
-            self.width = stretchWidth(gesture: gesture)
-            self.height = stretchHeight(gesture: gesture)
-            return
-        }
-        if onBottomLeftCorner(point: point) {
-            self.width = -stretchWidth(gesture: gesture)
-            self.height = stretchHeight(gesture: gesture)
-            return
-        }
-        self.width = -stretchWidth(gesture: gesture)
-        self.height = -stretchHeight(gesture: gesture)
+        stretchVertical(gesture: gesture)
+        stretchHorizontal(gesture: gesture)
     }
     
     func stretchHorizontal(gesture: DragGesture.Value) {
