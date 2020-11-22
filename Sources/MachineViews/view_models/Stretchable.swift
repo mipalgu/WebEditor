@@ -11,15 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol Stretchable {
-    
-    var horizontalEdgeTolerance: CGFloat {get}
-
-    var verticalEdgeTolerance: CGFloat {get}
-    
-    var width: CGFloat { get set }
-    
-    var height: CGFloat { get set }
+protocol Stretchable: Rigidable {
     
     var isStretchingX: Bool { get set }
     
