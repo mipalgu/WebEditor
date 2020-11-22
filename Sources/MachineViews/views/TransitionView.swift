@@ -15,16 +15,13 @@ import Attributes
 
 struct TransitionView: View {
     
-    @Binding var machine: Machine
-    let path: Attributes.Path<Machine, Transition>
-    @Binding var point0: CGPoint
-    @Binding var point1: CGPoint
-    @Binding var point2: CGPoint
-    @Binding var point3: CGPoint
+    @ObservedObject viewModel: TransitionViewModel
     
     @EnvironmentObject var config: Config
     
     var body: some View {
-        Text("Not yet implemented.")
+        Path {
+            
+        }
     }
 }
