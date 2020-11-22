@@ -32,7 +32,7 @@ public struct EditorView: View {
                 .background(config.stateColour)
             HStack {
                 MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
-                FocusedAttributesView(machine: machineViewModel.machine.asBinding, viewType: $viewModel.focusedView)
+                FocusedAttributesView(machine: machineViewModel.$machine.asBinding, viewType: $viewModel.focusedView)
                     .scaledToFit()
             }
         }
