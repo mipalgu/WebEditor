@@ -71,27 +71,25 @@ struct ContentView: View {
     }
     
     var body: some View {
-        ScrollView(.vertical, showsIndicators: true) {
-            VStack {
-                //LineView(machine: $machine, path: machine.path.states[0].name, label: "State Name")
-                /*HStack {
-                    StateEditView(machine: $machine, path: Machine.path.states[0])
-                        .frame(minWidth: 900)
-                    ScrollView(.horizontal, showsIndicators: true) {
-                        AttributeGroupsView(machine: $machine, path: Machine.path.states[0].attributes, label: "All Attributes")
-                            .frame(minWidth: 500)
-                    }
-                }*/
-                //CodeView(machine: $machine, path: Machine.path.states[0].actions["main"].wrappedValue, label: "OnEntry", language: .swift)
-                //    .scaledToFit()
-                //StateCollapsedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
-                //StateExpandedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
-                //AttributeGroupsView(machine: machineRef.asBinding, path: Machine.path.attributes, label: "Attributes")
-                //StateEditView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
-                //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
-                //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 100, y: 100), width: 300, height: 100, expanded: true))
-                EditorView(viewModel: editorViewModel, machineViewModel: editorViewModel.machines[0])
-            }
+        VStack {
+            //LineView(machine: $machine, path: machine.path.states[0].name, label: "State Name")
+            /*HStack {
+                StateEditView(machine: $machine, path: Machine.path.states[0])
+                    .frame(minWidth: 900)
+                ScrollView(.horizontal, showsIndicators: true) {
+                    AttributeGroupsView(machine: $machine, path: Machine.path.states[0].attributes, label: "All Attributes")
+                        .frame(minWidth: 500)
+                }
+            }*/
+            //CodeView(machine: $machine, path: Machine.path.states[0].actions["main"].wrappedValue, label: "OnEntry", language: .swift)
+            //    .scaledToFit()
+            //StateCollapsedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
+            //StateExpandedView(viewModel: StateViewModel(machine: machine, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
+            //AttributeGroupsView(machine: machineRef.asBinding, path: Machine.path.attributes, label: "Attributes")
+            //StateEditView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[0], location: CGPoint(x: 100, y: 100)))
+            //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
+            //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 100, y: 100), width: 300, height: 100, expanded: true))
+            EditorView(viewModel: editorViewModel, machineViewModel: editorViewModel.machines[0])
         }
         .background(config.backgroundColor)
         .frame(minWidth: CGFloat(config.width), minHeight: CGFloat(config.height))

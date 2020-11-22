@@ -30,10 +30,26 @@ public struct EditorView: View {
         VStack {
             MenuView(machine: machineViewModel.$machine.asBinding)
                 .background(config.stateColour)
-            HStack {
-                MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
-                FocusedAttributesView(machine: machineViewModel.$machine.asBinding, viewType: $viewModel.focusedView)
-                    .scaledToFit()
+           
+            switch viewModel.mainView {
+            case .state:
+                ScrollView {
+                    HStack {
+                        MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
+                        FocusedAttributesView(machine: machineViewModel.$machine.asBinding, viewType: $viewModel.focusedView)
+                            .scaledToFill()
+                            .frame(maxWidth: 500)
+                    }
+                }
+            default:
+                HStack {
+                    MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
+                    ScrollView(.vertical, showsIndicators: true) {
+                        FocusedAttributesView(machine: machineViewModel.$machine.asBinding, viewType: $viewModel.focusedView)
+                            .scaledToFill()
+                            .frame(maxWidth: 500)
+                    }
+                }
             }
         }
     }

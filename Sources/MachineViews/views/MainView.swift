@@ -30,6 +30,9 @@ struct MainView: View {
                 .coordinateSpace(name: "MAIN_VIEW")
         case .state(_, let stateIndex):
             StateEditView(viewModel: machineViewModel.states[stateIndex])
+                .onTapGesture(count: 2) {
+                    editorViewModel.changeMainView(machine: machineViewModel.id)
+                }
         default:
             EmptyView()
         }
