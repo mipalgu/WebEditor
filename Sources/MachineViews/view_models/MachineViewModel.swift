@@ -13,9 +13,11 @@ import SwiftUI
 import Machines
 import Attributes
 
+import Combine
+
 public class MachineViewModel: ObservableObject {
     
-    @Published var machine: Ref<Machine>
+    @Published public var machine: Ref<Machine>
     
     @Published public var states: [StateViewModel]
     
@@ -37,7 +39,7 @@ public class MachineViewModel: ObservableObject {
         self.states = states.indices.map {
             StateViewModel(machine: machine, path: path.states[$0])
         }
-         
+        self.machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
     }
     
     public func removeHighlights() {
