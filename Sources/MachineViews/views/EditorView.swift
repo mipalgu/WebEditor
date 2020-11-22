@@ -33,7 +33,7 @@ public struct EditorView: View {
             HStack {
                 MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
                 FocusedAttributesView(machine: machineViewModel.$machine.asBinding, viewType: $viewModel.focusedView)
-                    .frame(maxHeight: .infinity)
+                    .scaledToFit()
             }
         }
     }

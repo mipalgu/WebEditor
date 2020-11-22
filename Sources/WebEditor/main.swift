@@ -91,7 +91,6 @@ struct ContentView: View {
                 //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 600, y: 600)))
                 //StateView(viewModel: StateViewModel(machine: machineRef, path: Machine.path.states[1], location: CGPoint(x: 100, y: 100), width: 300, height: 100, expanded: true))
                 EditorView(viewModel: editorViewModel, machineViewModel: editorViewModel.machines[0])
-                    .frame(maxHeight: 720)
             }
         }
         .background(config.backgroundColor)
