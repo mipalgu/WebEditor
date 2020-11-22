@@ -13,8 +13,8 @@ import SwiftUI
 
 protocol DynamicViewModel: Positionable, Collapsable, Dragable {
     
-    func handleCollapsedDrag(gesture: DragGesture.Value)
+    mutating func handleCollapsedDrag(gesture: DragGesture.Value)
     
-    func finishCollapsedDrag(gesture: DragGesture.Value)
+    mutating func finishCollapsedDrag(gesture: DragGesture.Value)
     
 }

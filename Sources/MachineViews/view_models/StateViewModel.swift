@@ -15,7 +15,7 @@ import Attributes
 
 import Combine
 
-public class StateViewModel: ObservableObject, DynamicViewModel {
+public final class StateViewModel: ObservableObject, Stretchable, BoundedStretchable, Collapsable, Positionable, DynamicViewModel {
     
     @Reference public var machine: Machine
     
@@ -34,9 +34,27 @@ public class StateViewModel: ObservableObject, DynamicViewModel {
         }
     }
     
-    @Published fileprivate var _width: CGFloat
+    @Published var __width: CGFloat
     
-    @Published fileprivate var _height: CGFloat
+    var _width: CGFloat {
+        get {
+            __width
+        }
+        set {
+            __width = newValue
+        }
+    }
+    
+    @Published var __height: CGFloat
+    
+    var _height: CGFloat {
+        get {
+            __height
+        }
+        set {
+            __height = newValue
+        }
+    }
     
     @Published var expanded: Bool
     
@@ -122,24 +140,6 @@ public class StateViewModel: ObservableObject, DynamicViewModel {
 
     let verticalEdgeTolerance: CGFloat = 20.0
     
-    var width: CGFloat {
-        get {
-            min(max(_width, minWidth), maxWidth)
-        }
-        set {
-            _width = min(max(minWidth, newValue), maxWidth)
-        }
-    }
-
-    var height: CGFloat {
-        get {
-            min(max(_height, minHeight), maxHeight)
-        }
-        set {
-            _height = min(max(minHeight, newValue), maxHeight)
-        }
-    }
-    
     public var name: String {
         String(machine[keyPath: path.path].name)
     }
@@ -206,8 +206,8 @@ public class StateViewModel: ObservableObject, DynamicViewModel {
         self._machine = Reference(reference: machine)
         self.path = path
         self._location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
-        self._width = min(max(minWidth, width), maxWidth)
-        self._height = height
+        self.__width = min(max(minWidth, width), maxWidth)
+        self.__height = height
         self.expanded = expanded
         self._collapsedHeight = collapsedHeight
         self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
@@ -220,8 +220,8 @@ public class StateViewModel: ObservableObject, DynamicViewModel {
         self._machine = Reference(reference: machine)
         self.path = path
         self._location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
-        self._width = min(max(minWidth, width), maxWidth)
-        self._height = height
+        self.__width = min(max(minWidth, width), maxWidth)
+        self.__height = height
         self.expanded = expanded
         self._collapsedWidth = collapsedWidth
         self._collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
@@ -416,7 +416,7 @@ public class StateViewModel: ObservableObject, DynamicViewModel {
     }
     
     func finishDrag(gesture: DragGesture.Value) {
-        self.handleDrag(gesture: gesture)
+        //self.handleDrag(gesture: gesture)
         self.isDragging = false
         self.isStretchingY = false
         self.isStretchingX = false
