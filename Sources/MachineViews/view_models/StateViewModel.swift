@@ -15,7 +15,7 @@ import Attributes
 
 import Combine
 
-public final class StateViewModel: ObservableObject, Stretchable, BoundedStretchable, Collapsable, Positionable, DynamicViewModel {
+public final class StateViewModel: DynamicViewModel {
     
     @Reference public var machine: Machine
     
@@ -36,7 +36,7 @@ public final class StateViewModel: ObservableObject, Stretchable, BoundedStretch
     
     @Published var __width: CGFloat
     
-    var _width: CGFloat {
+    public var _width: CGFloat {
         get {
             __width
         }
@@ -47,7 +47,7 @@ public final class StateViewModel: ObservableObject, Stretchable, BoundedStretch
     
     @Published var __height: CGFloat
     
-    var _height: CGFloat {
+    public var _height: CGFloat {
         get {
             __height
         }
@@ -106,17 +106,17 @@ public final class StateViewModel: ObservableObject, Stretchable, BoundedStretch
         elementMaxWidth - buttonDimensions
     }
     
-    let minWidth: CGFloat = 200.0
+    public let minWidth: CGFloat = 200.0
     
-    let maxWidth: CGFloat = 1200.0
+    public let maxWidth: CGFloat = 1200.0
     
-    var minHeight: CGFloat {
+    public var minHeight: CGFloat {
         CGFloat(actions.count - collapsedActions.count) * minActionHeight +
             CGFloat(collapsedActions.count) * minCollapsedActionHeight +
             minTitleHeight + bottomPadding + topPadding + 20.0
     }
     
-    let maxHeight: CGFloat = 600.0
+    public let maxHeight: CGFloat = 600.0
     
     let minEditWidth: CGFloat = 800.0
     

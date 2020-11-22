@@ -13,13 +13,13 @@ import SwiftUI
 
 protocol Stretchable {
     
-    var width: CGFloat {get set}
+    var width: CGFloat { get set }
     
-    var height: CGFloat {get set}
+    var height: CGFloat { get set }
     
-    var isStretchingX: Bool {get set}
+    var isStretchingX: Bool { get set }
     
-    var isStretchingY: Bool {get set}
+    var isStretchingY: Bool { get set }
     
     mutating func stretchHorizontal(gesture: DragGesture.Value)
     

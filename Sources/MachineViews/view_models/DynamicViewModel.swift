@@ -11,10 +11,10 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol DynamicViewModel: Positionable, Collapsable, Dragable {
+protocol DynamicViewModel: ObservableObject, Positionable, Collapsable, Dragable, _BoundedStretchable {
     
-    mutating func handleCollapsedDrag(gesture: DragGesture.Value)
+    func handleCollapsedDrag(gesture: DragGesture.Value)
     
-    mutating func finishCollapsedDrag(gesture: DragGesture.Value)
+    func finishCollapsedDrag(gesture: DragGesture.Value)
     
 }
