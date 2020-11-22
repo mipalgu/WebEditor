@@ -32,14 +32,14 @@ public struct MachineView: View {
                 StateView(editorViewModel: editorViewModel, viewModel: $0)
             }
             ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) in
-                ForEach(stateViewModel.transitions.indices, id: \.self) { (index: Int) -> AnyView in
-                    return AnyView(TransitionView(
+                ForEach(stateViewModel.transitions.indices, id: \.self) { (index: Int) in
+                    TransitionView(
                         viewModel: stateViewModel.transitionViewModel(
                             transition: stateViewModel.transitions[index],
                             index: index,
                             target: viewModel.getStateViewModel(stateName: stateViewModel.transitions[index].target)
                         )
-                    ))
+                    )
                 }
             }
         }
