@@ -80,7 +80,7 @@ extension BoundedStretchable where Self: _BoundedStretchable {
     }
     
     func stretchHorizontal(gesture: DragGesture.Value) {
-        if onRightEdge(point: gesture.location) {
+        if gesture.location.x >= self.location.x {
             self.width = stretchWidth(gesture: gesture)
             return
         }
@@ -88,7 +88,7 @@ extension BoundedStretchable where Self: _BoundedStretchable {
     }
     
     func stretchVertical(gesture: DragGesture.Value) {
-        if onBottomEdge(point: gesture.location) {
+        if gesture.location.y >= self.location.y {
             self.height = stretchHeight(gesture: gesture)
             return
         }
