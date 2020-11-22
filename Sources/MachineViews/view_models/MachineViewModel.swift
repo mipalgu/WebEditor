@@ -21,7 +21,9 @@ public class MachineViewModel: ObservableObject {
     
     @Published public var states: [StateViewModel]
     
-    let path: Attributes.Path<Machine, Machine>
+    public var path: Attributes.Path<Machine, Machine> {
+        machine.value.path
+    }
     
     public var name: String {
         machine.value[keyPath: path.path].name
@@ -31,13 +33,12 @@ public class MachineViewModel: ObservableObject {
         machine.value.id
     }
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machine>) {
+    public init(machine: Ref<Machine>) {
         self.machine = machine
-        self.path = path
-        let statesPath: Attributes.Path<Machine, [Machines.State]> = path.states
+        let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.value.path.states
         let states: [Machines.State] = machine.value[keyPath: statesPath.path]
         self.states = states.indices.map {
-            StateViewModel(machine: machine, path: path.states[$0])
+            StateViewModel(machine: machine, path: machine.value.path.states[$0])
         }
         self.machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
     }

@@ -64,7 +64,7 @@ struct ContentView: View {
         self.machineRef = machineRef
         let view: ViewType = ViewType.machine(id: machineRef.value.id)
         self._editorViewModel = StateObject(wrappedValue: EditorViewModel(
-            machines: [MachineViewModel(machine: machineRef, path: machineRef.value.path)],
+            machines: [MachineViewModel(machine: machineRef)],
             mainView: view,
             focusedView: view
         ))
