@@ -17,6 +17,8 @@ struct MenuView: View {
     
     @State var openDialogue: Bool = false
     
+    @Binding var machine: Machine
+    
     @EnvironmentObject var config: Config
     
     var body: some View {
@@ -56,6 +58,9 @@ struct MenuView: View {
                         .font(config.fontBody)
                 }
             }
+            Spacer()
+            Text(machine.name)
+                .font(config.fontTitle1)
             Spacer()
         }
         .padding(20.0)

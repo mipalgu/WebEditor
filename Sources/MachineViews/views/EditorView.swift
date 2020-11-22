@@ -28,7 +28,7 @@ public struct EditorView: View {
     
     public var body: some View {
         VStack {
-            MenuView()
+            MenuView(machine: machineViewModel.$machine.asBinding)
                 .background(config.stateColour)
             HStack {
                 MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)

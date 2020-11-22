@@ -25,13 +25,13 @@ struct FocusedAttributesView: View {
             AttributeGroupsView(
                 machine: $machine,
                 path: machine.path.attributes,
-                label: "\(machine.name) Attributes"
+                label: "\(machine.name) Machine Attributes"
             )
         case .state(_, let stateIndex):
             AttributeGroupsView(
                 machine: $machine,
                 path: machine.path.states[stateIndex].attributes,
-                label: "\(machine.states[stateIndex].name) Attributes"
+                label: "\(machine.states[stateIndex].name) State Attributes"
             )
         default:
             EmptyView()
