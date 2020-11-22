@@ -13,9 +13,11 @@ import SwiftUI
 import Machines
 import Attributes
 
+import Combine
+
 public class StateViewModel: ObservableObject {
     
-    @Published public var machine: Ref<Machine>
+    @Reference public var machine: Machine
     
     let path: Attributes.Path<Machine, Machines.State>
     
@@ -128,15 +130,15 @@ public class StateViewModel: ObservableObject {
     }
     
     public var name: String {
-        String(machine.value[keyPath: path.path].name)
+        String(machine[keyPath: path.path].name)
     }
     
     var actions: [Machines.Action] {
-        machine.value[keyPath: path.path].actions
+        machine[keyPath: path.path].actions
     }
     
     var attributes: [AttributeGroup] {
-        machine.value[keyPath: path.path].attributes
+        machine[keyPath: path.path].attributes
     }
     
     var elementMinWidth: CGFloat {
@@ -156,7 +158,7 @@ public class StateViewModel: ObservableObject {
     }
     
     var isAccepting: Bool {
-        machine.value[keyPath: path.path].transitions.isEmpty
+        machine[keyPath: path.path].transitions.isEmpty
     }
     
     var isEmpty: Bool {
@@ -178,19 +180,19 @@ public class StateViewModel: ObservableObject {
     @Published var highlighted: Bool
     
     var machineName: String {
-        self.machine.value.name
+        self.machine.name
     }
     
     var machineId: UUID {
-        self.machine.value.id
+        self.machine.id
     }
     
     var stateIndex: Int {
-        self.machine.value.states.firstIndex(of: self.machine.value[keyPath: path.path]).wrappedValue
+        self.machine.states.firstIndex(of: self.machine[keyPath: path.path]).wrappedValue
     }
     
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false) {
-        self.machine = machine
+        self._machine = Reference(reference: machine)
         self.path = path
         self.location = location
         self._width = min(max(minWidth, width), maxWidth)
@@ -200,10 +202,11 @@ public class StateViewModel: ObservableObject {
         self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
         self.collapsedActions = collapsedActions
         self.highlighted = highlighted
+        self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
     }
     
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false) {
-        self.machine = machine
+        self._machine = Reference(reference: machine)
         self.path = path
         self.location = location
         self._width = min(max(minWidth, width), maxWidth)
@@ -213,6 +216,7 @@ public class StateViewModel: ObservableObject {
         self._collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
         self.collapsedActions = collapsedActions
         self.highlighted = highlighted
+        self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
     }
     
     public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
@@ -220,7 +224,7 @@ public class StateViewModel: ObservableObject {
     }
     
     func isEmpty(forAction action: String) -> Bool {
-        machine.value[keyPath: path.path].actions.first { $0.name == action }?.implementation.isEmpty ?? true
+        machine[keyPath: path.path].actions.first { $0.name == action }?.implementation.isEmpty ?? true
     }
     
     func toggleExpand() {

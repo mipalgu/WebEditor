@@ -32,7 +32,7 @@ struct StateExpandedView: View {
             .overlay (
                 VStack {
                     HStack {
-                        LineView(machine: viewModel.machine.asBinding, path: viewModel.path.name, label: viewModel.name)
+                        LineView(machine: viewModel.$machine.asBinding, path: viewModel.path.name, label: viewModel.name)
                             .multilineTextAlignment(.center)
                             .font(config.fontTitle2)
                             .background(config.fieldColor)
@@ -53,7 +53,7 @@ struct StateExpandedView: View {
                     ScrollView {
                         ForEach(Array(viewModel.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
                             CodeViewWithDropDown(
-                                machine: viewModel.machine.asBinding,
+                                machine: viewModel.$machine.asBinding,
                                 path: viewModel.path.actions[index].implementation,
                                 language: .swift,
                                 collapsed: viewModel.createCollapsedBinding(forAction: action)
@@ -83,7 +83,7 @@ struct StateExpandedView: View {
             editorViewModel.changeMainView(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
         }
         .onTapGesture(count: 1) {
-            editorViewModel.machines.first { viewModel.machine.value.name == $0.name }?.removeHighlights()
+            editorViewModel.machines.first { viewModel.machineName == $0.name }?.removeHighlights()
             viewModel.highlighted = true
             editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
         }
