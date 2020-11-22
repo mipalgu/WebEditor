@@ -15,7 +15,7 @@ import Attributes
 
 import Combine
 
-public class StateViewModel: ObservableObject {
+public class StateViewModel: ObservableObject, DynamicViewModel {
     
     @Reference public var machine: Machine
     
