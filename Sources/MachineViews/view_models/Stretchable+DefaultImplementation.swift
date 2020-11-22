@@ -11,27 +11,32 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol BoundedStretchable: Stretchable {
-    var _width: CGFloat {get set}
+protocol _BoundedStretchable: class {
     
-    var _height: CGFloat {get set}
+    var _width: CGFloat { get set }
     
-    var minWidth: CGFloat {get}
+    var _height: CGFloat { get set }
     
-    var maxWidth: CGFloat {get}
-    
-    var minHeight: CGFloat {get}
-    
-    var maxHeight: CGFloat {get}
 }
 
-extension BoundedStretchable {
+protocol BoundedStretchable: Stretchable {
+    
+    var minWidth: CGFloat { get }
+    
+    var maxWidth: CGFloat { get }
+    
+    var minHeight: CGFloat { get }
+    
+    var maxHeight: CGFloat { get }
+}
+
+extension BoundedStretchable where Self: _BoundedStretchable {
     
     var width: CGFloat {
         get {
             min(max(self._width, self.minWidth), self.maxWidth)
         }
-        mutating set {
+        set {
             self._width = min(max(self.minWidth, newValue), self.maxWidth)
         }
     }
@@ -40,7 +45,7 @@ extension BoundedStretchable {
         get {
             min(max(self._height, self.minHeight), self.maxHeight)
         }
-        mutating set {
+        set {
             self._height = min(max(self.minHeight, newValue), self.maxHeight)
         }
     }

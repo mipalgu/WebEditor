@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol Collapsable: Stretchable, BoundedStretchable {
+protocol Collapsable: BoundedStretchable {
     
     var expanded: Bool {get set}
     
@@ -27,6 +27,6 @@ protocol Collapsable: Stretchable, BoundedStretchable {
     
     var collapsedMaxHeight: CGFloat {get}
     
-    mutating func toggleExpand()
+    func toggleExpand()
     
 }
