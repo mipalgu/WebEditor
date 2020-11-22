@@ -66,17 +66,19 @@ extension BoundedStretchable where Self: _BoundedStretchable {
     func stretchHorizontal(gesture: DragGesture.Value) {
         if gesture.location.x >= self.location.x {
             self.width = stretchWidth(gesture: gesture)
-            return
+        } else {
+            self.width = -stretchWidth(gesture: gesture)
         }
-        self.width = -stretchWidth(gesture: gesture)
+        self.location = CGPoint(x: max(self.location.x, self.width / 2.0), y: self.location.y)
     }
     
     func stretchVertical(gesture: DragGesture.Value) {
         if gesture.location.y >= self.location.y {
             self.height = stretchHeight(gesture: gesture)
-            return
+        } else {
+            self.height = -stretchHeight(gesture: gesture)
         }
-        self.height = -stretchHeight(gesture: gesture)
+        self.location = CGPoint(x: self.location.x, y: max(self.location.y, self.height / 2.0))
     }
     
 }
