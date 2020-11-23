@@ -38,11 +38,13 @@ public struct LineView: View {
         VStack(alignment: .leading) {
             TextField(label, text: $value, onCommit: {
                 guard let path = self.path else {
+                    onChange(value)
                     return
                 }
                 do {
                     try machine.value.modify(attribute: path, value: value)
                     error = nil
+                    onChange(value)
                     return
                 } catch let e as MachinesError where e.path.isSame(as: path) {
                     error = e.message
@@ -56,7 +58,7 @@ public struct LineView: View {
             if let error = self.error {
                 Text(error).foregroundColor(.red)
             }
-        }.onChange(of: value, perform: onChange)
+        }
     }
 }
 
