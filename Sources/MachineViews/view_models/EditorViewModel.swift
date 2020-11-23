@@ -33,6 +33,16 @@ public class EditorViewModel: ObservableObject {
     
     let rightPaneMinWidth: CGFloat = 300
     
+    let leftPaneMaxWidth: CGFloat = 500
+    
+    let leftPaneMinWidth: CGFloat = 300
+    
+    let mainViewMinWidth: CGFloat = 500
+    
+    var editorMinWidth: CGFloat {
+        rightPaneMinWidth + leftPaneMinWidth + 2.0 * dividerWidth + mainViewMinWidth
+    }
+    
     public let logSize: UInt16
     
     public var currentMachine: MachineViewModel {
@@ -40,7 +50,7 @@ public class EditorViewModel: ObservableObject {
     }
     
     var mainViewWidth: CGFloat {
-        rightDividerLocation - dividerWidth / 2.0
+        max(rightDividerLocation - dividerWidth / 2.0, mainViewMinWidth)
     }
     
     public var log: String {
@@ -111,6 +121,14 @@ public class EditorViewModel: ObservableObject {
             let _ = errorLog.popLast()
         }
         errorLog.insert(error, at: 0)
+    }
+    
+    func getRightDividerLocation(width: CGFloat) -> CGFloat {
+        min(max(width - rightPaneMaxWidth - dividerWidth / 2.0, rightDividerLocation), width - rightPaneMinWidth - dividerWidth / 2.0)
+    }
+    
+    func getMainViewWidth(width: CGFloat) -> CGFloat {
+        min(mainViewWidth, width - rightPaneWidth(width: width) - dividerWidth)
     }
     
     func dragRightDividor(width: CGFloat, gesture: DragGesture.Value) {

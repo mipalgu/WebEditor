@@ -33,11 +33,11 @@ public struct EditorView: View {
             HStack {
                 GeometryReader{ reader in
                     MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
-                        .frame(width: viewModel.mainViewWidth)
+                        .frame(width: viewModel.getMainViewWidth(width: reader.size.width))
                     Divider()
                         .frame(width: viewModel.dividerWidth, height: reader.size.height)
                         .background(config.borderColour)
-                        .position(x: viewModel.rightDividerLocation, y: reader.size.height / 2.0)
+                        .position(x: viewModel.getRightDividerLocation(width: reader.size.width), y: reader.size.height / 2.0)
                         .gesture(DragGesture(minimumDistance: 0.0)
                             .onChanged({ viewModel.dragRightDividor(width: reader.size.width, gesture: $0) })
                             .onEnded({ viewModel.finishDraggingRight(width: reader.size.width, gesture: $0) })
@@ -48,5 +48,6 @@ public struct EditorView: View {
                 }
             }
         }
+        .frame(minWidth: viewModel.editorMinWidth)
     }
 }
