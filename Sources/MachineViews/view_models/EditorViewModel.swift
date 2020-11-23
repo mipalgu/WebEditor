@@ -25,10 +25,22 @@ public class EditorViewModel: ObservableObject {
     
     @Published public var errorLog: [Error]
     
+    @Published public var rightDividerLocation: CGFloat
+    
+    let dividerWidth: CGFloat = 5.0
+    
+    let rightPaneMaxWidth: CGFloat = 500
+    
+    let rightPaneMinWidth: CGFloat = 300
+    
     public let logSize: UInt16
     
     public var currentMachine: MachineViewModel {
         machines[currentMachineIndex]
+    }
+    
+    var mainViewWidth: CGFloat {
+        rightDividerLocation - dividerWidth / 2.0
     }
     
     public var log: String {
@@ -43,12 +55,17 @@ public class EditorViewModel: ObservableObject {
         }
     }
     
-    public init(machines: [MachineViewModel], mainView: ViewType = .none, focusedView: ViewType = .none, currentMachineIndex: Int = 0, logSize: UInt16 = 50) {
+    var draggingRight: Bool = false
+    
+    var originalLocation: CGFloat = 0.0
+    
+    public init(machines: [MachineViewModel], mainView: ViewType = .none, focusedView: ViewType = .none, currentMachineIndex: Int = 0, logSize: UInt16 = 50, rightDividerLocation: CGFloat = 1400) {
         self.machines = machines
         self.mainView = mainView
         self.focusedView = focusedView
         self.currentMachineIndex = currentMachineIndex
         self.logSize = logSize
+        self.rightDividerLocation = rightDividerLocation
         self.errorLog = []
         self.errorLog.reserveCapacity(Int(logSize))
     }
@@ -94,6 +111,28 @@ public class EditorViewModel: ObservableObject {
             let _ = errorLog.popLast()
         }
         errorLog.insert(error, at: 0)
+    }
+    
+    func dragRightDividor(width: CGFloat, gesture: DragGesture.Value) {
+        if !draggingRight {
+            originalLocation = rightDividerLocation
+            draggingRight = true
+            return
+        }
+        rightDividerLocation = min(max(width - rightPaneMaxWidth, originalLocation + gesture.translation.width), width - rightPaneMinWidth)
+    }
+    
+    func finishDraggingRight(width: CGFloat, gesture: DragGesture.Value) {
+        dragRightDividor(width: width, gesture: gesture)
+        draggingRight = false
+    }
+    
+    func rightPaneWidth(width: CGFloat) -> CGFloat {
+        min(max(width - rightDividerLocation - dividerWidth / 2.0, rightPaneMinWidth), rightPaneMaxWidth)
+    }
+    
+    func rightPaneLocation(width: CGFloat) -> CGFloat {
+        width - rightPaneWidth(width: width) / 2.0
     }
     
 }
