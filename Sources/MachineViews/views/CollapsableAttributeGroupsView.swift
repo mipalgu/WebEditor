@@ -42,7 +42,7 @@ struct CollapsableAttributeGroupsView: View {
                         Spacer()
                     }
                     Text(label.capitalized)
-                        .font(config.fontTitle3)
+                        .font(config.fontTitle2)
                         .padding(.horizontal, 10)
                     if collapseLeft {
                         Spacer()
@@ -85,15 +85,15 @@ struct CollapsableAttributeGroupsView: View {
                 Spacer()
                 if collapseLeft {
                     Text(label.capitalized)
-                        .font(config.fontTitle3)
+                        .font(config.fontTitle2)
                         .rotationEffect(Angle(degrees: -90.0))
-                        .frame(width: 300, height: 300)
+                        .frame(minWidth: 500, maxWidth: .infinity, maxHeight: 300)
                         .scaledToFit()
                 } else {
                     Text(label.capitalized)
-                        .font(config.fontTitle3)
+                        .font(config.fontTitle2)
                         .rotationEffect(Angle(degrees: 90.0))
-                        .frame(width: 300, height: 300)
+                        .frame(minWidth: 500, maxWidth: .infinity, maxHeight: 300)
                         .scaledToFit()
                 }
                 Spacer()
