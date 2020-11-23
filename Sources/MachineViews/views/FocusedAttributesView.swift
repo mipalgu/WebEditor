@@ -19,20 +19,21 @@ struct FocusedAttributesView: View {
     
     @Binding var viewType: ViewType
     
+    let label: String
+    
+    @Binding var collapsed: Bool
+    
+    let collapseLeft: Bool
+    let buttonSize: CGFloat
+    let buttonWidth: CGFloat
+    let buttonHeight: CGFloat
+    
     var body: some View {
         switch viewType {
         case .machine:
-            AttributeGroupsView(
-                machine: machine,
-                path: Machine.path.attributes,
-                label: "\(machine.value.name) Machine Attributes"
-            )
+            CollapsableAttributeGroupsView(machine: machine, path: Machine.path.attributes, label: "\(machine.value.name) Machine Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
         case .state(_, let stateIndex):
-            AttributeGroupsView(
-                machine: machine,
-                path: Machine.path.states[stateIndex].attributes,
-                label: "\(machine.value.states[stateIndex].name) State Attributes"
-            )
+            CollapsableAttributeGroupsView(machine: machine, path: Machine.path.states[stateIndex].attributes, label: "\(machine.value.states[stateIndex].name) State Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
         default:
             EmptyView()
         }
