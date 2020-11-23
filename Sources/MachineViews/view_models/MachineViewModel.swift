@@ -40,7 +40,7 @@ public class MachineViewModel: ObservableObject {
         let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.value.path.states
         let states: [Machines.State] = machine.value[keyPath: statesPath.path]
         self.states = states.indices.map {
-            StateViewModel(machine: machine, path: machine.value.path.states[$0])
+            StateViewModel(machine: machine, path: machine.value.path.states[$0], location: CGPoint(x: 100, y: $0 * 200))
         }
         self.listen(to: $machine)
     }
