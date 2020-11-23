@@ -53,11 +53,5 @@ public struct StateEditView: View {
             }
             .padding(viewModel.editPadding)
         }
-        
-        //.frame(maxHeight: .infinity)
-            /*Divider()
-                .border(Color.black.opacity(0.6), width: 1)
-            AttributeGroupsView(machine: $viewModel.machine, path: viewModel.path.attributes, label: "State Attributes")
-                .frame(minWidth: viewModel.minDetailsWidth, maxWidth: viewModel.maxDetailsWidth)*/
     }
 }
