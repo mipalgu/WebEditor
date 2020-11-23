@@ -42,7 +42,7 @@ struct CollapsableAttributeGroupsView: View {
                         Spacer()
                     }
                     Text(label.capitalized)
-                        .font(config.fontTitle2)
+                        .font(config.fontTitle3)
                         .padding(.horizontal, 10)
                     if collapseLeft {
                         Spacer()
