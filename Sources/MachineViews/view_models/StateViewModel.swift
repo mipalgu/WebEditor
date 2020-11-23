@@ -255,7 +255,9 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     }
     
     func isEmpty(forAction action: String) -> Bool {
-        machine[keyPath: path.path].actions.first { $0.name == action }?.implementation.isEmpty ?? true
+        machine[keyPath: path.path].actions.first {
+            $0.name == action
+        }?.implementation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true
     }
     
     func createTitleView(forAction action: String, color: Color) -> AnyView {
