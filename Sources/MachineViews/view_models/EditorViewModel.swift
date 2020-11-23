@@ -119,7 +119,7 @@ public class EditorViewModel: ObservableObject {
             draggingRight = true
             return
         }
-        rightDividerLocation = min(max(width - rightPaneMaxWidth, originalLocation + gesture.translation.width), width - rightPaneMinWidth)
+        rightDividerLocation = min(max(width - rightPaneMaxWidth - dividerWidth / 2.0, originalLocation + gesture.translation.width), width - rightPaneMinWidth - dividerWidth / 2.0)
     }
     
     func finishDraggingRight(width: CGFloat, gesture: DragGesture.Value) {
