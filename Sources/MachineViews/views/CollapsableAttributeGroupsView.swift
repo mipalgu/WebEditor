@@ -83,6 +83,20 @@ struct CollapsableAttributeGroupsView: View {
                 }
                 .padding(.horizontal, 10)
                 Spacer()
+                if collapseLeft {
+                    Text(label.capitalized)
+                        .font(config.fontTitle3)
+                        .rotationEffect(Angle(degrees: -90.0))
+                        .frame(width: 300, height: 300)
+                        .scaledToFit()
+                } else {
+                    Text(label.capitalized)
+                        .font(config.fontTitle3)
+                        .rotationEffect(Angle(degrees: 90.0))
+                        .frame(width: 300, height: 300)
+                        .scaledToFit()
+                }
+                Spacer()
             }
         }
     }
