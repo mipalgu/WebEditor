@@ -120,6 +120,14 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
     
     let minEditWidth: CGFloat = 800.0
     
+    let maxEditTitleHeight: CGFloat = 32.0
+    
+    let editActionPadding: CGFloat = 20.0
+    
+    let minEditActionHeight: CGFloat = 200.0
+    
+    let editPadding: CGFloat = 10.0
+    
     let topPadding: CGFloat = 10.0
     
     let leftPadding: CGFloat = 20.0
@@ -360,6 +368,12 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
             return collapsedActionHeight
         }
         return collapsed ? collapsedActionHeight : actionHeight
+    }
+    
+    func getHeightOfActionForEdit(height editHeight: CGFloat) -> CGFloat {
+        let numberOfActions = CGFloat(actions.count)
+        let availableSpace = editHeight - maxTitleHeight - editPadding * 2.0 - numberOfActions * editActionPadding
+        return max(minEditActionHeight, availableSpace / numberOfActions)
     }
     
 }
