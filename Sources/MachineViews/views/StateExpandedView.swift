@@ -45,7 +45,7 @@ struct StateExpandedView: View {
                                     maxHeight: viewModel.maxTitleHeight
                                 )
                                 .clipped()
-                            Button(action: { viewModel.toggleExpand() }) {
+                            Button(action: { viewModel.toggleExpand(frameWidth: reader.size.width, frameHeight: reader.size.height) }) {
                                 Image(systemName: "arrowtriangle.down.fill")
                                     .font(.system(size: viewModel.buttonSize, weight: .regular))
                                     .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)

@@ -22,6 +22,7 @@ struct StateCollapsedView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
+        GeometryReader { reader in
         Ellipse()
             .strokeBorder(viewModel.highlighted ? config.highlightColour : config.borderColour, lineWidth: 2.0, antialiased: true)
             .background(Ellipse().foregroundColor(config.stateColour))
@@ -49,7 +50,7 @@ struct StateCollapsedView: View {
                             .frame(maxWidth: viewModel.collapsedWidth, maxHeight: viewModel.collapsedHeight)
                             .clipped()
                     }
-                    Button(action: { viewModel.toggleExpand() }) {
+                    Button(action: { viewModel.toggleExpand(frameWidth: reader.size.width, frameHeight: reader.size.height) }) {
                         Image(systemName: "arrowtriangle.left.fill")
                             .font(.system(size: viewModel.buttonSize, weight: .regular))
                             .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
@@ -74,10 +75,10 @@ struct StateCollapsedView: View {
                 editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
             }
             .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
-                self.viewModel.handleCollapsedDrag(gesture: $0)
+                self.viewModel.handleCollapsedDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
             }.onEnded {
-                self.viewModel.finishCollapsedDrag(gesture: $0)
+                self.viewModel.finishCollapsedDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
             })
-            
+        }
     }
 }

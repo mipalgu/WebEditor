@@ -21,18 +21,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
     
     let path: Attributes.Path<Machine, Machines.State>
     
-    @Published var _location: CGPoint
-    
-    var location: CGPoint {
-        get {
-            _location
-        }
-        set {
-            let minX = expanded ? width / 2.0 : collapsedWidth / 2.0
-            let minY = expanded ? height / 2.0 : collapsedHeight / 2.0
-            self._location = CGPoint(x: max(minX, newValue.x), y: max(minY, newValue.y))
-        }
-    }
+    @Published var location: CGPoint
     
     @Published var __width: CGFloat
     
@@ -58,33 +47,11 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
     
     @Published var expanded: Bool
     
-    @Published fileprivate var _collapsedWidth: CGFloat
+    @Published var _collapsedWidth: CGFloat
     
-    @Published fileprivate var _collapsedHeight: CGFloat
+    @Published var _collapsedHeight: CGFloat
     
     @Published var collapsedActions: [String: Bool]
-    
-    var collapsedWidth: CGFloat {
-        get {
-            min(max(collapsedMinWidth, _collapsedWidth), collapsedMaxWidth)
-        }
-        set {
-            let newWidth = min(max(collapsedMinWidth, newValue), collapsedMaxWidth)
-            _collapsedWidth = newWidth
-            _collapsedHeight = collapsedMinHeight / collapsedMinWidth * newWidth
-        }
-    }
-    
-    var collapsedHeight: CGFloat {
-        get {
-            min(max(collapsedMinHeight, _collapsedHeight), collapsedMaxHeight)
-        }
-        set {
-            let newHeight = min(max(collapsedMinHeight, newValue), collapsedMaxHeight)
-            _collapsedHeight = newHeight
-            _collapsedWidth = collapsedMinWidth / collapsedMinHeight * newHeight
-        }
-    }
     
     let collapsedMinWidth: CGFloat = 150.0
     
@@ -231,7 +198,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false) {
         self._machine = Reference(reference: machine)
         self.path = path
-        self._location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
+        self.location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
         self.__width = min(max(minWidth, width), maxWidth)
         self.__height = height
         self.expanded = expanded
@@ -250,7 +217,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false) {
         self._machine = Reference(reference: machine)
         self.path = path
-        self._location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
+        self.location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
         self.__width = min(max(minWidth, width), maxWidth)
         self.__height = height
         self.expanded = expanded
@@ -274,11 +241,6 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
         machine[keyPath: path.path].actions.first { $0.name == action }?.implementation.isEmpty ?? true
     }
     
-    func toggleExpand() {
-        expanded = !expanded
-        self.location = _location
-    }
-    
     func createTitleView(forAction action: String, color: Color) -> AnyView {
         if self.isEmpty(forAction: action) {
             return AnyView(
@@ -295,19 +257,6 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
             get: { self.collapsedActions[action] ?? false },
             set: { self.collapsedActions[action] = $0 }
         )
-    }
-    
-    func handleCollapsedDrag(gesture: DragGesture.Value) {
-        if !isDragging {
-            offset = CGPoint(x: gesture.startLocation.x - location.x, y: gesture.startLocation.y - location.y)
-            isDragging = true
-        }
-        //updateLocationWithOffset(newLocation: gesture.location)
-    }
-    
-    func finishCollapsedDrag(gesture: DragGesture.Value) {
-        self.handleCollapsedDrag(gesture: gesture)
-        self.isDragging = false
     }
     
     fileprivate func collapsedEdge(theta: Double) -> CGPoint {
