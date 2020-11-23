@@ -31,6 +31,8 @@ class TransitionViewModel: ObservableObject {
     
     let pointDiameter: CGFloat = 5.0
     
+    let arrowHeadLength: Double = 50.0
+    
     var condition: String {
         get {
             String(machine[keyPath: path.path].condition ?? "")
@@ -48,6 +50,22 @@ class TransitionViewModel: ObservableObject {
         let dx = (point2.x - point1.x) / 2.0
         let dy = (point2.y - point1.y) / 2.0
         return CGPoint(x: point1.x + dx, y: point1.y + dy)
+    }
+    
+    var arrowPoint0: CGPoint {
+        let dx = point3.x - point2.x
+        let dy = point3.y - point2.y
+        let theta = atan2(Double(dy), Double(dx)) + Double.pi - Double.pi / 4.0
+        let r = arrowHeadLength
+        return CGPoint(x: point3.x + CGFloat(r * cos(theta)), y: point3.y + CGFloat(r * sin(theta)))
+    }
+    
+    var arrowPoint1: CGPoint {
+        let dx = point3.x - point2.x
+        let dy = point3.y - point2.y
+        let theta = atan2(Double(dy), Double(dx)) + Double.pi + Double.pi / 4.0
+        let r = arrowHeadLength
+        return CGPoint(x: point3.x + CGFloat(r * cos(theta)), y: point3.y + CGFloat(r * sin(theta)))
     }
     
     init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8) {
