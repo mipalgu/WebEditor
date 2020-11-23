@@ -55,7 +55,25 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     @Published var _collapsedHeight: CGFloat
     
-    @Published var collapsedActions: [String: Bool]
+    @Published var _collapsedActions: [String: Bool]
+    
+    var collapsedActions: [String: Bool] {
+        get {
+            if actions.count == _collapsedActions.count {
+                return _collapsedActions
+            }
+            actions.forEach { action in
+                guard let _ = _collapsedActions[action.name] else {
+                    _collapsedActions[action.name] = false
+                    return
+                }
+            }
+            return _collapsedActions
+        }
+        set {
+            _collapsedActions = newValue
+        }
+    }
     
     let collapsedMinWidth: CGFloat = 150.0
     
@@ -210,9 +228,9 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
         let actions = machine.value[keyPath: path.path].actions
         if collapsedActions.count != actions.count {
-            self.collapsedActions = actions.reduce(into: [:]) { $0[$1.name] = false }
+            self._collapsedActions = actions.reduce(into: [:]) { $0[$1.name] = false }
         } else {
-            self.collapsedActions = collapsedActions
+            self._collapsedActions = collapsedActions
         }
         self.highlighted = highlighted
         self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
@@ -229,9 +247,9 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self._collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
         let actions = machine.value[keyPath: path.path].actions
         if collapsedActions.count != actions.count {
-            self.collapsedActions = actions.reduce(into: [:]) { $0[$1.name] = false }
+            self._collapsedActions = actions.reduce(into: [:]) { $0[$1.name] = false }
         } else {
-            self.collapsedActions = collapsedActions
+            self._collapsedActions = collapsedActions
         }
         self.highlighted = highlighted
         self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
