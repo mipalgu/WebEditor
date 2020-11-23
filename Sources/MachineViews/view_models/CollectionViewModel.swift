@@ -115,7 +115,7 @@ public final class CollectionViewModel: ObservableObject {
         self.type = type
         self.currentElements = (path.map { machine[path: $0].value } ?? defaultValue).map { ListElement($0) }
         self.newAttribute = type.defaultValue
-        machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
+        self.listen(to: $machine)
     }
     
     public func addElement() {

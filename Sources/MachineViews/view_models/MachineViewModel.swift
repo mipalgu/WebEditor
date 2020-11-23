@@ -44,7 +44,7 @@ public class MachineViewModel: ObservableObject {
         self.states = states.indices.map {
             StateViewModel(machine: machine, path: machine.value.path.states[$0])
         }
-        self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
+        self.listen(to: $machine)
     }
     
     public func removeHighlights() {

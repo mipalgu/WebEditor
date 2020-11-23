@@ -233,7 +233,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
         self._collapsedActions = collapsedActions
         self.highlighted = highlighted
-        self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
+        self.listen(to: $machine)
     }
     
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false) {
@@ -247,7 +247,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self._collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
         self._collapsedActions = collapsedActions
         self.highlighted = highlighted
-        self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
+        self.listen(to: $machine)
     }
     
     public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
