@@ -15,7 +15,11 @@ import Attributes
 
 import Combine
 
-public final class StateViewModel: DynamicViewModel, Identifiable {
+public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
+    
+    public static func == (lhs: StateViewModel, rhs: StateViewModel) -> Bool {
+        lhs === rhs
+    }
     
     @Reference public var machine: Machine
     

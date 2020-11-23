@@ -60,4 +60,19 @@ public class MachineViewModel: ObservableObject {
         return vm
     }
     
+    public func deleteState(stateViewModel: StateViewModel) {
+        /*if !stateViewModel.highlighted {
+            return
+        }*/
+        guard let stateIndex = self.states.firstIndex(of: stateViewModel) else {
+            return
+        }
+        do {
+            try self.machine.deleteItem(table: self.path.states, atIndex: stateViewModel.stateIndex)
+        } catch let error {
+            print(error)
+        }
+        self.states.remove(at: stateIndex)
+    }
+    
 }

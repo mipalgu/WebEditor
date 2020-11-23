@@ -28,8 +28,17 @@ public struct MachineView: View {
     
     public var body: some View {
         ZStack {
-            ForEach(viewModel.states, id: \.name) {
-                StateView(editorViewModel: editorViewModel, viewModel: $0)
+            ForEach(viewModel.states, id: \.name) { (stateViewModel) -> AnyView in
+                AnyView(StateView(editorViewModel: editorViewModel, viewModel: stateViewModel)
+                    .contextMenu {
+                        Button(action: {
+                            viewModel.deleteState(stateViewModel: stateViewModel)
+                        }) {
+                            Text("Delete")
+                                .font(config.fontBody)
+                        }
+                        .keyboardShortcut(.delete)
+                    })
             }
             ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) in
                 ForEach(stateViewModel.transitions.indices, id: \.self) { (index: Int) in
