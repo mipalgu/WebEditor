@@ -15,14 +15,14 @@ import Attributes
 
 public struct AttributeGroupsView: View {
     
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, [AttributeGroup]>
     let label: String
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String) {
-        self._machine = machine
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String) {
+        self.machine = machine
         self.path = path
         self.label = label
     }
@@ -33,11 +33,11 @@ public struct AttributeGroupsView: View {
                 .font(.title3)
                 .foregroundColor(config.textColor)
             TabView {
-                ForEach(Array(machine[keyPath: path.path].indices), id: \.self) { index in
-                    AttributeGroupView(machine: $machine, path: path[index], label: machine[keyPath: path.path][index].name)
+                ForEach(Array(machine[path: path].value.indices), id: \.self) { index in
+                    AttributeGroupView(machine: machine, path: path[index], label: machine[path: path][index].name.value)
                         .padding(.horizontal, 10)
                         .tabItem {
-                            Text(machine[keyPath: path.path][index].name.pretty)
+                            Text(machine[path: path][index].name.value.pretty)
                         }
                 }
             }

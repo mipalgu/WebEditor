@@ -32,7 +32,7 @@ public struct EditorView: View {
                 .background(config.stateColour)
             HStack {
                 GeometryReader{ reader in
-                    AttributeGroupsView(machine: machineViewModel.$machine.asBinding, path: Machine.path.attributes, label: "Dependencies")
+                    AttributeGroupsView(machine: machineViewModel.$machine, path: Machine.path.attributes, label: "Dependencies")
                         .frame(width: viewModel.leftPaneWidth)
                         .position(x: viewModel.leftPaneWidth / 2.0, y: reader.size.height / 2.0)
                     Divider()
@@ -54,7 +54,7 @@ public struct EditorView: View {
                             .onChanged({ viewModel.dragRightDividor(width: reader.size.width, gesture: $0) })
                             .onEnded({ viewModel.finishDraggingRight(width: reader.size.width, gesture: $0) })
                         )
-                    FocusedAttributesView(machine: machineViewModel.$machine.asBinding, viewType: $viewModel.focusedView)
+                    FocusedAttributesView(machine: machineViewModel.$machine, viewType: $viewModel.focusedView)
                         .frame(width: viewModel.rightPaneWidth(width: reader.size.width))
                         .position(CGPoint(x: viewModel.rightPaneLocation(width: reader.size.width), y: reader.size.height / 2.0))
                 }

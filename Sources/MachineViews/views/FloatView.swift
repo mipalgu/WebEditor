@@ -15,7 +15,7 @@ import Attributes
 
 struct FloatView: View {
 
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, Double>?
     let label: String
     
@@ -23,11 +23,11 @@ struct FloatView: View {
     
     @EnvironmentObject var config: Config
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Double>?, label: String, defaultValue: Double = 0.0) {
-        self._machine = machine
+    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Double>?, label: String, defaultValue: Double = 0.0) {
+        self.machine = machine
         self.path = path
         self.label = label
-        self._value = State(initialValue: path.map { String(machine.wrappedValue[keyPath: $0.keyPath]) } ?? String(defaultValue))
+        self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
     }
     
     var body: some View {
@@ -39,12 +39,12 @@ struct FloatView: View {
                 return
             }
             do {
-                try machine.modify(attribute: path, value: value)
+                try machine.value.modify(attribute: path, value: value)
                 return
             } catch let e {
                 print("\(e)")
             }
-            self.value = String(machine[keyPath: path.keyPath])
+            self.value = String(machine[path: path].value)
         })
         .font(.body)
         .background(config.fieldColor)

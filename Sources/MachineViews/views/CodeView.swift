@@ -15,7 +15,7 @@ import Attributes
 
 struct CodeView<Label: View>: View {
     
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, Code>?
     let language: Language
     let label: () -> Label
@@ -24,16 +24,16 @@ struct CodeView<Label: View>: View {
     
     @EnvironmentObject var config: Config
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Code>?, label: String, language: Language, defaultValue: Code = "") where Label == Text {
+    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Code>?, label: String, language: Language, defaultValue: Code = "") where Label == Text {
         self.init(machine: machine, path: path, language: language, defaultValue: defaultValue) { Text(label.capitalized) }
     }
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Code>?, language: Language, defaultValue: Code = "", label: @escaping () -> Label) {
-        self._machine = machine
+    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Code>?, language: Language, defaultValue: Code = "", label: @escaping () -> Label) {
+        self.machine = machine
         self.path = path
         self.language = language
         self.label = label
-        self._value = State(initialValue: path.map { String(machine.wrappedValue[keyPath: $0.keyPath]) } ?? String(defaultValue))
+        self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
     }
     
     var body: some View {
@@ -53,12 +53,12 @@ struct CodeView<Label: View>: View {
                         return
                     }
                     do {
-                        try machine.modify(attribute: path, value: Code($0))
+                        try machine.value.modify(attribute: path, value: Code($0))
                         return
                     } catch let e {
                         print("\(e)")
                     }
-                    self.value = String(machine[keyPath: path.keyPath])
+                    self.value = String(machine[path: path].value)
                 }
         }
     }

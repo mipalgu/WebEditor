@@ -15,7 +15,7 @@ import Attributes
 
 public struct LineView: View {
     
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, String>?
     let label: String
     let onChange: (String) -> Void
@@ -26,11 +26,11 @@ public struct LineView: View {
     
     @State var error: String? = nil
     
-    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "", onChange: @escaping (String) -> Void = { _ in }) {
-        self._machine = machine
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "", onChange: @escaping (String) -> Void = { _ in }) {
+        self.machine = machine
         self.path = path
         self.label = label
-        self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue)
+        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
         self.onChange = onChange
     }
     
@@ -41,7 +41,7 @@ public struct LineView: View {
                     return
                 }
                 do {
-                    try machine.modify(attribute: path, value: value)
+                    try machine.value.modify(attribute: path, value: value)
                     error = nil
                     return
                 } catch let e as MachinesError where e.path.isSame(as: path) {
@@ -49,7 +49,7 @@ public struct LineView: View {
                 } catch let e {
                     print("\(e)", stderr)
                 }
-                value = machine[keyPath: path.path]
+                value = machine[path: path].value
             })
             .background(config.fieldColor)
             .foregroundColor(config.textColor)
@@ -66,7 +66,7 @@ struct LineView_Preview: PreviewProvider {
     
     static var previews: some View {
         LineView(
-            machine: Binding(get: { Self.machine }, set: { Self.machine = $0 }),
+            machine: Ref(copying: Machine.initialSwiftMachine),
             path: Machine.path.states[0].name,
             label: "State 0"
         ).environmentObject(Config())

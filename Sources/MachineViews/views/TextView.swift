@@ -15,7 +15,7 @@ import Attributes
 
 struct TextView: View {
     
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, String>?
     let label: String
     
@@ -23,11 +23,11 @@ struct TextView: View {
     
     @EnvironmentObject var config: Config
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "") {
-        self._machine = machine
+    init(machine: Ref<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "") {
+        self.machine = machine
         self.path = path
         self.label = label
-        self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue)
+        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
     }
     
     var body: some View {
@@ -49,12 +49,12 @@ struct TextView: View {
                         return
                     }
                     do {
-                        try machine.modify(attribute: path, value: $0)
+                        try machine.value.modify(attribute: path, value: $0)
                         return
                     } catch let e {
                         print("\(e)")
                     }
-                    self.value = machine[keyPath: path.keyPath]
+                    self.value = machine[path: path].value
                 }
         }
     }
