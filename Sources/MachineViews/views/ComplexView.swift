@@ -27,49 +27,7 @@ struct ComplexView: View {
         self.path = path
         self.label = label
         self.fields = fields
-        if let defaultValue = defaultValue {
-            self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue)
-            return
-        }
-        func computeDefaultValue(_ type: AttributeType) -> Attribute {
-            switch type {
-            case .line(let lineAttribute):
-                switch lineAttribute {
-                case .bool:
-                    return .bool(false)
-                case .enumerated(let validValues):
-                    return .enumerated(validValues.first ?? "", validValues: validValues)
-                case .expression(let language):
-                    return .expression("", language: language)
-                case .float:
-                    return .float(0.0)
-                case .integer:
-                    return .integer(0)
-                case .line:
-                    return .line("")
-                }
-            case .block(let blockAttribute):
-                switch blockAttribute {
-                case .code(let language):
-                    return .code("", language: language)
-                case .collection(let type):
-                    return .block(.collection([], type: type))
-                case .complex(let fields):
-                    let values = Dictionary(uniqueKeysWithValues: fields.map { (field) -> (Attributes.Label, Attribute) in
-                        return (field.name, computeDefaultValue(field.type))
-                    })
-                    return .complex(values, layout: fields)
-                case .enumerableCollection(let validValues):
-                    return .enumerableCollection(Set(), validValues: validValues)
-                case .table(let columns):
-                    return .table([], columns: columns.map { ($0.name, $0.type) })
-                case .text:
-                    return .text("")
-                }
-            }
-        }
-        let defaultValue = computeDefaultValue(.complex(layout: fields)).complexValue
-        self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue)
+        self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue ?? AttributeType.complex(layout: fields).defaultValue.complexValue)
     }
     
     var body: some View {
