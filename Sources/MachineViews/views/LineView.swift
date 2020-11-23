@@ -64,11 +64,11 @@ public struct LineView: View {
 
 struct LineView_Preview: PreviewProvider {
     
-    static var machine: Machine = Machine.initialSwiftMachine
+    static let machine: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine)
     
     static var previews: some View {
         LineView(
-            machine: Ref(copying: Machine.initialSwiftMachine),
+            machine: machine,
             path: Machine.path.states[0].name,
             label: "State 0"
         ).environmentObject(Config())
