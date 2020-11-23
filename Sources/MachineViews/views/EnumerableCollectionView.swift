@@ -15,7 +15,7 @@ import Attributes
 
 struct EnumerableCollectionView: View {
     
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, Set<String>>?
     let label: String
     let validValues: Set<String>
@@ -24,12 +24,12 @@ struct EnumerableCollectionView: View {
     
     @EnvironmentObject var config: Config
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Set<String>>?, label: String, validValues: Set<String>, defaultValue: Set<String> = []) {
-        self._machine = machine
+    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Set<String>>?, label: String, validValues: Set<String>, defaultValue: Set<String> = []) {
+        self.machine = machine
         self.path = path
         self.label = label
         self.validValues = validValues
-        self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue)
+        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
     }
     
     var body: some View {
@@ -62,12 +62,12 @@ struct EnumerableCollectionView: View {
                 return
             }
             do {
-                try machine.modify(attribute: path, value: $0)
+                try machine.value.modify(attribute: path, value: $0)
                 return
             } catch let e {
                 print("\(e)")
             }
-            self.value = machine[keyPath: path.keyPath]
+            self.value = machine[path: path].value
         }
     }
 }

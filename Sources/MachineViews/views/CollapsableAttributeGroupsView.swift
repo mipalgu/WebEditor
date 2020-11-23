@@ -15,7 +15,7 @@ import Attributes
 
 struct CollapsableAttributeGroupsView: View {
     
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     
     let path: Attributes.Path<Machine, [AttributeGroup]>
     let label: String
@@ -56,11 +56,11 @@ struct CollapsableAttributeGroupsView: View {
                     }
                 }
                 TabView {
-                    ForEach(Array(machine[keyPath: path.path].indices), id: \.self) { index in
-                        AttributeGroupView(machine: $machine, path: path[index], label: machine[keyPath: path.path][index].name)
+                    ForEach(Array(machine[path: path].value.indices), id: \.self) { index in
+                        AttributeGroupView(machine: machine, path: path[index], label: machine[path: path].value[index].name)
                             .padding(.horizontal, 10)
                             .tabItem {
-                                Text(machine[keyPath: path.path][index].name.pretty)
+                                Text(machine[path: path].value[index].name.pretty)
                             }
                     }
                 }

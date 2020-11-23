@@ -1,8 +1,8 @@
 /*
- * AttributeView.swift
+ * CollectionViewModel.swift
  * MachineViews
  *
- * Created by Callum McColl on 16/11/20.
+ * Created by Callum McColl on 23/11/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,32 +61,72 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
-import Machines
-import Attributes
 
-struct AttributeView: View{
+import Attributes
+import Machines
+
+public final class CollectionViewModel: ObservableObject {
     
-    @ObservedObject var machine: Ref<Machine>
-    @Binding var attribute: Attribute
-    let path: Attributes.Path<Machine, Attribute>?
-    let label: String
+    @Reference public var machine: Machine
+    public let path: Attributes.Path<Machine, [Attribute]>?
+    public let label: String
+    public let type: AttributeType
     
-    var body: some View {
-        switch attribute.type {
-        case .line:
-            LineAttributeView(
-                machine: machine,
-                attribute: $attribute.lineAttribute,
-                path: path?.lineAttribute,
-                label: label
-            )
-        case .block:
-            BlockAttributeView(
-                machine: machine,
-                attribute: $attribute.blockAttribute,
-                path: path?.blockAttribute,
-                label: label
-            )
+    @Published var newAttribute: Attribute
+    
+    @Published public var selection: Set<UUID> = []
+    
+    @Published private var currentElements: [ListElement<Attribute>]
+    
+    public var elements: [ListElement<Attribute>] {
+        get {
+            guard let path = path else {
+                return currentElements
+            }
+            let machineElements = $machine[path: path].value
+            let elements = zip(machineElements, currentElements).map { (machineElement, currentElement) -> ListElement<Attribute> in
+                if machineElement == currentElement.value {
+                    return currentElement
+                }
+                return ListElement(machineElement)
+            }
+            if machineElements.count <= elements.count {
+                return elements
+            }
+            return elements + machineElements[elements.count..<machineElements.count].map { ListElement($0) }
+        } set {
+            zip(currentElements, newValue).enumerated().forEach {
+                if $1.0.value == $1.1.value {
+                    return
+                }
+                currentElements[$0] = $1.1
+            }
+            if newValue.count > currentElements.count {
+                currentElements.append(contentsOf: newValue[currentElements.count..<newValue.count])
+            }
+            guard let path = path else {
+                return
+            }
+            let newElements = newValue.map { $0.value }
+            zip($machine[path: path].value, newElements).enumerated().forEach {
+                if $1.0 == $1.1 {
+                    return
+                }
+                $machine[path: path].value[$0] = $1.1
+            }
+            if newElements.count > $machine[path: path].value.count {
+                $machine[path: path].value.append(contentsOf: newElements[$machine[path: path].value.count..<newValue.count])
+            }
         }
     }
+    
+    init(machine: Ref<Machine>, path: Attributes.Path<Machine, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
+        self._machine = Reference(reference: machine)
+        self.path = path
+        self.label = label
+        self.type = type
+        self.currentElements = (path.map { machine[path: $0].value } ?? defaultValue).map { ListElement($0) }
+        self.newAttribute = type.defaultValue
+    }
+    
 }

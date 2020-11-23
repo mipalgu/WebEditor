@@ -15,7 +15,7 @@ import Attributes
 
 struct FocusedAttributesView: View {
     
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     
     @Binding var viewType: ViewType
     
@@ -31,9 +31,9 @@ struct FocusedAttributesView: View {
     var body: some View {
         switch viewType {
         case .machine:
-            CollapsableAttributeGroupsView(machine: $machine, path: machine.path.attributes, label: "\(machine.name) Machine Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
+            CollapsableAttributeGroupsView(machine: machine, path: Machine.path.attributes, label: "\(machine.value.name) Machine Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
         case .state(_, let stateIndex):
-            CollapsableAttributeGroupsView(machine: $machine, path: machine.path.states[stateIndex].attributes, label: "\(machine.states[stateIndex].name) State Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
+            CollapsableAttributeGroupsView(machine: machine, path: Machine.path.states[stateIndex].attributes, label: "\(machine.value.states[stateIndex].name) State Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
         default:
             EmptyView()
         }

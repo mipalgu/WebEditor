@@ -15,7 +15,7 @@ import Attributes
 
 struct ExpressionView: View {
     
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, Expression>?
     let label: String
     let language: Language
@@ -24,12 +24,12 @@ struct ExpressionView: View {
     
     @EnvironmentObject var config: Config
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Expression>?, label: String, language: Language, defaultValue: Expression = "") {
-        self._machine = machine
+    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Expression>?, label: String, language: Language, defaultValue: Expression = "") {
+        self.machine = machine
         self.path = path
         self.label = label
         self.language = language
-        self._value = State(initialValue: path.map { String(machine.wrappedValue[keyPath: $0.keyPath]) } ?? String(defaultValue))
+        self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
     }
     
     var body: some View {
@@ -38,12 +38,12 @@ struct ExpressionView: View {
                 return
             }
             do {
-                try machine.modify(attribute: path, value: Expression(value))
+                try machine.value.modify(attribute: path, value: Expression(value))
                 return
             } catch let e {
                 print("\(e)")
             }
-            self.value = String(machine[keyPath: path.keyPath])
+            self.value = String(machine[path: path].value)
         })
         .font(.body)
         .background(config.fieldColor)

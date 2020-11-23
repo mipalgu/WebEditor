@@ -16,7 +16,7 @@ import Attributes
 
 struct AttributeGroupView: View {
     
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, AttributeGroup>
     let label: String
     
@@ -26,10 +26,10 @@ struct AttributeGroupView: View {
             Form {
                 HStack {
                     VStack(alignment: .leading) {
-                        ForEach(Array(machine[keyPath: path.keyPath].fields.enumerated()), id: \.0) { (index, field) in
+                        ForEach(Array(machine[path: path].fields.value.enumerated()), id: \.0) { (index, field) in
                             AttributeView(
-                                machine: $machine,
-                                attribute: Binding(get: { machine[keyPath: path.path].attributes[field.name]! }, set: { machine[keyPath: path.path].attributes[field.name] = $0 }),
+                                machine: machine,
+                                attribute: machine[path: path].attributes[field.name].wrappedValue.asBinding,
                                 path: path.attributes[field.name].wrappedValue,
                                 label: field.name.pretty
                             )

@@ -34,7 +34,7 @@ struct TransitionView: View {
                     .background(Color.blue)
                     .position(viewModel.point2)
                 ExpressionView(
-                    machine: viewModel.$machine.asBinding,
+                    machine: viewModel.$machine,
                     path: viewModel.path.condition.wrappedValue,
                     label: viewModel.condition,
                     language: .swift

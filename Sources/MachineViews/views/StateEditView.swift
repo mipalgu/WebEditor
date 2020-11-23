@@ -27,14 +27,14 @@ public struct StateEditView: View {
         GeometryReader { reader in
             ScrollView {
                 VStack {
-                    LineView(machine: viewModel.$machine.asBinding, path: viewModel.path.name, label: viewModel.name)
+                    LineView(machine: viewModel.$machine, path: viewModel.path.name, label: viewModel.name)
                         .multilineTextAlignment(.center)
                         .font(config.fontTitle2)
                         .background(config.fieldColor)
                         .foregroundColor(config.textColor)
                         .frame(minWidth: viewModel.minEditWidth, maxHeight: viewModel.maxTitleHeight, alignment: .center)
                     ForEach(Array(viewModel.actions.enumerated()), id: \.0) { (index, action) in
-                        CodeView(machine: viewModel.$machine.asBinding, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
+                        CodeView(machine: viewModel.$machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
                             if viewModel.isEmpty(forAction: action.name) {
                                 return AnyView(
                                     Text(action.name + ":").font(config.fontHeading).underline().italic().foregroundColor(config.stateTextColour)

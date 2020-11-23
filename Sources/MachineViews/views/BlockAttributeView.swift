@@ -15,7 +15,7 @@ import Attributes
 
 struct BlockAttributeView: View{
     
-    @Binding var machine: Machine
+    @ObservedObject var machine: Ref<Machine>
     @Binding var attribute: BlockAttribute
     let path: Attributes.Path<Machine, BlockAttribute>?
     let label: String
@@ -23,17 +23,17 @@ struct BlockAttributeView: View{
     var body: some View {
         switch attribute.type {
         case .code(let language):
-            CodeView(machine: $machine, path: path?.codeValue, label: label, language: language)
+            CodeView(machine: machine, path: path?.codeValue, label: label, language: language)
         case .text:
-            TextView(machine: $machine, path: path?.textValue, label: label)
+            TextView(machine: machine, path: path?.textValue, label: label)
         case .collection(let type):
-            CollectionView(machine: $machine, path: path?.collectionValue, label: label, type: type)
+            CollectionView(machine: machine, path: path?.collectionValue, label: label, type: type)
         case .table(let columns):
-            TableView(machine: $machine, path: path?.tableValue, label: label, columns: columns)
+            TableView(machine: machine, path: path?.tableValue, label: label, columns: columns)
         case .complex(let fields):
-            ComplexView(machine: $machine, path: path?.complexValue, label: label, fields: fields)
+            ComplexView(machine: machine, path: path?.complexValue, label: label, fields: fields)
         case .enumerableCollection(let validValues):
-            EnumerableCollectionView(machine: $machine, path: path?.enumerableCollectionValue, label: label, validValues: validValues)
+            EnumerableCollectionView(machine: machine, path: path?.enumerableCollectionValue, label: label, validValues: validValues)
         default:
             Text("Not Yet Implemented")
         }
