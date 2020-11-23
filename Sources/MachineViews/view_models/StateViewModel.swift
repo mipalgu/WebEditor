@@ -302,7 +302,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
             offset = CGPoint(x: gesture.startLocation.x - location.x, y: gesture.startLocation.y - location.y)
             isDragging = true
         }
-        updateLocationWithOffset(newLocation: gesture.location)
+        //updateLocationWithOffset(newLocation: gesture.location)
     }
     
     func finishCollapsedDrag(gesture: DragGesture.Value) {

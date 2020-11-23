@@ -15,9 +15,9 @@ protocol MoveAndStretchFromDrag: Dragable, Moveable, BoundedStretchable {}
 
 extension Dragable where Self: MoveAndStretchFromDrag {
     
-    func handleDrag(gesture: DragGesture.Value) {
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isDragging {
-            updateLocationWithOffset(newLocation: gesture.location)
+            updateLocationWithOffset(frameWidth: frameWidth, frameHeight: frameHeight, newLocation: gesture.location)
             return
         }
         if isStretchingX && isStretchingY {
@@ -49,8 +49,8 @@ extension Dragable where Self: MoveAndStretchFromDrag {
         isDragging = true
     }
     
-    func finishDrag(gesture: DragGesture.Value) {
-        self.handleDrag(gesture: gesture)
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        self.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         self.isDragging = false
         self.isStretchingY = false
         self.isStretchingX = false
