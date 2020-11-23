@@ -159,7 +159,12 @@ struct CollectionView: View{
                     }
                     .contextMenu {
                         Button("Delete", action: {
-                            let offsets = IndexSet(Array(elements.enumerated().lazy.filter { selection.contains($1.id) }.map { $0.0 }) + [index])
+                            let offsets: IndexSet
+                            if selection.contains(element.id) {
+                                offsets = IndexSet(Array(elements.enumerated().lazy.filter { selection.contains($1.id) }.map { $0.0 }) + [index])
+                            } else {
+                                offsets = [index]
+                            }
                             guard let path = self.path else {
                                 value.remove(atOffsets: offsets)
                                 return
