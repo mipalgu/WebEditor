@@ -32,7 +32,16 @@ public struct EditorView: View {
                 .background(config.stateColour)
             HStack {
                 GeometryReader{ reader in
+                    Divider()
+                        .frame(width: viewModel.dividerWidth, height: reader.size.height)
+                        .background(config.borderColour)
+                        .position(x: viewModel.leftDividerLocation, y: reader.size.height / 2.0)
+                        .gesture(DragGesture(minimumDistance: 0.0)
+                            .onChanged({ viewModel.dragLeftDividor(gesture: $0) })
+                            .onEnded({ viewModel.finishDraggingLeft(gesture: $0) })
+                        )
                     MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
+                        .position(CGPoint(x: viewModel.leftDividerLocation + viewModel.getMainViewWidth(width: reader.size.width) / 2.0, y: reader.size.height / 2.0))
                         .frame(width: viewModel.getMainViewWidth(width: reader.size.width))
                     Divider()
                         .frame(width: viewModel.dividerWidth, height: reader.size.height)
