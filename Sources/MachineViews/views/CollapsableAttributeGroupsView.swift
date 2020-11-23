@@ -44,7 +44,7 @@ struct CollapsableAttributeGroupsView: View {
                     Text(label.capitalized)
                         .font(config.fontTitle3)
                         .padding(.horizontal, 10)
-                        .padding(collapseLeft ? .leading : .trailing, buttonWidth + 10.0)
+                        .padding(collapseLeft ? .leading : .trailing, buttonWidth / 2.0 + 10.0)
                     Spacer()
                     if collapseLeft {
                         
