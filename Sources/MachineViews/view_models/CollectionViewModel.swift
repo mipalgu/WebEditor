@@ -72,7 +72,7 @@ public final class CollectionViewModel: ObservableObject {
     public let label: String
     public let type: AttributeType
     
-    @Published var newAttribute: Attribute
+    @Published public var newAttribute: Attribute
     
     @Published public var selection: Set<UUID> = []
     
@@ -127,6 +127,55 @@ public final class CollectionViewModel: ObservableObject {
         self.type = type
         self.currentElements = (path.map { machine[path: $0].value } ?? defaultValue).map { ListElement($0) }
         self.newAttribute = type.defaultValue
+    }
+    
+    public func addElement() {
+        guard let path = self.path else {
+            currentElements.append(ListElement(newAttribute))
+            newAttribute = type.defaultValue
+            return
+        }
+        do {
+            try machine.addItem(newAttribute, to: path)
+            newAttribute = type.defaultValue
+        } catch let e {
+            print("\(e)", stderr)
+        }
+        self.currentElements = machine[keyPath: path.keyPath].map { ListElement($0) }
+    }
+    
+    public func deleteElement(_ element: ListElement<Attribute>, atIndex index: Int) {
+        let offsets: IndexSet = selection.contains(element.id)
+            ? IndexSet(elements.enumerated().lazy.filter { self.selection.contains($1.id) }.map { $0.0 })
+            : [index]
+        self.deleteElements(offsets: offsets)
+    }
+    
+    public func deleteElements(offsets: IndexSet) {
+        guard let path = self.path else {
+            currentElements.remove(atOffsets: offsets)
+            return
+        }
+        do {
+            try machine.deleteItems(table: path, items: offsets)
+            return
+        } catch let e {
+            print("\(e)", stderr)
+        }
+        currentElements = machine[keyPath: path.keyPath].map { ListElement($0) }
+    }
+    
+    public func moveElements(source: IndexSet, destination: Int) {
+//        guard let path = self.path else {
+//            value.move(fromOffsets: source, toOffset: destination)
+//            return
+//        }
+//        do {
+//            try machine.moveItems(table: path, from: source, to: destination)
+//        } catch let e {
+//            print("\(e)", stderr)
+//        }
+//        value = machine[keyPath: path.keyPath].map { ListElement($0) }
     }
     
 }

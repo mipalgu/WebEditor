@@ -75,30 +75,17 @@ struct CollectionView: View{
     var body: some View {
         VStack(alignment: .leading) {
             Text(viewModel.label + ":").fontWeight(.bold)
-//            HStack {
-//                switch type {
-//                case .line:
-//                    AttributeView(machine: viewModel.machine.asBinding, attribute: $viewModel.newAttribute, path: nil, label: "New " + viewModel.label)
-////                    Button(action: {
-////                        guard let path = self.path else {
-////                            value.append(ListElement(newAttribute))
-////                            newAttribute = type.defaultValue
-////                            return
-////                        }
-////                        do {
-////                            try machine.addItem(newAttribute, to: path)
-////                            newAttribute = type.defaultValue
-////                        } catch let e {
-////                            print("\(e)", stderr)
-////                        }
-////                        self.value = machine[keyPath: path.keyPath].map { ListElement($0) }
-////                    }, label: {
-////                        Image(systemName: "plus").font(.system(size: 16, weight: .regular))
-////                    }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
-//                case .block:
-//                    EmptyView()
-//                }
-//            }.padding(.bottom, 5)
+            HStack {
+                switch viewModel.type {
+                case .line:
+                    AttributeView(machine: viewModel.$machine, attribute: $viewModel.newAttribute, path: nil, label: "New " + viewModel.label)
+                    Button(action: viewModel.addElement, label: {
+                        Image(systemName: "plus").font(.system(size: 16, weight: .regular))
+                    }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+                case .block:
+                    EmptyView()
+                }
+            }.padding(.bottom, 5)
             Divider()
             List(selection: $viewModel.selection) {
                 ForEach(Array(viewModel.elements.enumerated()), id: \.1.id) { (index, element) in
@@ -110,51 +97,10 @@ struct CollectionView: View{
                             label: ""
                         )
                         Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
+                    }.contextMenu {
+                        Button("Delete", action: { viewModel.deleteElement(element, atIndex: index) }).keyboardShortcut(.delete)
                     }
-//                    .contextMenu {
-//                        Button("Delete", action: {
-//                            let offsets: IndexSet = selection.contains(element.id)
-//                                ? IndexSet(elements.enumerated().lazy.filter { selection.contains($1.id) }.map { $0.0 })
-//                                : [index]
-//                            guard let path = self.path else {
-//                                value.remove(atOffsets: offsets)
-//                                return
-//                            }
-//                            do {
-//                                try machine.deleteItems(table: path, items: offsets)
-//                                return
-//                            } catch let e {
-//                                print("\(e)", stderr)
-//                            }
-//                            value = machine[keyPath: path.keyPath].map { ListElement($0) }
-//                        }).keyboardShortcut(.delete)
-//                    }
-                }
-//                .onMove { (source, destination) in
-//                    guard let path = self.path else {
-//                        value.move(fromOffsets: source, toOffset: destination)
-//                        return
-//                    }
-//                    do {
-//                        try machine.moveItems(table: path, from: source, to: destination)
-//                    } catch let e {
-//                        print("\(e)", stderr)
-//                    }
-//                    value = machine[keyPath: path.keyPath].map { ListElement($0) }
-//                }
-//                .onDelete { offsets in
-//                    guard let path = self.path else {
-//                        value.remove(atOffsets: offsets)
-//                        return
-//                    }
-//                    do {
-//                        try machine.deleteItems(table: path, items: offsets)
-//                        return
-//                    } catch let e {
-//                        print("\(e)", stderr)
-//                    }
-//                    value = machine[keyPath: path.keyPath].map { ListElement($0) }
-//                }
+                }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
             }.frame(minHeight: CGFloat(viewModel.elements.count * (viewModel.type == .line ? 30 : 80) + 10))
         }
     }
