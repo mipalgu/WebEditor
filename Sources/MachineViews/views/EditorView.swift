@@ -32,6 +32,9 @@ public struct EditorView: View {
                 .background(config.stateColour)
             HStack {
                 GeometryReader{ reader in
+                    AttributeGroupsView(machine: machineViewModel.$machine.asBinding, path: Machine.path.attributes, label: "Dependencies")
+                        .frame(width: viewModel.leftPaneWidth)
+                        .position(x: viewModel.leftPaneWidth / 2.0, y: reader.size.height / 2.0)
                     Divider()
                         .frame(width: viewModel.dividerWidth, height: reader.size.height)
                         .background(config.borderColour)

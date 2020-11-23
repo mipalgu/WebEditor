@@ -63,6 +63,10 @@ public class EditorViewModel: ObservableObject {
         max(rightDividerLocation - dividerWidth - leftDividerLocation, mainViewMinWidth)
     }
     
+    var leftPaneWidth: CGFloat {
+        max(min(leftPaneMaxWidth, leftDividerLocation - dividerWidth / 2.0), leftPaneMinWidth)
+    }
+    
     public var log: String {
         errorLog.map { $0.localizedDescription }.reduce("") {
             if $0 == "" {
