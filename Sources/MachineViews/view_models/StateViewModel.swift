@@ -59,7 +59,8 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     var collapsedActions: [String: Bool] {
         get {
-            if actions.count == _collapsedActions.count {
+            let actionSet = Set(actions.map({$0.name}))
+            if actionSet.union(Set(_collapsedActions.keys)).count == actionSet.count {
                 return _collapsedActions
             }
             actions.forEach { action in
