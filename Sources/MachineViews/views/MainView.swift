@@ -32,6 +32,7 @@ struct MainView: View {
             StateEditView(viewModel: machineViewModel.states[stateIndex])
                 .onTapGesture(count: 2) {
                     editorViewModel.changeMainView(machine: machineViewModel.id)
+                    editorViewModel.changeFocus(machine: machineViewModel.id)
                 }
         default:
             EmptyView()
