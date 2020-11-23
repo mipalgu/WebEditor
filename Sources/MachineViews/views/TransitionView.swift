@@ -22,11 +22,13 @@ struct TransitionView: View {
     var body: some View {
         Path { path in
             path.move(to: viewModel.point0)
-            path.addCurve(to: viewModel.point3, control1: viewModel.point2, control2: viewModel.point1)
+            path.addCurve(to: viewModel.point3, control1: viewModel.point1, control2: viewModel.point2)
             path.addLine(to: viewModel.arrowPoint0)
-            path.move(to: viewModel.point3)
             path.addLine(to: viewModel.arrowPoint1)
-        }.overlay(
+            path.addLine(to: viewModel.point3)
+        }
+        .fill(config.borderColour)
+        .overlay(
             ZStack {
                 Circle()
                     .frame(width: viewModel.pointDiameter, height: viewModel.pointDiameter)
