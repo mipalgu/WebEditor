@@ -49,6 +49,8 @@ public class EditorViewModel: ObservableObject {
     
     let mainViewMinWidth: CGFloat = 800
     
+    let buttonWidth: CGFloat = 30.0
+    
     var editorMinWidth: CGFloat {
         rightPaneMinWidth + leftPaneMinWidth + 2.0 * dividerWidth + mainViewMinWidth
     }
@@ -66,6 +68,10 @@ public class EditorViewModel: ObservableObject {
     var leftPaneWidth: CGFloat {
         max(min(leftPaneMaxWidth, leftDividerLocation - dividerWidth / 2.0), leftPaneMinWidth)
     }
+    
+    @Published var leftPaneCollapsed: Bool = false
+    
+    @Published var rightPaneCollapsed: Bool = false
     
     public var log: String {
         errorLog.map { $0.localizedDescription }.reduce("") {
