@@ -159,22 +159,15 @@ struct CollectionView: View{
                     }
                     .contextMenu {
                         Button("Delete", action: {
-                            let offsets: IndexSet
-                            if selection.contains(element.id) {
-                                offsets = IndexSet(Array(elements.enumerated().lazy.filter { selection.contains($1.id) }.map { $0.0 }) + [index])
-                            } else {
-                                offsets = [index]
-                            }
+                            let offsets: IndexSet = selection.contains(element.id)
+                                ? IndexSet(elements.enumerated().lazy.filter { selection.contains($1.id) }.map { $0.0 })
+                                : [index]
                             guard let path = self.path else {
                                 value.remove(atOffsets: offsets)
                                 return
                             }
                             do {
-                                print()
-                                print(machine[keyPath: path.keyPath])
-                                print(selection)
                                 try machine.deleteItems(table: path, items: offsets)
-                                print(machine[keyPath: path.keyPath])
                                 return
                             } catch let e {
                                 print("\(e)", stderr)
@@ -195,22 +188,17 @@ struct CollectionView: View{
                     value = machine[keyPath: path.keyPath].map { ListElement($0) }
                 }
                 .onDelete { offsets in
-                    var transaction = Transaction()
-                    transaction.disablesAnimations = true
-                    withTransaction(transaction) {
+                    guard let path = self.path else {
                         value.remove(atOffsets: offsets)
                         return
-                        guard let path = self.path else {
-                            return
-                        }
-                        do {
-                            try machine.deleteItems(table: path, items: offsets)
-                            return
-                        } catch let e {
-                            print("\(e)", stderr)
-                        }
-                        value = machine[keyPath: path.keyPath].map { ListElement($0) }
                     }
+                    do {
+                        try machine.deleteItems(table: path, items: offsets)
+                        return
+                    } catch let e {
+                        print("\(e)", stderr)
+                    }
+                    value = machine[keyPath: path.keyPath].map { ListElement($0) }
                 }
             }.frame(minHeight: CGFloat(value.count * (type == .line ? 30 : 80) + 10))
         }
