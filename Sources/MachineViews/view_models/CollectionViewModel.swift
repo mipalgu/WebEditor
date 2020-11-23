@@ -64,6 +64,7 @@ import SwiftUI
 
 import Attributes
 import Machines
+import Combine
 
 public final class CollectionViewModel: ObservableObject {
     
@@ -104,19 +105,6 @@ public final class CollectionViewModel: ObservableObject {
             if newValue.count > currentElements.count {
                 currentElements.append(contentsOf: newValue[currentElements.count..<newValue.count])
             }
-            guard let path = path else {
-                return
-            }
-            let newElements = newValue.map { $0.value }
-            zip($machine[path: path].value, newElements).enumerated().forEach {
-                if $1.0 == $1.1 {
-                    return
-                }
-                $machine[path: path].value[$0] = $1.1
-            }
-            if newElements.count > $machine[path: path].value.count {
-                $machine[path: path].value.append(contentsOf: newElements[$machine[path: path].value.count..<newValue.count])
-            }
         }
     }
     
@@ -127,6 +115,7 @@ public final class CollectionViewModel: ObservableObject {
         self.type = type
         self.currentElements = (path.map { machine[path: $0].value } ?? defaultValue).map { ListElement($0) }
         self.newAttribute = type.defaultValue
+        machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
     }
     
     public func addElement() {
