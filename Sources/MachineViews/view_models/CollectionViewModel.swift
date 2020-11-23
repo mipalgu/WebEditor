@@ -64,7 +64,6 @@ import SwiftUI
 
 import Attributes
 import Machines
-import Combine
 
 public final class CollectionViewModel: ObservableObject {
     

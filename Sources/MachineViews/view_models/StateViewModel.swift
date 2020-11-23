@@ -13,8 +13,6 @@ import SwiftUI
 import Machines
 import Attributes
 
-import Combine
-
 public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     public static func == (lhs: StateViewModel, rhs: StateViewModel) -> Bool {

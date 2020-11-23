@@ -13,8 +13,6 @@ import SwiftUI
 import Machines
 import Attributes
 
-import Combine
-
 public class MachineViewModel: ObservableObject {
     
     @Reference public var machine: Machine
