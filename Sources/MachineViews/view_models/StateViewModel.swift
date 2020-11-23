@@ -59,24 +59,20 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     var collapsedActions: [String: Bool] {
         get {
-            let actionSet = Set(actions.map({$0.name}))
-            let collapsedActionsSet = Set(_collapsedActions.keys)
-            let union = actionSet.union(collapsedActionsSet)
-            if union.count == actionSet.count {
-                return _collapsedActions
-            }
-            var tempActions: [String: Bool] = [:]
-            collapsedActionsSet.forEach {
-                if !actionSet.contains($0) {
+            actions.forEach() {
+                guard let _ = _collapsedActions[$0.name] else {
+                    _collapsedActions[$0.name] = false
                     return
                 }
-                tempActions[$0] = _collapsedActions[$0] ?? false
             }
-            let missingActions = actionSet.filter { nil != tempActions[$0] }
-            missingActions.forEach {
-                tempActions[$0] = false
+            if actions.count != _collapsedActions.count {
+                let actionsSet = Set(actions.map { $0.name })
+                _collapsedActions.forEach {
+                    if !actionsSet.contains($0.0) {
+                        _collapsedActions.removeValue(forKey: $0.0)
+                    }
+                }
             }
-            _collapsedActions = tempActions
             return _collapsedActions
         }
         set {
@@ -235,12 +231,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self.expanded = expanded
         self._collapsedHeight = collapsedHeight
         self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
-        let actions = machine.value[keyPath: path.path].actions
-        if collapsedActions.count != actions.count {
-            self._collapsedActions = actions.reduce(into: [:]) { $0[$1.name] = false }
-        } else {
-            self._collapsedActions = collapsedActions
-        }
+        self._collapsedActions = collapsedActions
         self.highlighted = highlighted
         self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
     }
@@ -254,12 +245,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self.expanded = expanded
         self._collapsedWidth = collapsedWidth
         self._collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
-        let actions = machine.value[keyPath: path.path].actions
-        if collapsedActions.count != actions.count {
-            self._collapsedActions = actions.reduce(into: [:]) { $0[$1.name] = false }
-        } else {
-            self._collapsedActions = collapsedActions
-        }
+        self._collapsedActions = collapsedActions
         self.highlighted = highlighted
         self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
     }
