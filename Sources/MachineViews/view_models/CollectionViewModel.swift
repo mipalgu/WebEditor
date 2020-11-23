@@ -155,16 +155,16 @@ public final class CollectionViewModel: ObservableObject {
     }
     
     public func moveElements(source: IndexSet, destination: Int) {
-//        guard let path = self.path else {
-//            value.move(fromOffsets: source, toOffset: destination)
-//            return
-//        }
-//        do {
-//            try machine.moveItems(table: path, from: source, to: destination)
-//        } catch let e {
-//            print("\(e)", stderr)
-//        }
-//        value = machine[keyPath: path.keyPath].map { ListElement($0) }
+        guard let path = self.path else {
+            currentElements.move(fromOffsets: source, toOffset: destination)
+            return
+        }
+        do {
+            try machine.moveItems(table: path, from: source, to: destination)
+        } catch let e {
+            print("\(e)", stderr)
+        }
+        currentElements = machine[keyPath: path.keyPath].map { ListElement($0) }
     }
     
 }
