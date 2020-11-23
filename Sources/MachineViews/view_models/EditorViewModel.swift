@@ -47,7 +47,7 @@ public class EditorViewModel: ObservableObject {
     
     let leftPaneMinWidth: CGFloat = 300
     
-    let mainViewMinWidth: CGFloat = 500
+    let mainViewMinWidth: CGFloat = 800
     
     var editorMinWidth: CGFloat {
         rightPaneMinWidth + leftPaneMinWidth + 2.0 * dividerWidth + mainViewMinWidth
