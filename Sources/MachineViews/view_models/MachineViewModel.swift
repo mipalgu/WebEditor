@@ -68,11 +68,11 @@ public class MachineViewModel: ObservableObject {
             return
         }
         do {
-            try self.machine.deleteItem(table: self.path.states, atIndex: stateViewModel.stateIndex)
+            try self.machine.deleteState(atIndex: stateViewModel.stateIndex)
+            self.states.remove(at: stateIndex)
         } catch let error {
             print(error)
         }
-        self.states.remove(at: stateIndex)
     }
     
 }
