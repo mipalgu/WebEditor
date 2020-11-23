@@ -26,13 +26,13 @@ public struct StateEditView: View {
     public var body: some View {
         GeometryReader { reader in
             ScrollView {
-                VStack {
+                VStack(alignment: .leading) {
                     LineView(machine: viewModel.$machine, path: viewModel.path.name, label: viewModel.name)
                         .multilineTextAlignment(.center)
                         .font(config.fontTitle2)
                         .background(config.fieldColor)
                         .foregroundColor(config.textColor)
-                        .frame(minWidth: viewModel.minEditWidth, maxHeight: viewModel.maxTitleHeight, alignment: .center)
+                        .frame(minWidth: min(viewModel.minEditWidth - 2.0 * viewModel.editPadding, reader.size.width - 2.0 * viewModel.editPadding), maxWidth: reader.size.width - 2.0 * viewModel.editPadding, maxHeight: viewModel.maxTitleHeight, alignment: .center)
                     ForEach(Array(viewModel.actions.enumerated()), id: \.0) { (index, action) in
                         CodeView(machine: viewModel.$machine, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
                             if viewModel.isEmpty(forAction: action.name) {
@@ -46,7 +46,8 @@ public struct StateEditView: View {
                             }
                         }
                         .padding(.top, viewModel.editActionPadding)
-                        .frame(height: viewModel.getHeightOfActionForEdit(height: reader.size.height))
+                        .padding(.horizontal, 0)
+                        .frame(width: reader.size.width - 2.0 * viewModel.editPadding, height: viewModel.getHeightOfActionForEdit(height: reader.size.height))
                         
                     }
                 }
