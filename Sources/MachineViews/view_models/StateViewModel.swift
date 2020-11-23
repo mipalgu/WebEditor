@@ -140,6 +140,10 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
 
     let verticalEdgeTolerance: CGFloat = 20.0
     
+    let collapsedActionHeight: CGFloat = 16.0
+    
+    let actionPadding: CGFloat = 0.0
+    
     public var name: String {
         String(machine[keyPath: path.path].name)
     }
@@ -169,7 +173,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
     }
     
     var elementMaxHeight: CGFloat {
-        height - topPadding - bottomPadding
+        height - topPadding - bottomPadding - 20.0
     }
     
     var isAccepting: Bool {
@@ -182,6 +186,16 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
     
     var actionsMaxHeight: CGFloat {
         elementMaxHeight - maxTitleHeight
+    }
+    
+    var actionHeight: CGFloat {
+        let expandedActions = collapsedActions.filter { $0.1 == false }.count
+        if expandedActions == 0 {
+            return collapsedActionHeight
+        }
+        let collapsedActionsNumber = CGFloat(actions.count - expandedActions)
+        let availableSpace = actionsMaxHeight - CGFloat(actions.count) * actionPadding * 2.0 - collapsedActionsNumber * collapsedActionHeight
+        return max(minActionHeight, availableSpace / CGFloat(expandedActions))
     }
     
     var isDragging: Bool = false
@@ -215,7 +229,12 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
         self.expanded = expanded
         self._collapsedHeight = collapsedHeight
         self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
-        self.collapsedActions = collapsedActions
+        let actions = machine.value[keyPath: path.path].actions
+        if collapsedActions.count != actions.count {
+            self.collapsedActions = actions.reduce(into: [:]) { $0[$1.name] = false }
+        } else {
+            self.collapsedActions = collapsedActions
+        }
         self.highlighted = highlighted
         self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
     }
@@ -229,7 +248,12 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
         self.expanded = expanded
         self._collapsedWidth = collapsedWidth
         self._collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
-        self.collapsedActions = collapsedActions
+        let actions = machine.value[keyPath: path.path].actions
+        if collapsedActions.count != actions.count {
+            self.collapsedActions = actions.reduce(into: [:]) { $0[$1.name] = false }
+        } else {
+            self.collapsedActions = collapsedActions
+        }
         self.highlighted = highlighted
         self.$machine.objectWillChange.subscribe(Subscribers.Sink(receiveCompletion: { _ in }, receiveValue: { self.objectWillChange.send() }))
     }
@@ -250,11 +274,11 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
     func createTitleView(forAction action: String, color: Color) -> AnyView {
         if self.isEmpty(forAction: action) {
             return AnyView(
-                Text(action + ":").font(.headline).underline().italic().foregroundColor(color)
+                Text(action + ":").font(.headline).underline().italic().foregroundColor(color).frame(height: collapsedActionHeight)
             )
         }
         return AnyView(
-            Text(action + ":").font(.headline).underline().foregroundColor(color)
+            Text(action + ":").font(.headline).underline().foregroundColor(color).frame(height: collapsedActionHeight)
         )
     }
     
@@ -329,6 +353,13 @@ public final class StateViewModel: DynamicViewModel, Identifiable {
             destination: destinationEdge,
             priority: priority
         )
+    }
+    
+    func getHeightOfAction(actionName: String) -> CGFloat {
+        guard let collapsed = collapsedActions[actionName] else {
+            return collapsedActionHeight
+        }
+        return collapsed ? collapsedActionHeight : actionHeight
     }
     
 }

@@ -51,24 +51,29 @@ struct StateExpandedView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                     ScrollView {
-                        ForEach(Array(viewModel.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
-                            CodeViewWithDropDown(
-                                machine: viewModel.$machine.asBinding,
-                                path: viewModel.path.actions[index].implementation,
-                                language: .swift,
-                                collapsed: viewModel.createCollapsedBinding(forAction: action)
-                            ) {
-                                viewModel.createTitleView(forAction: action, color: config.stateTextColour)
-                            }.frame(
-                                minWidth: viewModel.elementMinWidth,
-                                maxWidth: viewModel.elementMaxWidth
-                            )
+                        VStack {
+                            ForEach(Array(viewModel.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
+                                CodeViewWithDropDown(
+                                    machine: viewModel.$machine.asBinding,
+                                    path: viewModel.path.actions[index].implementation,
+                                    language: .swift,
+                                    collapsed: viewModel.createCollapsedBinding(forAction: action)
+                                ) {
+                                    viewModel.createTitleView(forAction: action, color: config.stateTextColour)
+                                }.frame(
+                                    minWidth: viewModel.elementMinWidth,
+                                    maxWidth: viewModel.elementMaxWidth,
+                                    minHeight: viewModel.getHeightOfAction(actionName: action)
+                                )
+                                .padding(.vertical, viewModel.actionPadding)
+                                .clipped()
+                            }
                         }
-                    }.frame(maxWidth: viewModel.elementMaxWidth, maxHeight: viewModel.actionsMaxHeight)
+                    }
                 }
                 .padding(.bottom, viewModel.bottomPadding)
                 .padding(.top, viewModel.topPadding)
-                .frame(minHeight: viewModel.elementMinHeight, maxHeight: viewModel.elementMaxHeight)
+                .frame(minHeight: viewModel.elementMinHeight)
                 .background(
                     RoundedRectangle(cornerRadius: 20.0)
                     .strokeBorder(viewModel.highlighted ? config.highlightColour : config.borderColour, lineWidth: 3.0, antialiased: true)
