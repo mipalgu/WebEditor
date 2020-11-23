@@ -15,6 +15,6 @@ protocol Moveable: Positionable {
     
     var offset: CGPoint {get set}
     
-    func updateLocationWithOffset(newLocation: CGPoint)
+    func updateLocationWithOffset(frameWidth: CGFloat, frameHeight: CGFloat, newLocation: CGPoint)
     
 }

@@ -15,8 +15,8 @@ protocol Dragable: class {
     
     var isDragging: Bool {get set}
     
-    func handleDrag(gesture: DragGesture.Value)
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat)
     
-    func finishDrag(gesture: DragGesture.Value)
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat)
     
 }

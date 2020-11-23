@@ -15,10 +15,12 @@ protocol _Moveable: class {}
 
 extension Moveable where Self: _Moveable {
     
-    func updateLocationWithOffset(newLocation: CGPoint) {
+    func updateLocationWithOffset(frameWidth: CGFloat, frameHeight: CGFloat, newLocation: CGPoint) {
         let dx = newLocation.x - offset.x
         let dy = newLocation.y - offset.y
-        self.location = CGPoint(x: dx, y: dy)
+        self.setLocation(width: frameWidth, height: frameHeight, newLocation: newLocation)
     }
     
 }
+
+

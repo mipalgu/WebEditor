@@ -33,6 +33,10 @@ public class MachineViewModel: ObservableObject {
         machine.id
     }
     
+    let gridWidth: CGFloat = 80.0
+    
+    let gridHeight: CGFloat = 80.0
+    
     public init(machine: Ref<Machine>) {
         self._machine = Reference(reference: machine)
         let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.value.path.states
