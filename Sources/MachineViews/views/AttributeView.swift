@@ -67,21 +67,24 @@ import Attributes
 struct AttributeView: View{
     
     @Binding var machine: Machine
-    let path: Attributes.Path<Machine, Attribute>
+    @Binding var attribute: Attribute
+    let path: Attributes.Path<Machine, Attribute>?
     let label: String
     
     var body: some View {
-        switch machine[keyPath: path.path].type {
+        switch attribute.type {
         case .line:
             LineAttributeView(
                 machine: $machine,
-                path: path.lineAttribute,
+                attribute: $attribute.lineAttribute,
+                path: path?.lineAttribute,
                 label: label
             )
         case .block:
             BlockAttributeView(
                 machine: $machine,
-                path: path.blockAttribute,
+                attribute: $attribute.blockAttribute,
+                path: path?.blockAttribute,
                 label: label
             )
         }

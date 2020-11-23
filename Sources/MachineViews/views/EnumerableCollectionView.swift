@@ -16,11 +16,21 @@ import Attributes
 struct EnumerableCollectionView: View {
     
     @Binding var machine: Machine
-    let path: Attributes.Path<Machine, Set<String>>
+    let path: Attributes.Path<Machine, Set<String>>?
     let label: String
     let validValues: Set<String>
     
+    @State var value: Set<String>
+    
     @EnvironmentObject var config: Config
+    
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Set<String>>?, label: String, validValues: Set<String>, defaultValue: Set<String> = []) {
+        self._machine = machine
+        self.path = path
+        self.label = label
+        self.validValues = validValues
+        self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue)
+    }
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -35,20 +45,29 @@ struct EnumerableCollectionView: View {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: .infinity), spacing: 10, alignment: .topLeading)]) {
                     ForEach(Array(validValues.sorted()), id: \.self) { value in
                         Toggle(value, isOn: Binding(
-                            get: { machine[keyPath: path.path].contains(value) },
+                            get: { self.value.contains(value) },
                             set: { (isChecked) in
                                 if isChecked {
-                                    machine[keyPath: path.path].insert(value)
-                                    return
+                                    self.value.insert(value)
+                                } else {
+                                    self.value.remove(value)
                                 }
-                                machine[keyPath: path.path].remove(value)
-                                return
                             }
                         ))
                     }
                 }
-                
             }
+        }.onChange(of: value) {
+            guard let path = self.path else {
+                return
+            }
+            do {
+                try machine.modify(attribute: path, value: $0)
+                return
+            } catch let e {
+                print("\(e)")
+            }
+            self.value = machine[keyPath: path.keyPath]
         }
     }
 }

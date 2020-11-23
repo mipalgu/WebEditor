@@ -16,34 +16,38 @@ import Attributes
 public struct LineView: View {
     
     @Binding var machine: Machine
-    let path: Attributes.Path<Machine, String>
+    let path: Attributes.Path<Machine, String>?
     let label: String
+    
+    @State var value: String
     
     @EnvironmentObject var config: Config
     
-    @State var text: String
-    
     @State var error: String? = nil
     
-    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, String>, label: String) {
+    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "") {
         self._machine = machine
         self.path = path
         self.label = label
-        self._text = State(initialValue: machine.wrappedValue[keyPath: path.path])
+        self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue)
     }
     
     public var body: some View {
         VStack(alignment: .leading) {
-            TextField(label, text: $text, onCommit: {
+            TextField(label, text: $value, onCommit: {
+                guard let path = self.path else {
+                    return
+                }
                 do {
-                    try machine.modify(attribute: path, value: self.text)
+                    try machine.modify(attribute: path, value: value)
                     error = nil
+                    return
                 } catch let e as MachinesError where e.path.isSame(as: path) {
                     error = e.message
                 } catch let e {
                     print("\(e)", stderr)
                 }
-                text = machine[keyPath: path.path]
+                value = machine[keyPath: path.path]
             })
             .background(config.fieldColor)
             .foregroundColor(config.textColor)

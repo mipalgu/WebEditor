@@ -16,19 +16,36 @@ import Attributes
 struct BoolView: View {
     
     @Binding var machine: Machine
+    let path: Attributes.Path<Machine, Bool>?
     let label: String
-    let path: Attributes.Path<Machine, Bool>
+    
+    @State var value: Bool
+    
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Bool>?, label: String, defaultValue: Bool = false) {
+        self._machine = machine
+        self.path = path
+        self.label = label
+        self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.path] } ?? defaultValue)
+    }
     
     @EnvironmentObject var config: Config
     
     var body: some View {
-        Toggle(label, isOn: Binding(get: { machine[keyPath: path.path] }, set: {
-            do {
-                try machine.modify(attribute: path, value: $0)
-            } catch let e {
-                print("\(e)")
+        Toggle(label, isOn: $value)
+            .font(.body)
+            .foregroundColor(config.textColor)
+            .onChange(of: value) {
+                guard let path = self.path else {
+                    return
+                }
+                do {
+                    try machine.modify(attribute: path, value: $0)
+                    return
+                } catch let e {
+                    print("\(e)")
+                }
+                value = machine[keyPath: path.keyPath]
             }
-        })).font(.body).foregroundColor(config.textColor)
     }
 }
 
