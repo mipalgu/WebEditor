@@ -39,13 +39,15 @@ struct CollapsableAttributeGroupsView: View {
                                 .font(.system(size: buttonSize, weight: .regular))
                                 .frame(width: buttonWidth, height: buttonHeight)
                         }.buttonStyle(PlainButtonStyle())
-                        Spacer()
                     }
+                    Spacer()
                     Text(label.capitalized)
                         .font(config.fontTitle3)
                         .padding(.horizontal, 10)
+                        .padding(collapseLeft ? .leading : .trailing, buttonWidth / 2.0 + 10.0)
+                    Spacer()
                     if collapseLeft {
-                        Spacer()
+                        
                         Button(action: { collapsed = true }) {
                             Image(systemName: "arrow.left.to.line.alt")
                                 .font(.system(size: buttonSize, weight: .regular))
