@@ -15,6 +15,8 @@ protocol Positionable: class {
     
     var location: CGPoint {get set}
     
+    func getLocation(width: CGFloat, height: CGFloat) -> CGPoint
+    
     func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint)
     
 }
