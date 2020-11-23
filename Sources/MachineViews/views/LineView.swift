@@ -18,6 +18,7 @@ public struct LineView: View {
     @Binding var machine: Machine
     let path: Attributes.Path<Machine, String>?
     let label: String
+    let onChange: (String) -> Void
     
     @State var value: String
     
@@ -25,11 +26,12 @@ public struct LineView: View {
     
     @State var error: String? = nil
     
-    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "") {
+    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "", onChange: @escaping (String) -> Void = { _ in }) {
         self._machine = machine
         self.path = path
         self.label = label
         self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue)
+        self.onChange = onChange
     }
     
     public var body: some View {
@@ -54,7 +56,7 @@ public struct LineView: View {
             if let error = self.error {
                 Text(error).foregroundColor(.red)
             }
-        }
+        }.onChange(of: value, perform: onChange)
     }
 }
 

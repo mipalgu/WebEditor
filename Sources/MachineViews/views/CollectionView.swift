@@ -71,9 +71,13 @@ struct CollectionView: View{
     let label: String
     let type: AttributeType
     
+    @State var newAttribute: Attribute
+    
     @State var value: [Attribute]
     
-    @State private var selection: Set<Int> = []
+    @State private var selection: Set<UUID> = []
+    
+    @State var ids: [UUID]
     
     init(machine: Binding<Machine>, path: Attributes.Path<Machine, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
         self._machine = machine
@@ -81,62 +85,79 @@ struct CollectionView: View{
         self.label = label
         self.type = type
         self._value = State(initialValue: path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue)
+        self._newAttribute = State(initialValue: type.defaultValue)
+        self._ids = State(initialValue: (path.map { machine.wrappedValue[keyPath: $0.keyPath] } ?? defaultValue).map { _ in UUID() })
     }
     
     var body: some View {
         VStack(alignment: .leading) {
-            List(selection: $selection) {
-                HStack {
-                    Text(label + ":").fontWeight(.bold)
-                    Spacer()
+            Text(label + ":").fontWeight(.bold)
+            HStack {
+                switch type {
+                case .line:
+                    AttributeView(machine: $machine, attribute: $newAttribute, path: nil, label: "New " + label)
                     Button(action: {
                         guard let path = self.path else {
                             return
                         }
                         do {
-                            try machine.deleteItems(table: path, items: IndexSet(selection))
-                            return
+                            try machine.addItem(newAttribute, to: path)
+                            newAttribute = type.defaultValue
                         } catch let e {
                             print("\(e)", stderr)
                         }
-                        value = machine[keyPath: path.keyPath]
-                    }, label: {
-                        Image(systemName: "minus").font(.system(size: 16, weight: .regular))
-                    }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
-                    Button(action: {
-//                        guard let path = self.path else {
-//                            return
-//                        }
-//                        do {
-//                            try machine.addItem(path)
-//                        } catch let e {
-//                            print("\(e)", stderr)
-//                        }
+                        self.value = machine[keyPath: path.keyPath]
                     }, label: {
                         Image(systemName: "plus").font(.system(size: 16, weight: .regular))
                     }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
-                }.padding(.bottom, 5)
-                Divider()
-                ForEach(Array(value.enumerated()), id: \.0) { (index, attribute) in
+                case .block:
+                    EmptyView()
+                }
+//                Spacer()
+//                Button(action: {
+//                    guard let path = self.path else {
+//                        return
+//                    }
+//                    do {
+//                        try machine.deleteItems(table: path, items: IndexSet(selection))
+//                        return
+//                    } catch let e {
+//                        print("\(e)", stderr)
+//                    }
+//                    value = machine[keyPath: path.keyPath]
+//                }, label: {
+//                    Image(systemName: "minus").font(.system(size: 16, weight: .regular))
+//                }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+            }.padding(.bottom, 5)
+            Divider()
+            List(selection: $selection) {
+                ForEach(Array(zip(ids, value.indices)), id: \.0) { (id, index) in
                     HStack(spacing: 1) {
                         AttributeView(machine: $machine, attribute: $value[index], path: path?[index], label: "")
                         Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
-                    }.contextMenu {
+                    }
+                    .contextMenu {
                         Button("Delete", action: {
+                            let backup = ids
+                            let offsets = IndexSet(selection.compactMap { ids.firstIndex(of: $0) })
+                            ids.remove(atOffsets: offsets)
+                            value.remove(atOffsets: offsets)
                             guard let path = self.path else {
                                 return
                             }
                             do {
                                 print(selection)
-                                try machine.deleteItems(table: path, items: IndexSet(selection))
+                                try machine.deleteItems(table: path, items: offsets)
                                 return
                             } catch let e {
                                 print("\(e)", stderr)
                             }
                             value = machine[keyPath: path.keyPath]
+                            ids = backup
                         }).keyboardShortcut(.delete)
                     }
                 }.onMove { (source, destination) in
+                    value.move(fromOffsets: source, toOffset: destination)
                     guard let path = self.path else {
                         return
                     }
@@ -147,22 +168,21 @@ struct CollectionView: View{
                         print("\(e)", stderr)
                     }
                     value = machine[keyPath: path.keyPath]
-                }.onDelete {
-                    guard let path = self.path else {
-                        return
-                    }
-                    do {
-                        try machine.deleteItems(table: path, items: $0)
-                        return
-                    } catch let e {
-                        print("\(e)", stderr)
-                    }
-                    value = machine[keyPath: path.keyPath]
                 }
-//                HStack(spacing: 1) {
-//                    AttributeView()
+//                .onDelete {
+//                    value.remove(atOffsets: $0)
+//                    guard let path = self.path else {
+//                        return
+//                    }
+//                    do {
+//                        try machine.deleteItems(table: path, items: $0)
+//                        return
+//                    } catch let e {
+//                        print("\(e)", stderr)
+//                    }
+//                    value = machine[keyPath: path.keyPath]
 //                }
-            }.frame(minHeight: CGFloat(value.count * (type == .line ? 25 : 80) + 70))
+            }.frame(minHeight: CGFloat(value.count * (type == .line ? 30 : 80) + 10))
         }
     }
 }

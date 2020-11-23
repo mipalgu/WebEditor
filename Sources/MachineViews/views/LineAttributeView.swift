@@ -33,7 +33,9 @@ struct LineAttributeView: View {
         case .enumerated(let validValues):
             EnumeratedView(machine: $machine, path: path?.enumeratedValue, label: label, validValues: validValues)
         case .line:
-            LineView(machine: $machine, path: path?.lineValue, label: label)
+            LineView(machine: $machine, path: path?.lineValue, label: label) {
+                attribute = .line($0)
+            }
         }
     }
 }
