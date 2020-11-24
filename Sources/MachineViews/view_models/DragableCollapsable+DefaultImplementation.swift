@@ -11,9 +11,11 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol _DragableCollapsable: class {}
+//protocol _DragableCollapsable: class {}
 
-extension DragableCollapsable where Self: _DragableCollapsable {
+protocol MoveCollapsableFromDrag: DragableCollapsable {}
+
+extension DragableCollapsable where Self: MoveCollapsableFromDrag {
     
     func handleCollapsedDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if !isDragging {

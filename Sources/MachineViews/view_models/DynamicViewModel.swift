@@ -11,4 +11,4 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol DynamicViewModel: ObservableObject, _Moveable, _Collapsable, _BoundedSize, MoveAndStretchFromDrag, _DragableCollapsable, DragableCollapsable {}
+protocol DynamicViewModel: ObservableObject, _Moveable, _Collapsable, MoveCollapsableFromDrag, _BoundedSize, MoveAndStretchFromDrag {}
