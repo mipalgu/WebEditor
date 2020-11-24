@@ -45,7 +45,7 @@ extension Stretchable where Self: EdgeDetector {
     }
 }
 
-protocol _BoundedStretchable: class {
+protocol _BoundedSize: class {
     
     var _width: CGFloat { get set }
     
@@ -53,7 +53,7 @@ protocol _BoundedStretchable: class {
     
 }
 
-protocol BoundedStretchable: Stretchable {
+protocol BoundedSize: Stretchable {
     
     var minWidth: CGFloat { get }
     
@@ -64,7 +64,7 @@ protocol BoundedStretchable: Stretchable {
     var maxHeight: CGFloat { get }
 }
 
-extension BoundedStretchable where Self: _BoundedStretchable {
+extension BoundedSize where Self: _BoundedSize {
     
     var width: CGFloat {
         get {
