@@ -33,6 +33,26 @@ class TransitionViewModel: ObservableObject {
     
     let arrowHeadLength: Double = 50.0
     
+    let basePriorityLength: CGFloat = 20.0
+    
+    let priorityScale: CGFloat = 0.2
+    
+    let strokeSeparation: CGFloat = 5.0
+    
+    var lineAngle: Double {
+        let dx = Double(point1.x - point0.x)
+        let dy = Double(point1.y - point0.y)
+        return atan2(dy, dx)
+    }
+    
+    var strokeAngle: Double {
+        let unsanitisedTheta = lineAngle + Double.pi / 2.0
+        if unsanitisedTheta > Double.pi {
+            return unsanitisedTheta - Double.pi
+        }
+        return unsanitisedTheta
+    }
+    
     var condition: String {
         get {
             String(machine[keyPath: path.path].condition ?? "")
@@ -96,6 +116,24 @@ class TransitionViewModel: ObservableObject {
         self.point2 = point2
         self.point3 = point3
         self.priority = priority
+    }
+    
+    func strokeLength(transition: UInt8) -> CGFloat {
+        if transition == 0 {
+            return 0.0
+        }
+        return basePriorityLength + basePriorityLength * (CGFloat(transition) - 1.0 ) * priorityScale
+    }
+    
+    func strokePoints(transition: UInt8) -> (CGPoint, CGPoint) {
+        let length = strokeLength(transition: transition)
+        let locationX = point0.x + strokeSeparation *  CGFloat(transition) * CGFloat(cos(lineAngle))
+        let locationY = point0.y + strokeSeparation *  CGFloat(transition) * CGFloat(sin(lineAngle))
+        let dx = length / 2.0 * CGFloat(cos(strokeAngle))
+        let dy = length / 2.0 * CGFloat(sin(strokeAngle))
+        let stroke0 = CGPoint(x: locationX + dx, y: locationY + dy)
+        let stroke1 = CGPoint(x: locationX - dx, y: locationY - dy)
+        return (stroke0, stroke1)
     }
     
 }

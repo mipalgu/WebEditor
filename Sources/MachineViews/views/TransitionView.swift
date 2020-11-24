@@ -45,6 +45,15 @@ struct TransitionView: View {
                     language: .swift
                 )
                     .position(viewModel.conditionPosition)
+                if viewModel.priority != 0 {
+                    ForEach(Array(stride(from: 1, to: viewModel.priority, by: 1)), id: \.self) { (strokeNumber) -> AnyView in
+                        let strokePoints = viewModel.strokePoints(transition: strokeNumber)
+                        return AnyView(Path { strokePath in
+                            strokePath.move(to: strokePoints.0)
+                            strokePath.addLine(to: strokePoints.1)
+                        })
+                    }
+                }
             }
         )
     }
