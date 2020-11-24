@@ -11,7 +11,9 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol MoveAndStretchFromDrag: Dragable, Moveable, BoundedStretchable {}
+protocol MoveAndStretchFromDrag: Dragable, Moveable, Stretchable {}
+
+protocol MoveFromDrag: Dragable, Moveable {}
 
 extension Dragable where Self: MoveAndStretchFromDrag {
     
@@ -54,6 +56,24 @@ extension Dragable where Self: MoveAndStretchFromDrag {
         self.isDragging = false
         self.isStretchingY = false
         self.isStretchingX = false
+    }
+    
+}
+
+extension Dragable where Self: MoveFromDrag {
+    
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if isDragging {
+            updateLocationWithOffset(frameWidth: frameWidth, frameHeight: frameHeight, newLocation: gesture.location)
+            return
+        }
+        offset = CGPoint(x: gesture.startLocation.x - location.x, y: gesture.startLocation.y - location.y)
+        isDragging = true
+    }
+    
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        self.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+        self.isDragging = false
     }
     
 }

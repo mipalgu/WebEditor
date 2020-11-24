@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-extension EdgeDetector {
+extension EdgeDetector where Self: Rigidable {
     
     func onTopEdge(point: CGPoint) -> Bool {
         let topEdge = self.location.y - height / 2.0
