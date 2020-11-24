@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol Collapsable: Rigidable, Moveable  {
+protocol Collapsable: Moveable, BoundedSize  {
     
     var expanded: Bool {get set}
     
