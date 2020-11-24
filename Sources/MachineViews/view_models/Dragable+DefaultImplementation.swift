@@ -15,6 +15,8 @@ protocol MoveAndStretchFromDrag: Dragable, Moveable, Stretchable {}
 
 protocol MoveFromDrag: Dragable, Moveable {}
 
+protocol StretchFromDrag: Dragable, Stretchable {}
+
 extension Dragable where Self: MoveAndStretchFromDrag {
     
     func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
@@ -76,4 +78,40 @@ extension Dragable where Self: MoveFromDrag {
         self.isDragging = false
     }
     
+}
+
+extension Dragable where Self: StretchFromDrag {
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if isStretchingX && isStretchingY {
+            stretchCorner(gesture: gesture)
+            return
+        }
+        if isStretchingX {
+            stretchHorizontal(gesture: gesture)
+            return
+        }
+        if isStretchingY {
+            stretchVertical(gesture: gesture)
+            return
+        }
+        if onCorner(point: gesture.startLocation) {
+            isStretchingX = true
+            isStretchingY = true
+            return
+        }
+        if onVerticalEdge(point: gesture.startLocation) {
+            isStretchingX = true
+            return
+        }
+        if onHorizontalEdge(point: gesture.startLocation) {
+            isStretchingY = true
+            return
+        }
+    }
+    
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        self.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+        self.isStretchingY = false
+        self.isStretchingX = false
+    }
 }
