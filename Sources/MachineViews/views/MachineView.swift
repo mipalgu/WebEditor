@@ -82,6 +82,13 @@ public struct MachineView: View {
                     .onTapGesture(count: 2) {
                         viewModel.newState()
                     }
+                    .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
+                        .onChanged {
+                            self.viewModel.handleDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
+                        }.onEnded {
+                            self.viewModel.finishDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
+                        }
+                    )
                 )
             }
             .clipped()

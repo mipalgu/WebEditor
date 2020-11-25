@@ -13,7 +13,7 @@ import SwiftUI
 import Machines
 import Attributes
 
-class TransitionViewModel: ObservableObject, Equatable, Hashable {
+class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
     
     public static func == (lhs: TransitionViewModel, rhs: TransitionViewModel) -> Bool {
         lhs === rhs
@@ -100,6 +100,10 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable {
         return CGPoint(x: point3.x + CGFloat(r * cos(theta)), y: point3.y + CGFloat(r * sin(theta)))
     }
     
+    var isDragging: Bool = false
+    
+    var startLocation: (CGPoint, CGPoint, CGPoint, CGPoint) = (.zero, .zero, .zero, .zero)
+    
     init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8) {
         self._machine = Reference(reference: machine)
         self.path = path
@@ -146,6 +150,27 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable {
         let stroke0 = CGPoint(x: locationX + dx, y: locationY + dy)
         let stroke1 = CGPoint(x: locationX - dx, y: locationY - dy)
         return (stroke0, stroke1)
+    }
+    
+    private func translate(point: CGPoint, trans: CGSize) -> CGPoint {
+        CGPoint(x: point.x - trans.width, y: point.y - trans.height)
+    }
+    
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if isDragging {
+            point0 = translate(point: startLocation.0, trans: gesture.translation)
+            point1 = translate(point: startLocation.1, trans: gesture.translation)
+            point2 = translate(point: startLocation.2, trans: gesture.translation)
+            point3 = translate(point: startLocation.3, trans: gesture.translation)
+            return
+        }
+        startLocation = (point0, point1, point2, point3)
+        isDragging = true
+    }
+    
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+        isDragging = false
     }
     
 }

@@ -13,7 +13,9 @@ import SwiftUI
 import Machines
 import Attributes
 
-public class MachineViewModel: ObservableObject {
+public class MachineViewModel: ObservableObject, Dragable {
+    
+    
     
     @Reference public var machine: Machine
     
@@ -34,6 +36,10 @@ public class MachineViewModel: ObservableObject {
     let gridWidth: CGFloat = 80.0
     
     let gridHeight: CGFloat = 80.0
+    
+    var isDragging: Bool = false
+    
+    var startLocations: [CGPoint] = []
     
     public init(machine: Ref<Machine>) {
         self._machine = Reference(reference: machine)
@@ -109,6 +115,28 @@ public class MachineViewModel: ObservableObject {
             print("Failed to create state")
             print(error, stderr)
         }
+    }
+    
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if isDragging {
+            self.states.indices.forEach {
+                states[$0].location = CGPoint(
+                    x: startLocations[$0].x - gesture.translation.width,
+                    y: startLocations[$0].y - gesture.translation.height
+                )
+                states[$0].transitionViewModels.forEach {
+                    $0.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+                }
+            }
+            return
+        }
+        startLocations = self.states.map { $0.location }
+        isDragging = true
+    }
+    
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+        isDragging = false
     }
     
 }
