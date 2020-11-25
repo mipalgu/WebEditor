@@ -39,9 +39,17 @@ public class MachineViewModel: ObservableObject {
         self._machine = Reference(reference: machine)
         let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.value.path.states
         let states: [Machines.State] = machine.value[keyPath: statesPath.path]
-        self.states = states.indices.map {
-            StateViewModel(machine: machine, path: machine.value.path.states[$0], location: CGPoint(x: 100, y: $0 * 200))
+        self.states = states.indices.map { stateIndex in
+            let stateX: CGFloat = 100.0
+            let stateY: CGFloat = CGFloat(stateIndex) * 200.0
+            return StateViewModel(machine: machine, path: machine.value.path.states[stateIndex], location: CGPoint(x: stateX, y: stateY))
         }
+        self.listen(to: $machine)
+    }
+    
+    init(machine: Ref<Machine>, states: [StateViewModel]) {
+        self._machine = Reference(reference: machine)
+        self.states = states
         self.listen(to: $machine)
     }
     
@@ -71,15 +79,6 @@ public class MachineViewModel: ObservableObject {
         } catch let error {
             print(error)
         }
-    }
-    
-    func toPlist() -> String {
-        let helper = StringHelper()
-        let statesPlist = helper.reduceLines(data: states.map { $0.toPList() })
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" +
-        "<plist version=\"1.0\">\n<dict>\n" + helper.tab(data: statesPlist + "\n<key>Version</key>\n<string>1.3</string>") +
-        "\n</dict>\n</plist>"
     }
     
 }
