@@ -149,7 +149,6 @@ public class EditorViewModel: ObservableObject {
             return nil
         }
         let states = machine.states
-        print(states.map { $0.name })
         return states[stateIndex]
     }
     

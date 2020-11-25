@@ -101,7 +101,6 @@ public class MachineViewModel: ObservableObject {
                 fatalError("Failed to insert new state.")
             }
             states.insert(StateViewModel(machine: $machine, path: machine.path.states[newStateIndex]), at: newStateIndex)
-            print(states)
         } catch let error {
             print("Failed to create state")
             print(error, stderr)

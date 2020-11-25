@@ -31,7 +31,7 @@ extension MachineViewModel {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
         "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" +
             "<plist version=\"1.0\">\n<dict>\n" + helper.tab(
-                data: "<key>States</key>\n<dict>\n" + helper.tab(data: statesPlist) + "\n<key>Version</key>\n<string>1.3</string>"
+                data: "<key>States</key>\n<dict>\n" + helper.tab(data: statesPlist) + "\n</dict>\n<key>Version</key>\n<string>1.3</string>"
             ) +
         "\n</dict>\n</plist>"
     }
