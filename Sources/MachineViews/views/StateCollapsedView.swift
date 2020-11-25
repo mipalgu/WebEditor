@@ -64,7 +64,7 @@ struct StateCollapsedView: View {
                 )
             )
             .coordinateSpace(name: "MAIN_VIEW")
-            .position(viewModel.getLocation(width: reader.size.width, height: reader.size.height))
+            .position(viewModel.location)
             .onTapGesture(count: 2) {
                 editorViewModel.changeMainView(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
                 editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)

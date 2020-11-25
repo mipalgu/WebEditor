@@ -13,6 +13,22 @@ import SwiftUI
 
 extension Rigidable where Self: Positionable {
     
+    var bottom: CGPoint {
+        CGPoint(x: location.x, y: location.y + height / 2.0)
+    }
+    
+    var top: CGPoint {
+        CGPoint(x: location.x, y: location.y - height / 2.0)
+    }
+    
+    var right: CGPoint {
+        CGPoint(x: location.x + width / 2.0, y: location.y)
+    }
+    
+    var left: CGPoint {
+        CGPoint(x: location.x - width / 2.0, y: location.y)
+    }
+    
     func getLocation(width: CGFloat, height: CGFloat) -> CGPoint {
         let x = self.location.x
         let y = self.location.y

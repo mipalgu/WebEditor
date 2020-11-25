@@ -27,34 +27,42 @@ public struct MachineView: View {
     }
     
     public var body: some View {
-        ZStack {
-            ForEach(viewModel.states, id: \.name) { (stateViewModel) -> AnyView in
-                AnyView(StateView(editorViewModel: editorViewModel, viewModel: stateViewModel)
-                    .contextMenu {
-                        Button(action: {
-                            viewModel.deleteState(stateViewModel: stateViewModel)
-                        }) {
-                            Text("Delete")
-                                .font(config.fontBody)
-                        }
-                        .keyboardShortcut(.delete)
-                    })
-            }
-            ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) in
-                ForEach(stateViewModel.transitions.indices, id: \.self) { (index: Int) in
-                    TransitionView(
-                        viewModel: stateViewModel.transitionViewModel(
-                            transition: stateViewModel.transitions[index],
-                            index: index,
-                            target: viewModel.getStateViewModel(stateName: stateViewModel.transitions[index].target)
+        GeometryReader { reader in
+            ZStack {
+                ForEach(viewModel.states, id: \.name) { (stateViewModel) -> AnyView in
+                    if !viewModel.isHidden(state: stateViewModel, frameWidth: reader.size.width, frameHeight: reader.size.height) {
+                    return AnyView(StateView(editorViewModel: editorViewModel, viewModel: stateViewModel)
+                        .contextMenu {
+                            Button(action: {
+                                viewModel.deleteState(stateViewModel: stateViewModel)
+                            }) {
+                                Text("Delete")
+                                    .font(config.fontBody)
+                            }
+                            .keyboardShortcut(.delete)
+                        })
+                    }
+                    return AnyView(ArrowView(
+                        pointOffScreen: Binding(get: { stateViewModel.location }, set: {_ in return}),
+                        label: Binding(get: { stateViewModel.name }, set: {_ in return}),
+                        frameWidth: Binding(get: { reader.size.width }, set: {_ in return}),
+                        frameHeight: Binding(get: { reader.size.height }, set: {_ in return })
+                    ).coordinateSpace(name: "MAIN_VIEW"))
+                }
+                ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) in
+                    ForEach(stateViewModel.transitions.indices, id: \.self) { (index: Int) in
+                        TransitionView(
+                            viewModel: stateViewModel.transitionViewModel(
+                                transition: stateViewModel.transitions[index],
+                                index: index,
+                                target: viewModel.getStateViewModel(stateName: stateViewModel.transitions[index].target)
+                            )
                         )
-                    )
-                    .clipped()
+                        .clipped()
+                    }
                 }
             }
-        }
-        .background(
-            GeometryReader { reader in
+            .background(
                 ZStack {
                     HStack {
                         ForEach(Array(stride(from: -reader.size.width / 2.0 + viewModel.gridWidth, to: reader.size.width / 2.0, by: viewModel.gridWidth)), id: \.self) {
@@ -95,9 +103,9 @@ public struct MachineView: View {
                         }
                     )
                 )
-            }
-            .clipped()
-        )
+                .clipped()
+            )
+        }
     }
 }
 

@@ -17,4 +17,11 @@ protocol Rigidable: Positionable {
     
     var height: CGFloat { get set }
     
+    var bottom: CGPoint {get}
+    
+    var top: CGPoint {get}
+    
+    var right: CGPoint {get}
+    
+    var left: CGPoint {get}
 }

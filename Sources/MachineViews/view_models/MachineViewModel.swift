@@ -147,4 +147,13 @@ public class MachineViewModel: ObservableObject, Dragable {
         isDragging = false
     }
     
+    func isHidden(state: StateViewModel, frameWidth: CGFloat, frameHeight: CGFloat) -> Bool {
+        let loc = state.location
+        let right = state.expanded ? loc.x + state.width / 2.0 : loc.x + state.collapsedWidth / 2.0
+        let left = state.expanded ? loc.x - state.width / 2.0 : loc.x - state.collapsedWidth / 2.0
+        let top = state.expanded ? loc.y - state.height / 2.0 : loc.y - state.collapsedHeight / 2.0
+        let bottom = state.expanded ? loc.y + state.height / 2.0 : loc.y + state.collapsedHeight / 2.0
+        return right < 0 || left > frameWidth || bottom < 0 || top > frameHeight
+    }
+    
 }
