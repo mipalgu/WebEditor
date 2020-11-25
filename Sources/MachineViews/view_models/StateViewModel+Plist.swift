@@ -64,7 +64,7 @@ extension StateViewModel {
     func toPList() -> String {
         let helper = StringHelper()
         let transitionPList = helper.reduceLines(data: transitionViewModels.map { $0.toPlist() })
-        return "<key>\(name)</key>"
+        return "<key>\(name)</key>\n"
             + helper.tab(data: "<dict>\n" +
                 helper.tab(data: "<key>Transitions</key>\n<array>\n" +
                     helper.tab(data: transitionPList)
