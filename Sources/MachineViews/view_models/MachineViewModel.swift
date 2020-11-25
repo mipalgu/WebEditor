@@ -81,4 +81,31 @@ public class MachineViewModel: ObservableObject {
         }
     }
     
+    public func save() {
+        do {
+            try machine.save()
+            let layoutPath = machine.filePath.appendingPathComponent("Layout.plist")
+            let pListData = self.toPlist()
+            try pListData.write(to: layoutPath, atomically: true, encoding: .utf8)
+        } catch let error {
+            print(error, stderr)
+        }
+    }
+    
+    func newState() {
+        do {
+            try machine.newState()
+            guard let newStateIndex = machine.states.firstIndex(where: { state in
+                nil == states.map { $0.name }.first(where: { state.name == $0 })
+            }) else {
+                fatalError("Failed to insert new state.")
+            }
+            states.insert(StateViewModel(machine: $machine, path: machine.path.states[newStateIndex]), at: newStateIndex)
+            print(states)
+        } catch let error {
+            print("Failed to create state")
+            print(error, stderr)
+        }
+    }
+    
 }

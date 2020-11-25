@@ -144,7 +144,13 @@ public class EditorViewModel: ObservableObject {
     }
     
     func state(machine: UUID, stateIndex: Int) -> StateViewModel? {
-        self.machine(id: machine)?.states[stateIndex]
+        guard let machine = self.machine(id: machine) else {
+            print("Machine is nil")
+            return nil
+        }
+        let states = machine.states
+        print(states.map { $0.name })
+        return states[stateIndex]
     }
     
     public func addError(error: Error) {

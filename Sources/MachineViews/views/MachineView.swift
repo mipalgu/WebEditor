@@ -77,6 +77,12 @@ public struct MachineView: View {
                         }
                     }
                 }
+                .background(
+                    config.backgroundColor
+                    .onTapGesture(count: 2) {
+                        viewModel.newState()
+                    }
+                )
             }
             .clipped()
         )

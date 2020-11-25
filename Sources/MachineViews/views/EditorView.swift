@@ -27,39 +27,42 @@ public struct EditorView: View {
     }
     
     public var body: some View {
-        VStack {
-            MenuView(machine: machineViewModel.$machine.asBinding)
-                .background(config.stateColour)
-            HStack {
-                GeometryReader{ reader in
-                    CollapsableAttributeGroupsView(machine: machineViewModel.$machine, path: Machine.path.attributes, label: "Dependencies", collapsed: Binding(get: {viewModel.leftPaneCollapsed}, set: {viewModel.leftPaneCollapsed = $0}), collapseLeft: true, buttonSize: 20, buttonWidth: viewModel.buttonWidth, buttonHeight: viewModel.buttonWidth)
-                        .frame(width: viewModel.leftPaneWidth)
-                        .position(x: viewModel.leftPaneWidth / 2.0, y: reader.size.height / 2.0)
-                    Divider()
-                        .frame(width: viewModel.dividerWidth, height: reader.size.height)
-                        .background(config.borderColour)
-                        .position(x: viewModel.leftDividerLocation, y: reader.size.height / 2.0)
-                        .gesture(DragGesture(minimumDistance: 0.0)
-                            .onChanged({ viewModel.dragLeftDividor(gesture: $0) })
-                            .onEnded({ viewModel.finishDraggingLeft(gesture: $0) })
-                        )
-                    MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
-                        .position(CGPoint(x: viewModel.leftDividerLocation + viewModel.getMainViewWidth(width: reader.size.width) / 2.0, y: reader.size.height / 2.0))
-                        .frame(width: viewModel.getMainViewWidth(width: reader.size.width))
-                    Divider()
-                        .frame(width: viewModel.dividerWidth, height: reader.size.height)
-                        .background(config.borderColour)
-                        .position(x: viewModel.getRightDividerLocation(width: reader.size.width), y: reader.size.height / 2.0)
-                        .gesture(DragGesture(minimumDistance: 0.0)
-                            .onChanged({ viewModel.dragRightDividor(width: reader.size.width, gesture: $0) })
-                            .onEnded({ viewModel.finishDraggingRight(width: reader.size.width, gesture: $0) })
-                        )
-                    FocusedAttributesView(machine: machineViewModel.$machine, viewType: $viewModel.focusedView, label: "Attributes", collapsed: Binding(get: { viewModel.rightPaneCollapsed }, set: { viewModel.rightPaneCollapsed = $0 }), collapseLeft: false, buttonSize: 20.0, buttonWidth: viewModel.buttonWidth, buttonHeight: viewModel.buttonWidth)
-                        .frame(width: viewModel.rightPaneWidth(width: reader.size.width))
-                        .position(CGPoint(x: viewModel.rightPaneLocation(width: reader.size.width), y: reader.size.height / 2.0))
+        ZStack {
+            VStack {
+                MenuView(machine: machineViewModel.$machine)
+                    .background(config.stateColour)
+                HStack {
+                    GeometryReader{ reader in
+                        CollapsableAttributeGroupsView(machine: machineViewModel.$machine, path: Machine.path.attributes, label: "Dependencies", collapsed: Binding(get: {viewModel.leftPaneCollapsed}, set: {viewModel.leftPaneCollapsed = $0}), collapseLeft: true, buttonSize: 20, buttonWidth: viewModel.buttonWidth, buttonHeight: viewModel.buttonWidth)
+                            .frame(width: viewModel.leftPaneWidth)
+                            .position(x: viewModel.leftPaneWidth / 2.0, y: reader.size.height / 2.0)
+                        Divider()
+                            .frame(width: viewModel.dividerWidth, height: reader.size.height)
+                            .background(config.borderColour)
+                            .position(x: viewModel.leftDividerLocation, y: reader.size.height / 2.0)
+                            .gesture(DragGesture(minimumDistance: 0.0)
+                                .onChanged({ viewModel.dragLeftDividor(gesture: $0) })
+                                .onEnded({ viewModel.finishDraggingLeft(gesture: $0) })
+                            )
+                        MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
+                            .position(CGPoint(x: viewModel.leftDividerLocation + viewModel.getMainViewWidth(width: reader.size.width) / 2.0, y: reader.size.height / 2.0))
+                            .frame(width: viewModel.getMainViewWidth(width: reader.size.width))
+                        Divider()
+                            .frame(width: viewModel.dividerWidth, height: reader.size.height)
+                            .background(config.borderColour)
+                            .position(x: viewModel.getRightDividerLocation(width: reader.size.width), y: reader.size.height / 2.0)
+                            .gesture(DragGesture(minimumDistance: 0.0)
+                                .onChanged({ viewModel.dragRightDividor(width: reader.size.width, gesture: $0) })
+                                .onEnded({ viewModel.finishDraggingRight(width: reader.size.width, gesture: $0) })
+                            )
+                        FocusedAttributesView(machine: machineViewModel.$machine, viewType: $viewModel.focusedView, label: "Attributes", collapsed: Binding(get: { viewModel.rightPaneCollapsed }, set: { viewModel.rightPaneCollapsed = $0 }), collapseLeft: false, buttonSize: 20.0, buttonWidth: viewModel.buttonWidth, buttonHeight: viewModel.buttonWidth)
+                            .frame(width: viewModel.rightPaneWidth(width: reader.size.width))
+                            .position(CGPoint(x: viewModel.rightPaneLocation(width: reader.size.width), y: reader.size.height / 2.0))
+                    }
                 }
             }
+            .frame(minWidth: viewModel.editorMinWidth)
+            DialogueView(machineViewModel: machineViewModel)
         }
-        .frame(minWidth: viewModel.editorMinWidth)
     }
 }

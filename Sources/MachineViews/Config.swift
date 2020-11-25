@@ -98,6 +98,8 @@ public class Config: ObservableObject {
     
     @Published var rightPaneStartPoint: CGFloat = 200.0
     
+    @Published var alertView: ViewType = .none
+    
     public init() {}
     
 }

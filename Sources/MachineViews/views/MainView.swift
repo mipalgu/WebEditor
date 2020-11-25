@@ -28,6 +28,7 @@ struct MainView: View {
         case .machine(_):
             MachineView(editorViewModel: editorViewModel, viewModel: machineViewModel)
                 .coordinateSpace(name: "MAIN_VIEW")
+                
         case .state(_, let stateIndex):
             StateEditView(viewModel: machineViewModel.states[stateIndex])
                 .onTapGesture(count: 2) {

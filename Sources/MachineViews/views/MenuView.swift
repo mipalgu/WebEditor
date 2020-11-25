@@ -17,16 +17,18 @@ struct MenuView: View {
     
     @State var openDialogue: Bool = false
     
-    @Binding var machine: Machine
+    @State var saveDialogue: Bool = false
+    
+    @ObservedObject var machine: Ref<Machine>
     
     @EnvironmentObject var config: Config
     
     var body: some View {
         ZStack {
             VStack {
-                Text(machine.name)
+                Text(machine.value.name)
                     .font(config.fontTitle1)
-                Text(machine.filePath.absoluteString)
+                Text(machine.value.filePath.absoluteString)
                     .font(config.fontHeading)
             }
             HStack {
@@ -57,7 +59,7 @@ struct MenuView: View {
                             .font(config.fontBody)
                     }
                 }
-                Button(action: {  }) {
+                Button(action: { config.alertView = ViewType.machine(id: machine.value.id) }) {
                     // Save-As
                     VStack {
                         Image(systemName: "folder.circle.fill")
@@ -67,7 +69,7 @@ struct MenuView: View {
                 }
                 Spacer()
                 VStack {
-                    Text(machine.semantics.rawValue)
+                    Text(machine.value.semantics.rawValue)
                         .font(config.fontBody)
                     Text("Semantics")
                         .font(config.fontHeading)
