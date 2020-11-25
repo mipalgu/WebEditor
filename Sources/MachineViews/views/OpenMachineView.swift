@@ -39,6 +39,7 @@ struct OpenMachineView: View {
             }
             Section {
                 HStack {
+                    Spacer()
                     Button(action: { config.alertView = ViewType.none }) {
                         Text("Close")
                     }
@@ -67,6 +68,7 @@ struct OpenMachineView: View {
                     }) {
                         Text("Open")
                     }
+                    .padding(.leading, 10)
                 }
             }
         }

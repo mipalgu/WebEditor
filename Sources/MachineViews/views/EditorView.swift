@@ -63,13 +63,16 @@ public struct EditorView: View {
             }
             .frame(minWidth: viewModel.editorMinWidth)
             DialogueView(machineViewModel: machineViewModel, editorViewModel: viewModel)
+                .padding(10)
                 .background(
                     RoundedRectangle(cornerRadius: 20.0)
                         .background(config.backgroundColor)
+                        .foregroundColor(config.backgroundColor)
+                        .border(config.borderColour, width: 3.0)
+                        .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
                 )
-                .padding(10)
                 .frame(minWidth: 400.0, maxWidth: 1000.0)
-                .border(config.borderColour, width: 3.0)
+                
         }
     }
 }
