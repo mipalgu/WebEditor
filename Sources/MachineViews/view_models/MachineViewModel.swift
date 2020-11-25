@@ -87,6 +87,10 @@ public class MachineViewModel: ObservableObject {
             let layoutPath = machine.filePath.appendingPathComponent("Layout.plist")
             let pListData = self.toPlist()
             try pListData.write(to: layoutPath, atomically: true, encoding: .utf8)
+            let languagePath = machine.filePath.appendingPathComponent("Semantics.json")
+            let encoder = JSONEncoder()
+            let jsonData = try encoder.encode(machine.semantics)
+            try jsonData.write(to: languagePath)
         } catch let error {
             print(error, stderr)
         }

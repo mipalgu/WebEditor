@@ -23,7 +23,7 @@ extension StateViewModel {
         let h = helper.getValueFromFloat(plist: data, label: "h")
         let expanded = helper.getValueFromBool(plist: data, label: "expanded")
         let highlighted = helper.getValueFromBool(plist: data, label: "stateSelected")
-        let transitionsPlist: String = data.components(separatedBy: "<array>")[1].components(separatedBy: "</array>")[0]
+        let transitionsPlist: String = data.components(separatedBy: "<key>Transitions</key>")[1].components(separatedBy: "<key>bgColour</key>")[0]
         let transitionViewModels = machine.value[keyPath: path.path].transitions.indices.map { (priority: Int) -> TransitionViewModel in
             let transitionPlist = transitionsPlist.components(separatedBy: "</dict>")[priority]
                 .components(separatedBy: "<dict>")[1]

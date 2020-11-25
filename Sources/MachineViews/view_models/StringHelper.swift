@@ -40,14 +40,15 @@ struct StringHelper {
     }
     
     func getValueFromBool(plist data: String, label: String) -> Bool {
-        let val = data.components(separatedBy: "<key>\(label)</key>")[1].components(separatedBy: "<key>")[0].trimmingCharacters(in: .whitespaces)
+        let val = data.components(separatedBy: "<key>\(label)</key>")[1]
+            .components(separatedBy: "<key>")[0].trimmingCharacters(in: .whitespacesAndNewlines)
         if val == "<true/>" {
             return true
         }
         if val == "<false/>" {
             return false
         }
-        fatalError("Failed to convert plist to a bool value (data, label): (\(data), \(label))")
+        fatalError("Failed to convert plist to a bool value (data, label): (\(data), \(label))\n\n\nThe value in question: \(val)")
     }
     
 }

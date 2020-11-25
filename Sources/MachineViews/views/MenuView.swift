@@ -19,16 +19,16 @@ struct MenuView: View {
     
     @State var saveDialogue: Bool = false
     
-    @ObservedObject var machine: Ref<Machine>
+    @ObservedObject var machineViewModel: MachineViewModel
     
     @EnvironmentObject var config: Config
     
     var body: some View {
         ZStack {
             VStack {
-                Text(machine.value.name)
+                Text(machineViewModel.machine.name)
                     .font(config.fontTitle1)
-                Text(machine.value.filePath.absoluteString)
+                Text(machineViewModel.machine.filePath.absoluteString)
                     .font(config.fontHeading)
             }
             HStack {
@@ -43,7 +43,7 @@ struct MenuView: View {
                             .font(config.fontBody)
                     }
                 }
-                Button(action: { openDialogue = true }) {
+                Button(action: { config.alertView = ViewType.openMachine }) {
                     // Open Machine
                     VStack {
                         Image(systemName: "folder.fill")
@@ -51,7 +51,7 @@ struct MenuView: View {
                             .font(config.fontBody)
                     }
                 }
-                Button(action: {  }) {
+                Button(action: { machineViewModel.save() }) {
                     // Save Machine
                     VStack {
                         Image(systemName: "folder.circle")
@@ -59,7 +59,7 @@ struct MenuView: View {
                             .font(config.fontBody)
                     }
                 }
-                Button(action: { config.alertView = ViewType.machine(id: machine.value.id) }) {
+                Button(action: { config.alertView = ViewType.machine(id: machineViewModel.machine.id) }) {
                     // Save-As
                     VStack {
                         Image(systemName: "folder.circle.fill")
@@ -69,7 +69,7 @@ struct MenuView: View {
                 }
                 Spacer()
                 VStack {
-                    Text(machine.value.semantics.rawValue)
+                    Text(machineViewModel.machine.semantics.rawValue)
                         .font(config.fontBody)
                     Text("Semantics")
                         .font(config.fontHeading)

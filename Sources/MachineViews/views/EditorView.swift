@@ -29,7 +29,7 @@ public struct EditorView: View {
     public var body: some View {
         ZStack {
             VStack {
-                MenuView(machine: machineViewModel.$machine)
+                MenuView(machineViewModel: machineViewModel)
                     .background(config.stateColour)
                 HStack {
                     GeometryReader{ reader in
@@ -62,7 +62,14 @@ public struct EditorView: View {
                 }
             }
             .frame(minWidth: viewModel.editorMinWidth)
-            DialogueView(machineViewModel: machineViewModel)
+            DialogueView(machineViewModel: machineViewModel, editorViewModel: viewModel)
+                .background(
+                    RoundedRectangle(cornerRadius: 20.0)
+                        .background(config.backgroundColor)
+                )
+                .padding(10)
+                .frame(minWidth: 400.0, maxWidth: 1000.0)
+                .border(config.borderColour, width: 3.0)
         }
     }
 }

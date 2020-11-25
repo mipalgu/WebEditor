@@ -133,14 +133,19 @@ public class EditorViewModel: ObservableObject {
     }
     
     public func changeMainView(machine: UUID) {
-        guard nil != self.machine(id: machine) else {
+        guard let index = self.machineIndex(id: machine) else {
             return
         }
         self.mainView = .machine(id: machine)
+        self.currentMachineIndex = index
     }
     
     public func machine(id: UUID) -> MachineViewModel? {
         machines.first { $0.id == id }
+    }
+    
+    public func machineIndex(id: UUID) -> Int? {
+        machines.firstIndex(where: { $0.id == id })
     }
     
     func state(machine: UUID, stateIndex: Int) -> StateViewModel? {

@@ -17,5 +17,7 @@ public enum ViewType {
     case machine(id: UUID)
     case state(machine: UUID, stateIndex: Int)
     case transition(machine: Ref<Machine>, transition: Attributes.Path<Machine, Machines.Transition>)
+    case saveMachine(id: UUID)
+    case openMachine
     case none
 }
