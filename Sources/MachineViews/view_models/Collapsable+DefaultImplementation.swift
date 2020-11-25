@@ -21,6 +21,34 @@ protocol _Collapsable: class {
 
 extension Collapsable where Self: _Collapsable {
     
+    var bottom: CGPoint {
+        if expanded {
+            return CGPoint(x: location.x, y: location.y + height / 2.0)
+        }
+        return CGPoint(x: location.x, y: location.y + collapsedHeight / 2.0)
+    }
+    
+    var top: CGPoint {
+        if expanded {
+            return CGPoint(x: location.x, y: location.y - height / 2.0)
+        }
+        return CGPoint(x: location.x, y: location.y - collapsedHeight / 2.0)
+    }
+    
+    var right: CGPoint {
+        if expanded {
+            return CGPoint(x: location.x + width / 2.0, y: location.y)
+        }
+        return CGPoint(x: location.x + collapsedWidth / 2.0, y: location.y)
+    }
+    
+    var left: CGPoint {
+        if expanded {
+            return CGPoint(x: location.x - width / 2.0, y: location.y)
+        }
+        return CGPoint(x: location.x - collapsedWidth / 2.0, y: location.y)
+    }
+    
     var collapsedWidth: CGFloat {
         get {
             min(max(collapsedMinWidth, _collapsedWidth), collapsedMaxWidth)

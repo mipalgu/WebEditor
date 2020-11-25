@@ -30,6 +30,7 @@ public struct MachineView: View {
         GeometryReader { reader in
             ZStack {
                 ForEach(viewModel.states, id: \.name) { (stateViewModel) -> AnyView in
+                    print("Location: \(stateViewModel.location)")
                     if !viewModel.isHidden(state: stateViewModel, frameWidth: reader.size.width, frameHeight: reader.size.height) {
                     return AnyView(StateView(editorViewModel: editorViewModel, viewModel: stateViewModel)
                         .contextMenu {
@@ -42,6 +43,7 @@ public struct MachineView: View {
                             .keyboardShortcut(.delete)
                         })
                     }
+                    print("\(stateViewModel.name) is hidden")
                     return AnyView(ArrowView(
                         pointOffScreen: Binding(get: { stateViewModel.location }, set: {_ in return}),
                         label: Binding(get: { stateViewModel.name }, set: {_ in return}),
