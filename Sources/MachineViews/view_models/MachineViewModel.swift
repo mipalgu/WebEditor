@@ -17,7 +17,7 @@ public class MachineViewModel: ObservableObject {
     
     @Reference public var machine: Machine
     
-    @Published public var states: [StateViewModel]
+    @Published var states: [StateViewModel]
     
     public var path: Attributes.Path<Machine, Machine> {
         machine.path
@@ -51,14 +51,14 @@ public class MachineViewModel: ObservableObject {
         }
     }
     
-    public func getStateViewModel(stateName: String) -> StateViewModel {
+    func getStateViewModel(stateName: String) -> StateViewModel {
         guard let vm = self.states.first(where: { $0.name == stateName }) else {
             fatalError("Tried to access state view model that didn't exist")
         }
         return vm
     }
     
-    public func deleteState(stateViewModel: StateViewModel) {
+    func deleteState(stateViewModel: StateViewModel) {
         /*if !stateViewModel.highlighted {
             return
         }*/

@@ -13,17 +13,17 @@ import SwiftUI
 import Machines
 import Attributes
 
-public struct StateEditView: View {
+struct StateEditView: View {
     
     @ObservedObject var viewModel: StateViewModel
     
     @EnvironmentObject var config: Config
     
-    public init(viewModel: StateViewModel) {
+    init(viewModel: StateViewModel) {
         self.viewModel = viewModel
     }
     
-    public var body: some View {
+    var body: some View {
         GeometryReader { reader in
             ScrollView {
                 VStack(alignment: .leading) {

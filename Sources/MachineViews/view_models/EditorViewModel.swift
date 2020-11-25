@@ -143,7 +143,7 @@ public class EditorViewModel: ObservableObject {
         machines.first { $0.id == id }
     }
     
-    public func state(machine: UUID, stateIndex: Int) -> StateViewModel? {
+    func state(machine: UUID, stateIndex: Int) -> StateViewModel? {
         self.machine(id: machine)?.states[stateIndex]
     }
     

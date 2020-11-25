@@ -13,11 +13,23 @@ import SwiftUI
 import Machines
 import Attributes
 
-class TransitionViewModel: ObservableObject {
+class TransitionViewModel: ObservableObject, Equatable, Hashable {
+    
+    public static func == (lhs: TransitionViewModel, rhs: TransitionViewModel) -> Bool {
+        lhs === rhs
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(path)
+    }
     
     @Reference var machine: Machine
     
     let path: Attributes.Path<Machine, Transition>
+    
+    var transition: Transition {
+        machine[keyPath: path.path]
+    }
     
     @Published var point0: CGPoint
     
@@ -134,6 +146,24 @@ class TransitionViewModel: ObservableObject {
         let stroke0 = CGPoint(x: locationX + dx, y: locationY + dy)
         let stroke1 = CGPoint(x: locationX - dx, y: locationY - dy)
         return (stroke0, stroke1)
+    }
+    
+    fileprivate func floatToPList(key: String, point: CGFloat) -> String {
+        return "<key>\(key)</key>\n<real>\(point)</real>\n"
+    }
+    
+    func toPlist() -> String {
+        let helper = StringHelper()
+        return "<dict>\n" + helper.tab(
+            data: floatToPList(key: "controlPoint1X", point: point1.x) +
+                floatToPList(key: "controlPoint1Y", point: point1.y) +
+                floatToPList(key: "controlPoint2X", point: point2.x) +
+                floatToPList(key: "controlPoint2Y", point: point2.y) +
+                floatToPList(key: "dstPointX", point: point3.x) +
+                floatToPList(key: "dstPointY", point: point3.y) +
+                floatToPList(key: "srcPointX", point: point0.x) +
+                floatToPList(key: "srcPointY", point: point0.y)
+        ) + "</dict>"
     }
     
 }
