@@ -90,7 +90,7 @@ struct StateExpandedView: View {
                 editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
             }
             .onTapGesture(count: 1) {
-                editorViewModel.machines.first { viewModel.machineName == $0.name }?.removeHighlights()
+                editorViewModel.machines.first { viewModel.machineId == $0.id }?.removeHighlights()
                 viewModel.highlighted = true
                 editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
             }
