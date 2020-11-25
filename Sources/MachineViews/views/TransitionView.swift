@@ -33,10 +33,12 @@ struct TransitionView: View {
                 Circle()
                     .frame(width: viewModel.pointDiameter, height: viewModel.pointDiameter)
                     .background(Color.red)
+                    .coordinateSpace(name: "MAIN_VIEW")
                     .position(viewModel.point1)
                 Circle()
                     .frame(width: viewModel.pointDiameter, height: viewModel.pointDiameter)
                     .background(Color.blue)
+                    .coordinateSpace(name: "MAIN_VIEW")
                     .position(viewModel.point2)
                 ExpressionView(
                     machine: viewModel.$machine,
@@ -44,6 +46,7 @@ struct TransitionView: View {
                     label: viewModel.condition,
                     language: .swift
                 )
+                    .coordinateSpace(name: "MAIN_VIEW")
                     .position(viewModel.conditionPosition)
                 if viewModel.priority != 0 {
                     ForEach(Array(stride(from: 1, to: viewModel.priority, by: 1)), id: \.self) { (strokeNumber) -> AnyView in
@@ -51,7 +54,7 @@ struct TransitionView: View {
                         return AnyView(Path { strokePath in
                             strokePath.move(to: strokePoints.0)
                             strokePath.addLine(to: strokePoints.1)
-                        })
+                        }.coordinateSpace(name: "MAIN_VIEW"))
                     }
                 }
             }
