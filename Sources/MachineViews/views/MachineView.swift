@@ -29,27 +29,14 @@ public struct MachineView: View {
     public var body: some View {
         GeometryReader { reader in
             ZStack {
-                ForEach(viewModel.states, id: \.name) { (stateViewModel) -> AnyView in
-                    print("Location: \(stateViewModel.location)")
-                    if !viewModel.isHidden(state: stateViewModel, frameWidth: reader.size.width, frameHeight: reader.size.height) {
-                    return AnyView(StateView(editorViewModel: editorViewModel, viewModel: stateViewModel)
-                        .contextMenu {
-                            Button(action: {
-                                viewModel.deleteState(stateViewModel: stateViewModel)
-                            }) {
-                                Text("Delete")
-                                    .font(config.fontBody)
-                            }
-                            .keyboardShortcut(.delete)
-                        })
-                    }
-                    print("\(stateViewModel.name) is hidden")
-                    return AnyView(ArrowView(
-                        pointOffScreen: Binding(get: { stateViewModel.location }, set: {_ in return}),
-                        label: Binding(get: { stateViewModel.name }, set: {_ in return}),
-                        frameWidth: Binding(get: { reader.size.width }, set: {_ in return}),
-                        frameHeight: Binding(get: { reader.size.height }, set: {_ in return })
-                    ).coordinateSpace(name: "MAIN_VIEW"))
+                ForEach(viewModel.states, id: \.name) { (stateViewModel) -> HiddenStateView in
+                    HiddenStateView(
+                        viewModel: stateViewModel,
+                        editorViewModel: editorViewModel,
+                        machineViewModel: viewModel,
+                        parentWidth: Binding(get: { reader.size.width }, set: {_ in return }),
+                        parentHeight: Binding(get: { reader.size.height }, set: {_ in return})
+                    )
                 }
                 ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) in
                     ForEach(stateViewModel.transitions.indices, id: \.self) { (index: Int) in

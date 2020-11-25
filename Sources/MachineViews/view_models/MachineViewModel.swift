@@ -15,8 +15,6 @@ import Attributes
 
 public class MachineViewModel: ObservableObject, Dragable {
     
-    
-    
     @Reference public var machine: Machine
     
     @Published var states: [StateViewModel]
@@ -145,10 +143,6 @@ public class MachineViewModel: ObservableObject, Dragable {
     func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         isDragging = false
-    }
-    
-    func isHidden(state: StateViewModel, frameWidth: CGFloat, frameHeight: CGFloat) -> Bool {
-        return state.right.x < 0 || state.left.x > frameWidth || state.bottom.y < 0 || state.top.y > frameHeight
     }
     
 }

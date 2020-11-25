@@ -366,4 +366,8 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         return max(minEditActionHeight, availableSpace / numberOfActions)
     }
     
+    func isHidden(frameWidth: CGFloat, frameHeight: CGFloat) -> Bool {
+        return right.x < 0 || left.x > frameWidth || bottom.y < 0 || top.y > frameHeight
+    }
+    
 }

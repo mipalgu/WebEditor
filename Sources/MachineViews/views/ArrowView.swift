@@ -24,14 +24,34 @@ struct ArrowView: View {
     @EnvironmentObject var config: Config
     
     var point0: CGPoint {
-        let x = pointOffScreen.x < 0 ? 0 : frameWidth
-        let y = pointOffScreen.y < 0 ? 0 : frameHeight
+        var x: CGFloat = pointOffScreen.x
+        if pointOffScreen.x < 0 {
+            x = 0
+        } else if pointOffScreen.x > frameWidth {
+            x = frameWidth
+        }
+        var y: CGFloat = pointOffScreen.y
+        if pointOffScreen.y < 0 {
+            y = 0.0
+        } else if pointOffScreen.y > frameHeight {
+            y = frameHeight
+        }
         return CGPoint(x: x, y: y)
     }
     
     var point1: CGPoint {
-        let x = pointOffScreen.x < 0 ? 50.0 : frameWidth - 50.0
-        let y = pointOffScreen.y < 0 ? 50.0 : frameHeight - 50.0
+        var x: CGFloat = pointOffScreen.x
+        if pointOffScreen.x < 0 {
+            x = 30.0
+        } else if pointOffScreen.x > frameWidth {
+            x = frameWidth - 30.0
+        }
+        var y: CGFloat = pointOffScreen.y
+        if pointOffScreen.y < 0 {
+            y = 30.0
+        } else if pointOffScreen.y > frameHeight {
+            y = frameHeight - 30.0
+        }
         return CGPoint(x: x, y: y)
     }
     
@@ -52,15 +72,15 @@ struct ArrowView: View {
     
     var arrow1: CGPoint {
         let angle = theta + Double.pi - Double.pi / 4.0
-        let x = CGFloat(5.0 * cos(angle))
-        let y = CGFloat(5.0 * sin(angle))
+        let x = CGFloat(15.0 * cos(angle))
+        let y = CGFloat(15.0 * sin(angle))
         return CGPoint(x: point1.x + x, y: point1.y + y)
     }
     
     var arrow2: CGPoint {
         let angle = theta - Double.pi + Double.pi / 4.0
-        let x = CGFloat(5.0 * cos(angle))
-        let y = CGFloat(5.0 * sin(angle))
+        let x = CGFloat(15.0 * cos(angle))
+        let y = CGFloat(15.0 * sin(angle))
         return CGPoint(x: point1.x + x, y: point1.y + y)
     }
     
@@ -76,7 +96,7 @@ struct ArrowView: View {
                 path.addLine(to: arrow1)
                 path.move(to: point1)
                 path.addLine(to: arrow2)
-            }
+            }.fill(Color.clear)
             .coordinateSpace(name: "MAIN_VIEW")
             Text(label)
                 .font(config.fontBody)
