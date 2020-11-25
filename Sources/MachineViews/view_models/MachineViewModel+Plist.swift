@@ -25,12 +25,14 @@ extension MachineViewModel {
         self.init(machine: machine, states: stateViewModels)
     }
     
-    func toPlist() -> String {
+    public func toPlist() -> String {
         let helper = StringHelper()
         let statesPlist = helper.reduceLines(data: states.map { $0.toPList() })
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
         "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" +
-        "<plist version=\"1.0\">\n<dict>\n" + helper.tab(data: statesPlist + "\n<key>Version</key>\n<string>1.3</string>") +
+            "<plist version=\"1.0\">\n<dict>\n" + helper.tab(
+                data: "<key>States</key>\n<dict>\n" + helper.tab(data: statesPlist) + "\n<key>Version</key>\n<string>1.3</string>"
+            ) +
         "\n</dict>\n</plist>"
     }
     

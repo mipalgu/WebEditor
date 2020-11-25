@@ -34,7 +34,7 @@ extension StateViewModel {
     
     fileprivate func colourPList() -> String {
         let helper = StringHelper()
-        return "<dict>" +
+        return "<dict>\n" +
             helper.tab(data: "<key>alpha</key>\n<real>1</real>\n<key>blue</key>\n<real>0.92000000000000004</real>" +
         "\n<key>green</key>\n<real>0.92000000000000004</real>\n<key>red</key>\n<real>0.92000000000000004</real>"
             )
@@ -43,7 +43,7 @@ extension StateViewModel {
     
     fileprivate func strokePlist() -> String {
         let helper = StringHelper()
-        return "<dict>" +
+        return "<dict>\n" +
             helper.tab(data: "<key>alpha</key>\n<real>1</real>\n<key>blue</key>\n<real>0.0</real>" +
         "\n<key>green</key>\n<real>0.0</real>\n<key>red</key>\n<real>0.0</real>"
             )
@@ -64,15 +64,13 @@ extension StateViewModel {
     func toPList() -> String {
         let helper = StringHelper()
         let transitionPList = helper.reduceLines(data: transitionViewModels.map { $0.toPlist() })
-        return "<key>\(name)</key>\n"
-            + helper.tab(data: "<dict>\n" +
-                helper.tab(data: "<key>Transitions</key>\n<array>\n" +
-                    helper.tab(data: transitionPList)
-                ) +
-                "\n</array>\n" + colourPList() + "\n<key>editingMode</key>\n<false/>\n" +
+        return "<key>\(name)</key>\n<dict>\n"
+            + helper.tab(data: "<key>Transitions</key>\n\(transitions.count == 0 ? "<array/>" : "<array>")\n" +
+                helper.tab(data: transitionPList) + "\(transitions.count == 0 ? "" : "\n</array>")" +
+                "\n<key>bgColour</key>\n" + colourPList() + "\n<key>editingMode</key>\n<false/>\n" +
                 "<key>expanded</key>\n\(boolToPlist(value: expanded))\n" +
                 "<key>h</key>\n<real>\(height)</real>\n" + actionHeightstoPList() +
-                "\n<key>stateSelected</key>\n\(boolToPlist(value: highlighted))\n" +
+                "\n<key>stateSelected</key>\n\(boolToPlist(value: highlighted))\n<key>strokeColour</key>\n" +
                 strokePlist() + "\n<key>w</key>\n<real>\(width)</real>\n<key>x</key>\n<real>\(location.x)</real>\n" +
                 "<key>y</key>\n<real>\(location.y)</real>\n<key>zoomedInternalHeight</key>\n<real>0.0</real>\n" +
                 "<key>zoomedOnEntryHeight</key>\n<real>0.0</real>\n<key>zoomedOnExitHeight</key>\n<real>0.0</real>"
