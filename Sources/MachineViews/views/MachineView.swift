@@ -49,6 +49,7 @@ public struct MachineView: View {
                             target: viewModel.getStateViewModel(stateName: stateViewModel.transitions[index].target)
                         )
                     )
+                    .clipped()
                 }
             }
         }

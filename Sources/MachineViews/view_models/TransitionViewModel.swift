@@ -152,16 +152,24 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
         return (stroke0, stroke1)
     }
     
-    private func translate(point: CGPoint, trans: CGSize) -> CGPoint {
+    func translate(point: CGPoint, trans: CGSize) -> CGPoint {
         CGPoint(x: point.x - trans.width, y: point.y - trans.height)
+    }
+    
+    func boundPoint(point: CGPoint, frameWidth: CGFloat, frameHeight: CGFloat) -> CGPoint {
+        CGPoint(x: min(max(0, point.x), frameWidth), y: min(max(0, point.y), frameHeight))
+    }
+    
+    private func boundTranslate(point: CGPoint, trans: CGSize, frameWidth: CGFloat, frameHeight: CGFloat) -> CGPoint {
+        boundPoint(point: translate(point: point, trans: trans), frameWidth: frameWidth, frameHeight: frameHeight)
     }
     
     func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isDragging {
-            point0 = translate(point: startLocation.0, trans: gesture.translation)
-            point1 = translate(point: startLocation.1, trans: gesture.translation)
-            point2 = translate(point: startLocation.2, trans: gesture.translation)
-            point3 = translate(point: startLocation.3, trans: gesture.translation)
+            point0 = boundTranslate(point: startLocation.0, trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            point1 = boundTranslate(point: startLocation.1, trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            point2 = boundTranslate(point: startLocation.2, trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            point3 = boundTranslate(point: startLocation.3, trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
             return
         }
         startLocation = (point0, point1, point2, point3)

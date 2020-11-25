@@ -125,12 +125,20 @@ public class MachineViewModel: ObservableObject, Dragable {
                     y: startLocations[$0].y - gesture.translation.height
                 )
                 states[$0].transitionViewModels.forEach {
-                    $0.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+                    $0.point0 = $0.translate(point: $0.startLocation.0, trans: gesture.translation)
+                    $0.point1 = $0.translate(point: $0.startLocation.1, trans: gesture.translation)
+                    $0.point2 = $0.translate(point: $0.startLocation.2, trans: gesture.translation)
+                    $0.point3 = $0.translate(point: $0.startLocation.3, trans: gesture.translation)
                 }
             }
             return
         }
-        startLocations = self.states.map { $0.location }
+        startLocations = self.states.map {
+            $0.transitionViewModels.forEach {ts in
+                ts.startLocation = (ts.point0, ts.point1, ts.point2, ts.point3)
+            }
+            return $0.location
+        }
         isDragging = true
     }
     
