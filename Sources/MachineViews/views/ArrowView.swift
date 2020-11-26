@@ -17,9 +17,9 @@ struct ArrowView: View {
     
     @Binding var label: String
     
-    @Binding var frameWidth: CGFloat
+    var frameWidth: CGFloat
     
-    @Binding var frameHeight: CGFloat
+    var frameHeight: CGFloat
     
     @EnvironmentObject var config: Config
     

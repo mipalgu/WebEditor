@@ -21,9 +21,9 @@ struct HiddenStateView: View {
     
     @ObservedObject var machineViewModel: MachineViewModel
     
-    @Binding var parentWidth: CGFloat
+    var parentWidth: CGFloat
     
-    @Binding var parentHeight: CGFloat
+    var parentHeight: CGFloat
     
     @EnvironmentObject var config: Config
     
@@ -50,11 +50,11 @@ struct HiddenStateView: View {
                 .coordinateSpace(name: "MAIN_VIEW")
         } else {
             if viewModel.highlighted {
-                ArrowView(pointOffScreen: point, label: label, frameWidth: $parentWidth, frameHeight: $parentHeight)
+                ArrowView(pointOffScreen: point, label: label, frameWidth: parentWidth, frameHeight: parentHeight)
                     .coordinateSpace(name: "MAIN_VIEW")
                     .foregroundColor(config.highlightColour)
             } else {
-                ArrowView(pointOffScreen: point, label: label, frameWidth: $parentWidth, frameHeight: $parentHeight)
+                ArrowView(pointOffScreen: point, label: label, frameWidth: parentWidth, frameHeight: parentHeight)
                     .coordinateSpace(name: "MAIN_VIEW")
             }
         }

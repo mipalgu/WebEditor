@@ -27,32 +27,27 @@ public struct MachineView: View {
     }
     
     public var body: some View {
-        GeometryReader { reader in
+        GeometryReader { (geometry: GeometryProxy) in
             ZStack {
                 ForEach(viewModel.states, id: \.name) { (stateViewModel) -> HiddenStateView in
-                    let wBinding: Binding<CGFloat> = Binding<CGFloat>(get: { () -> CGFloat in reader.size.width }, set: {(_) -> Void in return })
-                    let hBinding: Binding<CGFloat> = Binding<CGFloat>(get: { () -> CGFloat in reader.size.height }, set: {(_) -> Void in return})
-                    return HiddenStateView(
+                    HiddenStateView(
                         viewModel: stateViewModel,
                         editorViewModel: editorViewModel,
                         machineViewModel: viewModel,
-                        parentWidth: wBinding,
-                        parentHeight: hBinding
+                        parentWidth: geometry.size.width,
+                        parentHeight: geometry.size.height
                     )
                 }
                 ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) in
-                    ForEach(stateViewModel.transitions.indices, id: \.self) { (index: Int) -> TransitionView in
-                        let transition: Transition = stateViewModel.transitions[index]
-                        let target: StateViewModel = viewModel.getStateViewModel(stateName: transition.target)
-                        let transitionViewModel: TransitionViewModel = stateViewModel.transitionViewModel(
-                            transition: transition,
-                            index: index,
-                            target: target
-                        )
-                        return TransitionView(
-                            viewModel: transitionViewModel,
-                            parentWidth: reader.size.width,
-                            parentHeight: reader.size.height
+                    ForEach(Array(stateViewModel.transitions.indices), id: \.self) { index in
+                        TransitionView(
+                            viewModel: stateViewModel.transitionViewModel(
+                                transition: stateViewModel.transitions[index],
+                                index: index,
+                                target: self.viewModel.getStateViewModel(stateName: stateViewModel.transitions[index].target)
+                            ),
+                            parentWidth: geometry.size.width,
+                            parentHeight: geometry.size.height
                         )
                     }
                 }
@@ -60,23 +55,23 @@ public struct MachineView: View {
             .background(
                 ZStack {
                     HStack {
-                        ForEach(Array(stride(from: -reader.size.width / 2.0 + viewModel.gridWidth, to: reader.size.width / 2.0, by: viewModel.gridWidth)), id: \.self) {
+                        ForEach(Array(stride(from: -geometry.size.width / 2.0 + viewModel.gridWidth, to: geometry.size.width / 2.0, by: viewModel.gridWidth)), id: \.self) {
                             Divider()
                                 .coordinateSpace(name: "MAIN_VIEW")
-                                .position(x: $0, y: reader.size.height / 2.0)
-                                .frame(width: 2.0, height: reader.size.height)
+                                .position(x: $0, y: geometry.size.height / 2.0)
+                                .frame(width: 2.0, height: geometry.size.height)
                                 .foregroundColor(config.stateColour)
                         }
                     }
                     VStack {
                         ForEach(
-                            Array(stride(from: -reader.size.height / 2.0 + viewModel.gridHeight, to: reader.size.height / 2.0, by: viewModel.gridHeight)),
+                            Array(stride(from: -geometry.size.height / 2.0 + viewModel.gridHeight, to: geometry.size.height / 2.0, by: viewModel.gridHeight)),
                             id: \.self
                         ) {
                             Divider()
                                 .coordinateSpace(name: "MAIN_VIEW")
-                                .position(x: reader.size.width / 2.0, y: $0)
-                                .frame(width: reader.size.width, height: 2.0)
+                                .position(x: geometry.size.width / 2.0, y: $0)
+                                .frame(width: geometry.size.width, height: 2.0)
                                 .foregroundColor(config.stateColour)
                         }
                     }
@@ -92,9 +87,9 @@ public struct MachineView: View {
                     }
                     .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
                         .onChanged {
-                            self.viewModel.handleDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
+                            self.viewModel.handleDrag(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                         }.onEnded {
-                            self.viewModel.finishDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
+                            self.viewModel.finishDrag(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                         }
                     )
                 )
