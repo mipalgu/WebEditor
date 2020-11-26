@@ -49,8 +49,14 @@ struct HiddenStateView: View {
                 }
                 .coordinateSpace(name: "MAIN_VIEW")
         } else {
-            ArrowView(pointOffScreen: point, label: label, frameWidth: $parentWidth, frameHeight: $parentHeight)
-                .coordinateSpace(name: "MAIN_VIEW")
+            if viewModel.highlighted {
+                ArrowView(pointOffScreen: point, label: label, frameWidth: $parentWidth, frameHeight: $parentHeight)
+                    .coordinateSpace(name: "MAIN_VIEW")
+                    .foregroundColor(config.highlightColour)
+            } else {
+                ArrowView(pointOffScreen: point, label: label, frameWidth: $parentWidth, frameHeight: $parentHeight)
+                    .coordinateSpace(name: "MAIN_VIEW")
+            }
         }
     }
 }
