@@ -37,7 +37,7 @@ struct WebEditor: App {
         let view: ViewType = ViewType.machine(id: machineRef.value.id)
         let oldMachine = MachineViewModel(machine: machineRef)
         return Config(viewModel: EditorViewModel(
-            machines: [oldMachine],
+            machines: [newMachine],
             mainView: view,
             focusedView: view
         ))

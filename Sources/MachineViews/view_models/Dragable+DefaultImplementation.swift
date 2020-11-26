@@ -13,7 +13,7 @@ import SwiftUI
 
 protocol MoveAndStretchFromDrag: Dragable, Moveable, Stretchable {}
 
-protocol MoveFromDrag: Dragable, Moveable {}
+protocol MoveFromDrag: Dragable, _Moveable, Moveable {}
 
 protocol StretchFromDrag: Dragable, Stretchable {}
 

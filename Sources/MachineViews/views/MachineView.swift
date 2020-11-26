@@ -30,24 +30,30 @@ public struct MachineView: View {
         GeometryReader { reader in
             ZStack {
                 ForEach(viewModel.states, id: \.name) { (stateViewModel) -> HiddenStateView in
-                    HiddenStateView(
+                    let wBinding: Binding<CGFloat> = Binding<CGFloat>(get: { () -> CGFloat in reader.size.width }, set: {(_) -> Void in return })
+                    let hBinding: Binding<CGFloat> = Binding<CGFloat>(get: { () -> CGFloat in reader.size.height }, set: {(_) -> Void in return})
+                    return HiddenStateView(
                         viewModel: stateViewModel,
                         editorViewModel: editorViewModel,
                         machineViewModel: viewModel,
-                        parentWidth: Binding(get: { reader.size.width }, set: {_ in return }),
-                        parentHeight: Binding(get: { reader.size.height }, set: {_ in return})
+                        parentWidth: wBinding,
+                        parentHeight: hBinding
                     )
                 }
                 ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) in
-                    ForEach(stateViewModel.transitions.indices, id: \.self) { (index: Int) in
-                        TransitionView(
-                            viewModel: stateViewModel.transitionViewModel(
-                                transition: stateViewModel.transitions[index],
-                                index: index,
-                                target: viewModel.getStateViewModel(stateName: stateViewModel.transitions[index].target)
-                            )
+                    ForEach(stateViewModel.transitions.indices, id: \.self) { (index: Int) -> TransitionView in
+                        let transition: Transition = stateViewModel.transitions[index]
+                        let target: StateViewModel = viewModel.getStateViewModel(stateName: transition.target)
+                        let transitionViewModel: TransitionViewModel = stateViewModel.transitionViewModel(
+                            transition: transition,
+                            index: index,
+                            target: target
                         )
-                        .clipped()
+                        return TransitionView(
+                            viewModel: transitionViewModel,
+                            parentWidth: reader.size.width,
+                            parentHeight: reader.size.height
+                        )
                     }
                 }
             }

@@ -20,6 +20,7 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
     }
     
     func hash(into hasher: inout Hasher) {
+        hasher.combine(machine)
         hasher.combine(path)
     }
     
@@ -31,17 +32,53 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
         machine[keyPath: path.path]
     }
     
-    @Published var point0: CGPoint
+    @Published var point0ViewModel: RigidMoveableViewModel
     
-    @Published var point1: CGPoint
+    @Published var point1ViewModel: RigidMoveableViewModel
     
-    @Published var point2: CGPoint
+    @Published var point2ViewModel: RigidMoveableViewModel
     
-    @Published var point3: CGPoint
+    @Published var point3ViewModel: RigidMoveableViewModel
     
     @Published var priority: UInt8
     
-    let pointDiameter: CGFloat = 5.0
+    var point0: CGPoint {
+        get {
+            point0ViewModel.location
+        }
+        set {
+            point0ViewModel.location = newValue
+        }
+    }
+    
+    var point1: CGPoint {
+        get {
+            point1ViewModel.location
+        }
+        set {
+            point1ViewModel.location = newValue
+        }
+    }
+    
+    var point2: CGPoint {
+        get {
+            point2ViewModel.location
+        }
+        set {
+            point2ViewModel.location = newValue
+        }
+    }
+    
+    var point3: CGPoint {
+        get {
+            point3ViewModel.location
+        }
+        set {
+            point3ViewModel.location = newValue
+        }
+    }
+    
+    let pointDiameter: CGFloat
     
     let arrowHeadLength: Double = 50.0
     
@@ -104,11 +141,18 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
     
     var startLocation: (CGPoint, CGPoint, CGPoint, CGPoint) = (.zero, .zero, .zero, .zero)
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8) {
+    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
         self._machine = Reference(reference: machine)
         self.path = path
-        self.point0 = source
-        self.point3 = destination
+        self.point0ViewModel = RigidMoveableViewModel(location: point0, width: pointDiameter, height: pointDiameter)
+        self.point1ViewModel = RigidMoveableViewModel(location: point1, width: pointDiameter, height: pointDiameter)
+        self.point2ViewModel = RigidMoveableViewModel(location: point2, width: pointDiameter, height: pointDiameter)
+        self.point3ViewModel = RigidMoveableViewModel(location: point3, width: pointDiameter, height: pointDiameter)
+        self.priority = priority
+        self.pointDiameter = pointDiameter
+    }
+    
+    convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
         let dx = destination.x - source.x
         let dy = destination.y - source.y
         let r = sqrt(dx * dx + dy * dy)
@@ -119,19 +163,7 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
         let p1y = source.y + 0.33 * rsint
         let p2x = source.x + 0.66 * rcost
         let p2y = source.y + 0.66 * rsint
-        self.point1 = CGPoint(x: p1x, y: p1y)
-        self.point2 = CGPoint(x: p2x, y: p2y)
-        self.priority = priority
-    }
-    
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint, priority: UInt8) {
-        self._machine = Reference(reference: machine)
-        self.path = path
-        self.point0 = point0
-        self.point1 = point1
-        self.point2 = point2
-        self.point3 = point3
-        self.priority = priority
+        self.init(machine: machine, path: path, point0: source, point1: CGPoint(x: p1x, y: p1y), point2: CGPoint(x: p2x, y: p2y), point3: destination, priority: priority, pointDiameter: pointDiameter)
     }
     
     func strokeLength(transition: UInt8) -> CGFloat {
