@@ -89,7 +89,7 @@ struct ArrowView: View {
     }
     
     var body: some View {
-        ZStack {
+        /*ZStack {
             Path { path in
                 path.move(to: point0)
                 path.addLine(to: point1)
@@ -97,11 +97,11 @@ struct ArrowView: View {
                 path.move(to: point1)
                 path.addLine(to: arrow2)
             }.fill(Color.clear)
-            .coordinateSpace(name: "MAIN_VIEW")
+            .coordinateSpace(name: "MAIN_VIEW")*/
             Text(label)
                 .font(config.fontBody)
                 .coordinateSpace(name: "MAIN_VIEW")
                 .position(center)
-        }
+        //}
     }
 }

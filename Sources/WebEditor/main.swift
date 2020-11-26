@@ -62,9 +62,15 @@ struct ContentView: View {
     
     init(machineRef: Ref<Machine>) {
         self.machineRef = machineRef
+        let path = URL(fileURLWithPath: "/Users/morgan/src/MiPal/GUNao/fsms/nao/SwiftMachines/Vision/PMTopLineSightings.machine")
+        let machine = try? Machine(filePath: path)
+        let plistPath = path.appendingPathComponent("Layout.plist")
+        let pListData = try? String(contentsOf: plistPath)
+        let newMachine = MachineViewModel(machine: Ref(copying: machine!), plist: pListData!)
         let view: ViewType = ViewType.machine(id: machineRef.value.id)
+        let oldMachine = MachineViewModel(machine: machineRef)
         self._editorViewModel = StateObject(wrappedValue: EditorViewModel(
-            machines: [MachineViewModel(machine: machineRef)],
+            machines: [oldMachine],
             mainView: view,
             focusedView: view
         ))

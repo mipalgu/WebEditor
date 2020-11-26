@@ -119,8 +119,8 @@ public class MachineViewModel: ObservableObject, Dragable {
         if isDragging {
             self.states.indices.forEach {
                 states[$0].location = CGPoint(
-                    x: startLocations[$0].x - gesture.translation.width,
-                    y: startLocations[$0].y - gesture.translation.height
+                    x: startLocations[$0].x + gesture.translation.width,
+                    y: startLocations[$0].y + gesture.translation.height
                 )
                 states[$0].transitionViewModels.forEach {
                     $0.point0 = $0.translate(point: $0.startLocation.0, trans: gesture.translation)
