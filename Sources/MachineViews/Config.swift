@@ -100,6 +100,10 @@ public class Config: ObservableObject {
     
     @Published var alertView: ViewType = .none
     
+    @Published public var viewModel: EditorViewModel = EditorViewModel(machines: [MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine))])
+    
     public init() {}
+    
+    public init(viewModel: EditorViewModel) {self.viewModel = viewModel}
     
 }
