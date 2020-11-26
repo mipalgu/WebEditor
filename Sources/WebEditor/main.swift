@@ -44,8 +44,9 @@ struct WebEditor: App {
     }
     
     var body: some Scene {
-        WindowGroup("Web Editor") {
-            WebEditorView().environmentObject(cfg)
+        let config = cfg
+        return WindowGroup("Web Editor") {
+            WebEditorView().environmentObject(config)
         }.commands(content: {
             ToolbarCommands()
             CommandMenu("Edit") {
