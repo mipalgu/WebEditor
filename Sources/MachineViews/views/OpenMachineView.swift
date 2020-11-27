@@ -40,35 +40,35 @@ struct OpenMachineView: View {
             Section {
                 HStack {
                     Spacer()
-                    Button(action: { config.alertView = ViewType.none }) {
+                    Button(action: { config.alertView = .none }) {
                         Text("Close")
                     }
-                    Button(action: {
-                        print("Before open: \(editorViewModel.machines)")
-                        print("Current UUID: \(editorViewModel.currentMachine.id)")
-                        if let machine = editorViewModel.machines.first(where: { $0.machine.filePath == machineURL }) {
-                            config.alertView = .none
-                            editorViewModel.changeMainView(machine: machine.id)
-                            return
-                        }
-                        do {
-                            let newMachine = try Machine(filePath: machineURL)
-                            let layoutPath = machineURL.appendingPathComponent("Layout.plist")
-                            let plistData = try String(contentsOf: layoutPath, encoding: .utf8)
-                            let viewModel = MachineViewModel(machine: Ref(copying: newMachine), plist: plistData)
-                            editorViewModel.machines.append(viewModel)
-                            config.alertView = .none
-                            editorViewModel.changeMainView(machine: viewModel.machine.id)
-                            print("UUID: \(viewModel.machine.id)")
-                            print("After open: \(editorViewModel.machines)")
-                            print("New states: \(viewModel.states.map { $0.name })")
-                        } catch let error {
-                            print(error, stderr)
-                        }
-                    }) {
-                        Text("Open")
-                    }
-                    .padding(.leading, 10)
+//                    Button(action: {
+//                        print("Before open: \(editorViewModel.machines)")
+//                        print("Current UUID: \(editorViewModel.currentMachine.id)")
+//                        if let machine = editorViewModel.machines.first(where: { $0.machine.filePath == machineURL }) {
+//                            config.alertView = .none
+//                            editorViewModel.changeMainView(machine: machine.id)
+//                            return
+//                        }
+//                        do {
+//                            let newMachine = try Machine(filePath: machineURL)
+//                            let layoutPath = machineURL.appendingPathComponent("Layout.plist")
+//                            let plistData = try String(contentsOf: layoutPath, encoding: .utf8)
+//                            let viewModel = MachineViewModel(machine: Ref(copying: newMachine), plist: plistData)
+//                            editorViewModel.machines.append(viewModel)
+//                            config.alertView = .none
+//                            editorViewModel.changeMainView(machine: viewModel.machine.id)
+//                            print("UUID: \(viewModel.machine.id)")
+//                            print("After open: \(editorViewModel.machines)")
+//                            print("New states: \(viewModel.states.map { $0.name })")
+//                        } catch let error {
+//                            print(error, stderr)
+//                        }
+//                    }) {
+//                        Text("Open")
+//                    }
+//                    .padding(.leading, 10)
                 }
             }
         }

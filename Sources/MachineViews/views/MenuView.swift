@@ -43,7 +43,7 @@ struct MenuView: View {
                             .font(config.fontBody)
                     }
                 }
-                Button(action: { config.alertView = ViewType.openMachine }) {
+                Button(action: { config.alertView = .openMachine }) {
                     // Open Machine
                     VStack {
                         Image(systemName: "folder.fill")
@@ -59,7 +59,7 @@ struct MenuView: View {
                             .font(config.fontBody)
                     }
                 }
-                Button(action: { config.alertView = ViewType.machine(id: machineViewModel.machine.id) }) {
+                Button(action: { config.alertView = .saveMachine(id: machineViewModel.machine.id) }) {
                     // Save-As
                     VStack {
                         Image(systemName: "folder.circle.fill")

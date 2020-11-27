@@ -15,11 +15,11 @@ import Attributes
 
 public class EditorViewModel: ObservableObject {
     
-    @Published public var machines: [MachineViewModel]
+    @Published public var machine: MachineViewModel
     
-    @Published public var mainView: ViewType = .none
+    @Published public var mainView: ViewType = .machine
     
-    @Published public var focusedView: ViewType = .none
+    @Published public var focusedView: ViewType = .machine
     
     @Published public var currentMachineIndex: Int
     
@@ -63,7 +63,7 @@ public class EditorViewModel: ObservableObject {
     public let logSize: UInt16
     
     public var currentMachine: MachineViewModel {
-        machines[currentMachineIndex]
+        self.machine
     }
     
     var mainViewWidth: CGFloat {
@@ -99,8 +99,8 @@ public class EditorViewModel: ObservableObject {
     
     var originalLocation: CGFloat = 0.0
     
-    public init(machines: [MachineViewModel], mainView: ViewType = .none, focusedView: ViewType = .none, currentMachineIndex: Int = 0, logSize: UInt16 = 50, rightDividerLocation: CGFloat = 10000, leftDividerLocation: CGFloat = 0.0) {
-        self.machines = machines
+    public init(machine: MachineViewModel, mainView: ViewType = .machine, focusedView: ViewType = .machine, currentMachineIndex: Int = 0, logSize: UInt16 = 50, rightDividerLocation: CGFloat = 10000, leftDividerLocation: CGFloat = 0.0) {
+        self.machine = machine
         self.mainView = mainView
         self.focusedView = focusedView
         self.currentMachineIndex = currentMachineIndex
@@ -109,53 +109,41 @@ public class EditorViewModel: ObservableObject {
         self._leftDividerLocation = leftDividerLocation
         self.errorLog = []
         self.errorLog.reserveCapacity(Int(logSize))
+        self.listen(to: machine)
     }
     
-    public func changeFocus(machine: UUID, stateIndex: Int) {
-        guard nil != self.state(machine: machine, stateIndex: stateIndex) else {
-            return
-        }
-        self.focusedView = .state(machine: machine, stateIndex: stateIndex)
+    public func changeFocus(stateIndex: Int) {
+        self.focusedView = .state(stateIndex: stateIndex)
     }
     
-    public func changeFocus(machine: UUID) {
-        guard nil != self.machine(id: machine) else {
-            return
-        }
-        self.focusedView = .machine(id: machine)
+    public func changeFocus() {
+        self.focusedView = .machine
     }
     
-    public func changeMainView(machine: UUID, stateIndex: Int) {
-        guard nil != self.state(machine: machine, stateIndex: stateIndex) else {
-            return
-        }
-        self.mainView = .state(machine: machine, stateIndex: stateIndex)
+    public func changeMainView(stateIndex: Int) {
+        self.mainView = .state(stateIndex: stateIndex)
     }
     
-    public func changeMainView(machine: UUID) {
-        guard let index = self.machineIndex(id: machine) else {
-            return
-        }
-        self.mainView = .machine(id: machine)
-        self.currentMachineIndex = index
+    public func changeMainView() {
+        self.mainView = .machine
     }
     
-    public func machine(id: UUID) -> MachineViewModel? {
-        machines.first { $0.id == id }
-    }
+//    public func machine(id: UUID) -> MachineViewModel? {
+//        machines.first { $0.id == id }
+//    }
+//    
+//    public func machineIndex(id: UUID) -> Int? {
+//        machines.firstIndex(where: { $0.id == id })
+//    }
     
-    public func machineIndex(id: UUID) -> Int? {
-        machines.firstIndex(where: { $0.id == id })
-    }
-    
-    func state(machine: UUID, stateIndex: Int) -> StateViewModel? {
-        guard let machine = self.machine(id: machine) else {
-            print("Machine is nil")
-            return nil
-        }
-        let states = machine.states
-        return states[stateIndex]
-    }
+//    func state(machine: UUID, stateIndex: Int) -> StateViewModel? {
+//        guard let machine = self.machine(id: machine) else {
+//            print("Machine is nil")
+//            return nil
+//        }
+//        let states = machine.states
+//        return states[stateIndex]
+//    }
     
     public func addError(error: Error) {
         if errorLog.count > logSize {

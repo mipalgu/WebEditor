@@ -98,12 +98,8 @@ public class Config: ObservableObject {
     
     @Published var rightPaneStartPoint: CGFloat = 200.0
     
-    @Published var alertView: ViewType = .none
-    
-    @Published public var viewModel: EditorViewModel = EditorViewModel(machines: [MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine))])
+    @Published var alertView: DialogType = .none
     
     public init() {}
-    
-    public init(viewModel: EditorViewModel) {self.viewModel = viewModel}
     
 }

@@ -27,26 +27,22 @@ struct WebEditor: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate: AppDelegate
     #endif
     
-    var cfg: Config {
-        let machineRef = Ref(copying: Machine.initialSwiftMachine)
-        let path = URL(fileURLWithPath: "/Users/morgan/src/MiPal/GUNao/fsms/nao/SwiftMachines/Vision/PMTopLineSightings.machine")
-        let machine = try? Machine(filePath: path)
-        let plistPath = path.appendingPathComponent("Layout.plist")
-        let pListData = try? String(contentsOf: plistPath)
-        let newMachine = MachineViewModel(machine: Ref(copying: machine!), plist: pListData!)
-        let view: ViewType = ViewType.machine(id: machineRef.value.id)
-        let oldMachine = MachineViewModel(machine: machineRef)
-        return Config(viewModel: EditorViewModel(
-            machines: [newMachine],
-            mainView: view,
-            focusedView: view
-        ))
-    }
+    var config: Config = Config()
+    
+    @StateObject var appViewModel = AppViewModel(
+        viewModels: Ref(
+            copying: [
+                EditorViewModel(machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine))),
+                EditorViewModel(machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine)))
+            ]
+        )
+    )
     
     var body: some Scene {
-        let config = cfg
-        return WindowGroup("Web Editor") {
-            WebEditorView().environmentObject(config)
+        WindowGroup("Web Editor") {
+            ForEach(Array(appViewModel.viewModels.value.indices), id: \.self) { index in
+                WebEditorView(viewModel: appViewModel.viewModels.value[index]).environmentObject(config)
+            }
         }.commands(content: {
             ToolbarCommands()
             CommandMenu("Edit") {
@@ -60,12 +56,12 @@ struct WebEditor: App {
 
 struct WebEditorView: View {
     
-    @StateObject var machineRef: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine)
+    @StateObject var viewModel: EditorViewModel
     
     @EnvironmentObject var config: Config
     
     var body: some View {
-        ContentView()
+        ContentView(editorViewModel: viewModel)
     }
     
 }
@@ -80,26 +76,26 @@ struct ContentView: View {
     
     @EnvironmentObject var config: Config
     /*
-    @ObservedObject var machineRef: Ref<Machine>
+    @ObservedObject var machineRef: Ref<Machine>*/
     
-    @StateObject var editorViewModel: EditorViewModel*/
+    @StateObject var editorViewModel: EditorViewModel
     
     var body: some View {
-        EditorView(viewModel: config.viewModel, machineViewModel: config.viewModel.currentMachine)
-        .background(config.backgroundColor)
-        .frame(minWidth: CGFloat(config.width), minHeight: CGFloat(config.height))
-        .onTapGesture(count: 1) {
-            let mainView = config.viewModel.mainView
-            switch mainView {
-            case .machine:
-                config.viewModel.currentMachine.removeHighlights()
-                config.viewModel.changeFocus(machine: config.viewModel.currentMachine.id)
-            case .state(_, let stateIndex):
-                config.viewModel.changeFocus(machine: config.viewModel.currentMachine.id, stateIndex: stateIndex)
-            default:
-                return
+        EditorView(viewModel: editorViewModel, machineViewModel: editorViewModel.currentMachine)
+            .background(config.backgroundColor)
+            .frame(minWidth: CGFloat(config.width), minHeight: CGFloat(config.height))
+            .onTapGesture(count: 1) {
+                let mainView = editorViewModel.mainView
+                switch mainView {
+                case .machine:
+                    editorViewModel.currentMachine.removeHighlights()
+                    editorViewModel.changeFocus()
+                case .state(let stateIndex):
+                    editorViewModel.changeFocus(stateIndex: stateIndex)
+                default:
+                    return
+                }
             }
-        }
     }
 }
 

@@ -25,18 +25,16 @@ struct MainView: View {
     
     var body: some View {
         switch type {
-        case .machine(_):
+        case .machine, .transition:
             MachineView(editorViewModel: editorViewModel, viewModel: machineViewModel)
                 .coordinateSpace(name: "MAIN_VIEW")
                 
-        case .state(_, let stateIndex):
+        case .state(let stateIndex):
             StateEditView(viewModel: machineViewModel.states[stateIndex])
                 .onTapGesture(count: 2) {
-                    editorViewModel.changeMainView(machine: machineViewModel.id)
-                    editorViewModel.changeFocus(machine: machineViewModel.id)
+                    editorViewModel.changeMainView()
+                    editorViewModel.changeFocus()
                 }
-        default:
-            EmptyView()
         }
     }
 }

@@ -32,10 +32,10 @@ struct FocusedAttributesView: View {
         switch viewType {
         case .machine:
             CollapsableAttributeGroupsView(machine: machine, path: Machine.path.attributes, label: "\(machine.value.name) Machine Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
-        case .state(_, let stateIndex):
+        case .state(let stateIndex):
             CollapsableAttributeGroupsView(machine: machine, path: Machine.path.states[stateIndex].attributes, label: "\(machine.value.states[stateIndex].name) State Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
-        default:
-            EmptyView()
+        case .transition(let path):
+            CollapsableAttributeGroupsView(machine: machine, path: path.attributes, label: "Transition Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
         }
     }
 }

@@ -83,7 +83,7 @@ public struct MachineView: View {
                     }
                     .onTapGesture(count: 1) {
                         viewModel.removeHighlights()
-                        editorViewModel.changeFocus(machine: viewModel.id)
+                        editorViewModel.changeFocus()
                     }
                     .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
                         .onChanged {

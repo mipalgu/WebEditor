@@ -14,9 +14,12 @@ import Machines
 import Attributes
 
 public enum ViewType {
-    case machine(id: UUID)
-    case state(machine: UUID, stateIndex: Int)
-    case transition(machine: Ref<Machine>, transition: Attributes.Path<Machine, Machines.Transition>)
+    case machine
+    case state(stateIndex: Int)
+    case transition(transition: Attributes.Path<Machine, Machines.Transition>)
+}
+
+public enum DialogType {
     case saveMachine(id: UUID)
     case openMachine
     case none

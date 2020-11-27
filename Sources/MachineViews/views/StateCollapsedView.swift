@@ -67,13 +67,13 @@ struct StateCollapsedView: View {
             .coordinateSpace(name: "MAIN_VIEW")
             .position(viewModel.location)
             .onTapGesture(count: 2) {
-                editorViewModel.changeMainView(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
-                editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
+                editorViewModel.changeMainView(stateIndex: viewModel.stateIndex)
+                editorViewModel.changeFocus(stateIndex: viewModel.stateIndex)
             }
             .onTapGesture(count: 1) {
-                editorViewModel.machines.first { viewModel.machineId == $0.id }?.removeHighlights()
+                editorViewModel.machine.removeHighlights()
                 viewModel.highlighted = true
-                editorViewModel.changeFocus(machine: viewModel.machineId, stateIndex: viewModel.stateIndex)
+                editorViewModel.changeFocus(stateIndex: viewModel.stateIndex)
             }
             .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
                 self.viewModel.handleCollapsedDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
