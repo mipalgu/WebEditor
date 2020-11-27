@@ -13,24 +13,18 @@ import SwiftUI
 import Machines
 import Attributes
 
-struct MenuView: View {
+public struct MenuView: View {
     
-    @State var openDialogue: Bool = false
+    @ObservedObject public var viewModel: ArrangementViewModel
     
-    @State var saveDialogue: Bool = false
+    @EnvironmentObject public var config: Config
     
-    @ObservedObject var machineViewModel: MachineViewModel
+    public init(viewModel: ArrangementViewModel) {
+        self.viewModel = viewModel
+    }
     
-    @EnvironmentObject var config: Config
-    
-    var body: some View {
-        ZStack {
-            VStack {
-                Text(machineViewModel.machine.name)
-                    .font(config.fontTitle1)
-                Text(machineViewModel.machine.filePath.absoluteString)
-                    .font(config.fontHeading)
-            }
+    public var body: some View {
+        HStack {
             HStack {
                 Button(action: {  }) {
                     // New Machine
@@ -51,7 +45,7 @@ struct MenuView: View {
                             .font(config.fontBody)
                     }
                 }
-                Button(action: { machineViewModel.save() }) {
+                Button(action: { viewModel.focusedView.machine.save() }) {
                     // Save Machine
                     VStack {
                         Image(systemName: "folder.circle")
@@ -59,7 +53,7 @@ struct MenuView: View {
                             .font(config.fontBody)
                     }
                 }
-                Button(action: { config.alertView = .saveMachine(id: machineViewModel.machine.id) }) {
+                Button(action: { config.alertView = .saveMachine(id: viewModel.focusedView.machine.machine.id) }) {
                     // Save-As
                     VStack {
                         Image(systemName: "folder.circle.fill")
@@ -67,13 +61,13 @@ struct MenuView: View {
                             .font(config.fontBody)
                     }
                 }
-                Spacer()
-                VStack {
-                    Text(machineViewModel.machine.semantics.rawValue)
-                        .font(config.fontBody)
-                    Text("Semantics")
-                        .font(config.fontHeading)
-                }
+            }
+            Spacer()
+            VStack {
+                Text(viewModel.focusedView.machine.machine.semantics.rawValue)
+                    .font(config.fontBody)
+                Text("Semantics")
+                    .font(config.fontHeading)
             }
         }
         .padding(20.0)

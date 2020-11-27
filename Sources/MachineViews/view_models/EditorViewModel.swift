@@ -27,18 +27,9 @@ public class EditorViewModel: ObservableObject {
     
     @Published public var rightDividerLocation: CGFloat
     
-    @Published var _leftDividerLocation: CGFloat
+
     
-    var leftDividerLocation: CGFloat {
-        get {
-            if leftPaneCollapsed {
-                return collapsedPaneWidth
-            }
-            return max(min(leftPaneMaxWidth, _leftDividerLocation), leftPaneMinWidth)
-        } set {
-            self._leftDividerLocation = max(min(leftPaneMaxWidth, newValue), leftPaneMinWidth)
-        }
-    }
+    
     
     let dividerWidth: CGFloat = 5.0
     
@@ -46,40 +37,17 @@ public class EditorViewModel: ObservableObject {
     
     let rightPaneMinWidth: CGFloat = 300
     
-    let leftPaneMaxWidth: CGFloat = 500
-    
-    let leftPaneMinWidth: CGFloat = 300
-    
     let mainViewMinWidth: CGFloat = 800
     
     let buttonWidth: CGFloat = 30.0
     
-    let collapsedPaneWidth: CGFloat = 50.0
-    
-    var editorMinWidth: CGFloat {
-        rightPaneMinWidth + leftPaneMinWidth + 2.0 * dividerWidth + mainViewMinWidth
-    }
-    
-    public let logSize: UInt16
-    
-    public var currentMachine: MachineViewModel {
-        self.machine
-    }
+
     
     var mainViewWidth: CGFloat {
-        max(rightDividerLocation - dividerWidth - leftDividerLocation, mainViewMinWidth)
+        max(rightDividerLocation - dividerWidth, mainViewMinWidth)
     }
     
-    var leftPaneWidth: CGFloat {
-        if leftPaneCollapsed {
-            return collapsedPaneWidth
-        }
-        return max(min(leftPaneMaxWidth, leftDividerLocation - dividerWidth / 2.0), leftPaneMinWidth)
-    }
-    
-    @Published var leftPaneCollapsed: Bool = false
-    
-    @Published var rightPaneCollapsed: Bool = false
+    @Published var paneCollapsed: Bool = false
     
     public var log: String {
         errorLog.map { $0.localizedDescription }.reduce("") {
@@ -99,16 +67,13 @@ public class EditorViewModel: ObservableObject {
     
     var originalLocation: CGFloat = 0.0
     
-    public init(machine: MachineViewModel, mainView: ViewType = .machine, focusedView: ViewType = .machine, currentMachineIndex: Int = 0, logSize: UInt16 = 50, rightDividerLocation: CGFloat = 10000, leftDividerLocation: CGFloat = 0.0) {
+    public init(machine: MachineViewModel, mainView: ViewType = .machine, focusedView: ViewType = .machine, currentMachineIndex: Int = 0, rightDividerLocation: CGFloat = 10000) {
         self.machine = machine
         self.mainView = mainView
         self.focusedView = focusedView
         self.currentMachineIndex = currentMachineIndex
-        self.logSize = logSize
         self.rightDividerLocation = rightDividerLocation
-        self._leftDividerLocation = leftDividerLocation
         self.errorLog = []
-        self.errorLog.reserveCapacity(Int(logSize))
         self.listen(to: machine)
     }
     
@@ -145,26 +110,21 @@ public class EditorViewModel: ObservableObject {
 //        return states[stateIndex]
 //    }
     
-    public func addError(error: Error) {
+    /*public func addError(error: Error) {
         if errorLog.count > logSize {
             let _ = errorLog.popLast()
         }
         errorLog.insert(error, at: 0)
-    }
+    }*/
     
-    func getRightDividerLocation(width: CGFloat) -> CGFloat {
-        if rightPaneCollapsed {
-            return width - collapsedPaneWidth
-        }
-        return min(max(width - rightPaneMaxWidth - dividerWidth / 2.0, rightDividerLocation), width - rightPaneMinWidth - dividerWidth / 2.0)
-    }
     
-    func getMainViewWidth(width: CGFloat) -> CGFloat {
+    
+    /*func getMainViewWidth(width: CGFloat) -> CGFloat {
         let width1 = max(getRightDividerLocation(width: width) - dividerWidth - leftDividerLocation, mainViewMinWidth)
         return min(width1, width - rightPaneWidth(width: width) - dividerWidth - leftDividerLocation)
-    }
+    }*/
     
-    func dragRightDividor(width: CGFloat, gesture: DragGesture.Value) {
+    /*func dragRightDividor(width: CGFloat, gesture: DragGesture.Value) {
         if rightPaneCollapsed {
             return
         }
@@ -174,39 +134,38 @@ public class EditorViewModel: ObservableObject {
             return
         }
         rightDividerLocation = min(max(width - rightPaneMaxWidth - dividerWidth / 2.0, originalLocation + gesture.translation.width), width - rightPaneMinWidth - dividerWidth / 2.0)
-    }
+    }*/
     
-    func finishDraggingRight(width: CGFloat, gesture: DragGesture.Value) {
+    /*func finishDraggingRight(width: CGFloat, gesture: DragGesture.Value) {
         dragRightDividor(width: width, gesture: gesture)
         draggingRight = false
-    }
+    }*/
     
-    func dragLeftDividor(gesture: DragGesture.Value) {
-        if leftPaneCollapsed {
-            return
-        }
-        if !draggingLeft {
-            originalLocation = leftDividerLocation
-            draggingLeft = true
-            return
-        }
-        leftDividerLocation = originalLocation + gesture.translation.width
-    }
     
-    func finishDraggingLeft(gesture: DragGesture.Value) {
+    
+    /*func finishDraggingLeft(gesture: DragGesture.Value) {
         dragLeftDividor(gesture: gesture)
         draggingLeft = false
-    }
+    }*/
     
-    func rightPaneWidth(width: CGFloat) -> CGFloat {
-        if rightPaneCollapsed {
+    /*func paneWidth(width: CGFloat) -> CGFloat {
+        if collapsed {
             return collapsedPaneWidth
         }
         return min(max(width - getRightDividerLocation(width: width) - dividerWidth / 2.0, rightPaneMinWidth), rightPaneMaxWidth)
-    }
+    }*/
     
-    func rightPaneLocation(width: CGFloat) -> CGFloat {
-        width - rightPaneWidth(width: width) / 2.0
-    }
+    /*func paneLocation(width: CGFloat) -> CGFloat {
+        width - paneWidth(width: width) / 2.0
+    }*/
+    
+    let collapsedPaneWidth: CGFloat = 50.0
+    
+    /*func getRightDividerLocation(width: CGFloat) -> CGFloat {
+        if rightPaneCollapsed {
+            return width - collapsedPaneWidth
+        }
+        return min(max(width - rightPaneMaxWidth - dividerWidth / 2.0, rightDividerLocation), width - rightPaneMinWidth - dividerWidth / 2.0)
+    }*/
     
 }

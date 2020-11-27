@@ -68,6 +68,42 @@ public final class ArrangementViewModel: ObservableObject {
     
     @Published public var rootMachineViewModels: [EditorViewModel]
     
+    @Published public var focusedView: EditorViewModel
+    
+    @Published var _leftDividerLocation: CGFloat
+    
+    @Published var leftPaneCollapsed: Bool = false
+    
+    let leftPaneMaxWidth: CGFloat = 500
+    
+    let leftPaneMinWidth: CGFloat = 300
+    
+    let collapsedPaneWidth: CGFloat = 50.0
+    
+    let dividerWidth: CGFloat = 5.0
+    
+    var leftPaneWidth: CGFloat {
+        if leftPaneCollapsed {
+            return collapsedPaneWidth
+        }
+        return max(min(leftPaneMaxWidth, leftDividerLocation - dividerWidth / 2.0), leftPaneMinWidth)
+    }
+    
+    var leftDividerLocation: CGFloat {
+        get {
+            if leftPaneCollapsed {
+                return collapsedPaneWidth
+            }
+            return max(min(leftPaneMaxWidth, _leftDividerLocation), leftPaneMinWidth)
+        } set {
+            self._leftDividerLocation = max(min(leftPaneMaxWidth, newValue), leftPaneMinWidth)
+        }
+    }
+
+    var rightPaneStartLocation: CGFloat {
+        leftPaneWidth + 2.0 * dividerWidth + focusedView.mainViewWidth
+    }
+
     public convenience init(rootMachines: [Machine]) {
         self.init(rootMachineViewModels: rootMachines.indices.map { EditorViewModel(machine: MachineViewModel(machine: Ref(copying: rootMachines[$0]))) })
     }
@@ -93,4 +129,15 @@ public final class ArrangementViewModel: ObservableObject {
         return states[stateIndex]
     }
     
+    /*func dragLeftDividor(gesture: DragGesture.Value) {
+        if leftPaneCollapsed {
+            return
+        }
+        if !draggingLeft {
+            originalLocation = leftDividerLocation
+            draggingLeft = true
+            return
+        }
+        leftDividerLocation = originalLocation + gesture.translation.width
+    }*/
 }
