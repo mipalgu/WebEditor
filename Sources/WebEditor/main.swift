@@ -69,28 +69,7 @@ struct WebEditorView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        VStack(alignment: .leading) {
-            MenuView(viewModel: viewModel)
-                .background(config.stateColour)
-            HStack {
-                CollapsableAttributeGroupsView(machine: machineViewModel.$machine, path: Machine.path.attributes, label: "Dependencies", collapsed: Binding(get: {viewModel.leftPaneCollapsed}, set: {viewModel.leftPaneCollapsed = $0}), collapseLeft: true, buttonSize: 20, buttonWidth: viewModel.buttonWidth, buttonHeight: viewModel.buttonWidth)
-                    .frame(width: viewModel.leftPaneWidth)
-                    .position(x: viewModel.leftPaneWidth / 2.0, y: reader.size.height / 2.0)
-                DividerView(
-                    viewModel: ,
-                    parentWidth: reader.size.width,
-                    parentHeight: reader.size.width
-                )
-                TabView {
-                    ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
-                        ContentView(editorViewModel: viewModel.rootMachineViewModels[index])
-                            .tabItem {
-                                Text(viewModel.rootMachineViewModels[index].machine.name)
-                            }.tag(index)
-                    }
-                }
-            }
-        }
+        
     }
     
 }
