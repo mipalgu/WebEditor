@@ -29,18 +29,9 @@ struct WebEditor: App {
     
     var config: Config = Config()
     
-    @StateObject var appViewModel = AppViewModel(
-        viewModels: [
-            EditorViewModel(machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine))),
-            EditorViewModel(machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine)))
-        ]
-    )
-    
     var body: some Scene {
         WindowGroup("Web Editor") {
-            ForEach(Array(appViewModel.viewModels.indices), id: \.self) { index in
-                WebEditorView(viewModel: appViewModel.viewModels[index]).environmentObject(config)
-            }
+            WebEditorView().environmentObject(config)
         }.commands(content: {
             ToolbarCommands()
             CommandMenu("Edit") {
@@ -54,12 +45,21 @@ struct WebEditor: App {
 
 struct WebEditorView: View {
     
-    @StateObject var viewModel: EditorViewModel
+    @StateObject var viewModel: ArrangementViewModel = ArrangementViewModel(rootMachines: [Machine.initialSwiftMachine])
     
     @EnvironmentObject var config: Config
     
     var body: some View {
-        ContentView(editorViewModel: viewModel)
+        VStack(alignment: .leading) {
+            TabView {
+                ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
+                    ContentView(editorViewModel: viewModel.rootMachineViewModels[index])
+                        .tabItem {
+                            Text(viewModel.rootMachineViewModels[index].machine.name)
+                        }.tag(index)
+                }
+            }
+        }
     }
     
 }

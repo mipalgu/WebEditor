@@ -64,24 +64,24 @@ import SwiftUI
 import Machines
 import Attributes
 
-public final class AppViewModel: ObservableObject {
+public final class ArrangementViewModel: ObservableObject {
     
-    @Published public var viewModels: [EditorViewModel]
+    @Published public var rootMachineViewModels: [EditorViewModel]
     
-    public convenience init(machines: Ref<[Machine]>) {
-        self.init(viewModels: machines.value.indices.map { EditorViewModel(machine: MachineViewModel(machine: machines[$0])) })
+    public convenience init(rootMachines: [Machine]) {
+        self.init(rootMachineViewModels: rootMachines.indices.map { EditorViewModel(machine: MachineViewModel(machine: Ref(copying: rootMachines[$0]))) })
     }
     
-    public init(viewModels: [EditorViewModel]) {
-        self.viewModels = viewModels
+    public init(rootMachineViewModels: [EditorViewModel]) {
+        self.rootMachineViewModels = rootMachineViewModels
     }
     
     public func machine(id: UUID) -> MachineViewModel? {
-        return viewModels.first { $0.machine.id == id }?.machine
+        return rootMachineViewModels.first { $0.machine.id == id }?.machine
     }
 
     public func machineIndex(id: UUID) -> Int? {
-        viewModels.firstIndex(where: { $0.machine.id == id })
+        rootMachineViewModels.firstIndex(where: { $0.machine.id == id })
     }
     
     func state(machine: UUID, stateIndex: Int) -> StateViewModel? {
