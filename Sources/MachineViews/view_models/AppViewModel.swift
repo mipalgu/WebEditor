@@ -66,23 +66,22 @@ import Attributes
 
 public final class AppViewModel: ObservableObject {
     
-    @Published public var viewModels: Ref<[EditorViewModel]>
+    @Published public var viewModels: [EditorViewModel]
     
     public convenience init(machines: Ref<[Machine]>) {
-        self.init(viewModels: Ref(copying: machines.value.indices.map { EditorViewModel(machine: MachineViewModel(machine: machines[$0])) }))
+        self.init(viewModels: machines.value.indices.map { EditorViewModel(machine: MachineViewModel(machine: machines[$0])) })
     }
     
-    public init(viewModels: Ref<[EditorViewModel]>) {
+    public init(viewModels: [EditorViewModel]) {
         self.viewModels = viewModels
-        self.listen(to: viewModels)
     }
     
     public func machine(id: UUID) -> MachineViewModel? {
-        return viewModels.value.first { $0.machine.id == id }?.machine
+        return viewModels.first { $0.machine.id == id }?.machine
     }
 
     public func machineIndex(id: UUID) -> Int? {
-        viewModels.value.firstIndex(where: { $0.machine.id == id })
+        viewModels.firstIndex(where: { $0.machine.id == id })
     }
     
     func state(machine: UUID, stateIndex: Int) -> StateViewModel? {

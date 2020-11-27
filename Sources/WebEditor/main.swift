@@ -30,18 +30,16 @@ struct WebEditor: App {
     var config: Config = Config()
     
     @StateObject var appViewModel = AppViewModel(
-        viewModels: Ref(
-            copying: [
-                EditorViewModel(machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine))),
-                EditorViewModel(machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine)))
-            ]
-        )
+        viewModels: [
+            EditorViewModel(machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine))),
+            EditorViewModel(machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine)))
+        ]
     )
     
     var body: some Scene {
         WindowGroup("Web Editor") {
-            ForEach(Array(appViewModel.viewModels.value.indices), id: \.self) { index in
-                WebEditorView(viewModel: appViewModel.viewModels.value[index]).environmentObject(config)
+            ForEach(Array(appViewModel.viewModels.indices), id: \.self) { index in
+                WebEditorView(viewModel: appViewModel.viewModels[index]).environmentObject(config)
             }
         }.commands(content: {
             ToolbarCommands()
