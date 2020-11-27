@@ -70,9 +70,9 @@ public final class ArrangementViewModel: ObservableObject {
     
     @Published public var focusedView: EditorViewModel
     
-    @Published var _leftDividerLocation: CGFloat
-    
     @Published var leftPaneCollapsed: Bool = false
+    
+    @Published var leftDivider: BoundedPositionViewModel
     
     let leftPaneMaxWidth: CGFloat = 500
     
@@ -80,43 +80,54 @@ public final class ArrangementViewModel: ObservableObject {
     
     let collapsedPaneWidth: CGFloat = 50.0
     
-    let dividerWidth: CGFloat = 5.0
+    var dividerWidth: CGFloat {
+        leftDivider.width
+    }
     
     var leftPaneWidth: CGFloat {
         if leftPaneCollapsed {
             return collapsedPaneWidth
         }
-        return max(min(leftPaneMaxWidth, leftDividerLocation - dividerWidth / 2.0), leftPaneMinWidth)
-    }
-    
-    var leftDividerLocation: CGFloat {
-        get {
-            if leftPaneCollapsed {
-                return collapsedPaneWidth
-            }
-            return max(min(leftPaneMaxWidth, _leftDividerLocation), leftPaneMinWidth)
-        } set {
-            self._leftDividerLocation = max(min(leftPaneMaxWidth, newValue), leftPaneMinWidth)
-        }
+        return max(min(leftPaneMaxWidth, leftDivider.location.x - dividerWidth / 2.0), leftPaneMinWidth)
     }
 
-    var rightPaneStartLocation: CGFloat {
-        leftPaneWidth + 2.0 * dividerWidth + focusedView.mainViewWidth
-    }
-
-    public convenience init(rootMachines: [Machine]) {
-        self.init(rootMachineViewModels: rootMachines.indices.map {
-            EditorViewModel(
-                machine: MachineViewModel(
-                    machine: Ref(copying: rootMachines[$0]),
-                    dividerViewModel:
+    public convenience init(rootMachines: [Machine], editorWidth: CGFloat, editorHeight: CGFloat) {
+        let x = editorWidth - 500
+        self.init(
+            rootMachineViewModels: rootMachines.indices.map {
+                EditorViewModel(
+                    machine: MachineViewModel(machine: Ref(copying: rootMachines[$0])),
+                    dividerViewModel: BoundedPositionViewModel(
+                        location: CGPoint(x: x, y: editorHeight / 2.0),
+                        width: 10.0,
+                        height: editorHeight,
+                        minX: x,
+                        maxX: editorWidth,
+                        minY: 0,
+                        maxY: editorHeight
+                    )
                 )
+            },
+            leftDivider: BoundedPositionViewModel(
+                location: CGPoint(x: 500, y: editorHeight / 2.0),
+                width: 10.0,
+                height: editorHeight,
+                minX: 300,
+                maxX: 500,
+                minY: 0,
+                maxY: editorHeight
             )
-        })
+        )
     }
     
-    public init(rootMachineViewModels: [EditorViewModel]) {
+    public init(rootMachineViewModels: [EditorViewModel], leftDivider: BoundedPositionViewModel) {
+        if rootMachineViewModels.count == 0 {
+            fatalError("Cannot load editor with no machines.")
+        }
         self.rootMachineViewModels = rootMachineViewModels
+        self.focusedView = rootMachineViewModels.first!
+        self.leftDivider = leftDivider
+        
     }
     
     public func machine(id: UUID) -> MachineViewModel? {
@@ -136,15 +147,9 @@ public final class ArrangementViewModel: ObservableObject {
         return states[stateIndex]
     }
     
-    /*func dragLeftDividor(gesture: DragGesture.Value) {
-        if leftPaneCollapsed {
-            return
-        }
-        if !draggingLeft {
-            originalLocation = leftDividerLocation
-            draggingLeft = true
-            return
-        }
-        leftDividerLocation = originalLocation + gesture.translation.width
-    }*/
+    func rightPaneStartLocation(width: CGFloat, height: CGFloat) -> CGPoint {
+        let offset = leftDivider.location.x + dividerWidth / 2.0
+        let x = leftPaneWidth + 2.0 * dividerWidth + focusedView.getDividerLocation(width: width - offset , height: height).x
+        return CGPoint(x: x, y: height / 2.0)
+    }
 }
