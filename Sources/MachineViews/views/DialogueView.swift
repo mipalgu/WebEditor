@@ -15,19 +15,17 @@ import Attributes
 
 struct DialogueView: View {
     
-    @ObservedObject var machineViewModel: MachineViewModel
-    
-    @ObservedObject var editorViewModel: EditorViewModel
+    @ObservedObject var viewModel: EditorViewModel
     
     @EnvironmentObject var config: Config
     
     var body: some View {
-        switch config.alertView {
-        case .saveMachine:
-            SaveMachineView(viewModel: machineViewModel)
+        switch viewModel.dialogueType {
+        case .save:
+            SaveMachineView(viewModel: viewModel)
                 .focusable()
-        case .openMachine:
-            OpenMachineView(editorViewModel: editorViewModel, machineURL: machineViewModel.machine.filePath, selected: .swiftfsm)
+        case .open:
+            OpenMachineView(viewModel: viewModel, machineURL: viewModel.machine.machine.filePath, selected: .swiftfsm)
         default:
             EmptyView()
         }

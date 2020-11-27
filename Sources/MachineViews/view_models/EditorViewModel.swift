@@ -21,17 +21,15 @@ public class EditorViewModel: ObservableObject {
     
     @Published public var focusedView: ViewType = .machine
     
-    @Published public var currentMachineIndex: Int
+    @Published var paneCollapsed: Bool = false
     
-    @Published public var errorLog: [Error]
+    @Published var dividerViewModel: BoundedPositionViewModel
     
-    @Published public var rightDividerLocation: CGFloat
+    @Published var dialogueType: DialogueViewType = .none
     
-
-    
-    
-    
-    let dividerWidth: CGFloat = 5.0
+    var dividerWidth: CGFloat {
+        dividerViewModel.width
+    }
     
     let rightPaneMaxWidth: CGFloat = 500
     
@@ -41,39 +39,43 @@ public class EditorViewModel: ObservableObject {
     
     let buttonWidth: CGFloat = 30.0
     
+    let buttonSize: CGFloat = 20.0
+    
+    let collapsedPaneWidth: CGFloat = 50.0
+    
+    private var mainViewWidth: CGFloat {
+        max(dividerLocation.x - dividerWidth, mainViewMinWidth)
+    }
+    
+    var dividerMinX: CGFloat {
+        mainViewMinWidth + dividerWidth / 2.0
+    }
+    
+    private var dividerLocation: CGPoint {
+        dividerViewModel.location
+    }
+    
+    var panelLabel: String {
+        machine.name + " Machine Attributes"
+    }
+    
+    var collapsedBinding: Binding<Bool> {
+        Binding(get: { self.paneCollapsed }, set: { self.paneCollapsed = $0 })
+    }
+    
+    var focusedViewBinding: Binding<ViewType> {
+        Binding(get: { self.focusedView }, set: { self.focusedView = $0 })
+    }
+    
+    var mainViewBinding: Binding<ViewType> {
+        Binding(get: { self.mainView }, set: { self.mainView = $0 })
+    }
 
-    
-    var mainViewWidth: CGFloat {
-        max(rightDividerLocation - dividerWidth, mainViewMinWidth)
-    }
-    
-    @Published var paneCollapsed: Bool = false
-    
-    public var log: String {
-        errorLog.map { $0.localizedDescription }.reduce("") {
-            if $0 == "" {
-                return $1
-            }
-            if $1 == "" {
-                return $0
-            }
-            return $0 + "\n" + $1
-        }
-    }
-    
-    var draggingRight: Bool = false
-    
-    var draggingLeft: Bool = false
-    
-    var originalLocation: CGFloat = 0.0
-    
-    public init(machine: MachineViewModel, mainView: ViewType = .machine, focusedView: ViewType = .machine, currentMachineIndex: Int = 0, rightDividerLocation: CGFloat = 10000) {
+    public init(machine: MachineViewModel, mainView: ViewType = .machine, focusedView: ViewType = .machine, dividerViewModel: BoundedPositionViewModel) {
         self.machine = machine
         self.mainView = mainView
         self.focusedView = focusedView
-        self.currentMachineIndex = currentMachineIndex
-        self.rightDividerLocation = rightDividerLocation
-        self.errorLog = []
+        self.dividerViewModel = dividerViewModel
         self.listen(to: machine)
     }
     
@@ -93,79 +95,36 @@ public class EditorViewModel: ObservableObject {
         self.mainView = .machine
     }
     
-//    public func machine(id: UUID) -> MachineViewModel? {
-//        machines.first { $0.id == id }
-//    }
-//    
-//    public func machineIndex(id: UUID) -> Int? {
-//        machines.firstIndex(where: { $0.id == id })
-//    }
+    func getMainViewWidth(width: CGFloat) -> CGFloat {
+        let width1 = max(getDividerLocation(width: width, height: .infinity).x - dividerWidth / 2.0, mainViewMinWidth)
+        return min(width1, width - paneWidth(width: width) - dividerWidth)
+    }
     
-//    func state(machine: UUID, stateIndex: Int) -> StateViewModel? {
-//        guard let machine = self.machine(id: machine) else {
-//            print("Machine is nil")
-//            return nil
-//        }
-//        let states = machine.states
-//        return states[stateIndex]
-//    }
-    
-    /*public func addError(error: Error) {
-        if errorLog.count > logSize {
-            let _ = errorLog.popLast()
-        }
-        errorLog.insert(error, at: 0)
-    }*/
-    
-    
-    
-    /*func getMainViewWidth(width: CGFloat) -> CGFloat {
-        let width1 = max(getRightDividerLocation(width: width) - dividerWidth - leftDividerLocation, mainViewMinWidth)
-        return min(width1, width - rightPaneWidth(width: width) - dividerWidth - leftDividerLocation)
-    }*/
-    
-    /*func dragRightDividor(width: CGFloat, gesture: DragGesture.Value) {
-        if rightPaneCollapsed {
-            return
-        }
-        if !draggingRight {
-            originalLocation = rightDividerLocation
-            draggingRight = true
-            return
-        }
-        rightDividerLocation = min(max(width - rightPaneMaxWidth - dividerWidth / 2.0, originalLocation + gesture.translation.width), width - rightPaneMinWidth - dividerWidth / 2.0)
-    }*/
-    
-    /*func finishDraggingRight(width: CGFloat, gesture: DragGesture.Value) {
-        dragRightDividor(width: width, gesture: gesture)
-        draggingRight = false
-    }*/
-    
-    
-    
-    /*func finishDraggingLeft(gesture: DragGesture.Value) {
-        dragLeftDividor(gesture: gesture)
-        draggingLeft = false
-    }*/
-    
-    /*func paneWidth(width: CGFloat) -> CGFloat {
-        if collapsed {
+    func paneWidth(width: CGFloat) -> CGFloat {
+        if paneCollapsed {
             return collapsedPaneWidth
         }
-        return min(max(width - getRightDividerLocation(width: width) - dividerWidth / 2.0, rightPaneMinWidth), rightPaneMaxWidth)
-    }*/
+        return min(
+            max(width - getDividerLocation(width: width, height: .infinity).x - dividerWidth / 2.0, rightPaneMinWidth),
+            rightPaneMaxWidth
+        )
+    }
     
-    /*func paneLocation(width: CGFloat) -> CGFloat {
-        width - paneWidth(width: width) / 2.0
-    }*/
+    func paneLocation(width: CGFloat, height: CGFloat) -> CGPoint {
+        let x = getDividerLocation(width: width, height: height).x + dividerWidth / 2.0 + paneWidth(width: width) / 2.0
+        return CGPoint(x: x, y: height / 2.0)
+    }
     
-    let collapsedPaneWidth: CGFloat = 50.0
+    func dividerMaxX(width: CGFloat) -> CGFloat {
+        width - rightPaneMaxWidth - dividerWidth / 2.0
+    }
     
-    /*func getRightDividerLocation(width: CGFloat) -> CGFloat {
-        if rightPaneCollapsed {
-            return width - collapsedPaneWidth
+    func getDividerLocation(width: CGFloat, height: CGFloat) -> CGPoint {
+        if paneCollapsed {
+            return CGPoint(x: width - collapsedPaneWidth, y: height / 2.0)
         }
-        return min(max(width - rightPaneMaxWidth - dividerWidth / 2.0, rightDividerLocation), width - rightPaneMinWidth - dividerWidth / 2.0)
-    }*/
-    
+        let x = min(max(width - rightPaneMaxWidth - dividerWidth / 2.0, dividerLocation.x), width - rightPaneMinWidth - dividerWidth / 2.0)
+        return CGPoint(x: x, y: height / 2.0)
+    }
+
 }

@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-class BoundedPositionViewModel: ObservableObject, BoundedPosition, Rigidable, MoveFromDrag {
+public class BoundedPositionViewModel: ObservableObject, BoundedPosition, Rigidable, MoveFromDrag {
     
     @Published var location: CGPoint
     
@@ -31,7 +31,7 @@ class BoundedPositionViewModel: ObservableObject, BoundedPosition, Rigidable, Mo
     
     var offset: CGPoint = .zero
     
-    init(location: CGPoint, width: CGFloat, height: CGFloat, minX: CGFloat, maxX: CGFloat, minY: CGFloat, maxY: CGFloat) {
+    public init(location: CGPoint, width: CGFloat, height: CGFloat, minX: CGFloat, maxX: CGFloat, minY: CGFloat, maxY: CGFloat) {
         self.location = location
         self.width = width
         self.height = height

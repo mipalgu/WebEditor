@@ -17,29 +17,20 @@ public struct EditorView: View {
     
     @ObservedObject var viewModel: EditorViewModel
     
-    @ObservedObject var machineViewModel: MachineViewModel
+    var machineViewModel: MachineViewModel {
+        viewModel.machine
+    }
     
     @EnvironmentObject var config: Config
     
-    public init(viewModel: EditorViewModel, machineViewModel: MachineViewModel) {
+    public init(viewModel: EditorViewModel) {
         self.viewModel = viewModel
-        self.machineViewModel = machineViewModel
     }
     
     public var body: some View {
         ZStack {
-            HStack {
-                GeometryReader{ (reader: GeometryProxy) in
-                    MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
-                        .position(CGPoint(x: viewModel.leftDividerLocation + viewModel.getMainViewWidth(width: reader.size.width) / 2.0, y: reader.size.height / 2.0))
-                        .frame(width: viewModel.getMainViewWidth(width: reader.size.width))
-                    FocusedAttributesView(machine: machineViewModel.$machine, viewType: $viewModel.focusedView, label: "Attributes", collapsed: Binding(get: { viewModel.rightPaneCollapsed }, set: { viewModel.rightPaneCollapsed = $0 }), collapseLeft: false, buttonSize: 20.0, buttonWidth: viewModel.buttonWidth, buttonHeight: viewModel.buttonWidth)
-                        .frame(width: viewModel.rightPaneWidth(width: reader.size.width))
-                        .position(CGPoint(x: viewModel.rightPaneLocation(width: reader.size.width), y: reader.size.height / 2.0))
-                }
-            }
-            .frame(minWidth: viewModel.editorMinWidth)
-            DialogueView(machineViewModel: machineViewModel, editorViewModel: viewModel)
+            MainViewWithPanel(viewModel: viewModel)
+            DialogueView(viewModel: viewModel)
                 .padding(10)
                 .background(
                     RoundedRectangle(cornerRadius: 20.0)
@@ -49,7 +40,6 @@ public struct EditorView: View {
                         .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
                 )
                 .frame(minWidth: 400.0, maxWidth: 1000.0)
-                
         }
     }
 }

@@ -30,22 +30,28 @@ struct WebEditor: App {
     var config: Config = Config()
     
     var body: some Scene {
-        WindowGroup("Web Editor") {
-            WebEditorView().environmentObject(config)
-        }.commands(content: {
-            ToolbarCommands()
-            CommandMenu("Edit") {
-                Button("Delete") {
-                    print("I'm deleting")
-                }.keyboardShortcut(.delete)
-            }
-        })
+        GeometryReader { (geometry: GeometryProxy) in
+            WindowGroup("Web Editor") {
+                WebEditorView(
+                    viewModel: ArrangementViewModel(
+                        rootMachines: [Machine.initialSwiftMachine]
+                    )
+                ).environmentObject(config)
+            }.commands(content: {
+                ToolbarCommands()
+                CommandMenu("Edit") {
+                    Button("Delete") {
+                        print("I'm deleting")
+                    }.keyboardShortcut(.delete)
+                }
+            })
+        }
     }
 }
 
 struct WebEditorView: View {
     
-    @StateObject var viewModel: ArrangementViewModel = ArrangementViewModel(rootMachines: [Machine.initialSwiftMachine])
+    @StateObject var viewModel: ArrangementViewModel
     
     @EnvironmentObject var config: Config
     

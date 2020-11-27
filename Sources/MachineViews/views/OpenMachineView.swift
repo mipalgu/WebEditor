@@ -17,7 +17,7 @@ import Foundation
 
 struct OpenMachineView: View {
     
-    @ObservedObject var editorViewModel: EditorViewModel
+    @ObservedObject var viewModel: EditorViewModel
     
     @State var machineURL: URL
     
@@ -40,7 +40,7 @@ struct OpenMachineView: View {
             Section {
                 HStack {
                     Spacer()
-                    Button(action: { config.alertView = .none }) {
+                    Button(action: { viewModel.dialogueType = .none }) {
                         Text("Close")
                     }
 //                    Button(action: {

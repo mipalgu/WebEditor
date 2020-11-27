@@ -105,7 +105,14 @@ public final class ArrangementViewModel: ObservableObject {
     }
 
     public convenience init(rootMachines: [Machine]) {
-        self.init(rootMachineViewModels: rootMachines.indices.map { EditorViewModel(machine: MachineViewModel(machine: Ref(copying: rootMachines[$0]))) })
+        self.init(rootMachineViewModels: rootMachines.indices.map {
+            EditorViewModel(
+                machine: MachineViewModel(
+                    machine: Ref(copying: rootMachines[$0]),
+                    dividerViewModel:
+                )
+            )
+        })
     }
     
     public init(rootMachineViewModels: [EditorViewModel]) {

@@ -15,9 +15,7 @@ import Attributes
 
 struct MainView: View {
     
-    @ObservedObject var editorViewModel: EditorViewModel
-    
-    @ObservedObject var machineViewModel: MachineViewModel
+    @ObservedObject var viewModel: EditorViewModel
     
     @Binding var type: ViewType
     
@@ -26,14 +24,14 @@ struct MainView: View {
     var body: some View {
         switch type {
         case .machine, .transition:
-            MachineView(editorViewModel: editorViewModel, viewModel: machineViewModel)
+            MachineView(editorViewModel: viewModel, viewModel: viewModel.machine)
                 .coordinateSpace(name: "MAIN_VIEW")
                 
         case .state(let stateIndex):
-            StateEditView(viewModel: machineViewModel.states[stateIndex])
+            StateEditView(viewModel: viewModel.machine.states[stateIndex])
                 .onTapGesture(count: 2) {
-                    editorViewModel.changeMainView()
-                    editorViewModel.changeFocus()
+                    viewModel.changeMainView()
+                    viewModel.changeFocus()
                 }
         }
     }
