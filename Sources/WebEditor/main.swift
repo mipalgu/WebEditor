@@ -30,22 +30,35 @@ struct WebEditor: App {
     var config: Config = Config()
     
     var body: some Scene {
-        GeometryReader { (geometry: GeometryProxy) in
-            WindowGroup("Web Editor") {
+        WindowGroup("Web Editor") {
+            GeometryReader { (geometry: GeometryProxy) in
                 WebEditorView(
                     viewModel: ArrangementViewModel(
-                        rootMachines: [Machine.initialSwiftMachine]
+                        rootMachines: [Machine.initialSwiftMachine],
+                        editorWidth: geometry.size.width,
+                        editorHeight: geometry.size.height
                     )
                 ).environmentObject(config)
-            }.commands(content: {
-                ToolbarCommands()
-                CommandMenu("Edit") {
-                    Button("Delete") {
-                        print("I'm deleting")
-                    }.keyboardShortcut(.delete)
-                }
-            })
-        }
+            }
+        }.commands(content: {
+            CommandGroup(replacing: .pasteboard) {
+                Button("Cut") {
+                    print("I'm cutting")
+                }.keyboardShortcut("x", modifiers: .command)
+                Button("Copy") {
+                    print("I'm copying")
+                }.keyboardShortcut("c", modifiers: .command)
+                Button("Paste") {
+                    print("I'm pasting")
+                }.keyboardShortcut("v", modifiers: .command)
+                Button("Delete") {
+                    print("I'm deleting")
+                }.keyboardShortcut(.delete)
+                Button("Select All") {
+                    print("I'm selecting all")
+                }.keyboardShortcut("a", modifiers: .command)
+            }
+        })
     }
 }
 
