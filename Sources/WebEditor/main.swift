@@ -33,11 +33,22 @@ struct WebEditor: App {
         WindowGroup("Web Editor") {
             WebEditorView().environmentObject(config)
         }.commands(content: {
-            ToolbarCommands()
-            CommandMenu("Edit") {
+            CommandGroup(replacing: .pasteboard) {
+                Button("Cut") {
+                    print("I'm cutting")
+                }.keyboardShortcut("x", modifiers: .command)
+                Button("Copy") {
+                    print("I'm copying")
+                }.keyboardShortcut("c", modifiers: .command)
+                Button("Paste") {
+                    print("I'm pasting")
+                }.keyboardShortcut("v", modifiers: .command)
                 Button("Delete") {
                     print("I'm deleting")
                 }.keyboardShortcut(.delete)
+                Button("Select All") {
+                    print("I'm selecting all")
+                }.keyboardShortcut("a", modifiers: .command)
             }
         })
     }
