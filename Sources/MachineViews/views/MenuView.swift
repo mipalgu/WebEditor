@@ -70,6 +70,6 @@ public struct MenuView: View {
                     .font(config.fontHeading)
             }
         }
-        .padding(20.0)
+        .padding(10.0)
     }
 }

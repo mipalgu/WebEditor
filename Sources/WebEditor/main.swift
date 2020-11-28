@@ -69,7 +69,7 @@ struct WebEditorView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        
+        TopView(viewModel: viewModel)
     }
     
 }
@@ -89,7 +89,8 @@ struct ContentView: View {
     @StateObject var editorViewModel: EditorViewModel
     
     var body: some View {
-        EditorView(viewModel: editorViewModel, machineViewModel: editorViewModel.currentMachine)
+        EmptyView()
+        /*EditorView(viewModel: editorViewModel, machineViewModel: editorViewModel.currentMachine)
             .background(config.backgroundColor)
             .frame(minWidth: CGFloat(config.width), minHeight: CGFloat(config.height))
             .onTapGesture(count: 1) {
@@ -103,7 +104,7 @@ struct ContentView: View {
                 default:
                     return
                 }
-            }
+            }*/
     }
 }
 

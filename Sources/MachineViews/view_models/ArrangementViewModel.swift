@@ -88,7 +88,15 @@ public final class ArrangementViewModel: ObservableObject {
         if leftPaneCollapsed {
             return collapsedPaneWidth
         }
-        return max(min(leftPaneMaxWidth, leftDivider.location.x - dividerWidth / 2.0), leftPaneMinWidth)
+        return max(min(leftPaneMaxWidth, dividerLocation.x - dividerWidth / 2.0), leftPaneMinWidth)
+    }
+    
+    var dividerLocation: CGPoint {
+        let divLoc = leftDivider.location
+        if leftPaneCollapsed {
+            return CGPoint(x: collapsedPaneWidth + dividerWidth / 2.0, y: divLoc.y)
+        }
+        return divLoc
     }
 
     public convenience init(rootMachines: [Machine], editorWidth: CGFloat, editorHeight: CGFloat) {
@@ -127,7 +135,7 @@ public final class ArrangementViewModel: ObservableObject {
         self.rootMachineViewModels = rootMachineViewModels
         self.focusedView = rootMachineViewModels.first!
         self.leftDivider = leftDivider
-        
+        self.listen(to: leftDivider)
     }
     
     public func machine(id: UUID) -> MachineViewModel? {
@@ -148,8 +156,17 @@ public final class ArrangementViewModel: ObservableObject {
     }
     
     func rightPaneStartLocation(width: CGFloat, height: CGFloat) -> CGPoint {
-        let offset = leftDivider.location.x + dividerWidth / 2.0
+        let offset = dividerLocation.x + dividerWidth / 2.0
         let x = leftPaneWidth + 2.0 * dividerWidth + focusedView.getDividerLocation(width: width - offset , height: height).x
         return CGPoint(x: x, y: height / 2.0)
+    }
+    
+    func rightPaneAndViewWidth(width: CGFloat) -> CGFloat {
+        width - leftPaneWidth - dividerWidth
+    }
+    
+    func rightPaneAndViewLocation(width: CGFloat, height: CGFloat) -> CGPoint {
+        let offset = dividerLocation.x + dividerWidth / 2.0
+        return CGPoint(x: rightPaneAndViewWidth(width: width) / 2.0 + offset, y: height / 2.0)
     }
 }

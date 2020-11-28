@@ -13,7 +13,15 @@ import SwiftUI
 import Machines
 import Attributes
 
-public class EditorViewModel: ObservableObject {
+public class EditorViewModel: ObservableObject, Hashable {
+    
+    public static func == (lhs: EditorViewModel, rhs: EditorViewModel) -> Bool {
+        lhs === rhs
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(machine)
+    }
     
     @Published public var machine: MachineViewModel
     
@@ -77,6 +85,7 @@ public class EditorViewModel: ObservableObject {
         self.focusedView = focusedView
         self.dividerViewModel = dividerViewModel
         self.listen(to: machine)
+        self.listen(to: dividerViewModel)
     }
     
     public func changeFocus(stateIndex: Int) {
@@ -96,8 +105,8 @@ public class EditorViewModel: ObservableObject {
     }
     
     func getMainViewWidth(width: CGFloat) -> CGFloat {
-        let width1 = max(getDividerLocation(width: width, height: .infinity).x - dividerWidth / 2.0, mainViewMinWidth)
-        return min(width1, width - paneWidth(width: width) - dividerWidth)
+        let width1 = getDividerLocation(width: width, height: .infinity).x - dividerWidth / 2.0
+        return max(min(width1, width - paneWidth(width: width) - dividerWidth), mainViewMinWidth)
     }
     
     func paneWidth(width: CGFloat) -> CGFloat {

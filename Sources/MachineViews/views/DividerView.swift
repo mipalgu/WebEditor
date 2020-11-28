@@ -25,6 +25,7 @@ struct DividerView: View {
         Divider()
             .frame(width: viewModel.width, height: viewModel.height)
             .background(config.borderColour)
+            .opacity(1)
             .gesture(DragGesture(minimumDistance: 0.0)
                 .onChanged({ viewModel.handleDrag(gesture: $0, frameWidth: parentWidth, frameHeight: parentHeight)})
                 .onEnded({ viewModel.finishDrag(gesture: $0, frameWidth: parentWidth, frameHeight: parentHeight) })
