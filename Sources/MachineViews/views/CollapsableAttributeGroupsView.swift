@@ -47,7 +47,6 @@ struct CollapsableAttributeGroupsView: View {
                         .padding(collapseLeft ? .leading : .trailing, buttonWidth / 2.0 + 10.0)
                     Spacer()
                     if collapseLeft {
-                        
                         Button(action: { collapsed = true }) {
                             Image(systemName: "arrow.left.to.line.alt")
                                 .font(.system(size: buttonSize, weight: .regular))

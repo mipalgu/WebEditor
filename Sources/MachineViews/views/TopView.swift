@@ -53,9 +53,10 @@ public struct TopView: View {
                         } else {
                             VStack {
                                 HStack {
-                                    Text("Dependencies")
+                                    Text("\(viewModel.focusedView.machine.name) Dependencies")
                                         .font(config.fontTitle2)
                                         .padding(.leading, 10)
+                                        .frame(maxWidth: viewModel.leftPaneWidth - 30)
                                     Spacer()
                                     Button(action: {
                                         viewModel.leftPaneCollapsed = true
@@ -91,10 +92,11 @@ public struct TopView: View {
                     .position(viewModel.dividerLocation)
                     TabView {
                         ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
-                            EditorView(viewModel: viewModel.rootMachineViewModels[index])
+                            EditorView(viewModel: viewModel.rootMachineViewModels[index], width: viewModel.rightPaneAndViewWidth(width: geometry.size.width), height: geometry.size.height)
                                 .tabItem {
                                     Text(viewModel.rootMachineViewModels[index].machine.name)
                                 }.tag(index)
+                                .coordinateSpace(name: "MAIN_VIEW")
                         }
                     }
                     .frame(maxWidth: geometry.size.width - viewModel.leftPaneWidth - viewModel.dividerWidth)
