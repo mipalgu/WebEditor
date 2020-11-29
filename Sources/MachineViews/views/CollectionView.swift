@@ -76,43 +76,42 @@ struct CollectionView: View{
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text(viewModel.label + ":").fontWeight(.bold)
-            HStack {
+            VStack {
                 switch viewModel.type {
                 case .line:
-                    AttributeView(machine: viewModel.$machine, attribute: $viewModel.newAttribute, path: nil, label: "New " + viewModel.label)
-                    Button(action: viewModel.addElement, label: {
-                        Image(systemName: "plus").font(.system(size: 16, weight: .regular))
-                    }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+                    HStack {
+                        AttributeView(machine: viewModel.$machine, attribute: $viewModel.newAttribute, path: nil, label: "New " + viewModel.label)
+                        Button(action: viewModel.addElement, label: {
+                            Image(systemName: "plus").font(.system(size: 16, weight: .regular))
+                        }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+                    }
                 case .block:
                     if creating {
-                        VStack {
-                            HStack {
-                                Text("New " + viewModel.label)
-                                Spacer()
-                                Button(action: {
-                                    viewModel.addElement()
-                                    creating = false
-                                }, label: {
-                                    Image(systemName: "square.and.pencil").font(.system(size: 16, weight: .regular))
-                                }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
-                                Divider()
-                                Button(action: {
-                                    creating = false
-                                }, label: {
-                                    Image(systemName: "trash").font(.system(size: 16, weight: .regular))
-                                }).buttonStyle(PlainButtonStyle()).foregroundColor(.red)
-                            }
-                            AttributeView(
-                                machine: viewModel.$machine,
-                                attribute: $viewModel.newAttribute,
-                                path: nil,
-                                label: ""
-                            )
-                            
+                        HStack {
+                            Text(viewModel.label + ":").fontWeight(.bold)
+                            Spacer()
+                            Button(action: {
+                                viewModel.addElement()
+                                creating = false
+                            }, label: {
+                                Image(systemName: "square.and.pencil").font(.system(size: 16, weight: .regular))
+                            }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+                            Divider()
+                            Button(action: {
+                                creating = false
+                            }, label: {
+                                Image(systemName: "trash").font(.system(size: 16, weight: .regular))
+                            }).buttonStyle(PlainButtonStyle()).foregroundColor(.red)
                         }
+                        AttributeView(
+                            machine: viewModel.$machine,
+                            attribute: $viewModel.newAttribute,
+                            path: nil,
+                            label: ""
+                        )
                     } else {
                         HStack {
+                            Text(viewModel.label + ":").fontWeight(.bold)
                             Spacer()
                             Button(action: { creating = true }, label: {
                                 Image(systemName: "plus").font(.system(size: 16, weight: .regular))
@@ -122,21 +121,23 @@ struct CollectionView: View{
                 }
             }.padding(.bottom, 5)
             Divider()
-            List(selection: $viewModel.selection) {
-                ForEach(Array(viewModel.elements.enumerated()), id: \.1.id) { (index, element) in
-                    HStack(spacing: 1) {
-                        AttributeView(
-                            machine: viewModel.$machine,
-                            attribute: $viewModel.elements[index].value,
-                            path: viewModel.path?[index],
-                            label: ""
-                        )
-                        Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
-                    }.contextMenu {
-                        Button("Delete", action: { viewModel.deleteElement(element, atIndex: index) }).keyboardShortcut(.delete)
-                    }
-                }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
-            }.frame(minHeight: min(CGFloat(viewModel.elements.count * (viewModel.type == .line ? 30 : 80) + 10), 100))
-        }
+            if !viewModel.elements.isEmpty {
+                List(selection: $viewModel.selection) {
+                    ForEach(Array(viewModel.elements.enumerated()), id: \.1.id) { (index, element) in
+                        HStack(spacing: 1) {
+                            AttributeView(
+                                machine: viewModel.$machine,
+                                attribute: $viewModel.elements[index].value,
+                                path: viewModel.path?[index],
+                                label: ""
+                            )
+                            Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
+                        }.contextMenu {
+                            Button("Delete", action: { viewModel.deleteElement(element, atIndex: index) }).keyboardShortcut(.delete)
+                        }
+                    }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
+                }.frame(minHeight: min(CGFloat(viewModel.elements.count * (viewModel.type == .line ? 30 : 80) + 10), 100))
+            }
+        }.padding(.top, 2)
     }
 }
