@@ -19,8 +19,6 @@ struct DependenciesView: View {
     
     @ObservedObject var viewModel: ArrangementViewModel
     
-    @ObservedObject var machine: Ref<Machine>
-    
     @Binding var collapsed: Bool
     
     let collapseLeft: Bool
@@ -58,16 +56,15 @@ struct DependenciesView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                ForEach(Array(machine.value.dependencies.indices), id: \.self) { (index: Int) -> AnyView in
-                    guard let machineDep = viewModel.machine(name: machine.value.dependencies[index].name)?.$machine else {
-                        return AnyView(EmptyView())
+                ForEach(viewModel.rootMachineViewModels.map { $0.machine.$machine }, id: \.self.value) {ref in
+                    ForEach(Array(ref.value.dependencies.indices), id: \.self) {
+                        DependencyView(
+                            viewModel: viewModel,
+                            machine: ref,
+                            path: ref.value.path.dependencies[$0]
+                        )
+                        .background(viewModel.currentMachine.machine.$machine === ref ? config.highlightColour : Color.clear)
                     }
-                    return AnyView(DependencyView(
-                        viewModel: viewModel,
-                        machine: machineDep,
-                        path: machineDep.value.path.dependencies[index],
-                        indent: 10
-                    ))
                 }
                 Spacer()
             } else {

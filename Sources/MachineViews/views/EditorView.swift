@@ -38,7 +38,6 @@ public struct EditorView: View {
                     GeometryReader{ reader in
                         DependenciesView(
                             viewModel: arrangement,
-                            machine: viewModel.machine.$machine,
                             collapsed: Binding(
                                 get: { viewModel.leftPaneCollapsed },
                                 set: { self.viewModel.leftPaneCollapsed = $0 }

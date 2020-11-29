@@ -25,8 +25,6 @@ struct DependencyView: View {
     
     @State var collapsed: Bool = true
     
-    var indent: CGFloat
-    
     @EnvironmentObject var config: Config
     
     var rootDependencies: [MachineDependency] {
@@ -50,19 +48,21 @@ struct DependencyView: View {
                     Text(machine.value[keyPath: path.path].name)
                         .font(config.fontHeading)
                 }
-                if !collapsed {
-                    Button(action: { collapsed = false }) {
-                        Image(systemName: "arrowtriangle.down.fill")
-                            .font(.system(size: 8.0, weight: .regular))
-                            .frame(width: 15.0, height: 15.0)
-                    }.buttonStyle(PlainButtonStyle())
-                    
-                } else {
-                    Button(action: { collapsed = true }) {
-                        Image(systemName: "arrowtriangle.right.fill")
-                            .font(.system(size: 8.0, weight: .regular))
-                            .frame(width: 15.0, height: 15.0)
-                    }.buttonStyle(PlainButtonStyle())
+                if rootDependencies.count > 0 {
+                    if !collapsed {
+                        Button(action: { collapsed = false }) {
+                            Image(systemName: "arrowtriangle.down.fill")
+                                .font(.system(size: 8.0, weight: .regular))
+                                .frame(width: 15.0, height: 15.0)
+                        }.buttonStyle(PlainButtonStyle())
+                        
+                    } else {
+                        Button(action: { collapsed = true }) {
+                            Image(systemName: "arrowtriangle.right.fill")
+                                .font(.system(size: 8.0, weight: .regular))
+                                .frame(width: 15.0, height: 15.0)
+                        }.buttonStyle(PlainButtonStyle())
+                    }
                 }
             }
             if !collapsed {
@@ -73,14 +73,12 @@ struct DependencyView: View {
                     return AnyView(DependencyView(
                         viewModel: viewModel,
                         machine: machine.$machine,
-                        path: Machine.path.dependencies[index],
-                        indent: indent + 10.0
+                        path: Machine.path.dependencies[index]
                     ))
                 }
             }
         }
-        .padding(10)
-        .padding(.leading, indent)
+        .padding(.leading, 10)
         .clipped()
     }
 }
