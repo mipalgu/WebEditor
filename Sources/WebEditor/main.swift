@@ -62,6 +62,8 @@ struct WebEditorView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
+            MenuView(machineViewModel: viewModel.currentMachine.machine)
+                .background(config.stateColour)
             TabView {
                 ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
                     ContentView(editorViewModel: viewModel.rootMachineViewModels[index])
@@ -69,7 +71,7 @@ struct WebEditorView: View {
                             Text(viewModel.rootMachineViewModels[index].machine.name)
                         }.tag(index)
                 }
-            }
+            }.background(config.backgroundColor)
         }
     }
     

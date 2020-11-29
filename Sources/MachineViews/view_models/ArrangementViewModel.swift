@@ -68,12 +68,25 @@ public final class ArrangementViewModel: ObservableObject {
     
     @Published public var rootMachineViewModels: [EditorViewModel]
     
+    @Published public var currentMachine: EditorViewModel
+    
     public convenience init(rootMachines: [Machine]) {
         self.init(rootMachineViewModels: rootMachines.indices.map { EditorViewModel(machine: MachineViewModel(machine: Ref(copying: rootMachines[$0]))) })
     }
     
     public init(rootMachineViewModels: [EditorViewModel]) {
-        self.rootMachineViewModels = rootMachineViewModels
+        let firstMachine = rootMachineViewModels.first ?? EditorViewModel(
+            machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine))
+        )
+        if rootMachineViewModels.count == 0 {
+            self.rootMachineViewModels = [firstMachine]
+        } else {
+            self.rootMachineViewModels = rootMachineViewModels
+        }
+        currentMachine = firstMachine
+        rootMachineViewModels.forEach {
+            self.listen(to: $0)
+        }
     }
     
     public func machine(id: UUID) -> MachineViewModel? {
