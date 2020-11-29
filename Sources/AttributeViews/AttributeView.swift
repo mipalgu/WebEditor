@@ -70,7 +70,7 @@ public struct AttributeView: View{
     
     @Binding var attribute: Attribute
     let label: String
-    private let onCommit: (Attribute) -> Void
+    let onCommit: (Attribute) -> Void
     
     public init(attribute: Binding<Attribute>, label: String, onCommit: @escaping (Attribute) -> Void = { _ in }) {
         self._attribute = attribute

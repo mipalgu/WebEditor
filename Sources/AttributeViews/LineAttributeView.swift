@@ -19,9 +19,9 @@ public struct LineAttributeView: View {
     
     @Binding var attribute: LineAttribute
     let label: String
-    private let onCommit: (LineAttribute) -> Void
+    let onCommit: (LineAttribute) -> Void
     
-    public init(attribute: Binding<LineAttribute>, label: String, onCommit: @escaping (LineAttribute) -> Void) {
+    public init(attribute: Binding<LineAttribute>, label: String, onCommit: @escaping (LineAttribute) -> Void = { _ in }) {
         self._attribute = attribute
         self.label = label
         self.onCommit = onCommit
