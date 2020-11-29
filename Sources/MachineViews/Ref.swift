@@ -69,35 +69,20 @@ public class ConstRef<T>: ObservableObject {
     
     fileprivate var get: () -> T
     
-    fileprivate var set: (T) -> Void
-    
     public var value: T {
-        get {
-            self.get()
-        }
+        self.get()
     }
     
-    public init(to pointer: UnsafeMutablePointer<T>) {
-        self.get = { pointer.pointee }
-        self.set = { pointer.pointee = $0 }
+    public convenience init(copying value: T) {
+        self.init(get: { value })
     }
     
-    public init(copying value: T) {
-        var value = value
-        self.get = { value }
-        self.set = { value = $0 }
-    }
-    
-    fileprivate init(get: @escaping () -> T, set: @escaping (T) -> Void) {
+    fileprivate init(get: @escaping () -> T) {
         self.get = get
-        self.set = set
     }
     
     public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> ConstRef<U> {
-        return ConstRef<U>(
-            get: { self.get()[keyPath: keyPath] },
-            set: { _ in }
-        )
+        return ConstRef<U> { self.get()[keyPath: keyPath] }
     }
     
     public subscript<Path: ReadOnlyPathProtocol>(readOnly path: Path) -> ConstRef<Path.Value> where Path.Root == T {
@@ -106,19 +91,45 @@ public class ConstRef<T>: ObservableObject {
     
 }
 
+extension ConstRef where T: ObservableObject {
+    
+    public convenience init(observing value: T) {
+        self.init(get: { value })
+        self.listen(to: value)
+    }
+    
+}
+
+@dynamicMemberLookup
 public final class Ref<T>: ConstRef<T> {
+    
+    fileprivate var set: (T) -> Void
     
     public override var value: T {
         get {
-            super.get()
+            get()
         } set {
             self.objectWillChange.send()
-            super.set(newValue)
+            set(newValue)
         }
     }
     
     public var asBinding: Binding<T> {
         return Binding(get: { self.value }, set: { self.value = $0 })
+    }
+    
+    public convenience init(to pointer: UnsafeMutablePointer<T>) {
+        self.init(get: { pointer.pointee }, set: { pointer.pointee = $0 })
+    }
+    
+    public convenience init(copying value: T) {
+        var value = value
+        self.init(get: { value }, set: { value = $0 })
+    }
+    
+    private init(get: @escaping () -> T, set: @escaping (T) -> Void) {
+        self.set = set
+        super.init(get: get)
     }
     
     public subscript<U>(dynamicMember keyPath: WritableKeyPath<T, U>) -> Ref<U> {
@@ -138,6 +149,16 @@ public final class Ref<T>: ConstRef<T> {
     
     public subscript<Path: PathProtocol>(bindingTo path: Path) -> Binding<Path.Value> where Path.Root == T {
         self[path: path].asBinding
+    }
+    
+}
+
+extension Ref where T: ObservableObject {
+    
+    public convenience init(observing value: T) {
+        var value = value
+        self.init(get: { value }, set: { value = $0 })
+        self.listen(to: value)
     }
     
 }
