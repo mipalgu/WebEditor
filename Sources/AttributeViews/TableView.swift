@@ -17,23 +17,20 @@ import Utilities
 
 public struct TableView: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, [[LineAttribute]]>?
+    @Binding var value: [[LineAttribute]]
     let label: String
     let columns: [BlockAttributeType.TableColumn]
-    
-    @State var value: [[LineAttribute]]
+    let onCommit: ([[LineAttribute]]) -> Void
     
     @EnvironmentObject var config: Config
     
     @State var selection: Set<Int> = []
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [[LineAttribute]]>?, label: String, columns: [BlockAttributeType.TableColumn], defaultValue: [[LineAttribute]] = []) {
-        self.machine = machine
-        self.path = path
+    public init(value: Binding<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn], onCommit: @escaping ([[LineAttribute]]) -> Void = { _ in }) {
+        self._value = value
         self.label = label
         self.columns = columns
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
+        self.onCommit = onCommit
     }
     
     public var body: some View {
@@ -49,7 +46,9 @@ public struct TableView: View {
                     }
                 }
                 ForEach(Array(value.indices), id: \.self) { rowIndex in
-                    TableRowView(machine: machine, path: path?[rowIndex], row: $value[rowIndex])
+                    TableRowView(row: $value[rowIndex]) { _ in
+                        self.onCommit(value)
+                    }
                 }
             }.frame(minHeight: 100)
         }
@@ -57,18 +56,18 @@ public struct TableView: View {
 }
 
 struct TableRowView: View {
-    
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, [LineAttribute]>?
     @Binding var row: [LineAttribute]
+    let onCommit: ([LineAttribute]) -> Void
     
     @EnvironmentObject var config: Config
     
     var body: some View {
         HStack {
             ForEach(Array(row.indices), id: \.self) { columnIndex in
-                LineAttributeView(machine: machine, attribute: $row[columnIndex], path: path?[columnIndex], label: "")
-                    .frame(minWidth: 0, maxWidth: .infinity)
+                LineAttributeView(attribute: $row[columnIndex], label: "") { _ in
+                    self.onCommit(row)
+                }
+                .frame(minWidth: 0, maxWidth: .infinity)
             }
         }
     }

@@ -17,36 +17,27 @@ import Utilities
 
 public struct FloatView: View {
 
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, Double>?
+    @Binding var value: Double
     let label: String
+    let onCommit: (Double) -> Void
     
-    @State var value: String
+    let formatter: Formatter = {
+        let formatter = NumberFormatter()
+        formatter.allowsFloats = true
+        return formatter
+    }()
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Double>?, label: String, defaultValue: Double = 0.0) {
-        self.machine = machine
-        self.path = path
+    public init(value: Binding<Double>, label: String, onCommit: @escaping (Double) -> Void = { _ in }) {
+        self._value = value
         self.label = label
-        self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
+        self.onCommit = onCommit
     }
     
     public var body: some View {
-        TextField(label, text: $value, onCommit: {
-            guard let path = self.path else {
-                return
-            }
-            guard let value = Double(value) else {
-                return
-            }
-            do {
-                try machine.value.modify(attribute: path, value: value)
-                return
-            } catch let e {
-                print("\(e)")
-            }
-            self.value = String(machine[path: path].value)
+        TextField(label, value: $value, formatter: formatter, onCommit: {
+            self.onCommit(value)
         })
         .font(.body)
         .background(config.fieldColor)

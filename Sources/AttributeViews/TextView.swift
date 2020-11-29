@@ -17,19 +17,16 @@ import Utilities
 
 public struct TextView: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, String>?
+    @Binding var value: String
     let label: String
-    
-    @State var value: String
+    let onCommit: (String) -> Void
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "") {
-        self.machine = machine
-        self.path = path
+    public init(value: Binding<String>, label: String, onCommit: @escaping (String) -> Void = { _ in }) {
+        self._value = value
         self.label = label
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
+        self.onCommit = onCommit
     }
     
     public var body: some View {
@@ -46,18 +43,7 @@ public struct TextView: View {
                         .stroke(Color.gray.opacity(0.3), lineWidth: 2)
                 )
                 .frame(minHeight: 80)
-                .onChange(of: value) {
-                    guard let path = self.path else {
-                        return
-                    }
-                    do {
-                        try machine.value.modify(attribute: path, value: $0)
-                        return
-                    } catch let e {
-                        print("\(e)")
-                    }
-                    self.value = machine[path: path].value
-                }
+                .onChange(of: value, perform: self.onCommit)
         }
     }
 }

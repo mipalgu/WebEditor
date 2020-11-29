@@ -17,21 +17,18 @@ import Utilities
 
 public struct EnumerableCollectionView: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, Set<String>>?
+    @Binding var value: Set<String>
     let label: String
     let validValues: Set<String>
-    
-    @State var value: Set<String>
+    let onCommit: (Set<String>) -> Void
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Set<String>>?, label: String, validValues: Set<String>, defaultValue: Set<String> = []) {
-        self.machine = machine
-        self.path = path
+    public init(value: Binding<Set<String>>, label: String, validValues: Set<String>, onCommit: @escaping (Set<String>) -> Void = { _ in }) {
+        self._value = value
         self.label = label
         self.validValues = validValues
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
+        self.onCommit = onCommit
     }
     
     public var body: some View {
@@ -59,17 +56,6 @@ public struct EnumerableCollectionView: View {
                     }
                 }
             }
-        }.onChange(of: value) {
-            guard let path = self.path else {
-                return
-            }
-            do {
-                try machine.value.modify(attribute: path, value: $0)
-                return
-            } catch let e {
-                print("\(e)")
-            }
-            self.value = machine[path: path].value
-        }
+        }.onChange(of: value, perform: self.onCommit)
     }
 }

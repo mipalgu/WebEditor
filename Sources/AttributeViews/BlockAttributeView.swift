@@ -17,32 +17,39 @@ import Utilities
 
 public struct BlockAttributeView: View{
     
-    @ObservedObject var machine: Ref<Machine>
     @Binding var attribute: BlockAttribute
-    let path: Attributes.Path<Machine, BlockAttribute>?
     let label: String
+    let onCommit: (BlockAttribute) -> Void
     
-    public init(machine: Ref<Machine>, attribute: Binding<BlockAttribute>, path: Attributes.Path<Machine, BlockAttribute>?, label: String) {
-        self.machine = machine
+    public init(attribute: Binding<BlockAttribute>, label: String, onCommit: @escaping (BlockAttribute) -> Void = { _ in }) {
         self._attribute = attribute
-        self.path = path
         self.label = label
+        self.onCommit = onCommit
     }
     
     public var body: some View {
         switch attribute.type {
         case .code(let language):
-            CodeView(machine: machine, path: path?.codeValue, label: label, language: language)
+            CodeView(value: $attribute.codeValue, label: label, language: language) {
+                self.onCommit(.code($0, language: language))
+            }
         case .text:
-            TextView(machine: machine, path: path?.textValue, label: label)
-        case .collection(let type):
-            CollectionView(machine: machine, path: path?.collectionValue, label: label, type: type)
+            TextView(value: $attribute.textValue, label: label) {
+                self.onCommit(.text($0))
+            }
+        case .collection:
+            EmptyView()
+            //CollectionView(machine: machine, path: path?.collectionValue, label: label, type: type)
         case .table(let columns):
-            TableView(machine: machine, path: path?.tableValue, label: label, columns: columns)
+            TableView(value: $attribute.tableValue, label: label, columns: columns) {
+                self.onCommit(.table($0, columns: columns))
+            }
         case .complex(let fields):
-            ComplexView(machine: machine, path: path?.complexValue, label: label, fields: fields)
+            ComplexView(value: $attribute.complexValue, label: label, fields: fields) {
+                self.onCommit(.complex($0, layout: fields))
+            }
         case .enumerableCollection(let validValues):
-            EnumerableCollectionView(machine: machine, path: path?.enumerableCollectionValue, label: label, validValues: validValues)
+            EnumerableCollectionView(value: $attribute.enumerableCollectionValue, label: label, validValues: validValues)
         }
     }
 }

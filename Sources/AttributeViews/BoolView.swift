@@ -16,22 +16,15 @@ import Attributes
 import Utilities
 
 public struct BoolView: View {
-    
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, Bool>?
-    let label: String
-    
+
     @Binding var value: Bool
+    let label: String
+    let onCommit: (Bool) -> Void
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Bool>?, label: String, defaultValue: Bool = false) {
-        self.machine = machine
-        self.path = path
+    public init(value: Binding<Bool>, label: String, onCommit: @escaping (Bool) -> Void = { _ in }) {
+        self._value = value
         self.label = label
-        if let path = path {
-            self._value = machine[bindingTo: path]
-        } else {
-            self._value = Ref(copying: false).asBinding
-        }
+        self.onCommit = onCommit
     }
     
     @EnvironmentObject var config: Config
@@ -41,18 +34,7 @@ public struct BoolView: View {
             .animation(.easeOut)
             .font(.body)
             .foregroundColor(config.textColor)
-            .onChange(of: value) {
-                guard let path = self.path else {
-                    return
-                }
-                do {
-                    try machine.value.modify(attribute: path, value: $0)
-                    return
-                } catch let e {
-                    print("\(e)")
-                }
-                value = machine[path: path].value
-            }
+            .onChange(of: value, perform: self.onCommit)
     }
 }
 

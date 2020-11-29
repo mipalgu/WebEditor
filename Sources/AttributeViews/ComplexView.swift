@@ -17,19 +17,16 @@ import Utilities
 
 public struct ComplexView: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, [Attributes.Label: Attribute]>?
+    @Binding var value: [String: Attribute]
     let label: String
     let fields: [Field]
+    let onCommit: ([String: Attribute]) -> Void
     
-    @State var value: [String: Attribute]
-    
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [String: Attribute]>?, label: String, fields: [Field], defaultValue: [Attributes.Label: Attribute]? = nil) {
-        self.machine = machine
-        self.path = path
+    public init(value: Binding<[String: Attribute]>, label: String, fields: [Field], onCommit: @escaping ([String: Attribute]) -> Void = { _ in }) {
+        self._value = value
         self.label = label
         self.fields = fields
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue ?? AttributeType.complex(layout: fields).defaultValue.complexValue)
+        self.onCommit = onCommit
     }
     
     public var body: some View {
@@ -38,11 +35,11 @@ public struct ComplexView: View {
                 VStack(alignment: .leading) {
                     ForEach(fields, id: \.name) { field in
                         AttributeView(
-                            machine: machine,
-                            attribute: path.map { machine[path: $0][field.name].wrappedValue.asBinding } ?? Binding($value[field.name])!,
-                            path: path?[field.name].wrappedValue,
+                            attribute: Binding($value[field.name])!,
                             label: field.name.pretty
-                        )
+                        ) { _ in
+                            self.onCommit(value)
+                        }
                     }
                 }.padding(10).background(Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.05))
             }

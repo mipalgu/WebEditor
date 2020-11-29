@@ -68,34 +68,32 @@ import Utilities
 
 public struct AttributeView: View{
     
-    @ObservedObject var machine: Ref<Machine>
     @Binding var attribute: Attribute
-    let path: Attributes.Path<Machine, Attribute>?
     let label: String
+    private let onCommit: (Attribute) -> Void
     
-    public init(machine: Ref<Machine>, attribute: Binding<Attribute>, path: Attributes.Path<Machine, Attribute>?, label: String) {
-        self.machine = machine
+    public init(attribute: Binding<Attribute>, label: String, onCommit: @escaping (Attribute) -> Void = { _ in }) {
         self._attribute = attribute
-        self.path = path
         self.label = label
+        self.onCommit = onCommit
     }
     
     public var body: some View {
         switch attribute.type {
         case .line:
             LineAttributeView(
-                machine: machine,
                 attribute: $attribute.lineAttribute,
-                path: path?.lineAttribute,
                 label: label
-            )
+            ) {
+                self.onCommit(.line($0))
+            }
         case .block:
             BlockAttributeView(
-                machine: machine,
                 attribute: $attribute.blockAttribute,
-                path: path?.blockAttribute,
                 label: label
-            )
+            ) {
+                self.onCommit(.block($0))
+            }
         }
     }
 }

@@ -17,25 +17,22 @@ import Utilities
 
 public struct CodeView<Label: View>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, Code>?
+    @Binding var value: Code
     let language: Language
     let label: () -> Label
-    
-    @State var value: String
+    let onCommit: (Code) -> Void
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Code>?, label: String, language: Language, defaultValue: Code = "") where Label == Text {
-        self.init(machine: machine, path: path, language: language, defaultValue: defaultValue) { Text(label.capitalized) }
+    public init(value: Binding<Code>, label: String, language: Language, onCommit: @escaping (Code) -> Void = { _ in }) where Label == Text {
+        self.init(value: value, language: language, label: { Text(label.capitalized) }, onCommit: onCommit)
     }
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Code>?, language: Language, defaultValue: Code = "", label: @escaping () -> Label) {
-        self.machine = machine
-        self.path = path
+    public init(value: Binding<Code>, language: Language, label: @escaping () -> Label, onCommit: @escaping (Code) -> Void = { _ in }) {
+        self._value = value
         self.language = language
         self.label = label
-        self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
+        self.onCommit = onCommit
     }
     
     public var body: some View {
@@ -50,18 +47,7 @@ public struct CodeView<Label: View>: View {
                         .stroke(Color.gray.opacity(0.3), lineWidth: 2)
                 )
                 .frame(minHeight: 80)
-                .onChange(of: value) {
-                    guard let path = self.path else {
-                        return
-                    }
-                    do {
-                        try machine.value.modify(attribute: path, value: Code($0))
-                        return
-                    } catch let e {
-                        print("\(e)")
-                    }
-                    self.value = String(machine[path: path].value)
-                }
+                .onChange(of: value, perform: self.onCommit)
         }
     }
 }

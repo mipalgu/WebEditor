@@ -17,21 +17,18 @@ import Utilities
 
 public struct EnumeratedView: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, String>?
+    @Binding var value: String
     let label: String
     let validValues: Set<String>
-    
-    @State var value: String
+    let onCommit: (String) -> Void
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, String>?, label: String, validValues: Set<String>, defaultValue: String? = nil) {
-        self.machine = machine
-        self.path = path
+    public init(value: Binding<String>, label: String, validValues: Set<String>, onCommit: @escaping (String) -> Void = { _ in }) {
+        self._value = value
         self.label = label
         self.validValues = validValues
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue ?? validValues.sorted().first ?? "")
+        self.onCommit = onCommit
     }
     
     public var body: some View {
@@ -41,17 +38,6 @@ public struct EnumeratedView: View {
                     .foregroundColor(config.textColor)
             }
         }.pickerStyle(InlinePickerStyle())
-        .onChange(of: value) {
-            guard let path = self.path else {
-                return
-            }
-            do {
-                try machine.value.modify(attribute: path, value: $0)
-                return
-            } catch let e {
-                print("\(e)")
-            }
-            self.value = machine[path: path].value
-        }
+        .onChange(of: value, perform: self.onCommit)
     }
 }

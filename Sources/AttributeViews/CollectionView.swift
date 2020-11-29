@@ -77,7 +77,8 @@ public struct CollectionView: View{
     }
     
     public var body: some View {
-        VStack(alignment: .leading) {
+        EmptyView()
+        /*VStack(alignment: .leading) {
             VStack {
                 switch viewModel.type {
                 case .line:
@@ -140,6 +141,6 @@ public struct CollectionView: View{
                     }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
                 }.frame(minHeight: min(CGFloat(viewModel.elements.count * (viewModel.type == .line ? 30 : 80) + 10), 100))
             }
-        }.padding(.top, 2)
+        }.padding(.top, 2)*/
     }
 }

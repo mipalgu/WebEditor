@@ -17,35 +17,23 @@ import Utilities
 
 public struct ExpressionView: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, Expression>?
+    @Binding var value: Expression
     let label: String
     let language: Language
-    
-    @State var value: String
+    let onCommit: (Expression) -> Void
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Expression>?, label: String, language: Language, defaultValue: Expression = "") {
-        self.machine = machine
-        self.path = path
+    public init(value: Binding<Expression>, label: String, language: Language, onCommit: @escaping (Expression) -> Void = { _ in }) {
+        self._value = value
         self.label = label
         self.language = language
-        self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
+        self.onCommit = onCommit
     }
     
     public var body: some View {
         TextField(label, text: $value, onCommit: {
-            guard let path = self.path else {
-                return
-            }
-            do {
-                try machine.value.modify(attribute: path, value: Expression(value))
-                return
-            } catch let e {
-                print("\(e)")
-            }
-            self.value = String(machine[path: path].value)
+            self.onCommit(value)
         })
         .font(.body)
         .background(config.fieldColor)

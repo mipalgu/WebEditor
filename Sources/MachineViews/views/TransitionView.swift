@@ -65,8 +65,7 @@ struct TransitionView: View {
                         })
                     )
                 ExpressionView(
-                    machine: viewModel.$machine,
-                    path: viewModel.path.condition.wrappedValue,
+                    value: viewModel.$machine[bindingTo: viewModel.path.condition.wrappedValue],
                     label: viewModel.condition,
                     language: .swift
                 )

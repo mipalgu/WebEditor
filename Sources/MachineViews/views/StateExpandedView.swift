@@ -36,7 +36,7 @@ struct StateExpandedView: View {
                 .overlay (
                     VStack {
                         HStack {
-                            LineView(machine: viewModel.$machine, path: viewModel.path.name, label: viewModel.name)
+                            LineView(value: viewModel.$machine[bindingTo: viewModel.path.name], label: viewModel.name)
                                 .multilineTextAlignment(.center)
                                 .font(config.fontTitle2)
                                 .background(config.fieldColor)

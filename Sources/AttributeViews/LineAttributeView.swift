@@ -17,33 +17,41 @@ import Utilities
 
 public struct LineAttributeView: View {
     
-    @ObservedObject var machine: Ref<Machine>
     @Binding var attribute: LineAttribute
-    let path: Attributes.Path<Machine, LineAttribute>?
     let label: String
+    private let onCommit: (LineAttribute) -> Void
     
-    public init(machine: Ref<Machine>, attribute: Binding<LineAttribute>, path: Attributes.Path<Machine, LineAttribute>?, label: String) {
-        self.machine = machine
+    public init(attribute: Binding<LineAttribute>, label: String, onCommit: @escaping (LineAttribute) -> Void) {
         self._attribute = attribute
-        self.path = path
         self.label = label
+        self.onCommit = onCommit
     }
     
     public var body: some View {
         switch attribute.type {
         case .bool:
-            BoolView(machine: machine, path: path?.boolValue, label: label)
+            BoolView(value: $attribute.boolValue, label: label) {
+                self.onCommit(.bool($0))
+            }
         case .integer:
-            IntegerView(machine: machine, path: path?.integerValue, label: label)
+            IntegerView(value: $attribute.integerValue, label: label) {
+                self.onCommit(.integer($0))
+            }
         case .float:
-            FloatView(machine: machine, path: path?.floatValue, label: label)
+            FloatView(value: $attribute.floatValue, label: label) {
+                self.onCommit(.float($0))
+            }
         case .expression(let language):
-            ExpressionView(machine: machine, path: path?.expressionValue, label: label, language: language)
+            ExpressionView(value: $attribute.expressionValue, label: label, language: language) {
+                self.onCommit(.expression($0, language: language))
+            }
         case .enumerated(let validValues):
-            EnumeratedView(machine: machine, path: path?.enumeratedValue, label: label, validValues: validValues)
+            EnumeratedView(value: $attribute.enumeratedValue, label: label, validValues: validValues) {
+                self.onCommit(.enumerated($0, validValues: validValues))
+            }
         case .line:
-            LineView(machine: machine, path: path?.lineValue, label: label) {
-                attribute = .line($0)
+            LineView(value: $attribute.lineValue, label: label) {
+                self.onCommit(.line($0))
             }
         }
     }
