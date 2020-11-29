@@ -101,7 +101,7 @@ struct CollectionView: View{
                                 creating = false
                             }, label: {
                                 Image(systemName: "trash").font(.system(size: 16, weight: .regular))
-                            }).buttonStyle(PlainButtonStyle()).foregroundColor(.red)
+                            }).animation(.easeOut).buttonStyle(PlainButtonStyle()).foregroundColor(.red)
                         }
                         AttributeView(
                             machine: viewModel.$machine,
@@ -115,7 +115,7 @@ struct CollectionView: View{
                             Spacer()
                             Button(action: { creating = true }, label: {
                                 Image(systemName: "plus").font(.system(size: 16, weight: .regular))
-                            }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+                            }).animation(.easeOut).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
                         }
                     }
                 }

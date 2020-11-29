@@ -82,14 +82,12 @@ public final class ArrangementViewModel: ObservableObject {
         let firstMachine = rootMachineViewModels.first ?? EditorViewModel(
             machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine))
         )
-        if rootMachineViewModels.count == 0 {
+        if rootMachineViewModels.isEmpty {
             self.rootMachineViewModels = [firstMachine]
         } else {
             self.rootMachineViewModels = rootMachineViewModels
         }
-        rootMachineViewModels.forEach {
-            self.listen(to: $0)
-        }
+        self.rootMachineViewModels.forEach(self.listen)
     }
     
     public func machine(id: UUID) -> MachineViewModel? {
