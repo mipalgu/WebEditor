@@ -52,7 +52,11 @@ public class EditorViewModel: ObservableObject {
     
     let mainViewMinWidth: CGFloat = 800
     
+    let buttonHeight: CGFloat = 30.0
+    
     let buttonWidth: CGFloat = 30.0
+    
+    let buttonSize: CGFloat = 20.0
     
     let collapsedPaneWidth: CGFloat = 50.0
     

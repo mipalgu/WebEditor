@@ -45,7 +45,7 @@ public class MachineViewModel: ObservableObject, Dragable {
         let states: [Machines.State] = machine.value[keyPath: statesPath.path]
         self.states = states.indices.map { stateIndex in
             let stateX: CGFloat = 100.0
-            let stateY: CGFloat = CGFloat(stateIndex) * 200.0
+            let stateY: CGFloat = 100.0 + CGFloat(stateIndex) * 200.0
             return StateViewModel(machine: machine, path: machine.value.path.states[stateIndex], location: CGPoint(x: stateX, y: stateY))
         }
         self.listen(to: $machine)

@@ -29,11 +29,19 @@ public struct EditorView: View {
     public var body: some View {
         ZStack {
             VStack {
-                MenuView(machineViewModel: machineViewModel)
-                    .background(config.stateColour)
                 HStack {
                     GeometryReader{ reader in
-                        CollapsableAttributeGroupsView(machine: machineViewModel.$machine, path: Machine.path.attributes, label: "Dependencies", collapsed: Binding(get: {viewModel.leftPaneCollapsed}, set: {viewModel.leftPaneCollapsed = $0}), collapseLeft: true, buttonSize: 20, buttonWidth: viewModel.buttonWidth, buttonHeight: viewModel.buttonWidth)
+                        DependenciesView(
+                            machine: viewModel.machine.$machine,
+                            collapsed: Binding(
+                                get: { viewModel.leftPaneCollapsed },
+                                set: { self.viewModel.leftPaneCollapsed = $0 }
+                            ),
+                            collapseLeft: true,
+                            buttonSize: viewModel.buttonSize,
+                            buttonWidth: viewModel.buttonWidth,
+                            buttonHeight: viewModel.buttonHeight
+                        )
                             .frame(width: viewModel.leftPaneWidth)
                             .position(x: viewModel.leftPaneWidth / 2.0, y: reader.size.height / 2.0)
                         Divider()
@@ -55,7 +63,19 @@ public struct EditorView: View {
                                 .onChanged({ viewModel.dragRightDividor(width: reader.size.width, gesture: $0) })
                                 .onEnded({ viewModel.finishDraggingRight(width: reader.size.width, gesture: $0) })
                             )
-                        FocusedAttributesView(machine: machineViewModel.$machine, viewType: $viewModel.focusedView, label: "Attributes", collapsed: Binding(get: { viewModel.rightPaneCollapsed }, set: { viewModel.rightPaneCollapsed = $0 }), collapseLeft: false, buttonSize: 20.0, buttonWidth: viewModel.buttonWidth, buttonHeight: viewModel.buttonWidth)
+                        FocusedAttributesView(
+                            machine: machineViewModel.$machine,
+                            viewType: $viewModel.focusedView,
+                            label: "Attributes",
+                            collapsed: Binding(
+                                get: { viewModel.rightPaneCollapsed },
+                                set: { viewModel.rightPaneCollapsed = $0 }
+                            ),
+                            collapseLeft: false,
+                            buttonSize: viewModel.buttonSize,
+                            buttonWidth: viewModel.buttonWidth,
+                            buttonHeight: viewModel.buttonHeight
+                        )
                             .frame(width: viewModel.rightPaneWidth(width: reader.size.width))
                             .position(CGPoint(x: viewModel.rightPaneLocation(width: reader.size.width), y: reader.size.height / 2.0))
                     }
