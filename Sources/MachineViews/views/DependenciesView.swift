@@ -58,7 +58,7 @@ struct DependenciesView: View {
                     machine: machine,
                     path: machine.value.path.dependencyAttributes,
                     label: label,
-                    type: .text
+                    type: machine.value.dependencyAttributeType
                 )
             } else {
                 HStack {

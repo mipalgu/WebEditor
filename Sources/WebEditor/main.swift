@@ -68,7 +68,10 @@ struct WebEditorView: View {
                 ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
                     ContentView(editorViewModel: viewModel.rootMachineViewModels[index])
                         .tabItem {
-                            Text(viewModel.rootMachineViewModels[index].machine.name)
+                            Button(action: { viewModel.currentMachine = viewModel.rootMachineViewModels[index] }) {
+                                Text(viewModel.rootMachineViewModels[index].machine.name)
+                                    .font(config.fontHeading)
+                            }
                         }.tag(index)
                 }
             }.background(config.backgroundColor)
