@@ -68,6 +68,8 @@ struct CollectionView: View{
     
     @StateObject var viewModel: CollectionViewModel
     
+    @State var creating: Bool = false
+    
     init(machine: Ref<Machine>, path: Attributes.Path<Machine, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
         self._viewModel = StateObject(wrappedValue: CollectionViewModel(machine: machine, path: path, label: label, type: type, defaultValue: defaultValue))
     }
@@ -83,7 +85,40 @@ struct CollectionView: View{
                         Image(systemName: "plus").font(.system(size: 16, weight: .regular))
                     }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
                 case .block:
-                    EmptyView()
+                    if creating {
+                        VStack {
+                            HStack {
+                                Text("New " + viewModel.label)
+                                Spacer()
+                                Button(action: {
+                                    viewModel.addElement()
+                                    creating = false
+                                }, label: {
+                                    Image(systemName: "square.and.pencil").font(.system(size: 16, weight: .regular))
+                                }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+                                Divider()
+                                Button(action: {
+                                    creating = false
+                                }, label: {
+                                    Image(systemName: "trash").font(.system(size: 16, weight: .regular))
+                                }).buttonStyle(PlainButtonStyle()).foregroundColor(.red)
+                            }
+                            AttributeView(
+                                machine: viewModel.$machine,
+                                attribute: $viewModel.newAttribute,
+                                path: nil,
+                                label: ""
+                            )
+                            
+                        }
+                    } else {
+                        HStack {
+                            Spacer()
+                            Button(action: { creating = true }, label: {
+                                Image(systemName: "plus").font(.system(size: 16, weight: .regular))
+                            }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+                        }
+                    }
                 }
             }.padding(.bottom, 5)
             Divider()
@@ -101,7 +136,7 @@ struct CollectionView: View{
                         Button("Delete", action: { viewModel.deleteElement(element, atIndex: index) }).keyboardShortcut(.delete)
                     }
                 }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
-            }.frame(minHeight: CGFloat(viewModel.elements.count * (viewModel.type == .line ? 30 : 80) + 10))
+            }.frame(minHeight: min(CGFloat(viewModel.elements.count * (viewModel.type == .line ? 30 : 80) + 10), 100))
         }
     }
 }
