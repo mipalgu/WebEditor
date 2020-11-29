@@ -19,19 +19,24 @@ struct BoolView: View {
     let path: Attributes.Path<Machine, Bool>?
     let label: String
     
-    @State var value: Bool
+    @Binding var value: Bool
     
     init(machine: Ref<Machine>, path: Attributes.Path<Machine, Bool>?, label: String, defaultValue: Bool = false) {
         self.machine = machine
         self.path = path
         self.label = label
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
+        if let path = path {
+            self._value = machine[bindingTo: path]
+        } else {
+            self._value = Ref(copying: false).asBinding
+        }
     }
     
     @EnvironmentObject var config: Config
     
     var body: some View {
         Toggle(label, isOn: $value)
+            .animation(.easeOut)
             .font(.body)
             .foregroundColor(config.textColor)
             .onChange(of: value) {
