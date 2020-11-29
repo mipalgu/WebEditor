@@ -55,15 +55,7 @@ struct CollapsableAttributeGroupsView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                TabView {
-                    ForEach(Array(machine[path: path].value.indices), id: \.self) { index in
-                        AttributeGroupView(machine: machine, path: path[index], label: machine[path: path].value[index].name)
-                            .padding(.horizontal, 10)
-                            .tabItem {
-                                Text(machine[path: path].value[index].name.pretty)
-                            }
-                    }
-                }
+                AttributeGroupsView(machine: machine, path: Machine.path.attributes, label: "")
             } else {
                 HStack {
                     if collapseLeft {

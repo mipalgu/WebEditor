@@ -54,12 +54,6 @@ struct DependenciesView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                CollectionView(
-                    machine: machine,
-                    path: machine.value.path.dependencyAttributes,
-                    label: label,
-                    type: machine.value.dependencyAttributeType
-                )
             } else {
                 HStack {
                     if collapseLeft {

@@ -31,17 +31,19 @@ struct ComplexView: View {
     }
     
     var body: some View {
-        Section(header: Text(label.capitalized).font(.title3)) {
-            VStack(alignment: .leading) {
-                ForEach(fields, id: \.name) { field in
-                    AttributeView(
-                        machine: machine,
-                        attribute: path.map { machine[path: $0][field.name].wrappedValue.asBinding } ?? Binding($value[field.name])!,
-                        path: path?[field.name].wrappedValue,
-                        label: field.name.pretty
-                    )
-                }
-            }.padding(10).background(Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.05))
+        if !fields.isEmpty {
+            Section(header: Text(label.capitalized).font(.title3)) {
+                VStack(alignment: .leading) {
+                    ForEach(fields, id: \.name) { field in
+                        AttributeView(
+                            machine: machine,
+                            attribute: path.map { machine[path: $0][field.name].wrappedValue.asBinding } ?? Binding($value[field.name])!,
+                            path: path?[field.name].wrappedValue,
+                            label: field.name.pretty
+                        )
+                    }
+                }.padding(10).background(Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.05))
+            }
         }
     }
 }

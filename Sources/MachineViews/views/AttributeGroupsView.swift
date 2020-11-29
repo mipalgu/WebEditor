@@ -40,6 +40,25 @@ public struct AttributeGroupsView: View {
                             Text(machine[path: path][index].name.value.pretty)
                         }
                 }
+                ScrollView(.vertical, showsIndicators: true) {
+                    Form {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                CollectionView(
+                                    machine: machine,
+                                    path: Machine.path.dependencyAttributes,
+                                    label: "Machine Dependencies",
+                                    type: machine.value.dependencyAttributeType
+                                )
+                            }
+                            Spacer()
+                        }
+                    }
+                }
+                .padding(.horizontal, 10)
+                .tabItem {
+                    Text("Dependencies")
+                }
             }
             
         }
