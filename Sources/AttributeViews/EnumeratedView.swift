@@ -20,11 +20,13 @@ public struct EnumeratedView: View {
     @Binding var value: String
     let label: String
     let validValues: Set<String>
-    let onCommit: (String) -> Void
+    let onCommit: (String, Binding<String>) -> Void
+    
+    @State var error: String = ""
     
     @EnvironmentObject var config: Config
     
-    public init(value: Binding<String>, label: String, validValues: Set<String>, onCommit: @escaping (String) -> Void = { _ in }) {
+    public init(value: Binding<String>, label: String, validValues: Set<String>, onCommit: @escaping (String, Binding<String>) -> Void = { (_, _) in }) {
         self._value = value
         self.label = label
         self.validValues = validValues
@@ -32,12 +34,17 @@ public struct EnumeratedView: View {
     }
     
     public var body: some View {
-        Picker(label, selection: $value) {
-            ForEach(validValues.sorted(), id: \.self) {
-                Text($0).tag($0)
-                    .foregroundColor(config.textColor)
+        VStack(alignment: .leading) {
+            Picker(label, selection: $value) {
+                ForEach(validValues.sorted(), id: \.self) {
+                    Text($0).tag($0)
+                        .foregroundColor(config.textColor)
+                }
+            }.pickerStyle(InlinePickerStyle())
+            .onChange(of: value) {
+                self.onCommit($0, $error)
             }
-        }.pickerStyle(InlinePickerStyle())
-        .onChange(of: value, perform: self.onCommit)
+            Text(error).foregroundColor(.red)
+        }
     }
 }

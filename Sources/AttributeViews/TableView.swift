@@ -20,13 +20,15 @@ public struct TableView: View {
     @Binding var value: [[LineAttribute]]
     let label: String
     let columns: [BlockAttributeType.TableColumn]
-    let onCommit: ([[LineAttribute]]) -> Void
+    let onCommit: ([[LineAttribute]], Binding<String>) -> Void
+    
+    @State var error: String = ""
     
     @EnvironmentObject var config: Config
     
     @State var selection: Set<Int> = []
     
-    public init(value: Binding<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn], onCommit: @escaping ([[LineAttribute]]) -> Void = { _ in }) {
+    public init(value: Binding<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn], onCommit: @escaping ([[LineAttribute]], Binding<String>) -> Void = { (_, _) in }) {
         self._value = value
         self.label = label
         self.columns = columns
@@ -46,8 +48,8 @@ public struct TableView: View {
                     }
                 }
                 ForEach(Array(value.indices), id: \.self) { rowIndex in
-                    TableRowView(row: $value[rowIndex]) { _ in
-                        self.onCommit(value)
+                    TableRowView(row: $value[rowIndex]) { (_, error) in
+                        self.onCommit(value, error)
                     }
                 }
             }.frame(minHeight: 100)
@@ -57,17 +59,19 @@ public struct TableView: View {
 
 struct TableRowView: View {
     @Binding var row: [LineAttribute]
-    let onCommit: ([LineAttribute]) -> Void
+    let onCommit: ([LineAttribute], Binding<String>) -> Void
     
     @EnvironmentObject var config: Config
     
     var body: some View {
         HStack {
             ForEach(Array(row.indices), id: \.self) { columnIndex in
-                LineAttributeView(attribute: $row[columnIndex], label: "") { _ in
-                    self.onCommit(row)
+                VStack {
+                    LineAttributeView(attribute: $row[columnIndex], label: "") { (_, error) in
+                        self.onCommit(row, error)
+                    }
+                    .frame(minWidth: 0, maxWidth: .infinity)
                 }
-                .frame(minWidth: 0, maxWidth: .infinity)
             }
         }
     }

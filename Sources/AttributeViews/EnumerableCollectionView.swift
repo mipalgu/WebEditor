@@ -20,11 +20,13 @@ public struct EnumerableCollectionView: View {
     @Binding var value: Set<String>
     let label: String
     let validValues: Set<String>
-    let onCommit: (Set<String>) -> Void
+    let onCommit: (Set<String>, Binding<String>) -> Void
+    
+    @State var error: String = ""
     
     @EnvironmentObject var config: Config
     
-    public init(value: Binding<Set<String>>, label: String, validValues: Set<String>, onCommit: @escaping (Set<String>) -> Void = { _ in }) {
+    public init(value: Binding<Set<String>>, label: String, validValues: Set<String>, onCommit: @escaping (Set<String>, Binding<String>) -> Void = { (_, _) in }) {
         self._value = value
         self.label = label
         self.validValues = validValues
@@ -56,6 +58,9 @@ public struct EnumerableCollectionView: View {
                     }
                 }
             }
-        }.onChange(of: value, perform: self.onCommit)
+            Text(error)
+        }.onChange(of: value) {
+            self.onCommit($0, $error)
+        }
     }
 }

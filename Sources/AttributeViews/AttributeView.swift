@@ -70,9 +70,9 @@ public struct AttributeView: View{
     
     @Binding var attribute: Attribute
     let label: String
-    let onCommit: (Attribute) -> Void
+    let onCommit: (Attribute, Binding<String>) -> Void
     
-    public init(attribute: Binding<Attribute>, label: String, onCommit: @escaping (Attribute) -> Void = { _ in }) {
+    public init(attribute: Binding<Attribute>, label: String, onCommit: @escaping (Attribute, Binding<String>) -> Void = { (_, _) in }) {
         self._attribute = attribute
         self.label = label
         self.onCommit = onCommit
@@ -85,14 +85,14 @@ public struct AttributeView: View{
                 attribute: $attribute.lineAttribute,
                 label: label
             ) {
-                self.onCommit(.line($0))
+                self.onCommit(.line($0), $1)
             }
         case .block:
             BlockAttributeView(
                 attribute: $attribute.blockAttribute,
                 label: label
             ) {
-                self.onCommit(.block($0))
+                self.onCommit(.block($0), $1)
             }
         }
     }

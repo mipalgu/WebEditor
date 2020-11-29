@@ -19,13 +19,13 @@ public struct LineView: View {
     
     @Binding var value: String
     let label: String
-    let onCommit: (String) -> Void
+    let onCommit: (String, Binding<String>) -> Void
+    
+    @State var error: String = ""
     
     @EnvironmentObject var config: Config
     
-    @State var error: String? = nil
-    
-    public init(value: Binding<String>, label: String, defaultValue: String = "", onCommit: @escaping (String) -> Void = { _ in }) {
+    public init(value: Binding<String>, label: String, defaultValue: String = "", onCommit: @escaping (String, Binding<String>) -> Void = { (_, _) in }) {
         self._value = value
         self.label = label
         self.onCommit = onCommit
@@ -34,13 +34,11 @@ public struct LineView: View {
     public var body: some View {
         VStack(alignment: .leading) {
             TextField(label, text: $value, onCommit: {
-                self.onCommit(value)
+                self.onCommit(value, $error)
             })
             .background(config.fieldColor)
             .foregroundColor(config.textColor)
-            if let error = self.error {
-                Text(error).foregroundColor(.red)
-            }
+            Text(error).foregroundColor(.red)
         }
     }
 }

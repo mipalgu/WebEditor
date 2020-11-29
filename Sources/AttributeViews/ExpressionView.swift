@@ -20,11 +20,13 @@ public struct ExpressionView: View {
     @Binding var value: Expression
     let label: String
     let language: Language
-    let onCommit: (Expression) -> Void
+    let onCommit: (Expression, Binding<String>) -> Void
+    
+    @State var error: String = ""
     
     @EnvironmentObject var config: Config
     
-    public init(value: Binding<Expression>, label: String, language: Language, onCommit: @escaping (Expression) -> Void = { _ in }) {
+    public init(value: Binding<Expression>, label: String, language: Language, onCommit: @escaping (Expression, Binding<String>) -> Void = { (_, _) in }) {
         self._value = value
         self.label = label
         self.language = language
@@ -32,11 +34,14 @@ public struct ExpressionView: View {
     }
     
     public var body: some View {
-        TextField(label, text: $value, onCommit: {
-            self.onCommit(value)
-        })
-        .font(.body)
-        .background(config.fieldColor)
-        .foregroundColor(config.textColor)
+        VStack(alignment: .leading) {
+            TextField(label, text: $value, onCommit: {
+                self.onCommit(value, $error)
+            })
+            .font(.body)
+            .background(config.fieldColor)
+            .foregroundColor(config.textColor)
+            Text(error).foregroundColor(.red)
+        }
     }
 }

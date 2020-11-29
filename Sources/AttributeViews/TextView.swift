@@ -19,11 +19,13 @@ public struct TextView: View {
     
     @Binding var value: String
     let label: String
-    let onCommit: (String) -> Void
+    let onCommit: (String, Binding<String>) -> Void
+    
+    @State var error: String = ""
     
     @EnvironmentObject var config: Config
     
-    public init(value: Binding<String>, label: String, onCommit: @escaping (String) -> Void = { _ in }) {
+    public init(value: Binding<String>, label: String, onCommit: @escaping (String, Binding<String>) -> Void = { (_, _) in }) {
         self._value = value
         self.label = label
         self.onCommit = onCommit
@@ -43,7 +45,10 @@ public struct TextView: View {
                         .stroke(Color.gray.opacity(0.3), lineWidth: 2)
                 )
                 .frame(minHeight: 80)
-                .onChange(of: value, perform: self.onCommit)
+                .onChange(of: value) {
+                    self.onCommit($0, $error)
+                }
+            Text(error).foregroundColor(.red)
         }
     }
 }

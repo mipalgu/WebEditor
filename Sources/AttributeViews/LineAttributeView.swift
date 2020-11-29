@@ -19,9 +19,9 @@ public struct LineAttributeView: View {
     
     @Binding var attribute: LineAttribute
     let label: String
-    let onCommit: (LineAttribute) -> Void
+    let onCommit: (LineAttribute, Binding<String>) -> Void
     
-    public init(attribute: Binding<LineAttribute>, label: String, onCommit: @escaping (LineAttribute) -> Void = { _ in }) {
+    public init(attribute: Binding<LineAttribute>, label: String, onCommit: @escaping (LineAttribute, Binding<String>) -> Void = { (_, _) in }) {
         self._attribute = attribute
         self.label = label
         self.onCommit = onCommit
@@ -31,27 +31,27 @@ public struct LineAttributeView: View {
         switch attribute.type {
         case .bool:
             BoolView(value: $attribute.boolValue, label: label) {
-                self.onCommit(.bool($0))
+                self.onCommit(.bool($0), $1)
             }
         case .integer:
             IntegerView(value: $attribute.integerValue, label: label) {
-                self.onCommit(.integer($0))
+                self.onCommit(.integer($0), $1)
             }
         case .float:
             FloatView(value: $attribute.floatValue, label: label) {
-                self.onCommit(.float($0))
+                self.onCommit(.float($0), $1)
             }
         case .expression(let language):
             ExpressionView(value: $attribute.expressionValue, label: label, language: language) {
-                self.onCommit(.expression($0, language: language))
+                self.onCommit(.expression($0, language: language), $1)
             }
         case .enumerated(let validValues):
             EnumeratedView(value: $attribute.enumeratedValue, label: label, validValues: validValues) {
-                self.onCommit(.enumerated($0, validValues: validValues))
+                self.onCommit(.enumerated($0, validValues: validValues), $1)
             }
         case .line:
             LineView(value: $attribute.lineValue, label: label) {
-                self.onCommit(.line($0))
+                self.onCommit(.line($0), $1)
             }
         }
     }

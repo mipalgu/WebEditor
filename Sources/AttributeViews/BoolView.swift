@@ -19,9 +19,10 @@ public struct BoolView: View {
 
     @Binding var value: Bool
     let label: String
-    let onCommit: (Bool) -> Void
+    let onCommit: (Bool, Binding<String>) -> Void
+    @State var error: String = ""
     
-    public init(value: Binding<Bool>, label: String, onCommit: @escaping (Bool) -> Void = { _ in }) {
+    public init(value: Binding<Bool>, label: String, onCommit: @escaping (Bool, Binding<String>) -> Void = { (_, _) in }) {
         self._value = value
         self.label = label
         self.onCommit = onCommit
@@ -30,11 +31,16 @@ public struct BoolView: View {
     @EnvironmentObject var config: Config
     
     public var body: some View {
-        Toggle(label, isOn: $value)
-            .animation(.easeOut)
-            .font(.body)
-            .foregroundColor(config.textColor)
-            .onChange(of: value, perform: self.onCommit)
+        VStack(alignment: .leading) {
+            Toggle(label, isOn: $value)
+                .animation(.easeOut)
+                .font(.body)
+                .foregroundColor(config.textColor)
+                .onChange(of: value) {
+                    self.onCommit($0, $error)
+                }
+            Text(error).foregroundColor(.red)
+        }
     }
 }
 
