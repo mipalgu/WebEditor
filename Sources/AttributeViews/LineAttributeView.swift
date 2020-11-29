@@ -10,17 +10,26 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct LineAttributeView: View {
+public struct LineAttributeView: View {
     
     @ObservedObject var machine: Ref<Machine>
     @Binding var attribute: LineAttribute
     let path: Attributes.Path<Machine, LineAttribute>?
     let label: String
     
-    var body: some View {
+    public init(machine: Ref<Machine>, attribute: Binding<LineAttribute>, path: Attributes.Path<Machine, LineAttribute>?, label: String) {
+        self.machine = machine
+        self._attribute = attribute
+        self.path = path
+        self.label = label
+    }
+    
+    public var body: some View {
         switch attribute.type {
         case .bool:
             BoolView(machine: machine, path: path?.boolValue, label: label)

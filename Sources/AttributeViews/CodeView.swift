@@ -10,35 +10,41 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct TextView: View {
+public struct CodeView<Label: View>: View {
     
     @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, String>?
-    let label: String
+    let path: Attributes.Path<Machine, Code>?
+    let language: Language
+    let label: () -> Label
     
     @State var value: String
     
     @EnvironmentObject var config: Config
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "") {
-        self.machine = machine
-        self.path = path
-        self.label = label
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Code>?, label: String, language: Language, defaultValue: Code = "") where Label == Text {
+        self.init(machine: machine, path: path, language: language, defaultValue: defaultValue) { Text(label.capitalized) }
     }
     
-    var body: some View {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Code>?, language: Language, defaultValue: Code = "", label: @escaping () -> Label) {
+        self.machine = machine
+        self.path = path
+        self.language = language
+        self.label = label
+        self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
+    }
+    
+    public var body: some View {
         VStack(alignment: .leading) {
-            Text(label.capitalized)
-                .font(.headline)
-                .foregroundColor(config.textColor)
+            label()
             TextEditor(text: $value)
-                .font(.body)
+                .font(config.fontBody)
                 .foregroundColor(config.textColor)
-                .disableAutocorrection(false)
+                .disableAutocorrection(true)
                 .overlay(
                     RoundedRectangle(cornerRadius: 5)
                         .stroke(Color.gray.opacity(0.3), lineWidth: 2)
@@ -49,12 +55,12 @@ struct TextView: View {
                         return
                     }
                     do {
-                        try machine.value.modify(attribute: path, value: $0)
+                        try machine.value.modify(attribute: path, value: Code($0))
                         return
                     } catch let e {
                         print("\(e)")
                     }
-                    self.value = machine[path: path].value
+                    self.value = String(machine[path: path].value)
                 }
         }
     }

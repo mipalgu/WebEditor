@@ -1,8 +1,8 @@
 /*
- * AppViewModel.swift
+ * ListElement.swift
  * MachineViews
  *
- * Created by Callum McColl on 27/11/20.
+ * Created by Callum McColl on 23/11/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,65 +56,29 @@
  *
  */
 
-#if canImport(TokamakShim)
-import TokamakShim
-#else
-import SwiftUI
-#endif
+import Foundation
 
-import Machines
-import Attributes
-import Utilities
-
-public final class ArrangementViewModel: ObservableObject {
+@dynamicMemberLookup
+public struct ListElement<Wrapped: Hashable>: Identifiable, Hashable {
     
-    @Published public var rootMachineViewModels: [EditorViewModel]
+    public let id: UUID = UUID()
     
-    @Published public var currentMachineIndex: Int = 0
+    public var value: Wrapped
     
-    public var currentMachine: EditorViewModel {
-        rootMachineViewModels[currentMachineIndex]
+    public init(_ value: Wrapped) {
+        self.value = value
     }
     
-    public convenience init(rootMachines: [Machine]) {
-        self.init(rootMachineViewModels: rootMachines.indices.map { EditorViewModel(machine: MachineViewModel(machine: Ref(copying: rootMachines[$0]))) })
+    public subscript<T>(dynamicMember keyPath: KeyPath<Wrapped, T>) -> T {
+        self.value[keyPath: keyPath]
     }
     
-    public init(rootMachineViewModels: [EditorViewModel]) {
-        let firstMachine = rootMachineViewModels.first ?? EditorViewModel(
-            machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine))
-        )
-        if rootMachineViewModels.isEmpty {
-            self.rootMachineViewModels = [firstMachine]
-        } else {
-            self.rootMachineViewModels = rootMachineViewModels
+    public subscript<T>(dynamicMember keyPath: WritableKeyPath<Wrapped, T>) -> T {
+        get {
+            self.value[keyPath: keyPath]
+        } set {
+            self.value[keyPath: keyPath] = newValue
         }
-        self.rootMachineViewModels.forEach(self.listen)
-    }
-    
-    public func machine(id: UUID) -> MachineViewModel? {
-        return rootMachineViewModels.first { $0.machine.id == id }?.machine
-    }
-    
-    public func machine(name: String) -> MachineViewModel? {
-        rootMachineViewModels.first { $0.machine.name == name }?.machine
-    }
-
-    public func machineIndex(id: UUID) -> Int? {
-        rootMachineViewModels.firstIndex(where: { $0.machine.id == id })
-    }
-    
-    public func machineIndex(name: String) -> Int? {
-        rootMachineViewModels.firstIndex(where: { $0.machine.name == name })
-    }
-    
-    func state(machine: UUID, stateIndex: Int) -> StateViewModel? {
-        guard let machine = self.machine(id: machine) else {
-            print("Machine is nil")
-            return nil
-        }
-        let states = machine.states
-        return states[stateIndex]
     }
     
 }

@@ -10,8 +10,10 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
 final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     

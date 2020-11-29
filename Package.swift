@@ -21,7 +21,9 @@ let package = Package(
         )
     ],
     targets: [
-        .target(name: "MachineViews", dependencies: products + ["Machines"]),
+        .target(name: "Utilities", dependencies: products),
+        .target(name: "AttributeViews", dependencies: products + ["Machines", "Utilities"]),
+        .target(name: "MachineViews", dependencies: products + ["Machines", "AttributeViews", "Utilities"]),
         .target(
             name: "WebEditor",
             dependencies: products + [

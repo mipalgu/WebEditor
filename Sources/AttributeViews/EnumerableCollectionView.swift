@@ -10,10 +10,12 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct EnumerableCollectionView: View {
+public struct EnumerableCollectionView: View {
     
     @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, Set<String>>?
@@ -24,7 +26,7 @@ struct EnumerableCollectionView: View {
     
     @EnvironmentObject var config: Config
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Set<String>>?, label: String, validValues: Set<String>, defaultValue: Set<String> = []) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Set<String>>?, label: String, validValues: Set<String>, defaultValue: Set<String> = []) {
         self.machine = machine
         self.path = path
         self.label = label
@@ -32,7 +34,7 @@ struct EnumerableCollectionView: View {
         self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
     }
     
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading) {
             Text(label + ":").font(config.fontHeading).fontWeight(.bold)
             if validValues.isEmpty {

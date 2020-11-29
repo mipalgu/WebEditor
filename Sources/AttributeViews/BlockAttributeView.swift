@@ -10,17 +10,26 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct BlockAttributeView: View{
+public struct BlockAttributeView: View{
     
     @ObservedObject var machine: Ref<Machine>
     @Binding var attribute: BlockAttribute
     let path: Attributes.Path<Machine, BlockAttribute>?
     let label: String
     
-    var body: some View {
+    public init(machine: Ref<Machine>, attribute: Binding<BlockAttribute>, path: Attributes.Path<Machine, BlockAttribute>?, label: String) {
+        self.machine = machine
+        self._attribute = attribute
+        self.path = path
+        self.label = label
+    }
+    
+    public var body: some View {
         switch attribute.type {
         case .code(let language):
             CodeView(machine: machine, path: path?.codeValue, label: label, language: language)
@@ -34,8 +43,6 @@ struct BlockAttributeView: View{
             ComplexView(machine: machine, path: path?.complexValue, label: label, fields: fields)
         case .enumerableCollection(let validValues):
             EnumerableCollectionView(machine: machine, path: path?.enumerableCollectionValue, label: label, validValues: validValues)
-        default:
-            Text("Not Yet Implemented")
         }
     }
 }

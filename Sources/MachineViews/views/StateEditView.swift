@@ -10,8 +10,11 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
+import AttributeViews
 
 struct StateEditView: View {
     

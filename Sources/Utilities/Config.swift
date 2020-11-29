@@ -13,7 +13,7 @@ import SwiftUI
 import Machines
 import Attributes
 
-public class Config: ObservableObject {
+public final class Config: ObservableObject {
     
     #if canImport(TokamakShim)
     @Published public var textColor = Color.black
@@ -96,9 +96,9 @@ public class Config: ObservableObject {
     @Published public var fontHeading: Font = Font.system(size: 16.0)
     @Published public var fontBody: Font = Font.system(size: 12.0)
     
-    @Published var rightPaneStartPoint: CGFloat = 200.0
+    @Published public var rightPaneStartPoint: CGFloat = 200.0
     
-    @Published var alertView: DialogType = .none
+    @Published public var alertView: DialogType = .none
     
     public init() {}
     

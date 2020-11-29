@@ -8,6 +8,7 @@ import SwiftUI
 #endif
 
 import MachineViews
+import Utilities
 
 struct WebEditor: App {
     

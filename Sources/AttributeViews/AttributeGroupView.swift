@@ -11,17 +11,25 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct AttributeGroupView: View {
+public struct AttributeGroupView: View {
     
     @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, AttributeGroup>
     let label: String
     
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, AttributeGroup>, label: String) {
+        self.machine = machine
+        self.path = path
+        self.label = label
+    }
+    
     @ViewBuilder
-    var body: some View {
+    public var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             Form {
                 HStack {

@@ -10,10 +10,12 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct ComplexView: View {
+public struct ComplexView: View {
     
     @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, [Attributes.Label: Attribute]>?
@@ -22,7 +24,7 @@ struct ComplexView: View {
     
     @State var value: [String: Attribute]
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, [String: Attribute]>?, label: String, fields: [Field], defaultValue: [Attributes.Label: Attribute]? = nil) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [String: Attribute]>?, label: String, fields: [Field], defaultValue: [Attributes.Label: Attribute]? = nil) {
         self.machine = machine
         self.path = path
         self.label = label
@@ -30,7 +32,7 @@ struct ComplexView: View {
         self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue ?? AttributeType.complex(layout: fields).defaultValue.complexValue)
     }
     
-    var body: some View {
+    public var body: some View {
         if !fields.isEmpty {
             Section(header: Text(label.capitalized).font(.title3)) {
                 VStack(alignment: .leading) {

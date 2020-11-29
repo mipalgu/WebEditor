@@ -62,8 +62,9 @@ import TokamakShim
 import SwiftUI
 #endif
 
-import Attributes
 import Machines
+import Attributes
+import Utilities
 
 public final class CollectionViewModel: ObservableObject {
     

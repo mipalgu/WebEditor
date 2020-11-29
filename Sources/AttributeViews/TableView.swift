@@ -10,10 +10,12 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct TableView: View {
+public struct TableView: View {
     
     @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, [[LineAttribute]]>?
@@ -26,7 +28,7 @@ struct TableView: View {
     
     @State var selection: Set<Int> = []
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, [[LineAttribute]]>?, label: String, columns: [BlockAttributeType.TableColumn], defaultValue: [[LineAttribute]] = []) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [[LineAttribute]]>?, label: String, columns: [BlockAttributeType.TableColumn], defaultValue: [[LineAttribute]] = []) {
         self.machine = machine
         self.path = path
         self.label = label
@@ -34,7 +36,7 @@ struct TableView: View {
         self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
     }
     
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading) {
             Text(label.capitalized)
                 .font(.headline)

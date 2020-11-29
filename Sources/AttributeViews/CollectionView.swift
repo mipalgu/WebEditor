@@ -61,20 +61,22 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct CollectionView: View{
+public struct CollectionView: View{
     
     @StateObject var viewModel: CollectionViewModel
     
     @State var creating: Bool = false
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
         self._viewModel = StateObject(wrappedValue: CollectionViewModel(machine: machine, path: path, label: label, type: type, defaultValue: defaultValue))
     }
     
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading) {
             VStack {
                 switch viewModel.type {

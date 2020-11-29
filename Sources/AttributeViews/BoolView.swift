@@ -10,10 +10,12 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct BoolView: View {
+public struct BoolView: View {
     
     @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, Bool>?
@@ -21,7 +23,7 @@ struct BoolView: View {
     
     @Binding var value: Bool
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Bool>?, label: String, defaultValue: Bool = false) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Bool>?, label: String, defaultValue: Bool = false) {
         self.machine = machine
         self.path = path
         self.label = label
@@ -34,7 +36,7 @@ struct BoolView: View {
     
     @EnvironmentObject var config: Config
     
-    var body: some View {
+    public var body: some View {
         Toggle(label, isOn: $value)
             .animation(.easeOut)
             .font(.body)

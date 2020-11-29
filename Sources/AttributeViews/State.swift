@@ -1,8 +1,8 @@
 /*
- * ListElement.swift
- * MachineViews
+ * State.swift
+ * AttributeViews
  *
- * Created by Callum McColl on 23/11/20.
+ * Created by Callum McColl on 30/11/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,29 +56,12 @@
  *
  */
 
-import Foundation
+#if canImport(TokamakShims)
+import TokamakShims
 
-@dynamicMemberLookup
-public struct ListElement<Wrapped: Hashable>: Identifiable, Hashable {
-    
-    public let id: UUID = UUID()
-    
-    var value: Wrapped
-    
-    public init(_ value: Wrapped) {
-        self.value = value
-    }
-    
-    public subscript<T>(dynamicMember keyPath: KeyPath<Wrapped, T>) -> T {
-        self.value[keyPath: keyPath]
-    }
-    
-    public subscript<T>(dynamicMember keyPath: WritableKeyPath<Wrapped, T>) -> T {
-        get {
-            self.value[keyPath: keyPath]
-        } set {
-            self.value[keyPath: keyPath] = newValue
-        }
-    }
-    
-}
+typealias State = TokamakShims.State
+#else
+import SwiftUI
+
+typealias State = SwiftUI.State
+#endif

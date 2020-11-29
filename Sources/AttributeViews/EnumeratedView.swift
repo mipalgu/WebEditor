@@ -10,10 +10,12 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct EnumeratedView: View {
+public struct EnumeratedView: View {
     
     @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, String>?
@@ -24,7 +26,7 @@ struct EnumeratedView: View {
     
     @EnvironmentObject var config: Config
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, String>?, label: String, validValues: Set<String>, defaultValue: String? = nil) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, String>?, label: String, validValues: Set<String>, defaultValue: String? = nil) {
         self.machine = machine
         self.path = path
         self.label = label
@@ -32,7 +34,7 @@ struct EnumeratedView: View {
         self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue ?? validValues.sorted().first ?? "")
     }
     
-    var body: some View {
+    public var body: some View {
         Picker(label, selection: $value) {
             ForEach(validValues.sorted(), id: \.self) {
                 Text($0).tag($0)

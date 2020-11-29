@@ -10,10 +10,12 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct ExpressionView: View {
+public struct ExpressionView: View {
     
     @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, Expression>?
@@ -24,7 +26,7 @@ struct ExpressionView: View {
     
     @EnvironmentObject var config: Config
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Expression>?, label: String, language: Language, defaultValue: Expression = "") {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Expression>?, label: String, language: Language, defaultValue: Expression = "") {
         self.machine = machine
         self.path = path
         self.label = label
@@ -32,7 +34,7 @@ struct ExpressionView: View {
         self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
     }
     
-    var body: some View {
+    public var body: some View {
         TextField(label, text: $value, onCommit: {
             guard let path = self.path else {
                 return

@@ -61,17 +61,26 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct AttributeView: View{
+public struct AttributeView: View{
     
     @ObservedObject var machine: Ref<Machine>
     @Binding var attribute: Attribute
     let path: Attributes.Path<Machine, Attribute>?
     let label: String
     
-    var body: some View {
+    public init(machine: Ref<Machine>, attribute: Binding<Attribute>, path: Attributes.Path<Machine, Attribute>?, label: String) {
+        self.machine = machine
+        self._attribute = attribute
+        self.path = path
+        self.label = label
+    }
+    
+    public var body: some View {
         switch attribute.type {
         case .line:
             LineAttributeView(

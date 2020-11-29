@@ -10,32 +10,34 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+
 import Machines
 import Attributes
+import Utilities
 
-struct FloatView: View {
+public struct IntegerView: View {
 
     @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, Double>?
+    let path: Attributes.Path<Machine, Int>?
     let label: String
     
     @State var value: String
     
     @EnvironmentObject var config: Config
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Double>?, label: String, defaultValue: Double = 0.0) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Int>?, label: String, defaultValue: Int = 0) {
         self.machine = machine
         self.path = path
         self.label = label
         self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
     }
     
-    var body: some View {
+    public var body: some View {
         TextField(label, text: $value, onCommit: {
             guard let path = self.path else {
                 return
             }
-            guard let value = Double(value) else {
+            guard let value = Int(value) else {
                 return
             }
             do {
