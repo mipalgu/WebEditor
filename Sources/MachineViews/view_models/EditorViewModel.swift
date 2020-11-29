@@ -103,7 +103,7 @@ public class EditorViewModel: ObservableObject {
     
     var originalLocation: CGFloat = 0.0
     
-    public init(machine: MachineViewModel, mainView: ViewType = .machine, focusedView: ViewType = .machine, currentMachineIndex: Int = 0, logSize: UInt16 = 50, rightDividerLocation: CGFloat = 10000, leftDividerLocation: CGFloat = 0.0) {
+    public init(machine: MachineViewModel, mainView: ViewType = .machine, focusedView: ViewType = .machine, currentMachineIndex: Int = 0, logSize: UInt16 = 50, rightDividerLocation: CGFloat = 0, leftDividerLocation: CGFloat = 0.0) {
         self.machine = machine
         self.mainView = mainView
         self.focusedView = focusedView
