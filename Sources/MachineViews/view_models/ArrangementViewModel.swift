@@ -74,9 +74,7 @@ public final class ArrangementViewModel: ObservableObject {
     
     public init(rootMachineViewModels: [EditorViewModel]) {
         self.rootMachineViewModels = rootMachineViewModels
-        self.rootMachineViewModels.forEach {
-            self.listen(to: $0)
-        }
+        self.rootMachineViewModels.forEach(self.listen)
     }
     
     public func machine(id: UUID) -> MachineViewModel? {
