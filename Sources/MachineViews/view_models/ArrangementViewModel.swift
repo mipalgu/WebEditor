@@ -68,7 +68,11 @@ public final class ArrangementViewModel: ObservableObject {
     
     @Published public var rootMachineViewModels: [EditorViewModel]
     
-    @Published public var currentMachine: EditorViewModel
+    @Published public var currentMachineIndex: Int = 0
+    
+    public var currentMachine: EditorViewModel {
+        rootMachineViewModels[currentMachineIndex]
+    }
     
     public convenience init(rootMachines: [Machine]) {
         self.init(rootMachineViewModels: rootMachines.indices.map { EditorViewModel(machine: MachineViewModel(machine: Ref(copying: rootMachines[$0]))) })
@@ -83,7 +87,6 @@ public final class ArrangementViewModel: ObservableObject {
         } else {
             self.rootMachineViewModels = rootMachineViewModels
         }
-        currentMachine = firstMachine
         rootMachineViewModels.forEach {
             self.listen(to: $0)
         }
