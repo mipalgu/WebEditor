@@ -65,23 +65,16 @@ import SwiftUI
 import Attributes
 
 @dynamicMemberLookup
-public final class Ref<T>: ObservableObject {
+public class ConstRef<T>: ObservableObject {
     
-    private var get: () -> T
+    fileprivate var get: () -> T
     
-    private var set: (T) -> Void
+    fileprivate var set: (T) -> Void
     
     public var value: T {
         get {
             self.get()
-        } set {
-            self.objectWillChange.send()
-            self.set(newValue)
         }
-    }
-    
-    public var asBinding: Binding<T> {
-        return Binding(get: { self.value }, set: { self.value = $0 })
     }
     
     public init(to pointer: UnsafeMutablePointer<T>) {
@@ -95,9 +88,37 @@ public final class Ref<T>: ObservableObject {
         self.set = { value = $0 }
     }
     
-    private init(get: @escaping () -> T, set: @escaping (T) -> Void) {
+    fileprivate init(get: @escaping () -> T, set: @escaping (T) -> Void) {
         self.get = get
         self.set = set
+    }
+    
+    public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> ConstRef<U> {
+        return ConstRef<U>(
+            get: { self.get()[keyPath: keyPath] },
+            set: { _ in }
+        )
+    }
+    
+    public subscript<Path: ReadOnlyPathProtocol>(readOnly path: Path) -> ConstRef<Path.Value> where Path.Root == T {
+        return self[dynamicMember: path.keyPath]
+    }
+    
+}
+
+public final class Ref<T>: ConstRef<T> {
+    
+    public override var value: T {
+        get {
+            super.get()
+        } set {
+            self.objectWillChange.send()
+            super.set(newValue)
+        }
+    }
+    
+    public var asBinding: Binding<T> {
+        return Binding(get: { self.value }, set: { self.value = $0 })
     }
     
     public subscript<U>(dynamicMember keyPath: WritableKeyPath<T, U>) -> Ref<U> {
