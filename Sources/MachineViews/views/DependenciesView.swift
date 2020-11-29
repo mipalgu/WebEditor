@@ -15,6 +15,8 @@ import Attributes
 
 struct DependenciesView: View {
     
+    @ObservedObject var viewModel: ArrangementViewModel
+    
     @ObservedObject var machine: Ref<Machine>
     
     @Binding var collapsed: Bool
@@ -54,6 +56,18 @@ struct DependenciesView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
+                ForEach(Array(machine.value.dependencies.indices), id: \.self) { (index: Int) -> AnyView in
+                    guard let machineDep = viewModel.machine(name: machine.value.dependencies[index].name)?.$machine else {
+                        return AnyView(EmptyView())
+                    }
+                    return AnyView(DependencyView(
+                        viewModel: viewModel,
+                        machine: machineDep,
+                        path: machineDep.value.path.dependencies[index],
+                        indent: 10
+                    ))
+                }
+                Spacer()
             } else {
                 HStack {
                     if collapseLeft {

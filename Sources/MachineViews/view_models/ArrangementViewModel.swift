@@ -95,9 +95,17 @@ public final class ArrangementViewModel: ObservableObject {
     public func machine(id: UUID) -> MachineViewModel? {
         return rootMachineViewModels.first { $0.machine.id == id }?.machine
     }
+    
+    public func machine(name: String) -> MachineViewModel? {
+        rootMachineViewModels.first { $0.machine.name == name }?.machine
+    }
 
     public func machineIndex(id: UUID) -> Int? {
         rootMachineViewModels.firstIndex(where: { $0.machine.id == id })
+    }
+    
+    public func machineIndex(name: String) -> Int? {
+        rootMachineViewModels.firstIndex(where: { $0.machine.name == name })
     }
     
     func state(machine: UUID, stateIndex: Int) -> StateViewModel? {

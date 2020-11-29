@@ -15,13 +15,16 @@ import Attributes
 
 public struct EditorView: View {
     
+    @ObservedObject var arrangement: ArrangementViewModel
+    
     @ObservedObject var viewModel: EditorViewModel
     
     @ObservedObject var machineViewModel: MachineViewModel
     
     @EnvironmentObject var config: Config
     
-    public init(viewModel: EditorViewModel, machineViewModel: MachineViewModel) {
+    public init(arrangement: ArrangementViewModel, viewModel: EditorViewModel, machineViewModel: MachineViewModel) {
+        self.arrangement = arrangement
         self.viewModel = viewModel
         self.machineViewModel = machineViewModel
     }
@@ -32,6 +35,7 @@ public struct EditorView: View {
                 HStack {
                     GeometryReader{ reader in
                         DependenciesView(
+                            viewModel: arrangement,
                             machine: viewModel.machine.$machine,
                             collapsed: Binding(
                                 get: { viewModel.leftPaneCollapsed },

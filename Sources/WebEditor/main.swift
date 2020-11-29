@@ -66,14 +66,14 @@ struct WebEditorView: View {
                 .background(config.stateColour)
             TabView(selection: Binding(get: { viewModel.currentMachineIndex }, set: { viewModel.currentMachineIndex = $0 })) {
                 ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
-                    ContentView(editorViewModel: viewModel.rootMachineViewModels[index])
+                    ContentView(editorViewModel: viewModel.rootMachineViewModels[index], arrangement: viewModel)
                         .tabItem {
                             Text(viewModel.rootMachineViewModels[index].machine.name)
                                 .font(config.fontHeading)
                         }.tag(index)
                 }
             }.background(config.backgroundColor)
-        }
+        }.background(config.backgroundColor)
     }
     
 }
@@ -92,8 +92,10 @@ struct ContentView: View {
     
     @StateObject var editorViewModel: EditorViewModel
     
+    @ObservedObject var arrangement: ArrangementViewModel
+    
     var body: some View {
-        EditorView(viewModel: editorViewModel, machineViewModel: editorViewModel.currentMachine)
+        EditorView(arrangement: arrangement, viewModel: editorViewModel, machineViewModel: editorViewModel.currentMachine)
             .background(config.backgroundColor)
             .frame(minWidth: CGFloat(config.width), minHeight: CGFloat(config.height))
             .onTapGesture(count: 1) {
