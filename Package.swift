@@ -21,7 +21,7 @@ let package = Package(
         )
     ],
     targets: [
-        .target(name: "Utilities", dependencies: products),
+        .target(name: "Utilities", dependencies: products + ["Machines"]),
         .target(name: "AttributeViews", dependencies: products + ["Machines", "Utilities"]),
         .target(name: "MachineViews", dependencies: products + ["Machines", "AttributeViews", "Utilities"]),
         .target(
