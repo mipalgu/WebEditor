@@ -66,46 +66,56 @@ import Machines
 import Attributes
 import Utilities
 
+import Foundation
+
 public final class ArrangementViewModel: ObservableObject {
     
-    @Published public var rootMachineViewModels: [EditorViewModel]
+    @Reference public var arrangement: Ref<Arrangement>
+    
+    @Published public var allMachines: [EditorViewModel]
     
     @Published public var currentMachineIndex: Int = 0
+    
+    public var rootMachineViewModels: [EditorViewModel] {
+        let rootMachineNames = Set(arrangement.value.rootMachines.map { $0.name })
+        return self.allMachines.filter { rootMachineNames.contains($0.machine.name) }
+    }
     
     public var currentMachine: EditorViewModel {
         rootMachineViewModels[currentMachineIndex]
     }
     
-    public convenience init(rootMachines: [Machine]) {
-        self.init(rootMachineViewModels: rootMachines.indices.map { EditorViewModel(machine: MachineViewModel(machine: Ref(copying: rootMachines[$0]))) })
-    }
-    
-    public init(rootMachineViewModels: [EditorViewModel]) {
-        let firstMachine = rootMachineViewModels.first ?? EditorViewModel(
-            machine: MachineViewModel(machine: Ref(copying: Machine.initialSwiftMachine))
-        )
-        if rootMachineViewModels.isEmpty {
-            self.rootMachineViewModels = [firstMachine]
-        } else {
-            self.rootMachineViewModels = rootMachineViewModels
+    public init(arrangement: Ref<Machines.Arrangement>) {
+        self.arrangement = arrangement
+        do {
+            self.allMachines = try arrangement.value.allMachines().map {
+                let manager = FileManager()
+                let filePath: URL = $0.0
+                let machineRef: Ref<Machine> = Ref(copying: $0.1)
+                guard let plist = manager.contents(atPath: filePath.appendingPathComponent("Layout.plist").absoluteString) else {
+                    return EditorViewModel(machine: MachineViewModel(machine: machineRef))
+                }
+                return EditorViewModel(machine: MachineViewModel(machine: machineRef, plist: plist.base64EncodedString()))
+            }
+        } catch let error {
+            fatalError("No machines. Error: \(error)")
         }
-        self.rootMachineViewModels.forEach(self.listen)
     }
     
     public func machine(id: UUID) -> MachineViewModel? {
-        return rootMachineViewModels.first { $0.machine.id == id }?.machine
+        allMachines.first { $0.machine.id == id }?.machine
     }
     
     public func machine(name: String) -> MachineViewModel? {
-        rootMachineViewModels.first { $0.machine.name == name }?.machine
+        allMachines.first { $0.machine.name == name }?.machine
     }
 
     public func machineIndex(id: UUID) -> Int? {
-        rootMachineViewModels.firstIndex(where: { $0.machine.id == id })
+        allMachines.firstIndex(where: { $0.machine.id == id })
     }
     
     public func machineIndex(name: String) -> Int? {
-        rootMachineViewModels.firstIndex(where: { $0.machine.name == name })
+        allMachines.firstIndex(where: { $0.machine.name == name })
     }
     
     func state(machine: UUID, stateIndex: Int) -> StateViewModel? {

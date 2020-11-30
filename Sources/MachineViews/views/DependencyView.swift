@@ -31,7 +31,7 @@ struct DependencyView: View {
         guard let index = viewModel.machineIndex(name: machine.value[keyPath: path.path].name) else {
             return []
         }
-        return viewModel.rootMachineViewModels[index].machine.machine.dependencies
+        return viewModel.allMachines[index].machine.machine.dependencies
     }
     
     var body: some View {

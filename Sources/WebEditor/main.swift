@@ -57,7 +57,9 @@ struct WebEditor: App {
 
 struct WebEditorView: View {
     
-    @StateObject var viewModel: ArrangementViewModel = ArrangementViewModel(rootMachines: [Machine.initialSwiftMachine])
+    @StateObject var viewModel: ArrangementViewModel = ArrangementViewModel(
+        arrangement: Ref(copying: Arrangement.initialSwiftArrangement)
+    )
     
     @EnvironmentObject var config: Config
     
