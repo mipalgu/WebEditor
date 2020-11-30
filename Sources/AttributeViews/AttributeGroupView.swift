@@ -18,31 +18,31 @@ import Utilities
 
 public struct AttributeGroupView: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, AttributeGroup>
+    @Binding var group: AttributeGroup
     let label: String
+    let onCommit: (AttributeGroup, Binding<String>) -> Void
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, AttributeGroup>, label: String) {
-        self.machine = machine
-        self.path = path
+    public init(group: Binding<AttributeGroup>, label: String, onCommit: @escaping (AttributeGroup, Binding<String>) -> Void = { (_, _) in }) {
+        self._group = group
         self.label = label
+        self.onCommit = onCommit
     }
     
     @ViewBuilder
     public var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
-            Form {
-                HStack {
-                    VStack(alignment: .leading) {
-                        ForEach(Array(machine[path: path].fields.value.enumerated()), id: \.0) { (index, field) in
-                            AttributeView(
-                                attribute: machine[path: path].attributes[field.name].wrappedValue.asBinding,
-                                label: field.name.pretty
-                            )
+            HStack {
+                VStack(alignment: .leading) {
+                    ForEach(Array(group.fields.enumerated()), id: \.0) { (index, field) in
+                        AttributeView(
+                            attribute: Binding($group.attributes[field.name])!,
+                            label: field.name.pretty
+                        ) { (_, error) in
+                            self.onCommit(group, error)
                         }
                     }
-                    Spacer()
                 }
+                Spacer()
             }
         }
     }

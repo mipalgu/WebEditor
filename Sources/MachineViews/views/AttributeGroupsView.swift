@@ -35,16 +35,16 @@ public struct AttributeGroupsView: View {
             Text(label.capitalized)
                 .font(.title3)
                 .foregroundColor(config.textColor)
-            TabView {
-                ForEach(Array(machine[path: path].value.indices), id: \.self) { index in
-                    AttributeGroupView(machine: machine, path: path[index], label: machine[path: path][index].name.value)
-                        .padding(.horizontal, 10)
-                        .tabItem {
-                            Text(machine[path: path][index].name.value.pretty)
-                        }
-                }
-                ScrollView(.vertical, showsIndicators: true) {
-                    Form {
+            Form {
+                TabView {
+                    ForEach(Array(machine[path: path].value.indices), id: \.self) { index in
+                        AttributeGroupView(group: machine[bindingTo: path[index]], label: machine[path: path][index].name.value)
+                            .padding(.horizontal, 10)
+                            .tabItem {
+                                Text(machine[path: path][index].name.value.pretty)
+                            }
+                    }
+                    ScrollView(.vertical, showsIndicators: true) {
                         HStack {
                             VStack(alignment: .leading) {
                                 CollectionView(
@@ -57,13 +57,12 @@ public struct AttributeGroupsView: View {
                             Spacer()
                         }
                     }
-                }
-                .padding(.horizontal, 10)
-                .tabItem {
-                    Text("Dependencies")
+                    .padding(.horizontal, 10)
+                    .tabItem {
+                        Text("Dependencies")
+                    }
                 }
             }
-            
         }
     }
 }

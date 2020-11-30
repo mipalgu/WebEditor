@@ -40,7 +40,7 @@ public struct EnumeratedView: View {
                     Text($0).tag($0)
                         .foregroundColor(config.textColor)
                 }
-            }.pickerStyle(InlinePickerStyle())
+            }
             .onChange(of: value) {
                 self.onCommit($0, $error)
             }
