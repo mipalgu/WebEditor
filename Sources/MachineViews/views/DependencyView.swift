@@ -53,29 +53,30 @@ struct DependencyView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                Button(action: {
-                    let name = machine.value[keyPath: path.path].name
-                    guard let machineIndex = viewModel.machineIndex(name: name) else {
-                        print("Cannot find machine named \(name)", stderr)
-                        return
-                    }
-                    viewModel.currentMachineIndex = machineIndex
-                }) {
-                    Text(machine.value[keyPath: path.path].name)
-                        .font(config.fontHeading)
-                }
+                DependencyLabelView(
+                    viewModel: viewModel,
+                    name: Binding(
+                        get: { machine.value[keyPath: path.path].name },
+                        set: {_ in }
+                    ),
+                    collapsed: Binding(get: { collapsed }, set: { collapsed = $0 })
+                )
                 Spacer()
             }
             if !collapsed {
-                ForEach(Array(rootDependencies.indices), id: \.self) { (index: Int) -> AnyView in
-                    guard let machine = viewModel.machine(name: machine.value[keyPath: path.path].name) else {
-                        return AnyView(EmptyView())
+                if rootDependencies.count > 0 {
+                    ForEach(Array(rootDependencies.indices), id: \.self) { (index: Int) -> AnyView in
+                        guard let machine = viewModel.machine(name: machine.value[keyPath: path.path].name) else {
+                            return AnyView(EmptyView())
+                        }
+                        return AnyView(DependencyView(
+                            viewModel: viewModel,
+                            machine: machine.$machine,
+                            path: Machine.path.dependencies[index]
+                        ))
                     }
-                    return AnyView(DependencyView(
-                        viewModel: viewModel,
-                        machine: machine.$machine,
-                        path: Machine.path.dependencies[index]
-                    ))
+                } else {
+                    Text("Nothing")
                 }
             }
         }
