@@ -21,12 +21,12 @@ public struct MenuView: View {
     
     @State var saveDialogue: Bool = false
     
-    @ObservedObject public var machineViewModel: MachineViewModel
+    @Binding public var machineViewModel: MachineViewModel?
     
     @EnvironmentObject var config: Config
     
-    public init(machineViewModel: MachineViewModel) {
-        self.machineViewModel = machineViewModel
+    public init(machineViewModel: Binding<MachineViewModel?>) {
+        self._machineViewModel = machineViewModel
     }
     
     public var body: some View {
@@ -50,7 +50,7 @@ public struct MenuView: View {
                         .font(config.fontBody)
                 }
             }
-            Button(action: { machineViewModel.save() }) {
+            Button(action: { machineViewModel?.save() }) {
                 // Save Machine
                 VStack {
                     Image(systemName: "folder.circle")
@@ -58,7 +58,7 @@ public struct MenuView: View {
                         .font(config.fontBody)
                 }
             }
-            Button(action: { config.alertView = .saveMachine(id: machineViewModel.machine.id) }) {
+            Button(action: { config.alertView = .saveMachine(id: machineViewModel?.machine.id ?? UUID()) }) {
                 // Save-As
                 VStack {
                     Image(systemName: "folder.circle.fill")
@@ -67,11 +67,13 @@ public struct MenuView: View {
                 }
             }
             Spacer()
-            VStack {
-                Text(machineViewModel.machine.semantics.rawValue)
-                    .font(config.fontBody)
-                Text("Semantics")
-                    .font(config.fontHeading)
+            if let machineViewModel = machineViewModel {
+                VStack {
+                    Text(machineViewModel.machine.semantics.rawValue)
+                        .font(config.fontBody)
+                    Text("Semantics")
+                        .font(config.fontHeading)
+                }
             }
         }
         .padding(20.0)

@@ -70,15 +70,19 @@ import Foundation
 
 public final class ArrangementViewModel: ObservableObject {
     
-    @Reference public var arrangement: Ref<Arrangement>
+    @Reference public var arrangement: Arrangement
     
     @Published public var allMachines: [EditorViewModel]
     
     @Published public var currentMachineIndex: Int = 0
     
     public var rootMachineViewModels: [EditorViewModel] {
-        let rootMachineNames = Set(arrangement.value.rootMachines.map { $0.name })
+        let rootMachineNames = Set(arrangement.rootMachines.map { $0.name })
         return self.allMachines.filter { rootMachineNames.contains($0.machine.name) }
+    }
+    
+    public var isEmpty: Bool {
+        return arrangement.rootMachines.isEmpty
     }
     
     public var currentMachine: EditorViewModel {
@@ -86,7 +90,7 @@ public final class ArrangementViewModel: ObservableObject {
     }
     
     public init(arrangement: Ref<Machines.Arrangement>) {
-        self.arrangement = arrangement
+        self._arrangement = Reference(reference: arrangement)
         do {
             self.allMachines = try arrangement.value.allMachines().map {
                 let manager = FileManager()
@@ -100,6 +104,7 @@ public final class ArrangementViewModel: ObservableObject {
         } catch let error {
             fatalError("No machines. Error: \(error)")
         }
+        self.listen(to: $arrangement)
     }
     
     public func machine(id: UUID) -> MachineViewModel? {

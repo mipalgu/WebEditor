@@ -3,8 +3,10 @@ import Attributes
 
 #if canImport(TokamakDOM)
 import TokamakDOM
+typealias State = TokamakDOM.State
 #else
 import SwiftUI
+typealias State = SwiftUI.State
 #endif
 
 import MachineViews
@@ -15,10 +17,10 @@ struct WebEditor: App {
     #if !canImport(TokamakDOM) && canImport(SwiftUI)
     class AppDelegate: NSObject, NSApplicationDelegate {
         
-        func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-            return true
-        }
-        
+//        func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+//            return true
+//        }
+//
         func applicationWillFinishLaunching(_ notification: Notification) {
             NSApp.setActivationPolicy(.regular)
         }
@@ -28,12 +30,24 @@ struct WebEditor: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate: AppDelegate
     #endif
     
-    var config: Config = Config()
+    @State var newDisplayType: DisplayType = .arrangement(Arrangement.initialSwiftArrangement)
     
     var body: some Scene {
         WindowGroup("Web Editor") {
-            WebEditorView().environmentObject(config)
+            WebEditorWindow(display: newDisplayType)
         }.commands(content: {
+            CommandGroup(after: .newItem) {
+                VStack {
+                    Button("New Arrangement") {
+                        newDisplayType = .arrangement(Arrangement.initialSwiftArrangement)
+                    }
+                    ForEach(Machine.supportedSemantics, id: \.self) { semantics in
+                        Button("New \(semantics.rawValue) Machine") {
+                            newDisplayType = .machine(Machine.initialMachine(forSemantics: semantics))
+                        }
+                    }
+                }
+            }
             CommandGroup(replacing: .pasteboard) {
                 Button("Cut") {
                     print("I'm cutting")
@@ -55,27 +69,83 @@ struct WebEditor: App {
     }
 }
 
-struct WebEditorView: View {
+enum DisplayType {
     
-    @StateObject var viewModel: ArrangementViewModel = ArrangementViewModel(
-        arrangement: Ref(copying: Arrangement.initialSwiftArrangement)
-    )
+    case arrangement(Arrangement)
+    case machine(Machine)
+    case none
+    
+}
+
+struct WebEditorWindow: View {
+    
+    @State var display: DisplayType
+    
+    var config: Config = Config()
+    
+    var body: some View {
+        switch display {
+        case .arrangement(let arrangement):
+            WebEditorArrangementView(viewModel: ArrangementViewModel(arrangement: Ref(copying: arrangement)))
+                .environmentObject(config)
+        case .machine(let machine):
+            WebEditorMachineView(viewModel: MachineViewModel(machine: Ref(copying: machine)))
+                .environmentObject(config)
+        case .none:
+            EmptyView()
+        }
+    }
+    
+}
+
+struct WebEditorArrangementView: View {
+    
+    @StateObject var viewModel: ArrangementViewModel
     
     @EnvironmentObject var config: Config
     
     var body: some View {
         VStack(alignment: .leading) {
-            MenuView(machineViewModel: viewModel.currentMachine.machine)
-                .background(config.stateColour)
-            TabView(selection: Binding(get: { viewModel.currentMachineIndex }, set: { viewModel.currentMachineIndex = $0 })) {
-                ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
-                    ContentView(editorViewModel: viewModel.rootMachineViewModels[index], arrangement: viewModel)
-                        .tabItem {
-                            Text(viewModel.rootMachineViewModels[index].machine.name)
-                                .font(config.fontHeading)
-                        }.tag(index)
-                }
-            }.background(config.backgroundColor)
+            MenuView(
+                machineViewModel: Binding<MachineViewModel?>(
+                    get: { viewModel.isEmpty ? nil : viewModel.currentMachine.machine },
+                    set: { _ in }
+                )
+            ).background(config.stateColour)
+            if !viewModel.isEmpty {
+                TabView(selection: Binding(get: { viewModel.currentMachineIndex }, set: { viewModel.currentMachineIndex = $0 })) {
+                    ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
+                        ContentView(editorViewModel: viewModel.rootMachineViewModels[index], arrangement: viewModel)
+                            .tabItem {
+                                Text(viewModel.rootMachineViewModels[index].machine.name)
+                                    .font(config.fontHeading)
+                            }.tag(index)
+                    }
+                }.background(config.backgroundColor)
+            }
+        }.background(config.backgroundColor)
+    }
+    
+}
+
+struct WebEditorMachineView: View {
+    
+    @StateObject var viewModel: MachineViewModel
+    
+    @EnvironmentObject var config: Config
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            MenuView(machineViewModel: Binding<MachineViewModel?>(get: { viewModel }, set: { _ in })).background(config.stateColour)
+//            TabView(selection: Binding(get: { viewModel.currentMachineIndex }, set: { viewModel.currentMachineIndex = $0 })) {
+//                ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
+//                    ContentView(editorViewModel: viewModel.rootMachineViewModels[index], arrangement: viewModel)
+//                        .tabItem {
+//                            Text(viewModel.rootMachineViewModels[index].machine.name)
+//                                .font(config.fontHeading)
+//                        }.tag(index)
+//                }
+//            }.background(config.backgroundColor)
         }.background(config.backgroundColor)
     }
     
