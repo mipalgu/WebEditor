@@ -262,6 +262,7 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
         }
         creatingTransition = false
         guard let destinationCandidate = states.first(where: { $0.isWithin(point: gesture.location) }) else {
+            print("You must finish dragging a transition to a valid state.")
             return
         }
         sourceViewModel.createNewTransition(destination: destinationCandidate)
