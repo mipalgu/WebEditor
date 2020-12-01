@@ -51,9 +51,11 @@ public extension Rigidable where Self: Positionable {
         point.x >= left.x && point.x <= right.x && point.y >= top.y && point.y <= bottom.y
     }
     
-    func findEdge(degrees theta: CGFloat) -> CGPoint {
+    func findEdge(degrees: CGFloat) -> CGPoint {
         var x: CGFloat = 0
         var y: CGFloat = 0
+        let normalisedDegrees = degrees.truncatingRemainder(dividingBy: 360.0)
+        let theta = normalisedDegrees > 180.0 ? normalisedDegrees - 360.0 : normalisedDegrees
         let angle = Double(theta / 180.0) * Double.pi
         if theta == 0.0 {
             return right
