@@ -13,6 +13,7 @@ import SwiftUI
 
 import Machines
 import Attributes
+import Transformations
 import Utilities
 
 final class StateViewModel: DynamicViewModel, Identifiable, Equatable {

@@ -13,9 +13,9 @@ import SwiftUI
 
 //protocol _DragableCollapsable: class {}
 
-protocol MoveCollapsableFromDrag: DragableCollapsable {}
+public protocol MoveCollapsableFromDrag: DragableCollapsable {}
 
-extension DragableCollapsable where Self: MoveCollapsableFromDrag {
+public extension DragableCollapsable where Self: MoveCollapsableFromDrag {
     
     func handleCollapsedDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if !isDragging {

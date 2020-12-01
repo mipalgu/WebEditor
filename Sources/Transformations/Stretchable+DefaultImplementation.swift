@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-extension Stretchable where Self: EdgeDetector {
+public extension Stretchable where Self: EdgeDetector {
     
     private func stretchWidth(gesture: DragGesture.Value) -> CGFloat {
         (gesture.location.x - location.x) * 2.0

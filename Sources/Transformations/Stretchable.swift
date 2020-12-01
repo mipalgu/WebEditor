@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol Stretchable: EdgeDetector {
+public protocol Stretchable: EdgeDetector {
     
     var isStretchingX: Bool { get set }
     

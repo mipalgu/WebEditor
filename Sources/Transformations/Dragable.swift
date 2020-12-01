@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol Dragable: class {
+public protocol Dragable: class {
     
     var isDragging: Bool {get set}
     

@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-extension Positionable {
+public extension Positionable {
     
     func getLocation(width: CGFloat, height: CGFloat) -> CGPoint {
         let x = self.location.x

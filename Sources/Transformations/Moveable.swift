@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol Moveable: Positionable {
+public protocol Moveable: Positionable {
     
     var offset: CGPoint {get set}
     

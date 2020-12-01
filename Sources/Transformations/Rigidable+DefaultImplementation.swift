@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-extension Rigidable where Self: Positionable {
+public extension Rigidable where Self: Positionable {
     
     var bottom: CGPoint {
         CGPoint(x: location.x, y: location.y + height / 2.0)

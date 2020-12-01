@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol DragableCollapsable: Collapsable {
+public protocol DragableCollapsable: Collapsable {
     
     var isDragging: Bool {get set}
     

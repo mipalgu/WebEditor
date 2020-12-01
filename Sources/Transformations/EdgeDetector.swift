@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol EdgeDetector: Rigidable {
+public protocol EdgeDetector: Rigidable {
     
     var horizontalEdgeTolerance: CGFloat {get}
 

@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol _Collapsable: class {
+public protocol _Collapsable: class {
     
     var _collapsedWidth: CGFloat {get set}
     
@@ -19,7 +19,7 @@ protocol _Collapsable: class {
     
 }
 
-extension Collapsable where Self: _Collapsable {
+public extension Collapsable where Self: _Collapsable {
     
     var bottom: CGPoint {
         if expanded {

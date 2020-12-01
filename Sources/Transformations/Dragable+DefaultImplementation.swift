@@ -11,13 +11,13 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol MoveAndStretchFromDrag: Dragable, Moveable, Stretchable {}
+public protocol MoveAndStretchFromDrag: Dragable, Moveable, Stretchable {}
 
-protocol MoveFromDrag: Dragable, _Moveable, Moveable {}
+public protocol MoveFromDrag: Dragable, _Moveable, Moveable {}
 
-protocol StretchFromDrag: Dragable, Stretchable {}
+public protocol StretchFromDrag: Dragable, Stretchable {}
 
-extension Dragable where Self: MoveAndStretchFromDrag {
+public extension Dragable where Self: MoveAndStretchFromDrag {
     
     func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isDragging {
@@ -62,7 +62,7 @@ extension Dragable where Self: MoveAndStretchFromDrag {
     
 }
 
-extension Dragable where Self: MoveFromDrag {
+public extension Dragable where Self: MoveFromDrag {
     
     func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isDragging {
@@ -80,7 +80,7 @@ extension Dragable where Self: MoveFromDrag {
     
 }
 
-extension Dragable where Self: StretchFromDrag {
+public extension Dragable where Self: StretchFromDrag {
     func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isStretchingX && isStretchingY {
             stretchCorner(gesture: gesture)

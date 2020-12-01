@@ -13,6 +13,7 @@ import SwiftUI
 
 import Machines
 import Attributes
+import Transformations
 import Utilities
 
 public class MachineViewModel: ObservableObject, Dragable {
@@ -37,7 +38,7 @@ public class MachineViewModel: ObservableObject, Dragable {
     
     let gridHeight: CGFloat = 80.0
     
-    var isDragging: Bool = false
+    public var isDragging: Bool = false
     
     var startLocations: [CGPoint] = []
     
@@ -117,7 +118,7 @@ public class MachineViewModel: ObservableObject, Dragable {
         }
     }
     
-    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    public func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isDragging {
             self.states.indices.forEach {
                 states[$0].location = CGPoint(
@@ -142,7 +143,7 @@ public class MachineViewModel: ObservableObject, Dragable {
         isDragging = true
     }
     
-    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    public func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         isDragging = false
     }

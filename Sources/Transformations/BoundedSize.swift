@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol BoundedSize: Rigidable {
+public protocol BoundedSize: Rigidable {
     
     var minWidth: CGFloat { get }
     

@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol Positionable: class {
+public protocol Positionable: class {
     
     var location: CGPoint {get set}
     

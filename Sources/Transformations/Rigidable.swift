@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol Rigidable: Positionable {
+public protocol Rigidable: Positionable {
     
     var width: CGFloat { get set }
     
