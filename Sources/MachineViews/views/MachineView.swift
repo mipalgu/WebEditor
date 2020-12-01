@@ -47,9 +47,7 @@ public struct MachineView: View {
                                 transition: stateViewModel.transitions[index],
                                 index: index,
                                 target: self.viewModel.getStateViewModel(stateName: stateViewModel.transitions[index].target)
-                            ),
-                            parentWidth: geometry.size.width,
-                            parentHeight: geometry.size.height
+                            )
                         )
                     }
                 }

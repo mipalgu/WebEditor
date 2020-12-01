@@ -22,10 +22,6 @@ struct TransitionView: View {
     
     @EnvironmentObject var config: Config
     
-    var parentWidth: CGFloat
-    
-    var parentHeight: CGFloat
-    
     var body: some View {
         ArrowWithLabelView(
             point0: viewModel.point0Binding,
