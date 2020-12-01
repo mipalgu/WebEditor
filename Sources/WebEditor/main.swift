@@ -108,6 +108,8 @@ struct WebEditorArrangementView: View {
                             }.tag(index)
                     }
                 }.background(config.backgroundColor)
+            } else {
+                ArrangementView(viewModel: viewModel)
             }
         }.background(config.backgroundColor)
     }

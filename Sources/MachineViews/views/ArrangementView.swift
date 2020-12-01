@@ -15,17 +15,27 @@ import Machines
 import Attributes
 import Utilities
 
-struct ArrangementView: View {
+public struct ArrangementView: View {
     
-    @ObservedObject var viewModel: ArrangementViewModel
+    @ObservedObject public var viewModel: ArrangementViewModel
     
-    var body: some View {
+    @EnvironmentObject public var config: Config
+    
+    public init(viewModel: ArrangementViewModel) {
+        self.viewModel = viewModel
+    }
+    
+    public var body: some View {
         GeometryReader { (geometry: GeometryProxy) in
-            ForEach(viewModel.machineViewModels, id: \.self) {
-                Text($0.name)
+            ForEach(viewModel.allMachines, id: \.self) {
+                Text($0.machine.name)
+                    .font(config.fontTitle2)
                     .coordinateSpace(name: "MAIN_VIEW")
-                    .position($0.location)
+                    .position($0.machine.getLocation(width: geometry.size.width, height: geometry.size.height))
+                    .background(RoundedRectangle(cornerRadius: 20).background(config.stateColour))
+                    .frame(width: $0.machine.width, height: $0.machine.height)
             }
+            .frame(minWidth: 1280, minHeight: 720)
         }
     }
 }

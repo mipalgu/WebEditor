@@ -15,7 +15,17 @@ import Machines
 import Attributes
 import Utilities
 
-public class EditorViewModel: ObservableObject {
+public class EditorViewModel: ObservableObject, Hashable {
+    
+    public static func == (lhs: EditorViewModel, rhs: EditorViewModel) -> Bool {
+        lhs === rhs
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(machine)
+        hasher.combine(currentMachineIndex)
+    }
+    
     
     @Published public var machine: MachineViewModel
     
