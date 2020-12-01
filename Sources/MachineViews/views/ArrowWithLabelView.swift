@@ -28,19 +28,17 @@ struct ArrowWithLabelView: View {
     @EnvironmentObject public var config: Config
     
     var center: CGPoint {
-        let dx = point2.x - point1.x / 2.0
-        let dy = point2.y - point1.y / 2.0
+        let dx = (point2.x - point1.x) / 2.0
+        let dy = (point2.y - point1.y) / 2.0
         return CGPoint(x: point1.x + dx, y: point1.y + dy)
     }
     
     var body: some View {
         ZStack {
+            ArrowView(point0: $point0, point1: $point1, point2: $point2, point3: $point3)
             Text(label)
                 .font(config.fontBody)
-                .coordinateSpace(name: "MAIN_VIEW")
                 .position(center)
-            ArrowView(point0: $point0, point1: $point1, point2: $point2, point3: $point3)
-                .coordinateSpace(name: "MAIN_VIEW")
         }
     }
 }
