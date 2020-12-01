@@ -32,7 +32,11 @@ public struct ArrangementView: View {
                     .font(config.fontTitle2)
                     .coordinateSpace(name: "MAIN_VIEW")
                     .position($0.machine.getLocation(width: geometry.size.width, height: geometry.size.height))
-                    .background(RoundedRectangle(cornerRadius: 20).background(config.stateColour))
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .background(config.stateColour)
+                            .foregroundColor($0 === viewModel.currentMachine ? config.highlightColour : config.borderColour)
+                    )
                     .frame(width: $0.machine.width, height: $0.machine.height)
             }
             .frame(minWidth: 1280, minHeight: 720)
