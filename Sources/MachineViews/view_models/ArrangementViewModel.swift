@@ -136,4 +136,18 @@ public final class ArrangementViewModel: ObservableObject {
         return states[stateIndex]
     }
     
+    public func addMachine(semantics: Machine.Semantics) -> EditorViewModel {
+        let newMachine = Machine.initialMachine(forSemantics: semantics)
+        let viewModel = EditorViewModel(machine: MachineViewModel(machine: Ref(copying: newMachine)))
+        self.listen(to: viewModel)
+        allMachines.append(viewModel)
+        return viewModel
+    }
+    
+    public func addRootMachine(semantics: Machine.Semantics) {
+        let viewModel = addMachine(semantics: semantics)
+        let dependency = MachineDependency(name: viewModel.machine.name, filePath: viewModel.machine.machine.filePath)
+        arrangement.rootMachines.append(dependency)
+    }
+    
 }
