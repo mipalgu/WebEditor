@@ -247,32 +247,24 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
         isMoving = false
     }
     
-    public func startCreatingTransition(gesture: DragGesture.Value) {
+    public func startCreatingTransition(gesture: DragGesture.Value, sourceViewModel: StateViewModel) {
         if creatingTransition {
             currentMouseLocation = gesture.location
             return
         }
-        let candidateSources = states.filter { $0.isWithin(point: gesture.startLocation) }
-        guard let candidate = candidateSources.first else {
-            return
-        }
-        source = candidate
+        source = sourceViewModel
         creatingTransition = true
     }
     
-    public func finishCreatingTransition(gesture: DragGesture.Value) {
+    public func finishCreatingTransition(gesture: DragGesture.Value, sourceViewModel: StateViewModel) {
         if !creatingTransition {
             return
         }
         creatingTransition = false
-        guard let sourceCandidate = source else {
+        guard let destinationCandidate = states.first(where: { $0.isWithin(point: gesture.location) }) else {
             return
         }
-        let destinationCandidates = states.filter { $0.isWithin(point: gesture.location) }
-        guard let destinationCandidate = destinationCandidates.first else {
-            return
-        }
-        sourceCandidate.createNewTransition(destination: destinationCandidate)
+        sourceViewModel.createNewTransition(destination: destinationCandidate)
     }
     
 }
