@@ -141,7 +141,9 @@ import UniformTypeIdentifiers
 
 struct DirectoryFileDocument: FileDocument {
     
-    static var readableContentTypes: [UTType] = []
+    static var readableContentTypes: [UTType] = [.directory]
+    
+    init() {}
 
     init(configuration: ReadConfiguration) throws {}
 
@@ -192,13 +194,45 @@ struct WebEditorDefaultMenu: View {
             }
         }
         .frame(minWidth: 500, minHeight: 300)
-        .fileExporter(isPresented: $presentNewFileSheet, document: Optional<DirectoryFileDocument>.none, contentType: .directory, onCompletion: { _ in
-            defer { presentNewFileSheet = false }
-        })
+        .fileExporter(
+            isPresented: $presentNewFileSheet,
+            document: DirectoryFileDocument(),
+            contentType: .directory,
+            onCompletion: {
+                defer { presentNewFileSheet = false }
+                switch $0 {
+                case .failure(let error):
+                    print("\(error)")
+                    return
+                case .success(let url):
+                    switch newType {
+                    case .arrangement:
+                        let arrangement = Arrangement(filePath: url, rootMachines: [])
+                        do {
+                            try arrangement.save()
+                        } catch let e {
+                            print("\(e)")
+                            return
+                        }
+                        display = .arrangement(arrangement)
+                    case .machine(let semantics):
+                        let machine = Machine.initialMachine(forSemantics: semantics)
+                        do {
+                            try machine.save()
+                        } catch let e {
+                            print("\(e)")
+                        }
+                        display = .machine(machine)
+                    }
+                    
+                }
+            }
+        )
         .fileImporter(isPresented: $presentOpenFileSheet, allowedContentTypes: [.directory], allowsMultipleSelection: false) {
             defer { presentOpenFileSheet = false }
             switch $0 {
             case .failure(let error):
+                print("\(error)")
                 return
             case .success(let urls):
                 guard let url = urls.first else {
@@ -215,7 +249,14 @@ struct WebEditorDefaultMenu: View {
                     }
                     display = .arrangement(arrangement)
                 case .machine(let semantics):
-                    display = .machine(Machine.initialMachine(forSemantics: semantics))
+                    let machine: Machine
+                    do {
+                        machine = try Machine(filePath: url)
+                    } catch let e {
+                        print("\(e)")
+                        return
+                    }
+                    display = .machine(machine)
                 }
             }
         }
