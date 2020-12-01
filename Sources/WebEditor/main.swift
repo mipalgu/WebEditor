@@ -90,6 +90,8 @@ struct WebEditorArrangementView: View {
     
     @EnvironmentObject var config: Config
     
+    @State var showArrangement: Bool = true
+    
     var body: some View {
         VStack(alignment: .leading) {
             MenuView(
@@ -98,7 +100,7 @@ struct WebEditorArrangementView: View {
                     set: { _ in }
                 )
             ).background(config.stateColour)
-            if !viewModel.isEmpty {
+            if !showArrangement && !viewModel.isEmpty {
                 TabView(selection: Binding(get: { viewModel.currentMachineIndex }, set: { viewModel.currentMachineIndex = $0 })) {
                     ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
                         ContentView(editorViewModel: viewModel.rootMachineViewModels[index], arrangement: viewModel)
@@ -108,6 +110,11 @@ struct WebEditorArrangementView: View {
                             }.tag(index)
                     }
                 }.background(config.backgroundColor)
+            } else {
+                ArrangementView(viewModel: viewModel, showArrangement: $showArrangement)
+                    .onTapGesture(count: 2) {
+                        viewModel.addRootMachine(semantics: .swiftfsm)
+                    }
             }
         }.background(config.backgroundColor)
     }
@@ -119,13 +126,22 @@ struct WebEditorMachineView: View {
     @StateObject var viewModel: MachineViewModel
     
     @EnvironmentObject var config: Config
+
+    @State var tabs: [MachineDependency]
+    
+    @State var selection: Int = 0
+    
+    init(viewModel: MachineViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+        self._tabs = State(initialValue: [MachineDependency(name: viewModel.machine.name, filePath: viewModel.machine.filePath)])
+    }
     
     var body: some View {
         VStack(alignment: .leading) {
             MenuView(machineViewModel: Binding<MachineViewModel?>(get: { viewModel }, set: { _ in })).background(config.stateColour)
-//            TabView(selection: Binding(get: { viewModel.currentMachineIndex }, set: { viewModel.currentMachineIndex = $0 })) {
-//                ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
-//                    ContentView(editorViewModel: viewModel.rootMachineViewModels[index], arrangement: viewModel)
+//            TabView(selection: $selection) {
+//                ForEach(tabs, id: \.self) { dep in
+//                    ContentView(editorViewModel: EditorViewModel(machine: MachineViewModel(machine: Ref(copying: Machine(filePath: dep.filePath)))), arrangement: viewModel)
 //                        .tabItem {
 //                            Text(viewModel.rootMachineViewModels[index].machine.name)
 //                                .font(config.fontHeading)

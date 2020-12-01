@@ -24,6 +24,10 @@ struct StateExpandedView: View {
     
     @EnvironmentObject var config: Config
     
+    var createTransitionMode: Bool {
+        editorViewModel.machine.createTransitionMode
+    }
+    
     var body: some View {
         GeometryReader{ reader in
             VStack {
@@ -99,8 +103,16 @@ struct StateExpandedView: View {
             }
             .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
                 .onChanged {
+                    if createTransitionMode {
+                        self.editorViewModel.machine.startCreatingTransition(gesture: $0, sourceViewModel: viewModel)
+                        return
+                    }
                     self.viewModel.handleDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
                 }.onEnded {
+                    if createTransitionMode {
+                        self.editorViewModel.machine.finishCreatingTransition(gesture: $0, sourceViewModel: viewModel)
+                        return
+                    }
                     self.viewModel.finishDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
                 }
             )

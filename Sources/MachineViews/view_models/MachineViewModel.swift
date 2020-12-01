@@ -16,11 +16,60 @@ import Attributes
 import Transformations
 import Utilities
 
-public class MachineViewModel: ObservableObject, Dragable {
+public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
     
+    public static func == (lhs: MachineViewModel, rhs: MachineViewModel) -> Bool {
+        lhs === rhs
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(machine)
+    }
+    
+
     @Reference public var machine: Machine
     
     @Published var states: [StateViewModel]
+    
+    @Published public var _collapsedWidth: CGFloat = 100
+    
+    @Published public var _collapsedHeight: CGFloat = 100
+    
+    @Published public var _width: CGFloat
+    
+    @Published public var _height: CGFloat
+    
+    @Published public var location: CGPoint
+    
+    @Published public var expanded: Bool = false
+    
+    public let horizontalEdgeTolerance: CGFloat = 10
+    
+    public let verticalEdgeTolerance: CGFloat = 10
+    
+    public let minWidth: CGFloat = 200
+    
+    public let maxWidth: CGFloat = 1000
+    
+    public let minHeight: CGFloat = 100
+    
+    public let maxHeight: CGFloat = 800
+    
+    public let collapsedMinWidth: CGFloat = 100
+    
+    public let collapsedMaxWidth: CGFloat = 100
+    
+    public let collapsedMinHeight: CGFloat = 100
+    
+    public let collapsedMaxHeight: CGFloat = 100
+    
+    public var isDragging: Bool = false
+    
+    public var offset: CGPoint = .zero
+    
+    public var isStretchingX: Bool = false
+    
+    public var isStretchingY: Bool = false
     
     public var path: Attributes.Path<Machine, Machine> {
         machine.path
@@ -38,23 +87,73 @@ public class MachineViewModel: ObservableObject, Dragable {
     
     let gridHeight: CGFloat = 80.0
     
-    public var isDragging: Bool = false
+    public var isMoving: Bool = false
     
     var startLocations: [CGPoint] = []
     
-    public init(machine: Ref<Machine>) {
-        self._machine = Reference(reference: machine)
+    @Published var createTransitionMode: Bool = false
+    
+    @Published var creatingTransition: Bool = false
+    
+    var source: StateViewModel?
+    
+    var destination: StateViewModel?
+    
+    @Published var currentMouseLocation: CGPoint = .zero
+    
+    var tempPoint0: CGPoint {
+        guard let viewModel = source else {
+            return .zero
+        }
+        let dx = currentMouseLocation.x - viewModel.location.x
+        let dy = currentMouseLocation.y - viewModel.location.y
+        let theta = atan2(Double(dy), Double(dx))
+        return viewModel.findEdge(radians: CGFloat(theta))
+    }
+    
+    var tempPoint1: CGPoint {
+        let dx = currentMouseLocation.x - tempPoint0.x
+        let dy = currentMouseLocation.y - tempPoint0.y
+        return CGPoint(x: tempPoint0.x + dx / 3.0, y: tempPoint0.y + dy / 3.0)
+    }
+    
+    var tempPoint2: CGPoint {
+        let dx = currentMouseLocation.x - tempPoint0.x
+        let dy = currentMouseLocation.y - tempPoint0.y
+        return CGPoint(x: tempPoint0.x + dx * 2.0 / 3.0, y: tempPoint0.y + dy * 2.0 / 3.0)
+    }
+    
+    var tempPoint0Binding: Binding<CGPoint> {
+        Binding(get: { self.tempPoint0 }, set: { _ in })
+    }
+    
+    var tempPoint1Binding: Binding<CGPoint> {
+        Binding(get: { self.tempPoint1 }, set: { _ in })
+    }
+    
+    var tempPoint2Binding: Binding<CGPoint> {
+        Binding(get: { self.tempPoint2 }, set: { _ in })
+    }
+    
+    var tempPoint3Binding: Binding<CGPoint> {
+        Binding(get: { self.currentMouseLocation }, set: { _ in })
+    }
+    
+    public convenience init(machine: Ref<Machine>) {
         let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.value.path.states
         let states: [Machines.State] = machine.value[keyPath: statesPath.path]
-        self.states = states.indices.map { stateIndex in
+        let stateViewModels: [StateViewModel] = states.indices.map { stateIndex in
             let stateX: CGFloat = 100.0
             let stateY: CGFloat = 100.0 + CGFloat(stateIndex) * 200.0
             return StateViewModel(machine: machine, path: machine.value.path.states[stateIndex], location: CGPoint(x: stateX, y: stateY))
         }
-        self.listen(to: $machine)
+        self.init(machine: machine, states: stateViewModels)
     }
     
-    init(machine: Ref<Machine>, states: [StateViewModel]) {
+    public init(machine: Ref<Machine>, states: [StateViewModel], width: CGFloat = 100, height: CGFloat = 100, location: CGPoint = .zero) {
+        self._width = width
+        self._height = height
+        self.location = location
         self._machine = Reference(reference: machine)
         self.states = states
         self.listen(to: $machine)
@@ -71,6 +170,10 @@ public class MachineViewModel: ObservableObject, Dragable {
             fatalError("Tried to access state view model that didn't exist")
         }
         return vm
+    }
+    
+    func getStateIndex(viewModel: StateViewModel) -> Int? {
+        self.states.firstIndex(where: { $0 === viewModel })
     }
     
     func deleteState(stateViewModel: StateViewModel) {
@@ -118,8 +221,8 @@ public class MachineViewModel: ObservableObject, Dragable {
         }
     }
     
-    public func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
-        if isDragging {
+    public func moveElements(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if isMoving {
             self.states.indices.forEach {
                 states[$0].location = CGPoint(
                     x: startLocations[$0].x + gesture.translation.width,
@@ -140,12 +243,33 @@ public class MachineViewModel: ObservableObject, Dragable {
             }
             return $0.location
         }
-        isDragging = true
+        isMoving = true
     }
     
-    public func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
-        handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
-        isDragging = false
+    public func finishMoveElements(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        moveElements(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+        isMoving = false
+    }
+    
+    public func startCreatingTransition(gesture: DragGesture.Value, sourceViewModel: StateViewModel) {
+        if creatingTransition {
+            currentMouseLocation = gesture.location
+            return
+        }
+        source = sourceViewModel
+        creatingTransition = true
+    }
+    
+    public func finishCreatingTransition(gesture: DragGesture.Value, sourceViewModel: StateViewModel) {
+        if !creatingTransition {
+            return
+        }
+        creatingTransition = false
+        guard let destinationCandidate = states.first(where: { $0.isWithin(point: gesture.location) }) else {
+            print("You must finish dragging a transition to a valid state.")
+            return
+        }
+        sourceViewModel.createNewTransition(destination: destinationCandidate)
     }
     
 }

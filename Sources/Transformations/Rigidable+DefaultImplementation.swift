@@ -47,4 +47,49 @@ public extension Rigidable where Self: Positionable {
         )
     }
     
+    func isWithin(point: CGPoint) -> Bool {
+        point.x >= left.x && point.x <= right.x && point.y >= top.y && point.y <= bottom.y
+    }
+    
+    func findEdge(degrees: CGFloat) -> CGPoint {
+        let normalisedDegrees = degrees.truncatingRemainder(dividingBy: 360.0)
+        let theta = normalisedDegrees > 180.0 ? normalisedDegrees - 360.0 : normalisedDegrees
+        if theta == 0.0 {
+            return right
+        }
+        if theta == 90.0 {
+            return top
+        }
+        if theta == -90.0 {
+            return bottom
+        }
+        if theta == 180.0 || theta == -180.0 {
+            return left
+        }
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        let angle = Double(theta / 180.0) * Double.pi
+        if theta >= -45.0 && theta <= 45.0 {
+            x = right.x
+            y = x * CGFloat(tan(angle))
+        } else if theta <= 135.0 && theta >= 45.0 {
+            y = top.y
+            x = y / CGFloat(tan(angle))
+        } else if theta < 180.0 && theta > 135.0 {
+            x = left.x
+            y = x * CGFloat(tan(angle))
+        } else if theta > -135.0 {
+            y = bottom.y
+            x = y / CGFloat(tan(angle))
+        } else {
+            x = left.x
+            y = x * CGFloat(tan(angle))
+        }
+        return CGPoint(x: x, y: y)
+    }
+    
+    func findEdge(radians theta: CGFloat) -> CGPoint {
+        findEdge(degrees: CGFloat(Double(theta) / Double.pi * 180.0))
+    }
+    
 }

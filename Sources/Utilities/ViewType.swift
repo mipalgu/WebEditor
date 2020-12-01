@@ -16,7 +16,7 @@ import Attributes
 public enum ViewType {
     case machine
     case state(stateIndex: Int)
-    case transition(transition: Attributes.Path<Machine, Machines.Transition>)
+    case transition(stateIndex: Int, transitionIndex: Int)
 }
 
 public enum DialogType {

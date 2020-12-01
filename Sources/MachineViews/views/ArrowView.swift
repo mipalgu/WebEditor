@@ -2,7 +2,7 @@
 //  SwiftUIView.swift
 //  
 //
-//  Created by Morgan McColl on 26/11/20.
+//  Created by Morgan McColl on 2/12/20.
 //
 
 #if canImport(TokamakShim)
@@ -15,95 +15,60 @@ import Utilities
 
 struct ArrowView: View {
     
-    @Binding var pointOffScreen: CGPoint
+    @Binding var point0: CGPoint
     
-    @Binding var label: String
+    @Binding var point1: CGPoint
     
-    var frameWidth: CGFloat
+    @Binding var point2: CGPoint
     
-    var frameHeight: CGFloat
+    @Binding var point3: CGPoint
     
-    @EnvironmentObject var config: Config
+    @Binding var focused: Bool
     
-    var point0: CGPoint {
-        var x: CGFloat = pointOffScreen.x
-        if pointOffScreen.x < 0 {
-            x = 0
-        } else if pointOffScreen.x > frameWidth {
-            x = frameWidth
-        }
-        var y: CGFloat = pointOffScreen.y
-        if pointOffScreen.y < 0 {
-            y = 0.0
-        } else if pointOffScreen.y > frameHeight {
-            y = frameHeight
-        }
-        return CGPoint(x: x, y: y)
-    }
-    
-    var point1: CGPoint {
-        var x: CGFloat = pointOffScreen.x
-        if pointOffScreen.x < 0 {
-            x = 30.0
-        } else if pointOffScreen.x > frameWidth {
-            x = frameWidth - 30.0
-        }
-        var y: CGFloat = pointOffScreen.y
-        if pointOffScreen.y < 0 {
-            y = 30.0
-        } else if pointOffScreen.y > frameHeight {
-            y = frameHeight - 30.0
-        }
-        return CGPoint(x: x, y: y)
-    }
-    
-    var dx: CGFloat {
-        point1.x - point0.x
-    }
-    
-    var dy: CGFloat {
-        point1.y - point0.y
-    }
-    
-    var theta: Double {
-        if dx == 0 {
-            return Double.pi / 2.0
-        }
-        return atan2(Double(dy), Double(dx))
-    }
-    
-    var arrow1: CGPoint {
-        let angle = theta + Double.pi - Double.pi / 4.0
-        let x = CGFloat(15.0 * cos(angle))
-        let y = CGFloat(15.0 * sin(angle))
-        return CGPoint(x: point1.x + x, y: point1.y + y)
-    }
-    
-    var arrow2: CGPoint {
-        let angle = theta - Double.pi + Double.pi / 4.0
-        let x = CGFloat(15.0 * cos(angle))
-        let y = CGFloat(15.0 * sin(angle))
-        return CGPoint(x: point1.x + x, y: point1.y + y)
-    }
-    
-    var center: CGPoint {
-        CGPoint(x: point0.x + dx / 2.0, y: point0.y + dy / 2.0)
-    }
+    @EnvironmentObject public var config: Config
     
     var body: some View {
-        /*ZStack {
+        ZStack {
             Path { path in
                 path.move(to: point0)
-                path.addLine(to: point1)
-                path.addLine(to: arrow1)
-                path.move(to: point1)
-                path.addLine(to: arrow2)
-            }.fill(Color.clear)
-            .coordinateSpace(name: "MAIN_VIEW")*/
-            Text(label)
-                .font(config.fontBody)
-                .coordinateSpace(name: "MAIN_VIEW")
-                .position(center)
-        //}
+                path.addCurve(to: point3, control1: point1, control2: point2)
+            }.foregroundColor(config.borderColour)
+            if focused {
+                Circle()
+                    .position(point0)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point0 = $0.location
+                    }.onEnded {
+                        point0 = $0.location
+                    })
+                Circle()
+                    .position(point1)
+                    .background(Color.red)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point1 = $0.location
+                    }.onEnded {
+                        point1 = $0.location
+                    })
+                Circle()
+                    .position(point2)
+                    .background(Color.blue)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point2 = $0.location
+                    }.onEnded {
+                        point2 = $0.location
+                    })
+                Circle()
+                    .position(point3)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point3 = $0.location
+                    }.onEnded {
+                        point3 = $0.location
+                    })
+            }
+        }
     }
 }

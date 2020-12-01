@@ -36,8 +36,8 @@ struct FocusedAttributesView: View {
             CollapsableAttributeGroupsView(machine: machine, path: Machine.path.attributes, label: "\(machine.value.name) Machine Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
         case .state(let stateIndex):
             CollapsableAttributeGroupsView(machine: machine, path: Machine.path.states[stateIndex].attributes, label: "\(machine.value.states[stateIndex].name) State Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
-        case .transition(let path):
-            CollapsableAttributeGroupsView(machine: machine, path: path.attributes, label: "Transition Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
+        case .transition(let stateIndex, let transIndex):
+            CollapsableAttributeGroupsView(machine: machine, path: Machine.path.states[stateIndex].transitions[transIndex].attributes, label: "Transition Attributes", collapsed: $collapsed, collapseLeft: collapseLeft, buttonSize: buttonSize, buttonWidth: buttonWidth, buttonHeight: buttonHeight)
         }
     }
 }

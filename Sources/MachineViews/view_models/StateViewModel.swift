@@ -16,9 +16,9 @@ import Attributes
 import Transformations
 import Utilities
 
-final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
+public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
-    static func == (lhs: StateViewModel, rhs: StateViewModel) -> Bool {
+    public static func == (lhs: StateViewModel, rhs: StateViewModel) -> Bool {
         lhs === rhs
     }
     
@@ -26,11 +26,11 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     let path: Attributes.Path<Machine, Machines.State>
     
-    @Published var location: CGPoint
+    @Published public var location: CGPoint
     
     @Published var __width: CGFloat
     
-    var _width: CGFloat {
+    public var _width: CGFloat {
         get {
             __width
         }
@@ -41,7 +41,7 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     @Published var __height: CGFloat
     
-    var _height: CGFloat {
+    public var _height: CGFloat {
         get {
             __height
         }
@@ -50,13 +50,13 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         }
     }
     
-    @Published var expanded: Bool
+    @Published public var expanded: Bool
     
-    @Published var _collapsedWidth: CGFloat
+    @Published public var _collapsedWidth: CGFloat
     
-    @Published var _collapsedHeight: CGFloat
+    @Published public var _collapsedHeight: CGFloat
     
-    @Published var _collapsedActions: [String: Bool]
+    @Published public var _collapsedActions: [String: Bool]
     
     var collapsedActions: [String: Bool] {
         get {
@@ -81,13 +81,13 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         }
     }
     
-    let collapsedMinWidth: CGFloat = 150.0
+    public let collapsedMinWidth: CGFloat = 150.0
     
-    let collapsedMinHeight: CGFloat = 100.0
+    public let collapsedMinHeight: CGFloat = 100.0
     
-    let collapsedMaxWidth: CGFloat = 750.0
+    public let collapsedMaxWidth: CGFloat = 750.0
     
-    let collapsedMaxHeight: CGFloat = 500.0
+    public let collapsedMaxHeight: CGFloat = 500.0
     
     let minTitleHeight: CGFloat = 42.0
     
@@ -101,17 +101,17 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         elementMaxWidth - buttonDimensions
     }
     
-    let minWidth: CGFloat = 200.0
+    public let minWidth: CGFloat = 200.0
     
-    let maxWidth: CGFloat = 1200.0
+    public let maxWidth: CGFloat = 1200.0
     
-    var minHeight: CGFloat {
+    public var minHeight: CGFloat {
         CGFloat(actions.count - collapsedActions.count) * minActionHeight +
             CGFloat(collapsedActions.count) * minCollapsedActionHeight +
             minTitleHeight + bottomPadding + topPadding + 20.0
     }
     
-    let maxHeight: CGFloat = 600.0
+    public let maxHeight: CGFloat = 600.0
     
     let minEditWidth: CGFloat = 800.0
     
@@ -139,9 +139,9 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     let minCollapsedActionHeight: CGFloat = 20.0
     
-    let horizontalEdgeTolerance: CGFloat = 20.0
+    public let horizontalEdgeTolerance: CGFloat = 20.0
 
-    let verticalEdgeTolerance: CGFloat = 20.0
+    public let verticalEdgeTolerance: CGFloat = 20.0
     
     let collapsedActionHeight: CGFloat = 16.0
     
@@ -203,13 +203,13 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         return max(minActionHeight, availableSpace / CGFloat(expandedActions))
     }
     
-    var isDragging: Bool = false
+    public var isDragging: Bool = false
     
-    var isStretchingX: Bool = false
+    public var isStretchingX: Bool = false
     
-    var isStretchingY: Bool = false
+    public var isStretchingY: Bool = false
     
-    var offset: CGPoint = CGPoint.zero
+    public var offset: CGPoint = CGPoint.zero
     
     @Published var highlighted: Bool
     
@@ -225,7 +225,7 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self.machine.states.firstIndex(of: self.machine[keyPath: path.path]).wrappedValue
     }
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
         self._machine = Reference(reference: machine)
         self.path = path
         self.location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
@@ -250,7 +250,7 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self.listen(to: $machine)
     }
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
         self._machine = Reference(reference: machine)
         self.path = path
         self.location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
@@ -371,6 +371,19 @@ final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     func isHidden(frameWidth: CGFloat, frameHeight: CGFloat) -> Bool {
         return right.x < 0 || left.x > frameWidth || bottom.y < 0 || top.y > frameHeight
+    }
+    
+    func createNewTransition(destination: StateViewModel) {
+        let newTransition = Transition(target: destination.name)
+        do {
+            try machine.addItem(newTransition, to: path.transitions)
+            let priority = machine[keyPath: path.path].transitions.count
+            let newViewModel = transitionViewModel(transition: newTransition, index: priority, target: destination)
+            transitionViewModels.append(newViewModel)
+        } catch let error {
+            print(error, stderr)
+        }
+        
     }
     
 }

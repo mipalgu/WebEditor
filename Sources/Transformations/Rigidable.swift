@@ -24,4 +24,10 @@ public protocol Rigidable: Positionable {
     var right: CGPoint {get}
     
     var left: CGPoint {get}
+    
+    func isWithin(point: CGPoint) -> Bool
+    
+    func findEdge(degrees: CGFloat) -> CGPoint
+    
+    func findEdge(radians: CGFloat) -> CGPoint
 }
