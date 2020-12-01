@@ -53,6 +53,19 @@ public struct ArrangementView: View {
                         viewModel.currentMachineIndex = index
                         showArrangement = false
                     }
+                    .gesture(DragGesture().onChanged {
+                        getMachine(index).machine.handleDrag(
+                            gesture: $0,
+                            frameWidth: geometry.size.width,
+                            frameHeight: geometry.size.height
+                        )
+                    }.onEnded {
+                        getMachine(index).machine.finishDrag(
+                            gesture: $0,
+                            frameWidth: geometry.size.width,
+                            frameHeight: geometry.size.height
+                        )
+                    })
             }
             .frame(minWidth: 1280, minHeight: 720)
         }
