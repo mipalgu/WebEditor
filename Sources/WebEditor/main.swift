@@ -30,24 +30,10 @@ struct WebEditor: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate: AppDelegate
     #endif
     
-    @State var newDisplayType: DisplayType = .arrangement(Arrangement.initialSwiftArrangement)
-    
     var body: some Scene {
         WindowGroup("Web Editor") {
-            WebEditorWindow(display: newDisplayType)
+            WebEditorWindow(display: .none)
         }.commands(content: {
-            CommandGroup(after: .newItem) {
-                VStack {
-                    Button("New Arrangement") {
-                        newDisplayType = .arrangement(Arrangement.initialSwiftArrangement)
-                    }
-                    ForEach(Machine.supportedSemantics, id: \.self) { semantics in
-                        Button("New \(semantics.rawValue) Machine") {
-                            newDisplayType = .machine(Machine.initialMachine(forSemantics: semantics))
-                        }
-                    }
-                }
-            }
             CommandGroup(replacing: .pasteboard) {
                 Button("Cut") {
                     print("I'm cutting")
@@ -92,7 +78,7 @@ struct WebEditorWindow: View {
             WebEditorMachineView(viewModel: MachineViewModel(machine: Ref(copying: machine)))
                 .environmentObject(config)
         case .none:
-            EmptyView()
+            WebEditorDefaultMenu(display: $display)
         }
     }
     
@@ -147,6 +133,92 @@ struct WebEditorMachineView: View {
 //                }
 //            }.background(config.backgroundColor)
         }.background(config.backgroundColor)
+    }
+    
+}
+
+import UniformTypeIdentifiers
+
+struct DirectoryFileDocument: FileDocument {
+    
+    static var readableContentTypes: [UTType] = []
+
+    init(configuration: ReadConfiguration) throws {}
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(directoryWithFileWrappers: [:])
+    }
+
+}
+
+struct WebEditorDefaultMenu: View {
+    
+    enum FileType {
+        case arrangement
+        case machine(Machine.Semantics)
+    }
+    
+    @Binding var display: DisplayType
+    
+    @State var presentNewFileSheet: Bool = false
+    
+    @State var presentOpenFileSheet: Bool = false
+    
+    @State var newType: FileType = .arrangement
+    
+    @State var openType: FileType = .arrangement
+    
+    var body: some View {
+        VStack {
+            Button("New Arrangement") {
+                newType = .arrangement
+                presentNewFileSheet = true
+            }
+            ForEach(Machine.supportedSemantics, id: \.self) { semantics in
+                Button("New \(semantics.rawValue) Machine") {
+                    newType = .machine(semantics)
+                    presentNewFileSheet = true
+                }
+            }
+            Button("Open Arrangement") {
+                openType = .arrangement
+                presentOpenFileSheet = true
+            }
+            ForEach(Machine.supportedSemantics, id: \.self) { semantics in
+                Button("Open \(semantics.rawValue) Machine") {
+                    openType = .machine(semantics)
+                    presentOpenFileSheet = true
+                }
+            }
+        }
+        .frame(minWidth: 500, minHeight: 300)
+        .fileExporter(isPresented: $presentNewFileSheet, document: Optional<DirectoryFileDocument>.none, contentType: .directory, onCompletion: { _ in
+            defer { presentNewFileSheet = false }
+        })
+        .fileImporter(isPresented: $presentOpenFileSheet, allowedContentTypes: [.directory], allowsMultipleSelection: false) {
+            defer { presentOpenFileSheet = false }
+            switch $0 {
+            case .failure(let error):
+                return
+            case .success(let urls):
+                guard let url = urls.first else {
+                    return
+                }
+                switch openType {
+                case .arrangement:
+                    let arrangement: Arrangement
+                    do {
+                        arrangement = try Arrangement(loadAtFilePath: url)
+                    } catch let e {
+                        print("\(e)")
+                        return
+                    }
+                    display = .arrangement(arrangement)
+                case .machine(let semantics):
+                    display = .machine(Machine.initialMachine(forSemantics: semantics))
+                }
+            }
+        }
     }
     
 }
