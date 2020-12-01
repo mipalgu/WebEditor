@@ -26,9 +26,29 @@ struct ArrowView: View {
     @EnvironmentObject public var config: Config
     
     var body: some View {
-        Path { path in
-            path.move(to: point0)
-            path.addCurve(to: point3, control1: point1, control2: point2)
-        }.foregroundColor(config.borderColour)
+        ZStack {
+            Path { path in
+                path.move(to: point0)
+                path.addCurve(to: point3, control1: point1, control2: point2)
+            }.foregroundColor(config.borderColour)
+            Circle()
+                .position(point1)
+                .background(Color.red)
+                .frame(width: 20, height: 20)
+                .gesture(DragGesture().onChanged {
+                    point1 = $0.location
+                }.onEnded {
+                    point1 = $0.location
+                })
+            Circle()
+                .position(point2)
+                .background(Color.blue)
+                .frame(width: 20, height: 20)
+                .gesture(DragGesture().onChanged {
+                    point2 = $0.location
+                }.onEnded {
+                    point2 = $0.location
+                })
+        }
     }
 }
