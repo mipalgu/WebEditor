@@ -16,13 +16,13 @@ import Attributes
 import Transformations
 import Utilities
 
-class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
+public final class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
     
     public static func == (lhs: TransitionViewModel, rhs: TransitionViewModel) -> Bool {
         lhs === rhs
     }
     
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(machine)
         hasher.combine(path)
     }
@@ -140,11 +140,11 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
         return CGPoint(x: point3.x + CGFloat(r * cos(theta)), y: point3.y + CGFloat(r * sin(theta)))
     }
     
-    var isDragging: Bool = false
+    public var isDragging: Bool = false
     
     var startLocation: (CGPoint, CGPoint, CGPoint, CGPoint) = (.zero, .zero, .zero, .zero)
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
+    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
         self._machine = Reference(reference: machine)
         self.path = path
         self.point0ViewModel = RigidMoveableViewModel(location: point0, width: pointDiameter, height: pointDiameter)
@@ -155,7 +155,7 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
         self.pointDiameter = pointDiameter
     }
     
-    convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
+    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
         let dx = destination.x - source.x
         let dy = destination.y - source.y
         let r = sqrt(dx * dx + dy * dy)
@@ -199,7 +199,7 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
         boundPoint(point: translate(point: point, trans: trans), frameWidth: frameWidth, frameHeight: frameHeight)
     }
     
-    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    public func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isDragging {
             point0 = boundTranslate(point: startLocation.0, trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
             point1 = boundTranslate(point: startLocation.1, trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
@@ -211,7 +211,7 @@ class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
         isDragging = true
     }
     
-    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    public func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         isDragging = false
     }

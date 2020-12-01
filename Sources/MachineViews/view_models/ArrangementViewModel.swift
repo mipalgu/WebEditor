@@ -89,6 +89,10 @@ public final class ArrangementViewModel: ObservableObject {
         rootMachineViewModels[currentMachineIndex]
     }
     
+    public var machineViewModels: [MachineViewModel] {
+        self.allMachines.map { $0.machine }
+    }
+    
     public init(arrangement: Ref<Machines.Arrangement>) {
         self._arrangement = Reference(reference: arrangement)
         do {
