@@ -91,6 +91,16 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
     
     var startLocations: [CGPoint] = []
     
+    @Published var createTransitionMode: Bool = false
+    
+    @Published var creatingTransition: Bool = false
+    
+    var source: StateViewModel?
+    
+    var destination: StateViewModel?
+    
+    @Published var currentMouseLocation: CGPoint = .zero
+    
     public convenience init(machine: Ref<Machine>) {
         let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.value.path.states
         let states: [Machines.State] = machine.value[keyPath: statesPath.path]
@@ -197,6 +207,34 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
     public func finishMoveElements(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         moveElements(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         isMoving = false
+    }
+    
+    public func startCreatingTransition(gesture: DragGesture.Value) {
+        if creatingTransition {
+            currentMouseLocation = gesture.location
+            return
+        }
+        let candidateSources = states.filter { $0.isWithin(point: gesture.startLocation) }
+        guard let candidate = candidateSources.first else {
+            return
+        }
+        source = candidate
+        creatingTransition = true
+    }
+    
+    public func finishCreatingTransition(gesture: DragGesture.Value) {
+        if !creatingTransition {
+            return
+        }
+        creatingTransition = false
+        guard let sourceCandidate = source else {
+            return
+        }
+        let destinationCandidates = states.filter { $0.isWithin(point: gesture.location) }
+        guard let destinationCandidate = destinationCandidates.first else {
+            return
+        }
+        sourceCandidate.createNewTransition(destination: destinationCandidate)
     }
     
 }

@@ -23,6 +23,10 @@ struct StateCollapsedView: View {
     
     @EnvironmentObject var config: Config
     
+    var createTransitionMode: Bool {
+        editorViewModel.machine.createTransitionMode
+    }
+    
     var body: some View {
         GeometryReader { reader in
         Ellipse()
@@ -78,8 +82,16 @@ struct StateCollapsedView: View {
                 editorViewModel.changeFocus(stateIndex: viewModel.stateIndex)
             }
             .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
+                if createTransitionMode {
+                    self.editorViewModel.machine.startCreatingTransition(gesture: $0)
+                    return
+                }
                 self.viewModel.handleCollapsedDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
             }.onEnded {
+                if createTransitionMode {
+                    self.editorViewModel.machine.finishCreatingTransition(gesture: $0)
+                    return
+                }
                 self.viewModel.finishCollapsedDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
             })
         }

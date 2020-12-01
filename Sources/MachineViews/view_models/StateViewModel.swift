@@ -373,4 +373,17 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         return right.x < 0 || left.x > frameWidth || bottom.y < 0 || top.y > frameHeight
     }
     
+    func createNewTransition(destination: StateViewModel) {
+        let newTransition = Transition(target: destination.name)
+        do {
+            try machine.addItem(newTransition, to: path.transitions)
+            let priority = machine[keyPath: path.path].transitions.count
+            let newViewModel = transitionViewModel(transition: newTransition, index: priority, target: destination)
+            transitionViewModels.append(newViewModel)
+        } catch let error {
+            print(error, stderr)
+        }
+        
+    }
+    
 }
