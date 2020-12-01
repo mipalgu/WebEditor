@@ -81,6 +81,29 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
         }
     }
     
+    var point0Binding: Binding<CGPoint> {
+        Binding(get: { self.point0 }, set: { self.point0 = $0 })
+    }
+    
+    var point1Binding: Binding<CGPoint> {
+        Binding(get: { self.point1 }, set: { self.point1 = $0 })
+    }
+    
+    var point2Binding: Binding<CGPoint> {
+        Binding(get: { self.point2 }, set: { self.point2 = $0 })
+    }
+    
+    var point3Binding: Binding<CGPoint> {
+        Binding(get: { self.point3 }, set: { self.point3 = $0 })
+    }
+    
+    var conditionBinding: Binding<String> {
+        Binding(
+            get: { String(self.transition.condition ?? "true") },
+            set: { try? self.machine.modify(attribute: self.path.condition, value: $0) }
+        )
+    }
+    
     let pointDiameter: CGFloat
     
     let arrowHeadLength: Double = 50.0
