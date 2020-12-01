@@ -112,6 +112,9 @@ struct WebEditorArrangementView: View {
                 }.background(config.backgroundColor)
             } else {
                 ArrangementView(viewModel: viewModel, showArrangement: $showArrangement)
+                    .onTapGesture(count: 2) {
+                        viewModel.addRootMachine(semantics: .swiftfsm)
+                    }
             }
         }.background(config.backgroundColor)
     }
