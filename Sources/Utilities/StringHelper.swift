@@ -11,15 +11,17 @@ import TokamakShim
 import SwiftUI
 #endif
 
-struct StringHelper {
+public struct StringHelper {
     
-    func tab(data: String) -> String {
+    public init() {}
+    
+    public func tab(data: String) -> String {
         let lines = data.split(separator: "\n")
         let tabbedLines = lines.map { "\t" + $0 }
         return reduceLines(data: tabbedLines)
     }
     
-    func reduceLines(data: [String]) -> String {
+    public func reduceLines(data: [String]) -> String {
         data.reduce("") {
             if $0 == "" {
                 return $1
@@ -31,7 +33,7 @@ struct StringHelper {
         }
     }
     
-    func getValueFromFloat(plist data: String, label: String) -> CGFloat {
+    public func getValueFromFloat(plist data: String, label: String) -> CGFloat {
         guard let val = Double(data.components(separatedBy: "<key>\(label)</key>")[1]
         .components(separatedBy: "<real>")[1].components(separatedBy: "</real>")[0]) else {
             fatalError("Failed to read PList when converting float (data, label): (\(data), \(label))")
@@ -39,7 +41,7 @@ struct StringHelper {
         return CGFloat(val)
     }
     
-    func getValueFromBool(plist data: String, label: String) -> Bool {
+    public func getValueFromBool(plist data: String, label: String) -> Bool {
         let val = data.components(separatedBy: "<key>\(label)</key>")[1]
             .components(separatedBy: "<key>")[0].trimmingCharacters(in: .whitespacesAndNewlines)
         if val == "<true/>" {
