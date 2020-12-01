@@ -160,35 +160,52 @@ struct WebEditorDefaultMenu: View {
         case machine(Machine.Semantics)
     }
     
+    enum Sheets {
+        case new
+        case open
+    }
+    
     @Binding var display: DisplayType
     
     @State var presentNewFileSheet: Bool = false
     
     @State var presentOpenFileSheet: Bool = false
     
-    @State var newType: FileType = .arrangement
+    @State var fileType: FileType
     
-    @State var openType: FileType = .arrangement
+    init(display: Binding<DisplayType>, showing: Sheets? = nil, fileType: FileType = .arrangement) {
+        self._display = display
+        self._fileType = State(initialValue: fileType)
+        guard let showing = showing else {
+            return
+        }
+        switch showing {
+        case .new:
+            presentNewFileSheet = true
+        case .open:
+            presentOpenFileSheet = true
+        }
+    }
     
     var body: some View {
         VStack {
             Button("New Arrangement") {
-                newType = .arrangement
+                fileType = .arrangement
                 presentNewFileSheet = true
             }
             ForEach(Machine.supportedSemantics, id: \.self) { semantics in
                 Button("New \(semantics.rawValue) Machine") {
-                    newType = .machine(semantics)
+                    fileType = .machine(semantics)
                     presentNewFileSheet = true
                 }
             }
             Button("Open Arrangement") {
-                openType = .arrangement
+                fileType = .arrangement
                 presentOpenFileSheet = true
             }
             ForEach(Machine.supportedSemantics, id: \.self) { semantics in
                 Button("Open \(semantics.rawValue) Machine") {
-                    openType = .machine(semantics)
+                    fileType = .machine(semantics)
                     presentOpenFileSheet = true
                 }
             }
@@ -205,7 +222,7 @@ struct WebEditorDefaultMenu: View {
                     print("\(error)")
                     return
                 case .success(let url):
-                    switch newType {
+                    switch fileType {
                     case .arrangement:
                         let arrangement = Arrangement(filePath: url, rootMachines: [])
                         do {
@@ -238,7 +255,7 @@ struct WebEditorDefaultMenu: View {
                 guard let url = urls.first else {
                     return
                 }
-                switch openType {
+                switch fileType {
                 case .arrangement:
                     let arrangement: Arrangement
                     do {
