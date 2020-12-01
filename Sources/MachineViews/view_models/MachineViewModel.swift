@@ -172,6 +172,10 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
         return vm
     }
     
+    func getStateIndex(viewModel: StateViewModel) -> Int? {
+        self.states.firstIndex(where: { $0 === viewModel })
+    }
+    
     func deleteState(stateViewModel: StateViewModel) {
         /*if !stateViewModel.highlighted {
             return

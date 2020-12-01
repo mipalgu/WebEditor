@@ -23,6 +23,8 @@ struct ArrowView: View {
     
     @Binding var point3: CGPoint
     
+    @Binding var focused: Bool
+    
     @EnvironmentObject public var config: Config
     
     var body: some View {
@@ -31,24 +33,42 @@ struct ArrowView: View {
                 path.move(to: point0)
                 path.addCurve(to: point3, control1: point1, control2: point2)
             }.foregroundColor(config.borderColour)
-            Circle()
-                .position(point1)
-                .background(Color.red)
-                .frame(width: 20, height: 20)
-                .gesture(DragGesture().onChanged {
-                    point1 = $0.location
-                }.onEnded {
-                    point1 = $0.location
-                })
-            Circle()
-                .position(point2)
-                .background(Color.blue)
-                .frame(width: 20, height: 20)
-                .gesture(DragGesture().onChanged {
-                    point2 = $0.location
-                }.onEnded {
-                    point2 = $0.location
-                })
+            if focused {
+                Circle()
+                    .position(point0)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point0 = $0.location
+                    }.onEnded {
+                        point0 = $0.location
+                    })
+                Circle()
+                    .position(point1)
+                    .background(Color.red)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point1 = $0.location
+                    }.onEnded {
+                        point1 = $0.location
+                    })
+                Circle()
+                    .position(point2)
+                    .background(Color.blue)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point2 = $0.location
+                    }.onEnded {
+                        point2 = $0.location
+                    })
+                Circle()
+                    .position(point3)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point3 = $0.location
+                    }.onEnded {
+                        point3 = $0.location
+                    })
+            }
         }
     }
 }

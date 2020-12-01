@@ -20,6 +20,8 @@ struct TransitionView: View {
     
     @ObservedObject var viewModel: TransitionViewModel
     
+    @Binding var focused: Bool
+    
     @EnvironmentObject var config: Config
     
     var body: some View {
@@ -28,7 +30,8 @@ struct TransitionView: View {
             point1: viewModel.point1Binding,
             point2: viewModel.point2Binding,
             point3: viewModel.point3Binding,
-            label: viewModel.conditionBinding
+            label: viewModel.conditionBinding,
+            focused: $focused
         )
     }
 }

@@ -28,6 +28,24 @@ public struct MachineView: View {
         self.viewModel = viewModel
     }
     
+    func isFocused(state: StateViewModel, transitionIndex: Int) -> Binding<Bool> {
+        Binding(get: {
+            switch editorViewModel.focusedView {
+            case .transition(let stateIndex, let transIndex):
+                return transIndex == transitionIndex && viewModel.states[stateIndex] === state
+            default:
+                return false
+            }
+        }, set: {
+            guard let stateIndex = editorViewModel.machine.getStateIndex(viewModel: state) else {
+                return
+            }
+            if $0 {
+                editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: transitionIndex)
+            }
+        })
+    }
+    
     public var body: some View {
         GeometryReader { (geometry: GeometryProxy) in
             ZStack {
@@ -47,7 +65,8 @@ public struct MachineView: View {
                                 transition: stateViewModel.transitions[index],
                                 index: index,
                                 target: self.viewModel.getStateViewModel(stateName: stateViewModel.transitions[index].target)
-                            )
+                            ),
+                            focused: isFocused(state: stateViewModel, transitionIndex: index)
                         )
                     }
                 }
@@ -56,7 +75,8 @@ public struct MachineView: View {
                         point0: viewModel.tempPoint0Binding,
                         point1: viewModel.tempPoint1Binding,
                         point2: viewModel.tempPoint2Binding,
-                        point3: viewModel.tempPoint3Binding
+                        point3: viewModel.tempPoint3Binding,
+                        focused: Binding(get: { false }, set: { _ in })
                     )
                         .foregroundColor(Color.red)
                 }
