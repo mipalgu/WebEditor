@@ -90,6 +90,8 @@ struct WebEditorArrangementView: View {
     
     @EnvironmentObject var config: Config
     
+    @State var showArrangement: Bool = true
+    
     var body: some View {
         VStack(alignment: .leading) {
             MenuView(
@@ -98,7 +100,7 @@ struct WebEditorArrangementView: View {
                     set: { _ in }
                 )
             ).background(config.stateColour)
-            if !viewModel.isEmpty {
+            if !showArrangement && !viewModel.isEmpty {
                 TabView(selection: Binding(get: { viewModel.currentMachineIndex }, set: { viewModel.currentMachineIndex = $0 })) {
                     ForEach(Array(viewModel.rootMachineViewModels.indices), id: \.self) { index in
                         ContentView(editorViewModel: viewModel.rootMachineViewModels[index], arrangement: viewModel)
@@ -109,7 +111,7 @@ struct WebEditorArrangementView: View {
                     }
                 }.background(config.backgroundColor)
             } else {
-                ArrangementView(viewModel: viewModel)
+                ArrangementView(viewModel: viewModel, showArrangement: $showArrangement)
             }
         }.background(config.backgroundColor)
     }
