@@ -13,7 +13,7 @@ import SwiftUI
 
 import Utilities
 
-struct ArrowView: View {
+struct BoundedLabelView: View {
     
     @Binding var pointOffScreen: CGPoint
     
