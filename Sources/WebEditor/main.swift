@@ -139,9 +139,17 @@ struct WebEditorMachineView: View {
 
 import UniformTypeIdentifiers
 
+extension UTType {
+    
+    static var machine: UTType {
+        return UTType(importedAs: "net.mipal.micase.fsm")
+    }
+    
+}
+
 struct DirectoryFileDocument: FileDocument {
     
-    static var readableContentTypes: [UTType] = [.directory]
+    static var readableContentTypes: [UTType] = [.directory, .machine]
     
     init() {}
 
@@ -245,7 +253,7 @@ struct WebEditorDefaultMenu: View {
                 }
             }
         )
-        .fileImporter(isPresented: $presentOpenFileSheet, allowedContentTypes: [.directory], allowsMultipleSelection: false) {
+        .fileImporter(isPresented: $presentOpenFileSheet, allowedContentTypes: [.directory, .machine], allowsMultipleSelection: false) {
             defer { presentOpenFileSheet = false }
             switch $0 {
             case .failure(let error):
