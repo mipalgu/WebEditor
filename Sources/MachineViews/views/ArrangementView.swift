@@ -46,12 +46,12 @@ public struct ArrangementView: View {
                             .foregroundColor(getMachine(index) === viewModel.currentMachine ? config.highlightColour : config.borderColour)
                     )
                     .frame(width: getMachine(index).machine.width, height: getMachine(index).machine.height)
-                    .onTapGesture(count: 1) {
-                        viewModel.currentMachineIndex = index
-                    }
                     .onTapGesture(count: 2) {
                         viewModel.currentMachineIndex = index
                         showArrangement = false
+                    }
+                    .onTapGesture(count: 1) {
+                        viewModel.currentMachineIndex = index
                     }
                     .gesture(DragGesture().onChanged {
                         getMachine(index).machine.handleDrag(
