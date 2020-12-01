@@ -101,6 +101,44 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
     
     @Published var currentMouseLocation: CGPoint = .zero
     
+    var tempPoint0: CGPoint {
+        guard let viewModel = source else {
+            return .zero
+        }
+        let dx = currentMouseLocation.x - viewModel.location.x
+        let dy = currentMouseLocation.y - viewModel.location.y
+        let theta = atan2(Double(dy), Double(dx))
+        return viewModel.findEdge(radians: CGFloat(theta))
+    }
+    
+    var tempPoint1: CGPoint {
+        let dx = currentMouseLocation.x - tempPoint0.x
+        let dy = currentMouseLocation.y - tempPoint0.y
+        return CGPoint(x: tempPoint0.x + dx / 3.0, y: tempPoint0.y + dy / 3.0)
+    }
+    
+    var tempPoint2: CGPoint {
+        let dx = currentMouseLocation.x - tempPoint0.x
+        let dy = currentMouseLocation.y - tempPoint0.y
+        return CGPoint(x: tempPoint0.x + dx * 2.0 / 3.0, y: tempPoint0.y + dy * 2.0 / 3.0)
+    }
+    
+    var tempPoint0Binding: Binding<CGPoint> {
+        Binding(get: { self.tempPoint0 }, set: { _ in })
+    }
+    
+    var tempPoint1Binding: Binding<CGPoint> {
+        Binding(get: { self.tempPoint1 }, set: { _ in })
+    }
+    
+    var tempPoint2Binding: Binding<CGPoint> {
+        Binding(get: { self.tempPoint2 }, set: { _ in })
+    }
+    
+    var tempPoint3Binding: Binding<CGPoint> {
+        Binding(get: { self.currentMouseLocation }, set: { _ in })
+    }
+    
     public convenience init(machine: Ref<Machine>) {
         let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.value.path.states
         let states: [Machines.State] = machine.value[keyPath: statesPath.path]

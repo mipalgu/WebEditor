@@ -51,7 +51,15 @@ public struct MachineView: View {
                         )
                     }
                 }
-                
+                if viewModel.creatingTransition {
+                    ArrowView(
+                        point0: viewModel.tempPoint0Binding,
+                        point1: viewModel.tempPoint1Binding,
+                        point2: viewModel.tempPoint2Binding,
+                        point3: viewModel.tempPoint3Binding
+                    )
+                        .foregroundColor(Color.red)
+                }
             }
             .background(
                 ZStack {
