@@ -140,14 +140,22 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
     }
     
     public convenience init(machine: Ref<Machine>) {
-        let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.value.path.states
-        let states: [Machines.State] = machine.value[keyPath: statesPath.path]
-        let stateViewModels: [StateViewModel] = states.indices.map { stateIndex in
-            let stateX: CGFloat = 100.0
-            let stateY: CGFloat = 100.0 + CGFloat(stateIndex) * 200.0
-            return StateViewModel(machine: machine, path: machine.value.path.states[stateIndex], location: CGPoint(x: stateX, y: stateY))
+        if let plist = try? String(contentsOf: machine.value.filePath.appendingPathComponent("Layout.plist")) {
+            self.init(machine: machine, plist: plist)
+        } else {
+            let statesPath: Attributes.Path<Machine, [Machines.State]> = machine.value.path.states
+            let states: [Machines.State] = machine.value[keyPath: statesPath.path]
+            let stateViewModels: [StateViewModel] = states.indices.map { stateIndex in
+                let stateX: CGFloat = 100.0
+                let stateY: CGFloat = 100.0 + CGFloat(stateIndex) * 200.0
+                return StateViewModel(
+                    machine: machine,
+                    path: machine.value.path.states[stateIndex],
+                    location: CGPoint(x: stateX, y: stateY)
+                )
+            }
+            self.init(machine: machine, states: stateViewModels)
         }
-        self.init(machine: machine, states: stateViewModels)
     }
     
     public init(machine: Ref<Machine>, states: [StateViewModel], width: CGFloat = 100, height: CGFloat = 100, location: CGPoint = .zero) {

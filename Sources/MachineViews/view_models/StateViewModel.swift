@@ -251,6 +251,8 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self._collapsedActions = collapsedActions
         self.highlighted = highlighted
         if transitionViewModels.count != machine.value[keyPath: path.path].transitions.count {
+            print(transitionViewModels)
+            print(machine.value[keyPath: path.path].transitions)
             /*let transitions = machine.value[keyPath: path.path].transitions
             let transitionsSet = Set(transitions)
             let outlierTransitions = transitions.filter { !transitionsSet.contains($0) }
