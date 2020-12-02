@@ -154,6 +154,21 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
                     location: CGPoint(x: stateX, y: stateY)
                 )
             }
+            stateViewModels.enumerated().forEach { viewModel in
+                let transitionViewModels = viewModel.1.transitions.enumerated().map { (transition: (Int, Transition)) -> TransitionViewModel in
+                    guard let destinationViewModel = stateViewModels.first(where: { $0.name == transition.1.target }) else {
+                        fatalError("Failed to read machine \(machine.value.name). Transitions are pointing to states that don't exist. Machine may be corrupted.")
+                    }
+                    return TransitionViewModel(
+                        machine: machine,
+                        path: machine.value.path.states[viewModel.0].transitions[transition.0],
+                        source: viewModel.1,
+                        destination: destinationViewModel,
+                        priority: UInt8(transition.0)
+                    )
+                }
+                viewModel.1.transitionViewModels = transitionViewModels
+            }
             self.init(machine: machine, states: stateViewModels)
         }
     }

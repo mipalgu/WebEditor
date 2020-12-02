@@ -266,7 +266,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
                     priority: <#T##UInt8#>
                 )
             }*/
-            fatalError("Not enough view models for transitions.")
+            //fatalError("Not enough view models for transitions.")
         }
         let transitionsSet = Set(transitionViewModels.map { $0.transition })
         machine.value[keyPath: path.path].transitions.forEach {
