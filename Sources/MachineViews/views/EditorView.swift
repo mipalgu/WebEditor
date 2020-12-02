@@ -16,8 +16,12 @@ import Attributes
 import Utilities
 
 public struct EditorView: View {
+
+    @Binding var machines: [Ref<Machine>]
     
-    @ObservedObject var arrangement: ArrangementViewModel
+    @Binding var rootMachines: [MachineDependency]
+    
+    @Binding var currentIndex: Int
     
     @ObservedObject var viewModel: EditorViewModel
     
@@ -25,8 +29,12 @@ public struct EditorView: View {
     
     @EnvironmentObject var config: Config
     
-    public init(arrangement: ArrangementViewModel, viewModel: EditorViewModel, machineViewModel: MachineViewModel) {
-        self.arrangement = arrangement
+    
+    
+    public init(machines: Binding<[Ref<Machine>]>, rootMachines: Binding<[MachineDependency]>, currentIndex: Binding<Int>, viewModel: EditorViewModel, machineViewModel: MachineViewModel) {
+        self._machines = machines
+        self._rootMachines = rootMachines
+        self._currentIndex = currentIndex
         self.viewModel = viewModel
         self.machineViewModel = machineViewModel
     }
@@ -37,9 +45,9 @@ public struct EditorView: View {
                 HStack {
                     GeometryReader{ reader in
                         DependenciesView(
-                            machines: Binding(get: { arrangement.allMachines.map { $0.machine.$machine } }, set: { _ in }),
-                            rootMachines: Binding(get: { arrangement.rootMachinesAsDependencies }, set: { _ in }),
-                            currentIndex: Binding(get: { arrangement.currentMachineIndex }, set: { arrangement.currentMachineIndex = $0 }),
+                            machines: $machines,
+                            rootMachines: $rootMachines,
+                            currentIndex: $currentIndex,
                             collapsed: Binding(
                                 get: { viewModel.leftPaneCollapsed },
                                 set: { self.viewModel.leftPaneCollapsed = $0 }

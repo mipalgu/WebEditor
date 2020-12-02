@@ -148,15 +148,15 @@ struct WebEditorMachineView: View {
     var body: some View {
         VStack(alignment: .leading) {
             MenuView(machineViewModel: Binding<MachineViewModel?>(get: { viewModel }, set: { _ in })).background(config.stateColour)
-//            TabView(selection: $selection) {
-//                ForEach(tabs, id: \.self) { dep in
-//                    ContentView(editorViewModel: EditorViewModel(machine: MachineViewModel(machine: Ref(copying: Machine(filePath: dep.filePath)))), arrangement: viewModel)
-//                        .tabItem {
-//                            Text(viewModel.rootMachineViewModels[index].machine.name)
-//                                .font(config.fontHeading)
-//                        }.tag(index)
-//                }
-//            }.background(config.backgroundColor)
+            TabView(selection: $selection) {
+                ForEach(Array(tabs.indices), id: \.self) { index in
+                    ContentView(editorViewModel: EditorViewModel(machine: MachineViewModel(machine: Ref(copying: (try? Machine(filePath: tabs[index].filePath))!))), machines: $allMachines, rootMachines: $rootMachines, currentIndex: $selection)
+                        .tabItem {
+                            Text(tabs[index].name)
+                                .font(config.fontHeading)
+                        }.tag(index)
+                }
+            }.background(config.backgroundColor)
         }.background(config.backgroundColor)
     }
     
@@ -328,10 +328,28 @@ struct ContentView: View {
     
     @StateObject var editorViewModel: EditorViewModel
     
-    @ObservedObject var arrangement: ArrangementViewModel
+    @Binding var machines: [Ref<Machine>]
+    
+    @Binding var rootMachines: [MachineDependency]
+    
+    @Binding var currentIndex: Int
+    
+    init(editorViewModel: EditorViewModel, machines: Binding<[Ref<Machine>]>, rootMachines: Binding<[MachineDependency]>, currentIndex: Binding<Int>) {
+        self._editorViewModel = StateObject(wrappedValue: editorViewModel)
+        self._machines = machines
+        self._rootMachines = rootMachines
+        self._currentIndex = currentIndex
+    }
+    
+    init(editorViewModel: EditorViewModel, arrangement: ArrangementViewModel) {
+        self._machines = Binding(get: { arrangement.allMachines.map { $0.machine.$machine } }, set: { _ in })
+        self._rootMachines = Binding(get: { arrangement.rootMachinesAsDependencies }, set: { _ in })
+        self._currentIndex = Binding(get: { arrangement.currentMachineIndex }, set: { arrangement.currentMachineIndex = $0 })
+        self._editorViewModel = StateObject(wrappedValue: editorViewModel)
+    }
     
     var body: some View {
-        EditorView(arrangement: arrangement, viewModel: editorViewModel, machineViewModel: editorViewModel.currentMachine)
+        EditorView(machines: $machines, rootMachines: $rootMachines, currentIndex: $currentIndex, viewModel: editorViewModel, machineViewModel: editorViewModel.currentMachine)
             .background(config.backgroundColor)
             .frame(minWidth: CGFloat(config.width), minHeight: CGFloat(config.height))
             .onTapGesture(count: 1) {
