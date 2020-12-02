@@ -192,6 +192,16 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
         self.init(machine: machine, path: path, point0: source, point1: CGPoint(x: p1x, y: p1y), point2: CGPoint(x: p2x, y: p2y), point3: destination, priority: priority, pointDiameter: pointDiameter)
     }
     
+    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: StateViewModel, destination: StateViewModel, priority: UInt8, pointDiameter: CGFloat = 10.0) {
+        let dx = destination.location.x - source.location.x
+        let dy = destination.location.y - source.location.y
+        let theta = atan2(Double(dy), Double(dx))
+        let sourceEdge = source.findEdge(radians: CGFloat(theta))
+        let destinationTheta = theta + Double.pi > Double.pi ? theta - Double.pi : theta + Double.pi
+        let destinationEdge = destination.findEdge(radians: CGFloat(destinationTheta))
+        self.init(machine: machine, path: path, source: sourceEdge, destination: destinationEdge, priority: priority, pointDiameter: pointDiameter)
+    }
+    
     func strokeLength(transition: UInt8) -> CGFloat {
         if transition == 0 {
             return 0.0

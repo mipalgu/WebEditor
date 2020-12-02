@@ -225,32 +225,21 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self.machine.states.firstIndex(of: self.machine[keyPath: path.path]).wrappedValue
     }
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
-        self._machine = Reference(reference: machine)
-        self.path = path
-        self.location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
-        self.__width = min(max(minWidth, width), maxWidth)
-        self.__height = height
-        self.expanded = expanded
-        self._collapsedHeight = collapsedHeight
+    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
+        self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: 150.0, collapsedHeight: collapsedHeight, collapsedActions: collapsedActions, highlighted: highlighted, transitionViewModels: transitionViewModels)
         self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
-        self._collapsedActions = collapsedActions
-        self.highlighted = highlighted
-        if transitionViewModels.count != machine.value[keyPath: path.path].transitions.count {
-            fatalError("Not Enough transitions view models for machine.")
-        }
-        let transitionsSet = Set(transitionViewModels.map { $0.transition })
-        machine.value[keyPath: path.path].transitions.forEach {
-            if transitionsSet.contains($0) {
-                return
-            }
-            fatalError("Not Enough transitions view models for machine.")
-        }
-        self.transitionViewModels = transitionViewModels
-        self.listen(to: $machine)
     }
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
+    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
+        self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: collapsedWidth, collapsedHeight: 100.0, collapsedActions: collapsedActions, highlighted: highlighted, transitionViewModels: transitionViewModels)
+        self.collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
+    }
+    
+    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
+        self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: 150.0)
+    }
+    
+    private init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
         self._machine = Reference(reference: machine)
         self.path = path
         self.location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
@@ -258,11 +247,24 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self.__height = height
         self.expanded = expanded
         self._collapsedWidth = collapsedWidth
-        self._collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
+        self._collapsedHeight = collapsedHeight
         self._collapsedActions = collapsedActions
         self.highlighted = highlighted
         if transitionViewModels.count != machine.value[keyPath: path.path].transitions.count {
-            fatalError("Not Enough transitions view models for machine.")
+            /*let transitions = machine.value[keyPath: path.path].transitions
+            let transitionsSet = Set(transitions)
+            let outlierTransitions = transitions.filter { !transitionsSet.contains($0) }
+            let newViewModels = outlierTransitions.map {
+                let 
+                TransitionViewModel(
+                    machine: <#T##Ref<Machine>#>,
+                    path: <#T##Path<Machine, Transition>#>,
+                    source: <#T##StateViewModel#>,
+                    destination: <#T##StateViewModel#>,
+                    priority: <#T##UInt8#>
+                )
+            }*/
+            fatalError("Not enough view models for transitions.")
         }
         let transitionsSet = Set(transitionViewModels.map { $0.transition })
         machine.value[keyPath: path.path].transitions.forEach {
@@ -273,10 +275,6 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         }
         self.transitionViewModels = transitionViewModels
         self.listen(to: $machine)
-    }
-    
-    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
-        self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: 150.0)
     }
     
     func isEmpty(forAction action: String) -> Bool {
@@ -342,9 +340,9 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         let dx = destinationViewModel.location.x - location.x
         let dy = destinationViewModel.location.y - location.y
         let theta = atan2(Double(dy), Double(dx))
-        let sourceEdge = edge(theta: theta)
+        let sourceEdge = findEdge(radians: CGFloat(theta))
         let destinationTheta = theta + Double.pi > Double.pi ? theta - Double.pi : theta + Double.pi
-        let destinationEdge = destinationViewModel.edge(theta: destinationTheta)
+        let destinationEdge = destinationViewModel.findEdge(radians: CGFloat(destinationTheta))
         let tPath: Attributes.Path<Machine, Transition> = path.transitions[index]
         let priority = UInt8(index)
         return TransitionViewModel(
