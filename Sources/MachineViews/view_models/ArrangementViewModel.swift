@@ -100,10 +100,11 @@ public final class ArrangementViewModel: ObservableObject {
                 let manager = FileManager()
                 let filePath: URL = $0.0
                 let machineRef: Ref<Machine> = Ref(copying: $0.1)
-                guard let plist = manager.contents(atPath: filePath.appendingPathComponent("Layout.plist").absoluteString) else {
+                guard let plist = manager.contents(atPath: filePath.appendingPathComponent("Layout.plist").absoluteString),
+                      let plistString = String(data: plist, encoding: .utf8) else {
                     return EditorViewModel(machine: MachineViewModel(machine: machineRef))
                 }
-                return EditorViewModel(machine: MachineViewModel(machine: machineRef, plist: plist.base64EncodedString()))
+                return EditorViewModel(machine: MachineViewModel(machine: machineRef, plist: plistString))
             }
         } catch let error {
             fatalError("No machines. Error: \(error)")
