@@ -93,6 +93,13 @@ public final class ArrangementViewModel: ObservableObject {
         self.allMachines.map { $0.machine }
     }
     
+    public var rootMachinesAsDependencies: [MachineDependency] {
+        rootMachineViewModels.map{
+            let machine = $0.machine.machine
+            return MachineDependency(name: machine.name, filePath: machine.filePath)
+        }
+    }
+    
     public init(arrangement: Ref<Machines.Arrangement>) {
         self._arrangement = Reference(reference: arrangement)
         do {

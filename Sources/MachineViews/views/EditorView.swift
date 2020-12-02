@@ -37,7 +37,9 @@ public struct EditorView: View {
                 HStack {
                     GeometryReader{ reader in
                         DependenciesView(
-                            viewModel: arrangement,
+                            machines: Binding(get: { arrangement.allMachines.map { $0.machine.$machine } }, set: { _ in }),
+                            rootMachines: Binding(get: { arrangement.rootMachinesAsDependencies }, set: { _ in }),
+                            currentIndex: Binding(get: { arrangement.currentMachineIndex }, set: { arrangement.currentMachineIndex = $0 }),
                             collapsed: Binding(
                                 get: { viewModel.leftPaneCollapsed },
                                 set: { self.viewModel.leftPaneCollapsed = $0 }

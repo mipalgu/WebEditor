@@ -126,14 +126,23 @@ struct WebEditorMachineView: View {
     @StateObject var viewModel: MachineViewModel
     
     @EnvironmentObject var config: Config
+    
+    @State var allMachines: [Ref<Machine>]
 
     @State var tabs: [MachineDependency]
+    
+    @State var rootMachines: [MachineDependency]
     
     @State var selection: Int = 0
     
     init(viewModel: MachineViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
-        self._tabs = State(initialValue: [MachineDependency(name: viewModel.machine.name, filePath: viewModel.machine.filePath)])
+        let rootMachine = MachineDependency(name: viewModel.machine.name, filePath: viewModel.machine.filePath)
+        self._rootMachines = State(initialValue: [rootMachine])
+        self._tabs = State(initialValue: [rootMachine] + viewModel.machine.dependencies)
+        self._allMachines = State(initialValue: [viewModel.$machine] + viewModel.machine.dependencies.compactMap {
+            try? Ref(copying: Machine(filePath: $0.filePath))
+        })
     }
     
     var body: some View {

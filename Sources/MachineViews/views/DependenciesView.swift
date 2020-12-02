@@ -17,7 +17,11 @@ import Utilities
 
 struct DependenciesView: View {
     
-    @ObservedObject var viewModel: ArrangementViewModel
+    @Binding var machines: [Ref<Machine>]
+    
+    @Binding var rootMachines: [MachineDependency]
+    
+    @Binding var currentIndex: Int
     
     @Binding var collapsed: Bool
     
@@ -29,6 +33,10 @@ struct DependenciesView: View {
     let label = "Dependencies"
     
     @State var rootMachinesExpanded: Set<String> = Set()
+    
+    var rootMachineModels: [Ref<Machine>] {
+        rootMachines.compactMap { rootMachine in  machines.first(where: { $0.value.name == rootMachine.name }) }
+    }
     
     @EnvironmentObject var config: Config
     
@@ -57,7 +65,7 @@ struct DependenciesView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                ForEach(viewModel.rootMachineViewModels.map { $0.machine.$machine }, id: \.self.value) {ref in
+                ForEach(rootMachineModels, id: \.self.value) {ref in
                     VStack(alignment: .leading) {
                         HStack {
                             if rootMachinesExpanded.contains(ref.value.name) {
@@ -75,26 +83,26 @@ struct DependenciesView: View {
                             }
                             Button(action: {
                                 let name = ref.value.name
-                                guard let machineIndex = viewModel.machineIndex(name: name) else {
+                                guard let machineIndex = machines.firstIndex(where: { $0.value.name == name }) else {
                                     print("Cannot find machine named \(name)", stderr)
                                     return
                                 }
-                                viewModel.currentMachineIndex = machineIndex
+                                currentIndex = machineIndex
                             }) {
                                 Text(ref.value.name)
                                     .font(config.fontHeading)
                             }.buttonStyle(PlainButtonStyle())
                             Spacer()
                         }
-                        .background(viewModel.currentMachine.machine.$machine === ref ? config.highlightColour : Color.clear)
+                        .background(machines[currentIndex] === ref ? config.highlightColour : Color.clear)
                         if rootMachinesExpanded.contains(ref.value.name) {
-                            ForEach(Array(ref.value.dependencies.indices), id: \.self) {
+                            ForEach(ref.value.dependencies, id: \.self) { dep in
                                 DependencyView(
-                                    viewModel: viewModel,
-                                    machine: ref,
-                                    path: ref.value.path.dependencies[$0]
+                                    machines: $machines,
+                                    currentIndex: $currentIndex,
+                                    dependency: Binding(get: { machines.first(where: { $0.value.name == dep.name })! }, set: {_ in })
                                 )
-                                .background(viewModel.currentMachine.machine.$machine === ref ? config.highlightColour : Color.clear)
+                                .background(machines[currentIndex] === ref ? config.highlightColour : Color.clear)
                             }
                         }
                     }

@@ -17,7 +17,9 @@ import Utilities
 
 struct DependencyLabelView: View {
     
-    @ObservedObject var viewModel: ArrangementViewModel
+    @Binding var machines: [Ref<Machine>]
+    
+    @Binding var currentIndex: Int
     
     @Binding var name: String
     
@@ -42,11 +44,11 @@ struct DependencyLabelView: View {
                 }.buttonStyle(PlainButtonStyle())
             }
             Button(action: {
-                guard let machineIndex = viewModel.machineIndex(name: name) else {
+                guard let machineIndex = machines.firstIndex(where: { $0.value.name == name }) else {
                     print("Cannot find machine named \(name)", stderr)
                     return
                 }
-                viewModel.currentMachineIndex = machineIndex
+                currentIndex = machineIndex
             }) {
                 Text(name)
                     .font(config.fontHeading)

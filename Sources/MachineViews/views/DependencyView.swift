@@ -17,27 +17,20 @@ import Utilities
 
 struct DependencyView: View {
     
-    @ObservedObject var viewModel: ArrangementViewModel
+    @Binding var machines: [Ref<Machine>]
     
-    @ObservedObject var machine: Ref<Machine>
+    @Binding var currentIndex: Int
     
-    let path: Attributes.Path<Machine, MachineDependency>
+    @Binding var dependency: Ref<Machine>
     
     @State var collapsed: Bool = true
     
     @EnvironmentObject var config: Config
     
-    var rootDependencies: [MachineDependency] {
-        guard let index = viewModel.machineIndex(name: machine.value[keyPath: path.path].name) else {
-            return []
-        }
-        return viewModel.allMachines[index].machine.machine.dependencies
-    }
-    
     var body: some View {
         VStack {
             HStack {
-                if rootDependencies.count > 0 {
+                if machines.count > 0 {
                     if !collapsed {
                         Button(action: { collapsed = true }) {
                             Image(systemName: "arrowtriangle.down.fill")
@@ -54,9 +47,10 @@ struct DependencyView: View {
                     }
                 }
                 DependencyLabelView(
-                    viewModel: viewModel,
+                    machines: $machines,
+                    currentIndex: $currentIndex,
                     name: Binding(
-                        get: { machine.value[keyPath: path.path].name },
+                        get: { dependency.value.name },
                         set: {_ in }
                     ),
                     collapsed: Binding(get: { collapsed }, set: { collapsed = $0 })
@@ -64,15 +58,15 @@ struct DependencyView: View {
                 Spacer()
             }
             if !collapsed {
-                if rootDependencies.count > 0 {
-                    ForEach(Array(rootDependencies.indices), id: \.self) { (index: Int) -> AnyView in
-                        guard let machine = viewModel.machine(name: machine.value[keyPath: path.path].name) else {
+                if machines.count > 0 {
+                    ForEach(Array(dependency.value.dependencies.indices), id: \.self) { (index: Int) -> AnyView in
+                        guard let machine = machines.first(where: { $0.value.name == dependency.value.dependencies[index].name }) else {
                             return AnyView(EmptyView())
                         }
                         return AnyView(DependencyView(
-                            viewModel: viewModel,
-                            machine: machine.$machine,
-                            path: Machine.path.dependencies[index]
+                            machines: $machines,
+                            currentIndex: $currentIndex,
+                            dependency: Binding(get: { machine }, set: { _ in })
                         ))
                     }
                 } else {
