@@ -32,7 +32,10 @@ struct ArrowView: View {
             Path { path in
                 path.move(to: point0)
                 path.addCurve(to: point3, control1: point1, control2: point2)
-            }.foregroundColor(config.borderColour)
+            }
+            .fill(config.textColor)
+            .coordinateSpace(name: "MAIN_VIEW")
+            .foregroundColor(config.textColor)
             if focused {
                 Circle()
                     .position(point0)
