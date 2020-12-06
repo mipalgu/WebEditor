@@ -147,6 +147,12 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     let actionPadding: CGFloat = 0.0
     
+    var originalPoint0s: [CGPoint] = []
+    
+    var originalPoint1s: [CGPoint] = []
+    
+    var originalPoint2s: [CGPoint] = []
+    
     public var name: String {
         String(machine[keyPath: path.path].name)
     }
@@ -384,6 +390,29 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
             print(error, stderr)
         }
         
+    }
+    
+    func moveSelf(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if !isDragging {
+            originalPoint0s = transitionViewModels.map { $0.point0 }
+            originalPoint1s = transitionViewModels.map { $0.point1 }
+            originalPoint2s = transitionViewModels.map { $0.point2 }
+        }
+        handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+        transitionViewModels.indices.forEach {
+            transitionViewModels[$0].point0 = CGPoint(x: originalPoint0s[$0].x + gesture.translation.width, y: originalPoint0s[$0].y - gesture.translation.height)
+            transitionViewModels[$0].point1 = CGPoint(x: originalPoint1s[$0].x + gesture.translation.width, y: originalPoint1s[$0].y - gesture.translation.height)
+            transitionViewModels[$0].point2 = CGPoint(x: originalPoint2s[$0].x + gesture.translation.width, y: originalPoint2s[$0].y - gesture.translation.height)
+        }
+    }
+    
+    func finishMoveSelf(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        finishDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+        transitionViewModels.indices.forEach {
+            transitionViewModels[$0].point0 = CGPoint(x: originalPoint0s[$0].x + gesture.translation.width, y: originalPoint0s[$0].y - gesture.translation.height)
+            transitionViewModels[$0].point1 = CGPoint(x: originalPoint1s[$0].x + gesture.translation.width, y: originalPoint1s[$0].y - gesture.translation.height)
+            transitionViewModels[$0].point2 = CGPoint(x: originalPoint2s[$0].x + gesture.translation.width, y: originalPoint2s[$0].y - gesture.translation.height)
+        }
     }
     
 }
