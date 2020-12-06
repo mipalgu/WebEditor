@@ -25,15 +25,35 @@ struct ArrowView: View {
     
     @Binding var focused: Bool
     
+    var arrowPoint0: CGPoint {
+        let theta = atan2(Double(point3.y - point2.y), Double(point3.x - point2.x)) +  Double.pi - Double.pi / 6.0
+        let y = point3.y + CGFloat(10.0 * sin(theta))
+        let x = point3.x + CGFloat(10.0 * cos(theta))
+        return CGPoint(x: x, y: y)
+    }
+    
+    var arrowPoint1: CGPoint {
+        let theta = atan2(Double(point3.y - point2.y), Double(point3.x - point2.x)) + Double.pi + Double.pi / 6.0
+        let y = point3.y + CGFloat(10.0 * sin(theta))
+        let x = point3.x + CGFloat(10.0 * cos(theta))
+        return CGPoint(x: x, y: y)
+    }
+    
     @EnvironmentObject public var config: Config
     
     var body: some View {
         ZStack {
             Path { path in
                 path.move(to: point0)
+                //path.addLine(to: point3)
                 path.addCurve(to: point3, control1: point1, control2: point2)
+                path.move(to: point3)
+                path.addLine(to: arrowPoint0)
+                path.move(to: point3)
+                path.addLine(to: arrowPoint1)
             }
-            .fill(config.textColor)
+            .stroke(config.textColor, lineWidth: 2)
+            //.fill(config.textColor)
             .coordinateSpace(name: "MAIN_VIEW")
             .foregroundColor(config.textColor)
             if focused {
