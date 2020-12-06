@@ -53,14 +53,14 @@ struct ArrowView: View {
     func strokePoint0(number: UInt8) -> CGPoint {
         let center = getStrokeCenter(number: number)
         let point1Theta = strokeTheta + Double.pi / 2.0
-        let length = 2.0 * Double(number)
+        let length = 2.0 + 2.0 * Double(max(number - 1, 0))
         return CGPoint(x: center.x + CGFloat(length * cos(point1Theta)), y: center.y + CGFloat(length * sin(point1Theta)))
     }
     
     func strokePoint1(number: UInt8) -> CGPoint {
         let center = getStrokeCenter(number: number)
         let point1Theta = strokeTheta - Double.pi / 2.0
-        let length = 2.0 * Double(number)
+        let length = 2.0 + 2.0 * Double(max(number - 1, 0))
         return CGPoint(x: center.x + CGFloat(length * cos(point1Theta)), y: center.y + CGFloat(length * sin(point1Theta)))
     }
     
@@ -77,7 +77,7 @@ struct ArrowView: View {
                 path.addLine(to: arrowPoint1)
             }
             .stroke(config.textColor, lineWidth: 2)
-            .coordinateSpace(name: "MAIN_VIEW")
+            //.coordinateSpace(name: "MAIN_VIEW")
             .foregroundColor(config.textColor)
             if strokeNumber > 0 {
                 ForEach(1...strokeNumber, id: \.self) { number in
@@ -86,7 +86,7 @@ struct ArrowView: View {
                         strokePath.addLine(to: strokePoint1(number: number))
                     }
                     .stroke(config.textColor, lineWidth: 2)
-                    .coordinateSpace(name: "MAIN_VIEW")
+                    //.coordinateSpace(name: "MAIN_VIEW")
                 }
             }
             if focused {

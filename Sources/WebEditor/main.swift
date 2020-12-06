@@ -135,6 +135,8 @@ struct WebEditorMachineView: View {
     
     @State var selection: Int = 0
     
+    @State var creatingTransitions: Bool = false
+    
     init(viewModel: MachineViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
         let rootMachine = MachineDependency(name: viewModel.machine.name, filePath: viewModel.machine.filePath)
@@ -147,10 +149,18 @@ struct WebEditorMachineView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            MenuView(machineViewModel: Binding<MachineViewModel?>(get: { viewModel }, set: { _ in })).background(config.stateColour)
+            Button(action: { self.creatingTransitions = !self.creatingTransitions }) {
+                // Transition Mode
+                VStack {
+                    Text("Transition Mode")
+                        .font(config.fontBody)
+                }
+            }
+            MenuView(machineViewModel: Binding(get: { self.viewModel }, set: { _ in }))
+                .background(config.stateColour)
             TabView(selection: $selection) {
                 ForEach(Array(tabs.indices), id: \.self) { index in
-                    ContentView(editorViewModel: EditorViewModel(machine: MachineViewModel(machine: Ref(copying: (try? Machine(filePath: tabs[index].filePath))!))), machines: $allMachines, rootMachines: $rootMachines, currentIndex: $selection)
+                    ContentView(editorViewModel: EditorViewModel(machine: MachineViewModel(machine: Ref(copying: (try? Machine(filePath: tabs[index].filePath))!))), machines: $allMachines, rootMachines: $rootMachines, currentIndex: $selection, creatingTransitions: $creatingTransitions)
                         .tabItem {
                             Text(tabs[index].name)
                                 .font(config.fontHeading)
@@ -334,11 +344,14 @@ struct ContentView: View {
     
     @Binding var currentIndex: Int
     
-    init(editorViewModel: EditorViewModel, machines: Binding<[Ref<Machine>]>, rootMachines: Binding<[MachineDependency]>, currentIndex: Binding<Int>) {
+    @Binding var creatingTransitions: Bool
+    
+    init(editorViewModel: EditorViewModel, machines: Binding<[Ref<Machine>]>, rootMachines: Binding<[MachineDependency]>, currentIndex: Binding<Int>, creatingTransitions: Binding<Bool>) {
         self._editorViewModel = StateObject(wrappedValue: editorViewModel)
         self._machines = machines
         self._rootMachines = rootMachines
         self._currentIndex = currentIndex
+        self._creatingTransitions = creatingTransitions
     }
     
     init(editorViewModel: EditorViewModel, arrangement: ArrangementViewModel) {
@@ -346,10 +359,11 @@ struct ContentView: View {
         self._rootMachines = Binding(get: { arrangement.rootMachinesAsDependencies }, set: { _ in })
         self._currentIndex = Binding(get: { arrangement.currentMachineIndex }, set: { arrangement.currentMachineIndex = $0 })
         self._editorViewModel = StateObject(wrappedValue: editorViewModel)
+        self._creatingTransitions = Binding(get: { false }, set: {_ in })
     }
     
     var body: some View {
-        EditorView(machines: $machines, rootMachines: $rootMachines, currentIndex: $currentIndex, viewModel: editorViewModel, machineViewModel: editorViewModel.currentMachine)
+        EditorView(machines: $machines, rootMachines: $rootMachines, currentIndex: $currentIndex, viewModel: editorViewModel, machineViewModel: editorViewModel.currentMachine, creatingTransitions: $creatingTransitions)
             .background(config.backgroundColor)
             .frame(minWidth: CGFloat(config.width), minHeight: CGFloat(config.height))
             .onTapGesture(count: 1) {

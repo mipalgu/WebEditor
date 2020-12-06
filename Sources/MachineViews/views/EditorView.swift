@@ -27,16 +27,19 @@ public struct EditorView: View {
     
     @ObservedObject var machineViewModel: MachineViewModel
     
+    @Binding var creatingTransitions: Bool
+    
     @EnvironmentObject var config: Config
     
     
     
-    public init(machines: Binding<[Ref<Machine>]>, rootMachines: Binding<[MachineDependency]>, currentIndex: Binding<Int>, viewModel: EditorViewModel, machineViewModel: MachineViewModel) {
+    public init(machines: Binding<[Ref<Machine>]>, rootMachines: Binding<[MachineDependency]>, currentIndex: Binding<Int>, viewModel: EditorViewModel, machineViewModel: MachineViewModel, creatingTransitions: Binding<Bool>) {
         self._machines = machines
         self._rootMachines = rootMachines
         self._currentIndex = currentIndex
         self.viewModel = viewModel
         self.machineViewModel = machineViewModel
+        self._creatingTransitions = creatingTransitions
     }
     
     public var body: some View {
@@ -67,7 +70,7 @@ public struct EditorView: View {
                                 .onChanged({ viewModel.dragLeftDividor(gesture: $0) })
                                 .onEnded({ viewModel.finishDraggingLeft(gesture: $0) })
                             )
-                        MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView)
+                        MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView, creatingTransitions: $creatingTransitions)
                             .position(CGPoint(x: viewModel.leftDividerLocation + viewModel.getMainViewWidth(width: reader.size.width) / 2.0, y: reader.size.height / 2.0))
                             .frame(width: viewModel.getMainViewWidth(width: reader.size.width))
                         Divider()

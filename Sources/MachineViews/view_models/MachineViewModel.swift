@@ -93,7 +93,7 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
     
     @Published var createTransitionMode: Bool = false
     
-    @Published var creatingTransition: Bool = false
+    @Published public var creatingTransition: Bool = false
     
     var source: StateViewModel?
     

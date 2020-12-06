@@ -23,12 +23,14 @@ struct MainView: View {
     
     @Binding var type: ViewType
     
+    @Binding var creatingTransitions: Bool
+    
     @EnvironmentObject var config: Config
     
     var body: some View {
         switch type {
         case .machine, .transition:
-            MachineView(editorViewModel: editorViewModel, viewModel: machineViewModel)
+            MachineView(editorViewModel: editorViewModel, viewModel: machineViewModel, creatingTransitions: $creatingTransitions)
                 .coordinateSpace(name: "MAIN_VIEW")
                 
         case .state(let stateIndex):

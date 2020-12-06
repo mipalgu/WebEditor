@@ -21,11 +21,14 @@ public struct MachineView: View {
     
     @ObservedObject var viewModel: MachineViewModel
     
+    @Binding var creatingTransitions: Bool
+    
     @EnvironmentObject var config: Config
     
-    public init(editorViewModel: EditorViewModel, viewModel: MachineViewModel) {
+    public init(editorViewModel: EditorViewModel, viewModel: MachineViewModel, creatingTransitions: Binding<Bool>) {
         self.editorViewModel = editorViewModel
         self.viewModel = viewModel
+        self._creatingTransitions = creatingTransitions
     }
     
     func isFocused(state: StateViewModel, transitionIndex: Int) -> Binding<Bool> {
@@ -54,6 +57,7 @@ public struct MachineView: View {
                         viewModel: stateViewModel,
                         editorViewModel: editorViewModel,
                         machineViewModel: viewModel,
+                        creatingTransitions: $creatingTransitions,
                         parentWidth: geometry.size.width,
                         parentHeight: geometry.size.height
                     )

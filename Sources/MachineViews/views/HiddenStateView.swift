@@ -23,6 +23,8 @@ struct HiddenStateView: View {
     
     @ObservedObject var machineViewModel: MachineViewModel
     
+    @Binding var creatingTransitions: Bool
+    
     var parentWidth: CGFloat
     
     var parentHeight: CGFloat
@@ -39,7 +41,7 @@ struct HiddenStateView: View {
     
     var body: some View {
         if !viewModel.isHidden(frameWidth: parentWidth, frameHeight: parentHeight) {
-            StateView(editorViewModel: editorViewModel, viewModel: viewModel)
+            StateView(editorViewModel: editorViewModel, viewModel: viewModel, creatingTransitions: $creatingTransitions)
                 .contextMenu {
                     Button(action: {
                         machineViewModel.deleteState(stateViewModel: viewModel)

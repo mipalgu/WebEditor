@@ -19,15 +19,18 @@ struct StateView: View {
     
     @StateObject var viewModel: StateViewModel
     
-    init(editorViewModel: EditorViewModel, viewModel: StateViewModel) {
+    @Binding var creatingTransitions: Bool
+    
+    init(editorViewModel: EditorViewModel, viewModel: StateViewModel, creatingTransitions: Binding<Bool>) {
         self.editorViewModel = editorViewModel
         self._viewModel = StateObject(wrappedValue: viewModel)
+        self._creatingTransitions = creatingTransitions
     }
     
     var body: some View {
         if viewModel.expanded {
-            return AnyView(StateExpandedView(editorViewModel: editorViewModel, viewModel: viewModel)).clipped()
+            return AnyView(StateExpandedView(editorViewModel: editorViewModel, viewModel: viewModel, creatingTransitions: $creatingTransitions)).clipped()
         }
-        return AnyView(StateCollapsedView(editorViewModel: editorViewModel, viewModel: viewModel)).clipped()
+        return AnyView(StateCollapsedView(editorViewModel: editorViewModel, viewModel: viewModel, creatingTransitions: $creatingTransitions)).clipped()
     }
 }

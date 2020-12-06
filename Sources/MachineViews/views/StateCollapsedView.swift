@@ -21,6 +21,8 @@ struct StateCollapsedView: View {
     
     @ObservedObject var viewModel: StateViewModel
     
+    @Binding var creatingTransitions: Bool
+    
     @EnvironmentObject var config: Config
     
     var createTransitionMode: Bool {
@@ -82,13 +84,13 @@ struct StateCollapsedView: View {
                 editorViewModel.changeFocus(stateIndex: viewModel.stateIndex)
             }
             .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
-                if createTransitionMode {
+                if creatingTransitions {
                     self.editorViewModel.machine.startCreatingTransition(gesture: $0, sourceViewModel: viewModel)
                     return
                 }
                 self.viewModel.handleCollapsedDrag(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
             }.onEnded {
-                if createTransitionMode {
+                if creatingTransitions {
                     self.editorViewModel.machine.finishCreatingTransition(gesture: $0, sourceViewModel: viewModel)
                     return
                 }

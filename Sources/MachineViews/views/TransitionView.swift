@@ -34,5 +34,6 @@ struct TransitionView: View {
             label: viewModel.conditionBinding,
             focused: $focused
         )
+        .coordinateSpace(name: "MAIN_VIEW")
     }
 }

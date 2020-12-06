@@ -42,9 +42,12 @@ struct ArrowWithLabelView: View {
     var body: some View {
         ZStack {
             ArrowView(point0: $point0, point1: $point1, point2: $point2, point3: $point3, strokeNumber: $strokeNumber, focused: $focused)
+                .coordinateSpace(name: "MAIN_VIEW")
             Text(label)
+                .coordinateSpace(name: "MAIN_VIEW")
                 .font(config.fontBody)
                 .position(center)
         }
+        .coordinateSpace(name: "MAIN_VIEW")
     }
 }
