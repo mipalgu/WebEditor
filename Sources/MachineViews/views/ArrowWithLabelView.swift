@@ -23,9 +23,13 @@ struct ArrowWithLabelView: View {
     
     @Binding var point3: CGPoint
     
+    @Binding var strokeNumber: UInt8
+    
     @Binding var label: String
     
     @Binding var focused: Bool
+    
+    
     
     @EnvironmentObject public var config: Config
     
@@ -37,7 +41,7 @@ struct ArrowWithLabelView: View {
     
     var body: some View {
         ZStack {
-            ArrowView(point0: $point0, point1: $point1, point2: $point2, point3: $point3, focused: $focused)
+            ArrowView(point0: $point0, point1: $point1, point2: $point2, point3: $point3, strokeNumber: $strokeNumber, focused: $focused)
             Text(label)
                 .font(config.fontBody)
                 .position(center)

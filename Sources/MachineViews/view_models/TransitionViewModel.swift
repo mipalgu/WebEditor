@@ -104,6 +104,10 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
         )
     }
     
+    var priorityBinding: Binding<UInt8> {
+        Binding(get: { self.priority }, set: { self.priority = $0 })
+    }
+    
     let pointDiameter: CGFloat
     
     let arrowHeadLength: Double = 50.0

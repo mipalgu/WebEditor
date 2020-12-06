@@ -30,6 +30,7 @@ struct TransitionView: View {
             point1: viewModel.point1Binding,
             point2: viewModel.point2Binding,
             point3: viewModel.point3Binding,
+            strokeNumber: viewModel.priorityBinding,
             label: viewModel.conditionBinding,
             focused: $focused
         )

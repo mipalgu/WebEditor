@@ -139,6 +139,10 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
         Binding(get: { self.currentMouseLocation }, set: { _ in })
     }
     
+    var tempStrokeNumberBinding: Binding<UInt8> {
+        Binding(get: { 0 }, set: {_ in })
+    }
+    
     public convenience init(machine: Ref<Machine>) {
         if let plist = try? String(contentsOf: machine.value.filePath.appendingPathComponent("Layout.plist")) {
             self.init(machine: machine, plist: plist)

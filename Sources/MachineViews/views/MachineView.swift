@@ -76,6 +76,7 @@ public struct MachineView: View {
                         point1: viewModel.tempPoint1Binding,
                         point2: viewModel.tempPoint2Binding,
                         point3: viewModel.tempPoint3Binding,
+                        strokeNumber: viewModel.tempStrokeNumberBinding,
                         focused: Binding(get: { false }, set: { _ in })
                     )
                         .foregroundColor(Color.red)
