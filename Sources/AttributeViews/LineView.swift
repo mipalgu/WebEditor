@@ -11,7 +11,6 @@ import TokamakShim
 import SwiftUI
 #endif
 
-import Machines
 import Attributes
 import Utilities
 
@@ -63,6 +62,8 @@ public struct LineView<Root: Modifiable>: View {
         }
     }
 }
+
+import Machines
 
 struct LineView_Preview: PreviewProvider {
     

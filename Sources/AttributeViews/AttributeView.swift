@@ -62,7 +62,6 @@ import TokamakShim
 import SwiftUI
 #endif
 
-import Machines
 import Attributes
 import Utilities
 
