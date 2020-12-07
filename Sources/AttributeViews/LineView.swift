@@ -14,7 +14,7 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct LineView<Root: Modifiable>: View {
+public struct LineView<Root: Modifiable>: AttributeViewProtocol {
     
     @ObservedObject var root: Ref<Root>
     let path: Attributes.Path<Root, String>?
@@ -27,6 +27,10 @@ public struct LineView<Root: Modifiable>: View {
     
     @State var error: String? = nil
     
+    var valueBinding: Binding<String> { $value }
+    
+    var errorBinding: Binding<String?> { $error }
+    
     public init(root: Ref<Root>, path: Attributes.Path<Root, String>?, label: String, defaultValue: String = "", onChange: @escaping (String) -> Void = { _ in }) {
         self.root = root
         self.path = path
@@ -37,21 +41,7 @@ public struct LineView<Root: Modifiable>: View {
     
     public var body: some View {
         VStack(alignment: .leading) {
-            TextField(label, text: $value, onCommit: {
-                guard let path = self.path else {
-                    onChange(value)
-                    return
-                }
-                do {
-                    try root.value.modify(attribute: path, value: value)
-                    error = nil
-                    onChange(value)
-                    return
-                } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                    error = e.message
-                } catch {}
-                value = root[path: path].value
-            })
+            TextField(label, text: $value, onCommit: modify)
             .background(config.fieldColor)
             .foregroundColor(config.textColor)
             if let error = self.error {
