@@ -192,7 +192,11 @@ extension UTType {
 
 struct DirectoryFileDocument: FileDocument {
     
-    static var readableContentTypes: [UTType] = [.arrangement, .micaseMachine, .machine]
+    static var readableContentTypes: [UTType] = [.directory, .arrangement, .micaseMachine, .machine]
+    
+    static var arrangementReadableContentTypes: [UTType] = [.directory, .arrangement]
+    
+    static var machineReadableContentTypes: [UTType] = [.directory, .micaseMachine, .machine]
     
     init() {}
 
@@ -296,7 +300,11 @@ struct WebEditorDefaultMenu: View {
                 }
             }
         )
-        .fileImporter(isPresented: $presentOpenFileSheet, allowedContentTypes: DirectoryFileDocument.readableContentTypes, allowsMultipleSelection: false) {
+        .fileImporter(
+            isPresented: $presentOpenFileSheet,
+            allowedContentTypes: fileType == .arrangement ? DirectoryFileDocument.arrangementReadableContentTypes : DirectoryFileDocument.machineReadableContentTypes,
+            allowsMultipleSelection: false
+        ) {
             defer { presentOpenFileSheet = false }
             switch $0 {
             case .failure(let error):
