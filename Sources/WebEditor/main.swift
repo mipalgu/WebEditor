@@ -176,15 +176,23 @@ import UniformTypeIdentifiers
 
 extension UTType {
     
+    static var arrangement: UTType {
+        UTType(filenameExtension: "arrangement")!
+    }
+    
+    static var micaseMachine: UTType {
+        UTType(importedAs: "net.mipal.micase.fsm")
+    }
+    
     static var machine: UTType {
-        return UTType(importedAs: "net.mipal.micase.fsm")
+        UTType(filenameExtension: "machine")!
     }
     
 }
 
 struct DirectoryFileDocument: FileDocument {
     
-    static var readableContentTypes: [UTType] = [.directory, .machine]
+    static var readableContentTypes: [UTType] = [.arrangement, .micaseMachine, .machine]
     
     init() {}
 
@@ -198,7 +206,7 @@ struct DirectoryFileDocument: FileDocument {
 
 struct WebEditorDefaultMenu: View {
     
-    enum FileType {
+    enum FileType: Equatable {
         case arrangement
         case machine(Machine.Semantics)
     }
@@ -257,7 +265,7 @@ struct WebEditorDefaultMenu: View {
         .fileExporter(
             isPresented: $presentNewFileSheet,
             document: DirectoryFileDocument(),
-            contentType: .directory,
+            contentType: fileType == .arrangement ? .arrangement : .machine,
             onCompletion: {
                 defer { presentNewFileSheet = false }
                 switch $0 {
@@ -289,7 +297,7 @@ struct WebEditorDefaultMenu: View {
                 }
             }
         )
-        .fileImporter(isPresented: $presentOpenFileSheet, allowedContentTypes: [.directory, .machine], allowsMultipleSelection: false) {
+        .fileImporter(isPresented: $presentOpenFileSheet, allowedContentTypes: DirectoryFileDocument.readableContentTypes, allowsMultipleSelection: false) {
             defer { presentOpenFileSheet = false }
             switch $0 {
             case .failure(let error):
@@ -309,7 +317,7 @@ struct WebEditorDefaultMenu: View {
                         return
                     }
                     display = .arrangement(arrangement)
-                case .machine(let semantics):
+                case .machine:
                     let machine: Machine
                     do {
                         machine = try Machine(filePath: url)
