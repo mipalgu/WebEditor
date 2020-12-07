@@ -66,10 +66,10 @@ import Machines
 import Attributes
 import Utilities
 
-public final class CollectionViewModel: ObservableObject {
+public final class CollectionViewModel<Root: Modifiable>: ObservableObject {
     
-    @Reference public var machine: Machine
-    public let path: Attributes.Path<Machine, [Attribute]>?
+    @Reference public var root: Root
+    public let path: Attributes.Path<Root, [Attribute]>?
     public let label: String
     public let type: AttributeType
     
@@ -84,17 +84,17 @@ public final class CollectionViewModel: ObservableObject {
             guard let path = path else {
                 return currentElements
             }
-            let machineElements = $machine[path: path].value
-            let elements = zip(machineElements, currentElements).map { (machineElement, currentElement) -> ListElement<Attribute> in
-                if machineElement == currentElement.value {
+            let rootElements = $root[path: path].value
+            let elements = zip(rootElements, currentElements).map { (rootElement, currentElement) -> ListElement<Attribute> in
+                if rootElement == currentElement.value {
                     return currentElement
                 }
-                return ListElement(machineElement)
+                return ListElement(rootElement)
             }
-            if machineElements.count <= elements.count {
+            if rootElements.count <= elements.count {
                 return elements
             }
-            return elements + machineElements[elements.count..<machineElements.count].map { ListElement($0) }
+            return elements + rootElements[elements.count..<rootElements.count].map { ListElement($0) }
         } set {
             zip(currentElements, newValue).enumerated().forEach {
                 if $1.0.value == $1.1.value {
@@ -108,14 +108,14 @@ public final class CollectionViewModel: ObservableObject {
         }
     }
     
-    init(machine: Ref<Machine>, path: Attributes.Path<Machine, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
-        self._machine = Reference(reference: machine)
+    init(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
+        self._root = Reference(reference: root)
         self.path = path
         self.label = label
         self.type = type
-        self.currentElements = (path.map { machine[path: $0].value } ?? defaultValue).map { ListElement($0) }
+        self.currentElements = (path.map { root[path: $0].value } ?? defaultValue).map { ListElement($0) }
         self.newAttribute = type.defaultValue
-        self.listen(to: $machine)
+        self.listen(to: $root)
     }
     
     public func addElement() {
@@ -125,12 +125,12 @@ public final class CollectionViewModel: ObservableObject {
             return
         }
         do {
-            try machine.addItem(newAttribute, to: path)
+            try root.addItem(newAttribute, to: path)
             newAttribute = type.defaultValue
         } catch let e {
             print("\(e)", stderr)
         }
-        self.currentElements = machine[keyPath: path.keyPath].map { ListElement($0) }
+        self.currentElements = root[keyPath: path.keyPath].map { ListElement($0) }
     }
     
     public func deleteElement(_ element: ListElement<Attribute>, atIndex index: Int) {
@@ -146,12 +146,12 @@ public final class CollectionViewModel: ObservableObject {
             return
         }
         do {
-            try machine.deleteItems(table: path, items: offsets)
+            try root.deleteItems(table: path, items: offsets)
             return
         } catch let e {
             print("\(e)", stderr)
         }
-        currentElements = machine[keyPath: path.keyPath].map { ListElement($0) }
+        currentElements = root[keyPath: path.keyPath].map { ListElement($0) }
     }
     
     public func moveElements(source: IndexSet, destination: Int) {
@@ -160,11 +160,11 @@ public final class CollectionViewModel: ObservableObject {
             return
         }
         do {
-            try machine.moveItems(table: path, from: source, to: destination)
+            try root.moveItems(table: path, from: source, to: destination)
         } catch let e {
             print("\(e)", stderr)
         }
-        currentElements = machine[keyPath: path.keyPath].map { ListElement($0) }
+        currentElements = root[keyPath: path.keyPath].map { ListElement($0) }
     }
     
 }

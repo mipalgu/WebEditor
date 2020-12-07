@@ -15,10 +15,10 @@ import Machines
 import Attributes
 import Utilities
 
-public struct LineView: View {
+public struct LineView<Root: Modifiable>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, String>?
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, String>?
     let label: String
     let onChange: (String) -> Void
     
@@ -28,11 +28,11 @@ public struct LineView: View {
     
     @State var error: String? = nil
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "", onChange: @escaping (String) -> Void = { _ in }) {
-        self.machine = machine
+    public init(root: Ref<Root>, path: Attributes.Path<Root, String>?, label: String, defaultValue: String = "", onChange: @escaping (String) -> Void = { _ in }) {
+        self.root = root
         self.path = path
         self.label = label
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
+        self._value = State(initialValue: path.map { root[path: $0].value } ?? defaultValue)
         self.onChange = onChange
     }
     
@@ -44,16 +44,16 @@ public struct LineView: View {
                     return
                 }
                 do {
-                    try machine.value.modify(attribute: path, value: value)
+                    try root.value.modify(attribute: path, value: value)
                     error = nil
                     onChange(value)
                     return
-                } catch let e as MachinesError where e.path.isSame(as: path) {
-                    error = e.message
+//                } catch let e as MachinesError where e.path.isSame(as: path) {
+//                    error = e.message
                 } catch let e {
                     print("\(e)", stderr)
                 }
-                value = machine[path: path].value
+                value = root[path: path].value
             })
             .background(config.fieldColor)
             .foregroundColor(config.textColor)
@@ -66,11 +66,11 @@ public struct LineView: View {
 
 struct LineView_Preview: PreviewProvider {
     
-    static let machine: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine())
+    static let root: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine())
     
     static var previews: some View {
         LineView(
-            machine: machine,
+            root: root,
             path: Machine.path.states[0].name,
             label: "State 0"
         ).environmentObject(Config())

@@ -66,14 +66,14 @@ import Machines
 import Attributes
 import Utilities
 
-public struct CollectionView: View{
+public struct CollectionView<Root: Modifiable>: View{
     
-    @StateObject var viewModel: CollectionViewModel
+    @StateObject var viewModel: CollectionViewModel<Root>
     
     @State var creating: Bool = false
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
-        self._viewModel = StateObject(wrappedValue: CollectionViewModel(machine: machine, path: path, label: label, type: type, defaultValue: defaultValue))
+    public init(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
+        self._viewModel = StateObject(wrappedValue: CollectionViewModel(root: root, path: path, label: label, type: type, defaultValue: defaultValue))
     }
     
     public var body: some View {
@@ -82,7 +82,7 @@ public struct CollectionView: View{
                 switch viewModel.type {
                 case .line:
                     HStack {
-                        AttributeView(machine: viewModel.$machine, attribute: $viewModel.newAttribute, path: nil, label: "New " + viewModel.label)
+                        AttributeView(root: viewModel.$root, attribute: $viewModel.newAttribute, path: nil, label: "New " + viewModel.label)
                         Button(action: viewModel.addElement, label: {
                             Image(systemName: "plus").font(.system(size: 16, weight: .regular))
                         }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
@@ -106,7 +106,7 @@ public struct CollectionView: View{
                             }).animation(.easeOut).buttonStyle(PlainButtonStyle()).foregroundColor(.red)
                         }
                         AttributeView(
-                            machine: viewModel.$machine,
+                            root: viewModel.$root,
                             attribute: $viewModel.newAttribute,
                             path: nil,
                             label: ""
@@ -128,7 +128,7 @@ public struct CollectionView: View{
                     ForEach(Array(viewModel.elements.enumerated()), id: \.1.id) { (index, element) in
                         HStack(spacing: 1) {
                             AttributeView(
-                                machine: viewModel.$machine,
+                                root: viewModel.$root,
                                 attribute: $viewModel.elements[index].value,
                                 path: viewModel.path?[index],
                                 label: ""

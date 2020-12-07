@@ -15,21 +15,21 @@ import Machines
 import Attributes
 import Utilities
 
-public struct FloatView: View {
+public struct FloatView<Root: Modifiable>: View {
 
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, Double>?
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, Double>?
     let label: String
     
     @State var value: String
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Double>?, label: String, defaultValue: Double = 0.0) {
-        self.machine = machine
+    public init(root: Ref<Root>, path: Attributes.Path<Root, Double>?, label: String, defaultValue: Double = 0.0) {
+        self.root = root
         self.path = path
         self.label = label
-        self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
+        self._value = State(initialValue: path.map { String(root[path: $0].value) } ?? String(defaultValue))
     }
     
     public var body: some View {
@@ -41,12 +41,12 @@ public struct FloatView: View {
                 return
             }
             do {
-                try machine.value.modify(attribute: path, value: value)
+                try root.value.modify(attribute: path, value: value)
                 return
             } catch let e {
                 print("\(e)")
             }
-            self.value = String(machine[path: path].value)
+            self.value = String(root[path: path].value)
         })
         .font(.body)
         .background(config.fieldColor)

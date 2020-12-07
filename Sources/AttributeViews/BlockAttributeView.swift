@@ -15,15 +15,15 @@ import Machines
 import Attributes
 import Utilities
 
-public struct BlockAttributeView: View{
+public struct BlockAttributeView<Root: Modifiable>: View{
     
-    @ObservedObject var machine: Ref<Machine>
+    @ObservedObject var root: Ref<Root>
     @Binding var attribute: BlockAttribute
-    let path: Attributes.Path<Machine, BlockAttribute>?
+    let path: Attributes.Path<Root, BlockAttribute>?
     let label: String
     
-    public init(machine: Ref<Machine>, attribute: Binding<BlockAttribute>, path: Attributes.Path<Machine, BlockAttribute>?, label: String) {
-        self.machine = machine
+    public init(root: Ref<Root>, attribute: Binding<BlockAttribute>, path: Attributes.Path<Root, BlockAttribute>?, label: String) {
+        self.root = root
         self._attribute = attribute
         self.path = path
         self.label = label
@@ -32,17 +32,17 @@ public struct BlockAttributeView: View{
     public var body: some View {
         switch attribute.type {
         case .code(let language):
-            CodeView(machine: machine, path: path?.codeValue, label: label, language: language)
+            CodeView(root: root, path: path?.codeValue, label: label, language: language)
         case .text:
-            TextView(machine: machine, path: path?.textValue, label: label)
+            TextView(root: root, path: path?.textValue, label: label)
         case .collection(let type):
-            CollectionView(machine: machine, path: path?.collectionValue, label: label, type: type)
+            CollectionView(root: root, path: path?.collectionValue, label: label, type: type)
         case .table(let columns):
-            TableView(machine: machine, path: path?.tableValue, label: label, columns: columns)
+            TableView(root: root, path: path?.tableValue, label: label, columns: columns)
         case .complex(let fields):
-            ComplexView(machine: machine, path: path?.complexValue, label: label, fields: fields)
+            ComplexView(root: root, path: path?.complexValue, label: label, fields: fields)
         case .enumerableCollection(let validValues):
-            EnumerableCollectionView(machine: machine, path: path?.enumerableCollectionValue, label: label, validValues: validValues)
+            EnumerableCollectionView(root: root, path: path?.enumerableCollectionValue, label: label, validValues: validValues)
         }
     }
 }

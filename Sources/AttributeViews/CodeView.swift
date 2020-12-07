@@ -15,10 +15,10 @@ import Machines
 import Attributes
 import Utilities
 
-public struct CodeView<Label: View>: View {
+public struct CodeView<Root: Modifiable, Label: View>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, Code>?
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, Code>?
     let language: Language
     let label: () -> Label
     
@@ -26,16 +26,16 @@ public struct CodeView<Label: View>: View {
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Code>?, label: String, language: Language, defaultValue: Code = "") where Label == Text {
-        self.init(machine: machine, path: path, language: language, defaultValue: defaultValue) { Text(label.capitalized) }
+    public init(root: Ref<Root>, path: Attributes.Path<Root, Code>?, label: String, language: Language, defaultValue: Code = "") where Label == Text {
+        self.init(root: root, path: path, language: language, defaultValue: defaultValue) { Text(label.capitalized) }
     }
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Code>?, language: Language, defaultValue: Code = "", label: @escaping () -> Label) {
-        self.machine = machine
+    public init(root: Ref<Root>, path: Attributes.Path<Root, Code>?, language: Language, defaultValue: Code = "", label: @escaping () -> Label) {
+        self.root = root
         self.path = path
         self.language = language
         self.label = label
-        self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
+        self._value = State(initialValue: path.map { String(root[path: $0].value) } ?? String(defaultValue))
     }
     
     public var body: some View {
@@ -55,12 +55,12 @@ public struct CodeView<Label: View>: View {
                         return
                     }
                     do {
-                        try machine.value.modify(attribute: path, value: Code($0))
+                        try root.value.modify(attribute: path, value: Code($0))
                         return
                     } catch let e {
                         print("\(e)")
                     }
-                    self.value = String(machine[path: path].value)
+                    self.value = String(root[path: path].value)
                 }
         }
     }

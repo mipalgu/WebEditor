@@ -66,15 +66,15 @@ import Machines
 import Attributes
 import Utilities
 
-public struct AttributeView: View{
+public struct AttributeView<Root: Modifiable>: View{
     
-    @ObservedObject var machine: Ref<Machine>
+    @ObservedObject var root: Ref<Root>
     @Binding var attribute: Attribute
-    let path: Attributes.Path<Machine, Attribute>?
+    let path: Attributes.Path<Root, Attribute>?
     let label: String
     
-    public init(machine: Ref<Machine>, attribute: Binding<Attribute>, path: Attributes.Path<Machine, Attribute>?, label: String) {
-        self.machine = machine
+    public init(root: Ref<Root>, attribute: Binding<Attribute>, path: Attributes.Path<Root, Attribute>?, label: String) {
+        self.root = root
         self._attribute = attribute
         self.path = path
         self.label = label
@@ -84,14 +84,14 @@ public struct AttributeView: View{
         switch attribute.type {
         case .line:
             LineAttributeView(
-                machine: machine,
+                root: root,
                 attribute: $attribute.lineAttribute,
                 path: path?.lineAttribute,
                 label: label
             )
         case .block:
             BlockAttributeView(
-                machine: machine,
+                root: root,
                 attribute: $attribute.blockAttribute,
                 path: path?.blockAttribute,
                 label: label

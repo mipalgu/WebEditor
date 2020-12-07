@@ -15,15 +15,15 @@ import Machines
 import Attributes
 import Utilities
 
-public struct LineAttributeView: View {
+public struct LineAttributeView<Root: Modifiable>: View {
     
-    @ObservedObject var machine: Ref<Machine>
+    @ObservedObject var root: Ref<Root>
     @Binding var attribute: LineAttribute
-    let path: Attributes.Path<Machine, LineAttribute>?
+    let path: Attributes.Path<Root, LineAttribute>?
     let label: String
     
-    public init(machine: Ref<Machine>, attribute: Binding<LineAttribute>, path: Attributes.Path<Machine, LineAttribute>?, label: String) {
-        self.machine = machine
+    public init(root: Ref<Root>, attribute: Binding<LineAttribute>, path: Attributes.Path<Root, LineAttribute>?, label: String) {
+        self.root = root
         self._attribute = attribute
         self.path = path
         self.label = label
@@ -32,17 +32,17 @@ public struct LineAttributeView: View {
     public var body: some View {
         switch attribute.type {
         case .bool:
-            BoolView(machine: machine, path: path?.boolValue, label: label)
+            BoolView(root: root, path: path?.boolValue, label: label)
         case .integer:
-            IntegerView(machine: machine, path: path?.integerValue, label: label)
+            IntegerView(root: root, path: path?.integerValue, label: label)
         case .float:
-            FloatView(machine: machine, path: path?.floatValue, label: label)
+            FloatView(root: root, path: path?.floatValue, label: label)
         case .expression(let language):
-            ExpressionView(machine: machine, path: path?.expressionValue, label: label, language: language)
+            ExpressionView(root: root, path: path?.expressionValue, label: label, language: language)
         case .enumerated(let validValues):
-            EnumeratedView(machine: machine, path: path?.enumeratedValue, label: label, validValues: validValues)
+            EnumeratedView(root: root, path: path?.enumeratedValue, label: label, validValues: validValues)
         case .line:
-            LineView(machine: machine, path: path?.lineValue, label: label) {
+            LineView(root: root, path: path?.lineValue, label: label) {
                 attribute = .line($0)
             }
         }

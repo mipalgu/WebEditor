@@ -15,20 +15,20 @@ import Machines
 import Attributes
 import Utilities
 
-public struct BoolView: View {
+public struct BoolView<Root: Modifiable>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, Bool>?
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, Bool>?
     let label: String
     
     @Binding var value: Bool
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Bool>?, label: String, defaultValue: Bool = false) {
-        self.machine = machine
+    public init(root: Ref<Root>, path: Attributes.Path<Root, Bool>?, label: String, defaultValue: Bool = false) {
+        self.root = root
         self.path = path
         self.label = label
         if let path = path {
-            self._value = machine[bindingTo: path]
+            self._value = root[bindingTo: path]
         } else {
             self._value = Ref(copying: false).asBinding
         }
@@ -46,12 +46,12 @@ public struct BoolView: View {
                     return
                 }
                 do {
-                    try machine.value.modify(attribute: path, value: $0)
+                    try root.value.modify(attribute: path, value: $0)
                     return
                 } catch let e {
                     print("\(e)")
                 }
-                value = machine[path: path].value
+                value = root[path: path].value
             }
     }
 }

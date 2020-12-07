@@ -15,10 +15,10 @@ import Machines
 import Attributes
 import Utilities
 
-public struct ExpressionView: View {
+public struct ExpressionView<Root: Modifiable>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, Expression>?
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, Expression>?
     let label: String
     let language: Language
     
@@ -26,12 +26,12 @@ public struct ExpressionView: View {
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Expression>?, label: String, language: Language, defaultValue: Expression = "") {
-        self.machine = machine
+    public init(root: Ref<Root>, path: Attributes.Path<Root, Expression>?, label: String, language: Language, defaultValue: Expression = "") {
+        self.root = root
         self.path = path
         self.label = label
         self.language = language
-        self._value = State(initialValue: path.map { String(machine[path: $0].value) } ?? String(defaultValue))
+        self._value = State(initialValue: path.map { String(root[path: $0].value) } ?? String(defaultValue))
     }
     
     public var body: some View {
@@ -40,12 +40,12 @@ public struct ExpressionView: View {
                 return
             }
             do {
-                try machine.value.modify(attribute: path, value: Expression(value))
+                try root.value.modify(attribute: path, value: Expression(value))
                 return
             } catch let e {
                 print("\(e)")
             }
-            self.value = String(machine[path: path].value)
+            self.value = String(root[path: path].value)
         })
         .font(.body)
         .background(config.fieldColor)

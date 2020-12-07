@@ -16,14 +16,14 @@ import Machines
 import Attributes
 import Utilities
 
-public struct AttributeGroupView: View {
+public struct AttributeGroupView<Root: Modifiable>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, AttributeGroup>
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, AttributeGroup>
     let label: String
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, AttributeGroup>, label: String) {
-        self.machine = machine
+    public init(root: Ref<Root>, path: Attributes.Path<Root, AttributeGroup>, label: String) {
+        self.root = root
         self.path = path
         self.label = label
     }
@@ -34,10 +34,10 @@ public struct AttributeGroupView: View {
             Form {
                 HStack {
                     VStack(alignment: .leading) {
-                        ForEach(Array(machine[path: path].fields.value.enumerated()), id: \.0) { (index, field) in
+                        ForEach(Array(root[path: path].fields.value.enumerated()), id: \.0) { (index, field) in
                             AttributeView(
-                                machine: machine,
-                                attribute: machine[path: path].attributes[field.name].wrappedValue.asBinding,
+                                root: root,
+                                attribute: root[path: path].attributes[field.name].wrappedValue.asBinding,
                                 path: path.attributes[field.name].wrappedValue,
                                 label: field.name.pretty
                             )

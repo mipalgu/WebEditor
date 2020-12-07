@@ -15,21 +15,21 @@ import Machines
 import Attributes
 import Utilities
 
-public struct ComplexView: View {
+public struct ComplexView<Root: Modifiable>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, [Attributes.Label: Attribute]>?
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, [Attributes.Label: Attribute]>?
     let label: String
     let fields: [Field]
     
     @State var value: [String: Attribute]
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [String: Attribute]>?, label: String, fields: [Field], defaultValue: [Attributes.Label: Attribute]? = nil) {
-        self.machine = machine
+    public init(root: Ref<Root>, path: Attributes.Path<Root, [String: Attribute]>?, label: String, fields: [Field], defaultValue: [Attributes.Label: Attribute]? = nil) {
+        self.root = root
         self.path = path
         self.label = label
         self.fields = fields
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue ?? AttributeType.complex(layout: fields).defaultValue.complexValue)
+        self._value = State(initialValue: path.map { root[path: $0].value } ?? defaultValue ?? AttributeType.complex(layout: fields).defaultValue.complexValue)
     }
     
     public var body: some View {
@@ -38,8 +38,8 @@ public struct ComplexView: View {
                 VStack(alignment: .leading) {
                     ForEach(fields, id: \.name) { field in
                         AttributeView(
-                            machine: machine,
-                            attribute: path.map { machine[path: $0][field.name].wrappedValue.asBinding } ?? Binding($value[field.name])!,
+                            root: root,
+                            attribute: path.map { root[path: $0][field.name].wrappedValue.asBinding } ?? Binding($value[field.name])!,
                             path: path?[field.name].wrappedValue,
                             label: field.name.pretty
                         )

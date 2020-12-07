@@ -15,21 +15,21 @@ import Machines
 import Attributes
 import Utilities
 
-public struct TextView: View {
+public struct TextView<Root: Modifiable>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, String>?
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, String>?
     let label: String
     
     @State var value: String
     
     @EnvironmentObject var config: Config
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, String>?, label: String, defaultValue: String = "") {
-        self.machine = machine
+    public init(root: Ref<Root>, path: Attributes.Path<Root, String>?, label: String, defaultValue: String = "") {
+        self.root = root
         self.path = path
         self.label = label
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
+        self._value = State(initialValue: path.map { root[path: $0].value } ?? defaultValue)
     }
     
     public var body: some View {
@@ -51,12 +51,12 @@ public struct TextView: View {
                         return
                     }
                     do {
-                        try machine.value.modify(attribute: path, value: $0)
+                        try root.value.modify(attribute: path, value: $0)
                         return
                     } catch let e {
                         print("\(e)")
                     }
-                    self.value = machine[path: path].value
+                    self.value = root[path: path].value
                 }
         }
     }

@@ -15,10 +15,10 @@ import Machines
 import Attributes
 import Utilities
 
-public struct TableView: View {
+public struct TableView<Root: Modifiable>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, [[LineAttribute]]>?
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, [[LineAttribute]]>?
     let label: String
     let columns: [BlockAttributeType.TableColumn]
     
@@ -28,12 +28,12 @@ public struct TableView: View {
     
     @State var selection: Set<Int> = []
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [[LineAttribute]]>?, label: String, columns: [BlockAttributeType.TableColumn], defaultValue: [[LineAttribute]] = []) {
-        self.machine = machine
+    public init(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>?, label: String, columns: [BlockAttributeType.TableColumn], defaultValue: [[LineAttribute]] = []) {
+        self.root = root
         self.path = path
         self.label = label
         self.columns = columns
-        self._value = State(initialValue: path.map { machine[path: $0].value } ?? defaultValue)
+        self._value = State(initialValue: path.map { root[path: $0].value } ?? defaultValue)
     }
     
     public var body: some View {
@@ -49,17 +49,17 @@ public struct TableView: View {
                     }
                 }
                 ForEach(Array(value.indices), id: \.self) { rowIndex in
-                    TableRowView(machine: machine, path: path?[rowIndex], row: $value[rowIndex])
+                    TableRowView(root: root, path: path?[rowIndex], row: $value[rowIndex])
                 }
             }.frame(minHeight: 100)
         }
     }
 }
 
-struct TableRowView: View {
+struct TableRowView<Root: Modifiable>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, [LineAttribute]>?
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, [LineAttribute]>?
     @Binding var row: [LineAttribute]
     
     @EnvironmentObject var config: Config
@@ -67,7 +67,7 @@ struct TableRowView: View {
     var body: some View {
         HStack {
             ForEach(Array(row.indices), id: \.self) { columnIndex in
-                LineAttributeView(machine: machine, attribute: $row[columnIndex], path: path?[columnIndex], label: "")
+                LineAttributeView(root: root, attribute: $row[columnIndex], path: path?[columnIndex], label: "")
                     .frame(minWidth: 0, maxWidth: .infinity)
             }
         }
