@@ -52,7 +52,7 @@ public struct MachineView: View {
     public var body: some View {
         GeometryReader { (geometry: GeometryProxy) in
             ZStack {
-                ForEach(viewModel.states, id: \.name) { (stateViewModel) -> HiddenStateView in
+                ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) -> HiddenStateView in
                     HiddenStateView(
                         viewModel: stateViewModel,
                         editorViewModel: editorViewModel,
@@ -62,16 +62,21 @@ public struct MachineView: View {
                         parentHeight: geometry.size.height
                     )
                 }
-                ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) in
-                    ForEach(Array(stateViewModel.transitions.indices), id: \.self) { index in
-                        TransitionView(
-                            viewModel: stateViewModel.transitionViewModel(
-                                transition: stateViewModel.transitions[index],
+                ForEach(Array(viewModel.states.indices), id: \.self) { (stateIndex: Int) in
+                    ForEach(Array(viewModel.states[stateIndex].transitions.indices), id: \.self) { (index: Int) -> AnyView in
+                        AnyView(TransitionView(
+                            viewModel: viewModel.states[stateIndex].transitionViewModel(
+                                transition: viewModel.states[stateIndex].transitions[index],
                                 index: index,
-                                target: self.viewModel.getStateViewModel(stateName: stateViewModel.transitions[index].target)
+                                target: self.viewModel.getStateViewModel(
+                                    stateName: viewModel.states[stateIndex].transitions[index].target
+                                )
                             ),
-                            focused: isFocused(state: stateViewModel, transitionIndex: index)
+                            focused: isFocused(state: viewModel.states[stateIndex], transitionIndex: index)
                         )
+                        .onTapGesture(count: 1) {
+                            editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: index)
+                        })
                     }
                 }
                 if viewModel.creatingTransition {
@@ -81,9 +86,9 @@ public struct MachineView: View {
                         point2: viewModel.tempPoint2Binding,
                         point3: viewModel.tempPoint3Binding,
                         strokeNumber: viewModel.tempStrokeNumberBinding,
-                        focused: Binding(get: { false }, set: { _ in })
+                        focused: Binding(get: { false }, set: { _ in }),
+                        colour: Color.red
                     )
-                        .foregroundColor(Color.red)
                 }
             }
             .background(

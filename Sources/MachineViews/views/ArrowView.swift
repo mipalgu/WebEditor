@@ -27,6 +27,8 @@ struct ArrowView: View {
     
     @Binding var focused: Bool
     
+    var colour: Color
+    
     var arrowPoint0: CGPoint {
         let theta = atan2(Double(point3.y - point2.y), Double(point3.x - point2.x)) +  Double.pi - Double.pi / 6.0
         let y = point3.y + CGFloat(10.0 * sin(theta))
@@ -76,7 +78,7 @@ struct ArrowView: View {
                 path.move(to: point3)
                 path.addLine(to: arrowPoint1)
             }
-            .stroke(config.textColor, lineWidth: 2)
+            .stroke(colour, lineWidth: 2)
             //.coordinateSpace(name: "MAIN_VIEW")
             .foregroundColor(config.textColor)
             if strokeNumber > 0 {

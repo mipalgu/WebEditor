@@ -174,12 +174,21 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
         self._machine = Reference(reference: machine)
         self.path = path
-        self.point0ViewModel = RigidMoveableViewModel(location: point0, width: pointDiameter, height: pointDiameter)
-        self.point1ViewModel = RigidMoveableViewModel(location: point1, width: pointDiameter, height: pointDiameter)
-        self.point2ViewModel = RigidMoveableViewModel(location: point2, width: pointDiameter, height: pointDiameter)
-        self.point3ViewModel = RigidMoveableViewModel(location: point3, width: pointDiameter, height: pointDiameter)
+        let pointViewModels = [
+            RigidMoveableViewModel(location: point0, width: pointDiameter, height: pointDiameter),
+            RigidMoveableViewModel(location: point1, width: pointDiameter, height: pointDiameter),
+            RigidMoveableViewModel(location: point2, width: pointDiameter, height: pointDiameter),
+            RigidMoveableViewModel(location: point3, width: pointDiameter, height: pointDiameter)
+        ]
+        self.point0ViewModel = pointViewModels[0]
+        self.point1ViewModel = pointViewModels[1]
+        self.point2ViewModel = pointViewModels[2]
+        self.point3ViewModel = pointViewModels[3]
         self.priority = priority
         self.pointDiameter = pointDiameter
+        pointViewModels.forEach {
+            self.listen(to: $0)
+        }
     }
     
     public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {

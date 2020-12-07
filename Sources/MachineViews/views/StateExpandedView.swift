@@ -109,13 +109,23 @@ struct StateExpandedView: View {
                         self.editorViewModel.machine.startCreatingTransition(gesture: $0, sourceViewModel: viewModel)
                         return
                     }
-                    self.viewModel.moveSelf(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
+                    self.viewModel.moveSelf(
+                        gesture: $0,
+                        frameWidth: reader.size.width,
+                        frameHeight: reader.size.height,
+                        collapsed: false
+                    )
                 }.onEnded {
                     if creatingTransitions {
                         self.editorViewModel.machine.finishCreatingTransition(gesture: $0, sourceViewModel: viewModel)
                         return
                     }
-                    self.viewModel.finishMoveSelf(gesture: $0, frameWidth: reader.size.width, frameHeight: reader.size.height)
+                    self.viewModel.finishMoveSelf(
+                        gesture: $0,
+                        frameWidth: reader.size.width,
+                        frameHeight: reader.size.height,
+                        collapsed: false
+                    )
                 }
             )
     }
