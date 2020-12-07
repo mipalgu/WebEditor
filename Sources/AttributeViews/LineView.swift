@@ -47,11 +47,9 @@ public struct LineView<Root: Modifiable>: View {
                     error = nil
                     onChange(value)
                     return
-//                } catch let e as MachinesError where e.path.isSame(as: path) {
-//                    error = e.message
-                } catch let e {
-                    print("\(e)", stderr)
-                }
+                } catch let e as AttributeError<Root> where e.isError(forPath: path) {
+                    error = e.message
+                } catch {}
                 value = root[path: path].value
             })
             .background(config.fieldColor)
