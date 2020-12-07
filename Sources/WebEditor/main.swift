@@ -276,7 +276,8 @@ struct WebEditorDefaultMenu: View {
                         }
                         display = .arrangement(arrangement)
                     case .machine(let semantics):
-                        let machine = Machine.initialMachine(forSemantics: semantics)
+                        var machine = Machine.initialMachine(forSemantics: semantics)
+                        machine.filePath = url
                         do {
                             try machine.save()
                         } catch let e {
