@@ -66,7 +66,7 @@ public struct LineView: View {
 
 struct LineView_Preview: PreviewProvider {
     
-    static let machine: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine)
+    static let machine: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine())
     
     static var previews: some View {
         LineView(
