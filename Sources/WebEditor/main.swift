@@ -375,7 +375,7 @@ struct ContentView: View {
         self._rootMachines = Binding(get: { arrangement.rootMachinesAsDependencies }, set: { _ in })
         self._currentIndex = Binding(get: { arrangement.currentMachineIndex }, set: { arrangement.currentMachineIndex = $0 })
         self._editorViewModel = StateObject(wrappedValue: editorViewModel)
-        self._creatingTransitions = Binding(get: { false }, set: {_ in })
+        self._creatingTransitions = .constant(false)
     }
     
     var body: some View {
