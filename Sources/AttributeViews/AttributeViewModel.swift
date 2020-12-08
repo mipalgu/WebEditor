@@ -1,8 +1,8 @@
 /*
- * AttributeView.swift
- * MachineViews
+ * AttributeViewModel.swift
+ * AttributeViews
  *
- * Created by Callum McColl on 16/11/20.
+ * Created by Callum McColl on 9/12/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,33 +65,39 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct AttributeView: View{
+class AttributeViewModel<Value>: ObservableObject {
     
-    let subView: () -> AnyView
+    private var _modify: (Value) -> Void
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Attribute>, label: String) {
-        self.subView = {
-            switch root[path: path].value.type {
-            case .line:
-                return AnyView(LineAttributeView(root: root, path: path.lineAttribute,label: label))
-            case .block:
-                return AnyView(BlockAttributeView(root: root, path: path.blockAttribute, label: label))
-            }
+    @Published public var value: Value
+    
+    @Published var error: String? = nil
+    
+    init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Value>) {
+        self.value = root[path: path].value
+        self._modify = { _ in }
+        self._modify = { [unowned self] in
+            do {
+                try root.value.modify(attribute: path, value: $0)
+                self.error = nil
+                self.value = root[path: path].value
+                return
+            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
+                self.error = e.message
+            } catch {}
+            self.value = root[path: path].value
         }
+        self.listen(to: root)
     }
     
-    public init(attribute: Binding<Attribute>, label: String) {
-        self.subView = {
-            switch attribute.wrappedValue.type {
-            case .line:
-                return AnyView(LineAttributeView(attribute: attribute.lineAttribute, label: label))
-            case .block:
-                return AnyView(BlockAttributeView(attribute: attribute.blockAttribute, label: label))
-            }
-        }
+    init(binding: Binding<Value>) {
+        self._modify = { binding.wrappedValue = $0 }
+        self.value = binding.wrappedValue
     }
     
-    public var body: some View {
-        subView()
+    func sendModification() -> Void {
+        self._modify(value)
+        self.objectWillChange.send()
     }
+    
 }

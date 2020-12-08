@@ -14,21 +14,32 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct ComplexView<Root: Modifiable>: View {
+public struct ComplexView: View {
     
-    @ObservedObject var root: Ref<Root>
-    let path: Attributes.Path<Root, [Attributes.Label: Attribute]>?
+    @StateObject var viewModel: AttributeViewModel<[String: Attribute]>
+    let subView: (Field) -> AttributeView
     let label: String
     let fields: [Field]
     
-    @State var value: [String: Attribute]
+    @EnvironmentObject var config: Config
     
-    public init(root: Ref<Root>, path: Attributes.Path<Root, [String: Attribute]>?, label: String, fields: [Field], defaultValue: [Attributes.Label: Attribute]? = nil) {
-        self.root = root
-        self.path = path
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [String: Attribute]>, label: String, fields: [Field]) {
+        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label, fields: fields) {
+            AttributeView(root: root, path: path[$0.name].wrappedValue, label: $0.name.pretty)
+        }
+    }
+    
+    public init(value: Binding<[String: Attribute]>, label: String, fields: [Field]) {
+        self.init(viewModel: AttributeViewModel(binding: value), label: label, fields: fields) {
+            AttributeView(attribute: Binding(value[$0.name])!, label: $0.name.pretty)
+        }
+    }
+    
+    init(viewModel: AttributeViewModel<[String: Attribute]>, label: String, fields: [Field], subView: @escaping (Field) -> AttributeView) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+        self.subView = subView
         self.label = label
         self.fields = fields
-        self._value = State(initialValue: path.map { root[path: $0].value } ?? defaultValue ?? AttributeType.complex(layout: fields).defaultValue.complexValue)
     }
     
     public var body: some View {
@@ -36,12 +47,7 @@ public struct ComplexView<Root: Modifiable>: View {
             Section(header: Text(label.capitalized).font(.title3)) {
                 VStack(alignment: .leading) {
                     ForEach(fields, id: \.name) { field in
-                        AttributeView(
-                            root: root,
-                            attribute: path.map { root[path: $0][field.name].wrappedValue.asBinding } ?? Binding($value[field.name])!,
-                            path: path?[field.name].wrappedValue,
-                            label: field.name.pretty
-                        )
+                        subView(field)
                     }
                 }.padding(10).background(Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.05))
             }

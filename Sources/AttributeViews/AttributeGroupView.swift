@@ -16,14 +16,30 @@ import Attributes
 import Utilities
 
 public struct AttributeGroupView<Root: Modifiable>: View {
-    
-    @ObservedObject var root: Ref<Root>
-    let path: Attributes.Path<Root, AttributeGroup>
+
+    @StateObject var viewModel: AttributeViewModel<AttributeGroup>
+    let subView: (Field) -> AttributeView
     let label: String
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, AttributeGroup>, label: String) {
-        self.root = root
-        self.path = path
+        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label) { field in
+            AttributeView(
+                root: root,
+                path: path.attributes[field.name].wrappedValue,
+                label: field.name.pretty
+            )
+        }
+    }
+    
+    public init(group: Binding<AttributeGroup>, label: String) {
+        self.init(viewModel: AttributeViewModel(binding: group), label: label) { field in
+            AttributeView(attribute: Binding(group.attributes[field.name])!, label: field.name.pretty)
+        }
+    }
+    
+    init(viewModel: AttributeViewModel<AttributeGroup>, label: String, subView: @escaping (Field) -> AttributeView) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+        self.subView = subView
         self.label = label
     }
     
@@ -33,13 +49,8 @@ public struct AttributeGroupView<Root: Modifiable>: View {
             Form {
                 HStack {
                     VStack(alignment: .leading) {
-                        ForEach(Array(root[path: path].fields.value.enumerated()), id: \.0) { (index, field) in
-                            AttributeView(
-                                root: root,
-                                attribute: root[path: path].attributes[field.name].wrappedValue.asBinding,
-                                path: path.attributes[field.name].wrappedValue,
-                                label: field.name.pretty
-                            )
+                        ForEach(Array(viewModel.value.fields.enumerated()), id: \.0) { (index, field) in
+                            subView(field)
                         }
                     }
                     Spacer()

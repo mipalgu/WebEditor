@@ -14,43 +14,38 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct EnumeratedView<Root: Modifiable>: View {
+public struct EnumeratedView: View {
     
-    @ObservedObject var root: Ref<Root>
-    let path: Attributes.Path<Root, String>?
+    
+    @StateObject var viewModel: AttributeViewModel<Expression>
     let label: String
     let validValues: Set<String>
     
-    @State var value: String
-    
     @EnvironmentObject var config: Config
     
-    public init(root: Ref<Root>, path: Attributes.Path<Root, String>?, label: String, validValues: Set<String>, defaultValue: String? = nil) {
-        self.root = root
-        self.path = path
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Expression>, label: String, validValues: Set<String>) {
+        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label, validValues: validValues)
+    }
+    
+    public init(value: Binding<Expression>, label: String, validValues: Set<String>) {
+        self.init(viewModel: AttributeViewModel(binding: value), label: label, validValues: validValues)
+    }
+    
+    init(viewModel: AttributeViewModel<Expression>, label: String, validValues: Set<String>) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
         self.label = label
         self.validValues = validValues
-        self._value = State(initialValue: path.map { root[path: $0].value } ?? defaultValue ?? validValues.sorted().first ?? "")
     }
     
     public var body: some View {
-        Picker(label, selection: $value) {
+        Picker(label, selection: $viewModel.value) {
             ForEach(validValues.sorted(), id: \.self) {
                 Text($0).tag($0)
                     .foregroundColor(config.textColor)
             }
         }.pickerStyle(InlinePickerStyle())
-        .onChange(of: value) {
-            guard let path = self.path else {
-                return
-            }
-            do {
-                try root.value.modify(attribute: path, value: $0)
-                return
-            } catch let e {
-                print("\(e)")
-            }
-            self.value = root[path: path].value
+        .onChange(of: viewModel.value) { _ in
+            self.viewModel.sendModification()
         }
     }
 }

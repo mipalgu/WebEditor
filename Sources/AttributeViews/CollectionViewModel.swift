@@ -65,12 +65,12 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public final class CollectionViewModel<Root: Modifiable>: ObservableObject {
+final class CollectionViewModel: AttributeViewModel<[Attribute]> {
     
-    @Reference public var root: Root
-    public let path: Attributes.Path<Root, [Attribute]>?
-    public let label: String
-    public let type: AttributeType
+    let _addElement: (CollectionViewModel) -> Void
+    let _deleteElement: (CollectionViewModel, ListElement<Attribute>, Int) -> Void
+    let _deleteElements: (CollectionViewModel, IndexSet) -> Void
+    let _moveElements: (CollectionViewModel, IndexSet, Int) -> Void
     
     @Published public var newAttribute: Attribute
     
@@ -80,10 +80,7 @@ public final class CollectionViewModel<Root: Modifiable>: ObservableObject {
     
     public var elements: [ListElement<Attribute>] {
         get {
-            guard let path = path else {
-                return currentElements
-            }
-            let rootElements = $root[path: path].value
+            let rootElements = super.value
             let elements = zip(rootElements, currentElements).map { (rootElement, currentElement) -> ListElement<Attribute> in
                 if rootElement == currentElement.value {
                     return currentElement
@@ -107,63 +104,83 @@ public final class CollectionViewModel<Root: Modifiable>: ObservableObject {
         }
     }
     
-    init(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
-        self._root = Reference(reference: root)
-        self.path = path
-        self.label = label
-        self.type = type
-        self.currentElements = (path.map { root[path: $0].value } ?? defaultValue).map { ListElement($0) }
+    init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>, type: AttributeType) {
+        self._addElement = { me in
+            do {
+                try root.value.addItem(me.newAttribute, to: path)
+                me.newAttribute = type.defaultValue
+            } catch let e {
+                me.error = "\(e)"
+            }
+            me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+        }
+        self._deleteElement = { (me, element, index) in
+            let offsets: IndexSet = me.selection.contains(element.id)
+                ? IndexSet(me.elements.enumerated().lazy.filter { me.selection.contains($1.id) }.map { $0.0 })
+                : [index]
+            me.deleteElements(offsets: offsets)
+        }
+        self._deleteElements = { (me, offsets) in
+            do {
+                try root.value.deleteItems(table: path, items: offsets)
+                return
+            } catch let e {
+                me.error = "\(e)"
+            }
+            me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+        }
+        self._moveElements = { (me, source, destination) in
+            do {
+                try root.value.moveItems(table: path, from: source, to: destination)
+            } catch let e {
+                me.error = "\(e)"
+            }
+            me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+        }
         self.newAttribute = type.defaultValue
-        self.listen(to: $root)
+        self.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+        super.init(root: root, path: path)
+    }
+    
+    init(binding value: Binding<[Attribute]>, type: AttributeType) {
+        self._addElement = { me in
+            value.wrappedValue.append(me.newAttribute)
+            me.newAttribute = type.defaultValue
+            me.currentElements = value.wrappedValue.map { ListElement($0) }
+        }
+        self._deleteElement = { (me, element, index) in
+            let offsets: IndexSet = me.selection.contains(element.id)
+                ? IndexSet(me.elements.enumerated().lazy.filter { me.selection.contains($1.id) }.map { $0.0 })
+                : [index]
+            me.deleteElements(offsets: offsets)
+        }
+        self._deleteElements = { (me, offsets) in
+            value.wrappedValue.remove(atOffsets: offsets)
+            me.currentElements = value.wrappedValue.map { ListElement($0) }
+        }
+        self._moveElements = { (me, source, destination) in
+            value.wrappedValue.move(fromOffsets: source, toOffset: destination)
+            me.currentElements = value.wrappedValue.map { ListElement($0) }
+        }
+        self.newAttribute = type.defaultValue
+        self.currentElements = value.wrappedValue.map { ListElement($0) }
+        super.init(binding: value)
     }
     
     public func addElement() {
-        guard let path = self.path else {
-            currentElements.append(ListElement(newAttribute))
-            newAttribute = type.defaultValue
-            return
-        }
-        do {
-            try root.addItem(newAttribute, to: path)
-            newAttribute = type.defaultValue
-        } catch let e {
-            print("\(e)", stderr)
-        }
-        self.currentElements = root[keyPath: path.keyPath].map { ListElement($0) }
+        self._addElement(self)
     }
     
     public func deleteElement(_ element: ListElement<Attribute>, atIndex index: Int) {
-        let offsets: IndexSet = selection.contains(element.id)
-            ? IndexSet(elements.enumerated().lazy.filter { self.selection.contains($1.id) }.map { $0.0 })
-            : [index]
-        self.deleteElements(offsets: offsets)
+        self._deleteElement(self, element, index)
     }
     
     public func deleteElements(offsets: IndexSet) {
-        guard let path = self.path else {
-            currentElements.remove(atOffsets: offsets)
-            return
-        }
-        do {
-            try root.deleteItems(table: path, items: offsets)
-            return
-        } catch let e {
-            print("\(e)", stderr)
-        }
-        currentElements = root[keyPath: path.keyPath].map { ListElement($0) }
+        self._deleteElements(self, offsets)
     }
     
     public func moveElements(source: IndexSet, destination: Int) {
-        guard let path = self.path else {
-            currentElements.move(fromOffsets: source, toOffset: destination)
-            return
-        }
-        do {
-            try root.moveItems(table: path, from: source, to: destination)
-        } catch let e {
-            print("\(e)", stderr)
-        }
-        currentElements = root[keyPath: path.keyPath].map { ListElement($0) }
+        self._moveElements(self, source, destination)
     }
     
 }

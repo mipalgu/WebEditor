@@ -65,23 +65,43 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct CollectionView<Root: Modifiable>: View{
+public struct CollectionView: View{
     
-    @StateObject var viewModel: CollectionViewModel<Root>
+    @StateObject var viewModel: CollectionViewModel
+    let subView: (Int) -> AttributeView
+    let label: String
+    let type: AttributeType
+    
+    @EnvironmentObject var config: Config
     
     @State var creating: Bool = false
     
-    public init(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>?, label: String, type: AttributeType, defaultValue: [Attribute] = []) {
-        self._viewModel = StateObject(wrappedValue: CollectionViewModel(root: root, path: path, label: label, type: type, defaultValue: defaultValue))
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>, label: String, type: AttributeType) {
+        self.init(viewModel: CollectionViewModel(root: root, path: path, type: type), label: label, type: type) {
+            AttributeView(root: root, path: path[$0], label: "")
+        }
+    }
+    
+    public init(value: Binding<[Attribute]>, label: String, type: AttributeType) {
+        self.init(viewModel: CollectionViewModel(binding: value, type: type), label: label, type: type) {
+            AttributeView(attribute: value[$0], label: "")
+        }
+    }
+    
+    init(viewModel: CollectionViewModel, label: String, type: AttributeType, subView: @escaping (Int) -> AttributeView) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+        self.subView = subView
+        self.label = label
+        self.type = type
     }
     
     public var body: some View {
         VStack(alignment: .leading) {
             VStack {
-                switch viewModel.type {
+                switch type {
                 case .line:
                     HStack {
-                        AttributeView(root: viewModel.$root, attribute: $viewModel.newAttribute, path: nil, label: "New " + viewModel.label)
+                        AttributeView(attribute: $viewModel.newAttribute, label: "New " + label)
                         Button(action: viewModel.addElement, label: {
                             Image(systemName: "plus").font(.system(size: 16, weight: .regular))
                         }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
@@ -89,7 +109,7 @@ public struct CollectionView<Root: Modifiable>: View{
                 case .block:
                     if creating {
                         HStack {
-                            Text(viewModel.label + ":").fontWeight(.bold)
+                            Text(label + ":").fontWeight(.bold)
                             Spacer()
                             Button(action: {
                                 viewModel.addElement()
@@ -104,15 +124,10 @@ public struct CollectionView<Root: Modifiable>: View{
                                 Image(systemName: "trash").font(.system(size: 16, weight: .regular))
                             }).animation(.easeOut).buttonStyle(PlainButtonStyle()).foregroundColor(.red)
                         }
-                        AttributeView(
-                            root: viewModel.$root,
-                            attribute: $viewModel.newAttribute,
-                            path: nil,
-                            label: ""
-                        )
+                        AttributeView(attribute: $viewModel.newAttribute, label: "")
                     } else {
                         HStack {
-                            Text(viewModel.label + ":").fontWeight(.bold)
+                            Text(label + ":").fontWeight(.bold)
                             Spacer()
                             Button(action: { creating = true }, label: {
                                 Image(systemName: "plus").font(.system(size: 16, weight: .regular))
@@ -126,18 +141,13 @@ public struct CollectionView<Root: Modifiable>: View{
                 List(selection: $viewModel.selection) {
                     ForEach(Array(viewModel.elements.enumerated()), id: \.1.id) { (index, element) in
                         HStack(spacing: 1) {
-                            AttributeView(
-                                root: viewModel.$root,
-                                attribute: $viewModel.elements[index].value,
-                                path: viewModel.path?[index],
-                                label: ""
-                            )
+                            subView(index)
                             Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
                         }.contextMenu {
                             Button("Delete", action: { viewModel.deleteElement(element, atIndex: index) }).keyboardShortcut(.delete)
                         }
                     }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
-                }.frame(minHeight: min(CGFloat(viewModel.elements.count * (viewModel.type == .line ? 30 : 80) + 10), 100))
+                }.frame(minHeight: min(CGFloat(viewModel.elements.count * (type == .line ? 30 : 80) + 10), 100))
             }
         }.padding(.top, 2)
     }

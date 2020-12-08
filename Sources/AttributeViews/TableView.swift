@@ -14,25 +14,34 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct TableView<Root: Modifiable>: View {
+public struct TableView: View {
     
-    @ObservedObject var root: Ref<Root>
-    let path: Attributes.Path<Root, [[LineAttribute]]>?
+    @StateObject var viewModel: AttributeViewModel<[[LineAttribute]]>
+    let subView: (TableView, Int) -> TableRowView
     let label: String
     let columns: [BlockAttributeType.TableColumn]
-    
-    @State var value: [[LineAttribute]]
     
     @EnvironmentObject var config: Config
     
     @State var selection: Set<Int> = []
     
-    public init(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>?, label: String, columns: [BlockAttributeType.TableColumn], defaultValue: [[LineAttribute]] = []) {
-        self.root = root
-        self.path = path
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
+        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label, columns: columns) {
+            TableRowView(root: root, path: path[$1], row: $0.$viewModel.value[$1])
+        }
+    }
+    
+    public init(value: Binding<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
+        self.init(viewModel: AttributeViewModel(binding: value), label: label, columns: columns) {
+            TableRowView(value: value[$1], row: $0.$viewModel.value[$1])
+        }
+    }
+    
+    init(viewModel: AttributeViewModel<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, Int) -> TableRowView) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+        self.subView = subView
         self.label = label
         self.columns = columns
-        self._value = State(initialValue: path.map { root[path: $0].value } ?? defaultValue)
     }
     
     public var body: some View {
@@ -47,27 +56,39 @@ public struct TableView<Root: Modifiable>: View {
                             .frame(minWidth: 0, maxWidth: .infinity)
                     }
                 }
-                ForEach(Array(value.indices), id: \.self) { rowIndex in
-                    TableRowView(root: root, path: path?[rowIndex], row: $value[rowIndex])
+                ForEach(Array(viewModel.value.indices), id: \.self) { rowIndex in
+                    subView(self, rowIndex)
                 }
             }.frame(minHeight: 100)
         }
     }
 }
 
-struct TableRowView<Root: Modifiable>: View {
+struct TableRowView: View {
     
-    @ObservedObject var root: Ref<Root>
-    let path: Attributes.Path<Root, [LineAttribute]>?
+    let subView: (Int) -> LineAttributeView
     @Binding var row: [LineAttribute]
     
     @EnvironmentObject var config: Config
     
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [LineAttribute]>, row: Binding<[LineAttribute]>) {
+        self.subView = {
+            LineAttributeView(root: root, path: path[$0], label: "")
+        }
+        self._row = row
+    }
+    
+    public init(value: Binding<[LineAttribute]>, row: Binding<[LineAttribute]>) {
+        self.subView = {
+            LineAttributeView(attribute: value[$0], label: "")
+        }
+        self._row = row
+    }
+    
     var body: some View {
         HStack {
             ForEach(Array(row.indices), id: \.self) { columnIndex in
-                LineAttributeView(root: root, attribute: $row[columnIndex], path: path?[columnIndex], label: "")
-                    .frame(minWidth: 0, maxWidth: .infinity)
+                subView(columnIndex)
             }
         }
     }

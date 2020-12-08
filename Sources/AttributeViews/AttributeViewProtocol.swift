@@ -1,6 +1,6 @@
 /*
  * AttributeViewProtocol.swift
- * 
+ * AttributeViews
  *
  * Created by Callum McColl on 7/12/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
@@ -62,42 +62,10 @@ import TokamakShim
 import SwiftUI
 #endif
 
-import Attributes
-import Utilities
-
 protocol AttributeViewProtocol: View {
     
-    associatedtype Root: Modifiable
     associatedtype Value
     
-    var root: Ref<Root> { get set }
-    
-    var path: Attributes.Path<Root, Value>? { get }
-    
-    var onChange: (Value) -> Void { get }
-    
-    var valueBinding: Binding<Value> { get }
-    
-    var errorBinding: Binding<String?> { get }
-    
-}
-
-extension AttributeViewProtocol {
-    
-    func modify() {
-        guard let path = self.path else {
-            onChange(valueBinding.wrappedValue)
-            return
-        }
-        do {
-            try root.value.modify(attribute: path, value: valueBinding.wrappedValue)
-            errorBinding.wrappedValue = nil
-            onChange(valueBinding.wrappedValue)
-            return
-        } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-            errorBinding.wrappedValue = e.message
-        } catch {}
-        valueBinding.wrappedValue = root[path: path].value
-    }
+    var viewModel: AttributeViewModel<Value> { get }
     
 }
