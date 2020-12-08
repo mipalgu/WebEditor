@@ -259,11 +259,11 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
     
     public func startCreatingTransition(gesture: DragGesture.Value, sourceViewModel: StateViewModel) {
         if creatingTransition {
-            dragStartLocation = gesture.startLocation
             currentMouseLocation = gesture.location
             return
         }
         source = sourceViewModel
+        dragStartLocation = gesture.startLocation
         creatingTransition = true
     }
     
