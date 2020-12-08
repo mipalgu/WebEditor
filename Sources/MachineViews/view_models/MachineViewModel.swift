@@ -123,26 +123,6 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
         return CGPoint(x: tempPoint0.x + dx * 2.0 / 3.0, y: tempPoint0.y + dy * 2.0 / 3.0)
     }
     
-    var tempPoint0Binding: Binding<CGPoint> {
-        Binding(get: { self.tempPoint0 }, set: { _ in })
-    }
-    
-    var tempPoint1Binding: Binding<CGPoint> {
-        Binding(get: { self.tempPoint1 }, set: { _ in })
-    }
-    
-    var tempPoint2Binding: Binding<CGPoint> {
-        Binding(get: { self.tempPoint2 }, set: { _ in })
-    }
-    
-    var tempPoint3Binding: Binding<CGPoint> {
-        Binding(get: { self.currentMouseLocation }, set: { _ in })
-    }
-    
-    var tempStrokeNumberBinding: Binding<UInt8> {
-        Binding(get: { 0 }, set: {_ in })
-    }
-    
     public convenience init(machine: Ref<Machine>) {
         if let plist = try? String(contentsOf: machine.value.filePath.appendingPathComponent("Layout.plist")) {
             self.init(machine: machine, plist: plist)
