@@ -380,7 +380,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     }
     
     func createNewTransition(destination: StateViewModel) {
-        let newTransition = Transition(target: destination.name)
+        let newTransition = Transition(condition: "true", target: destination.name)
         do {
             try machine.addItem(newTransition, to: path.transitions)
             let priority = machine[keyPath: path.path].transitions.count

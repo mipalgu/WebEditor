@@ -15,17 +15,15 @@ import Utilities
 
 struct ArrowView: View {
     
-    @Binding var point0: CGPoint
+    var point0: CGPoint
     
-    @Binding var point1: CGPoint
+    var point1: CGPoint
     
-    @Binding var point2: CGPoint
+    var point2: CGPoint
     
-    @Binding var point3: CGPoint
+    var point3: CGPoint
     
-    @Binding var strokeNumber: UInt8
-    
-    @Binding var focused: Bool
+    var strokeNumber: UInt8
     
     var colour: Color
     
@@ -48,7 +46,7 @@ struct ArrowView: View {
     }
     
     func getStrokeCenter(number: UInt8) -> CGPoint {
-        let offset = 2.0 + 2.0 * Double(number)
+        let offset = 3.0 + 3.0 * Double(number)
         return CGPoint(x: point0.x + CGFloat(offset * cos(strokeTheta)), y: point0.y + CGFloat(offset * sin(strokeTheta)))
     }
     
@@ -88,44 +86,9 @@ struct ArrowView: View {
                         strokePath.addLine(to: strokePoint1(number: number))
                     }
                     .stroke(config.textColor, lineWidth: 2)
+                    .border(Color.black, width: 2)
                     //.coordinateSpace(name: "MAIN_VIEW")
                 }
-            }
-            if focused {
-                Circle()
-                    .position(point0)
-                    .frame(width: 20, height: 20)
-                    .gesture(DragGesture().onChanged {
-                        point0 = $0.location
-                    }.onEnded {
-                        point0 = $0.location
-                    })
-                Circle()
-                    .position(point1)
-                    .background(Color.red)
-                    .frame(width: 20, height: 20)
-                    .gesture(DragGesture().onChanged {
-                        point1 = $0.location
-                    }.onEnded {
-                        point1 = $0.location
-                    })
-                Circle()
-                    .position(point2)
-                    .background(Color.blue)
-                    .frame(width: 20, height: 20)
-                    .gesture(DragGesture().onChanged {
-                        point2 = $0.location
-                    }.onEnded {
-                        point2 = $0.location
-                    })
-                Circle()
-                    .position(point3)
-                    .frame(width: 20, height: 20)
-                    .gesture(DragGesture().onChanged {
-                        point3 = $0.location
-                    }.onEnded {
-                        point3 = $0.location
-                    })
             }
         }
     }

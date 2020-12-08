@@ -81,12 +81,11 @@ public struct MachineView: View {
                 }
                 if viewModel.creatingTransition {
                     ArrowView(
-                        point0: viewModel.tempPoint0Binding,
-                        point1: viewModel.tempPoint1Binding,
-                        point2: viewModel.tempPoint2Binding,
-                        point3: viewModel.tempPoint3Binding,
-                        strokeNumber: viewModel.tempStrokeNumberBinding,
-                        focused: Binding(get: { false }, set: { _ in }),
+                        point0: viewModel.tempPoint0,
+                        point1: viewModel.tempPoint1,
+                        point2: viewModel.tempPoint2,
+                        point3: viewModel.currentMouseLocation,
+                        strokeNumber: 0,
                         colour: Color.red
                     )
                 }
