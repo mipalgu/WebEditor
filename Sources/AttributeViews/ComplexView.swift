@@ -29,7 +29,7 @@ public struct ComplexView: View {
         }
     }
     
-    public init(value: Binding<[String: Attribute]>, label: String, fields: [Field]) {
+    init(value: Binding<[String: Attribute]>, label: String, fields: [Field]) {
         self.init(viewModel: AttributeViewModel(binding: value), label: label, fields: fields) {
             AttributeView(attribute: Binding(value[$0.name])!, label: $0.name.pretty)
         }

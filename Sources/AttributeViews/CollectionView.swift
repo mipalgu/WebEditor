@@ -82,7 +82,7 @@ public struct CollectionView: View{
         }
     }
     
-    public init(value: Binding<[Attribute]>, label: String, type: AttributeType) {
+    init(value: Binding<[Attribute]>, label: String, type: AttributeType) {
         self.init(viewModel: CollectionViewModel(binding: value, type: type), label: label, type: type) {
             AttributeView(attribute: value[$0], label: "")
         }

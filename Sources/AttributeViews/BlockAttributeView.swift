@@ -37,7 +37,7 @@ public struct BlockAttributeView: View{
         }
     }
     
-    public init(attribute: Binding<BlockAttribute>, label: String) {
+    init(attribute: Binding<BlockAttribute>, label: String) {
         self.subView = {
             switch attribute.wrappedValue.type {
             case .code(let language):

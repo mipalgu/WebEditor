@@ -80,7 +80,7 @@ public struct AttributeView: View{
         }
     }
     
-    public init(attribute: Binding<Attribute>, label: String) {
+    init(attribute: Binding<Attribute>, label: String) {
         self.subView = {
             switch attribute.wrappedValue.type {
             case .line:

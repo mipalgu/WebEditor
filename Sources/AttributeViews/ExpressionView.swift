@@ -26,7 +26,7 @@ public struct ExpressionView: View {
         self.init(viewModel: AttributeViewModel(root: root, path: path), label: label, language: language)
     }
     
-    public init(value: Binding<Expression>, label: String, language: Language) {
+    init(value: Binding<Expression>, label: String, language: Language) {
         self.init(viewModel: AttributeViewModel(binding: value), label: label, language: language)
     }
     

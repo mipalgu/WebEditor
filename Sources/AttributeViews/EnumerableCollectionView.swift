@@ -26,7 +26,7 @@ public struct EnumerableCollectionView: View {
         self.init(viewModel: AttributeViewModel(root: root, path: path), label: label, validValues: validValues)
     }
     
-    public init(value: Binding<Set<String>>, label: String, validValues: Set<String>) {
+    init(value: Binding<Set<String>>, label: String, validValues: Set<String>) {
         self.init(viewModel: AttributeViewModel(binding: value), label: label, validValues: validValues)
     }
     

@@ -25,7 +25,7 @@ public struct TextView: View {
         self.init(viewModel: AttributeViewModel(root: root, path: path), label: label)
     }
     
-    public init(value: Binding<String>, label: String) {
+    init(value: Binding<String>, label: String) {
         self.init(viewModel: AttributeViewModel(binding: value), label: label)
     }
     

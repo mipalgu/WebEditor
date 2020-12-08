@@ -32,7 +32,7 @@ public struct FloatView: View {
         self.init(viewModel: AttributeViewModel(root: root, path: path), label: label)
     }
     
-    public init(value: Binding<Double>, label: String) {
+    init(value: Binding<Double>, label: String) {
         self.init(viewModel: AttributeViewModel(binding: value), label: label)
     }
     
