@@ -324,18 +324,10 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat, externalTransitions: [TransitionViewModel]) {
         self.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight)
         externalTransitions.forEach {
-            let s0 = $0.point3
-            let dy = s0.y - location.y
-            let dx = s0.x - location.x
-            let theta = CGFloat(atan2(Double(dy), Double(dx)))
-            $0.point3 = self.findEdge(radians: theta)
+            $0.point3 = self.closestEdge(point: $0.point3)
         }
         transitionViewModels.forEach {
-            let s0 = $0.point0
-            let dy = s0.y - location.y
-            let dx = s0.x - location.x
-            let theta = CGFloat(atan2(Double(dy), Double(dx)))
-            $0.point0 = self.findEdge(radians: theta)
+            $0.point0 = self.closestEdge(point: $0.point0)
         }
     }
     
@@ -374,14 +366,15 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         return right.x < 0 || left.x > frameWidth || bottom.y < 0 || top.y > frameHeight
     }
     
-    func createNewTransition(destination: StateViewModel) {
+    func createNewTransition(destination: StateViewModel, point3: CGPoint) {
         do {
             try machine.newTransition(source: self.name, target: destination.name)
             let lastIndex = machine[keyPath: path.path].transitions.count - 1
             try machine.modify(attribute: path.transitions[lastIndex].condition, value: "true")
-            let newTransition = machine[keyPath: path.transitions[lastIndex].path]
-            let priority = lastIndex
-            let newViewModel = transitionViewModel(transition: newTransition, index: priority, target: destination)
+            let priority = UInt8(lastIndex)
+            let source = self.closestEdge(point: point3)
+            let dest = destination.closestPointToEdge(point: point3, source: source)
+            let newViewModel = TransitionViewModel(machine: $machine, path: path.transitions[lastIndex], source: source, destination: dest, priority: priority)
             transitionViewModels.append(newViewModel)
         } catch let error {
             print(error, stderr)
