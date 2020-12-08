@@ -324,10 +324,10 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat, externalTransitions: [TransitionViewModel]) {
         self.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight)
         externalTransitions.forEach {
-            $0.point3 = self.closestEdge(point: $0.point3)
+            $0.point3 = self.findEdge(point: $0.point3)
         }
         transitionViewModels.forEach {
-            $0.point0 = self.closestEdge(point: $0.point0)
+            $0.point0 = self.findEdge(point: $0.point0)
         }
     }
     

@@ -92,6 +92,13 @@ public extension Rigidable where Self: Positionable {
         findEdge(degrees: CGFloat(Double(theta) / Double.pi * 180.0))
     }
     
+    func findEdge(point: CGPoint) -> CGPoint {
+        let dx = point.x - location.x
+        let dy = point.y - location.y
+        let theta = CGFloat(atan2(Double(dy), Double(dx)))
+        return findEdge(radians: theta)
+    }
+    
     func findEdgeCenter(degrees: CGFloat) -> CGPoint {
         let normalisedDegrees = degrees.truncatingRemainder(dividingBy: 360.0)
         let theta = normalisedDegrees > 180.0 ? normalisedDegrees - 360.0 : normalisedDegrees
@@ -116,41 +123,21 @@ public extension Rigidable where Self: Positionable {
         return findEdge(radians: theta)
     }
     
-    func closestEdge(point: CGPoint) -> CGPoint {
-        let edges = [right, top, left, bottom]
-        let dxs = edges.map {
-            abs($0.x - point.x)
-        }
-        let dys = edges.map {
-            abs($0.y - point.y)
-        }
-        let minDx = dxs.min() ?? dxs[0]
-        let minDy = dys.min() ?? dys[0]
-        var i: Int = 0
-        if minDx < minDy {
-            i = dxs.firstIndex(of: minDx) ?? 0
-        } else {
-            i = dys.firstIndex(of: minDy) ?? 0
-        }
-        if i == 0 || i == 2 {
-            return CGPoint(x: edges[i].x, y: min(max(point.y, top.y), bottom.y))
-        }
-        return CGPoint(x: min(max(point.x, left.x), right.x), y: edges[i].y)
-    }
     
-    private func closestPointToTop(point: CGPoint) -> CGPoint {
+    
+    func closestPointToTop(point: CGPoint) -> CGPoint {
         CGPoint(x: min(max(point.x, left.x), right.x), y: top.y)
     }
     
-    private func closestPointToBottom(point: CGPoint) -> CGPoint {
+    func closestPointToBottom(point: CGPoint) -> CGPoint {
         CGPoint(x: min(max(point.x, left.x), right.x), y: bottom.y)
     }
         
-    private func closestPointToRight(point: CGPoint) -> CGPoint {
+    func closestPointToRight(point: CGPoint) -> CGPoint {
         CGPoint(x: right.x, y: min(max(point.y, top.y), bottom.y))
     }
         
-    private func closestPointToLeft(point: CGPoint) -> CGPoint {
+    func closestPointToLeft(point: CGPoint) -> CGPoint {
         CGPoint(x: left.x, y: min(max(point.y, top.y), bottom.y))
     }
     
