@@ -54,7 +54,7 @@ struct StateExpandedView: View {
                                     maxHeight: viewModel.maxTitleHeight
                                 )
                                 .clipped()
-                            Button(action: { viewModel.toggleExpand(frameWidth: reader.size.width, frameHeight: reader.size.height) }) {
+                            Button(action: { viewModel.toggleExpand(frameWidth: reader.size.width, frameHeight: reader.size.height, externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)) }) {
                                 Image(systemName: "arrowtriangle.down.fill")
                                     .font(.system(size: viewModel.buttonSize, weight: .regular))
                                     .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
@@ -113,7 +113,8 @@ struct StateExpandedView: View {
                         gesture: $0,
                         frameWidth: reader.size.width,
                         frameHeight: reader.size.height,
-                        collapsed: false
+                        collapsed: false,
+                        externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)
                     )
                 }.onEnded {
                     if creatingTransitions {
@@ -124,7 +125,8 @@ struct StateExpandedView: View {
                         gesture: $0,
                         frameWidth: reader.size.width,
                         frameHeight: reader.size.height,
-                        collapsed: false
+                        collapsed: false,
+                        externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)
                     )
                 }
             )

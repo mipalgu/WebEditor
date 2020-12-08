@@ -25,7 +25,7 @@ struct ArrowWithLabelView: View {
     
     var strokeNumber: UInt8
     
-    var label: String
+    @Binding var label: String
     
     var colour: Color
     
@@ -41,9 +41,10 @@ struct ArrowWithLabelView: View {
         ZStack {
             ArrowView(point0: point0, point1: point1, point2: point2, point3: point3, strokeNumber: strokeNumber, colour: colour)
                 .coordinateSpace(name: "MAIN_VIEW")
-            Text(label)
+            TextField("", text: $label)
                 .coordinateSpace(name: "MAIN_VIEW")
                 .font(config.fontBody)
+                .fixedSize()
                 .position(center)
         }
         .coordinateSpace(name: "MAIN_VIEW")

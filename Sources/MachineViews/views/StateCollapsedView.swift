@@ -59,7 +59,7 @@ struct StateCollapsedView: View {
                             .frame(maxWidth: viewModel.collapsedWidth, maxHeight: viewModel.collapsedHeight)
                             .clipped()
                     }
-                    Button(action: { viewModel.toggleExpand(frameWidth: reader.size.width, frameHeight: reader.size.height) }) {
+                    Button(action: { viewModel.toggleExpand(frameWidth: reader.size.width, frameHeight: reader.size.height, externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)) }) {
                         Image(systemName: "arrowtriangle.left.fill")
                             .font(.system(size: viewModel.buttonSize, weight: .regular))
                             .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
@@ -92,7 +92,8 @@ struct StateCollapsedView: View {
                     gesture: $0,
                     frameWidth: reader.size.width,
                     frameHeight: reader.size.height,
-                    collapsed: true
+                    collapsed: true,
+                    externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)
                 )
             }.onEnded {
                 if creatingTransitions {
@@ -103,7 +104,8 @@ struct StateCollapsedView: View {
                     gesture: $0,
                     frameWidth: reader.size.width,
                     frameHeight: reader.size.height,
-                    collapsed: true
+                    collapsed: true,
+                    externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)
                 )
             })
         }

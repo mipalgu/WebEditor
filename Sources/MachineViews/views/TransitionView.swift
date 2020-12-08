@@ -36,7 +36,7 @@ struct TransitionView: View {
                 point2: viewModel.point2,
                 point3: viewModel.point3,
                 strokeNumber: viewModel.priority,
-                label: viewModel.condition,
+                label: Binding(get: { viewModel.condition}, set: { viewModel.condition = $0 }),
                 colour: focused ? config.highlightColour : config.textColor
             )
             .coordinateSpace(name: "MAIN_VIEW")

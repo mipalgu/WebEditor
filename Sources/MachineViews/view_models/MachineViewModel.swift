@@ -279,4 +279,10 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
         sourceViewModel.createNewTransition(destination: destinationCandidate)
     }
     
+    public func getExternalTransitionsForState(state: StateViewModel) -> [TransitionViewModel] {
+        states.flatMap {
+            $0.transitionViewModels.filter { $0.transition.target == state.name }
+        }
+    }
+    
 }
