@@ -65,36 +65,33 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct AttributeView<Root: Modifiable>: View{
+public struct AttributeView: View{
     
-    @ObservedObject var root: Ref<Root>
-    @Binding var attribute: Attribute
-    let path: Attributes.Path<Root, Attribute>?
-    let label: String
+    let subView: () -> AnyView
     
-    public init(root: Ref<Root>, attribute: Binding<Attribute>, path: Attributes.Path<Root, Attribute>?, label: String) {
-        self.root = root
-        self._attribute = attribute
-        self.path = path
-        self.label = label
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Attribute>, label: String) {
+        self.subView = {
+            switch root[path: path].value.type {
+            case .line:
+                return AnyView(LineAttributeView(root: root, path: path.lineAttribute,label: label))
+            case .block:
+                return AnyView(BlockAttributeView(root: root, path: path.blockAttribute, label: label))
+            }
+        }
+    }
+    
+    init(attribute: Binding<Attribute>, label: String) {
+        self.subView = {
+            switch attribute.wrappedValue.type {
+            case .line:
+                return AnyView(LineAttributeView(attribute: attribute.lineAttribute, label: label))
+            case .block:
+                return AnyView(BlockAttributeView(attribute: attribute.blockAttribute, label: label))
+            }
+        }
     }
     
     public var body: some View {
-        switch attribute.type {
-        case .line:
-            LineAttributeView(
-                root: root,
-                attribute: $attribute.lineAttribute,
-                path: path?.lineAttribute,
-                label: label
-            )
-        case .block:
-            BlockAttributeView(
-                root: root,
-                attribute: $attribute.blockAttribute,
-                path: path?.blockAttribute,
-                label: label
-            )
-        }
+        subView()
     }
 }

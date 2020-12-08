@@ -14,38 +14,30 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct ExpressionView<Root: Modifiable>: View {
+public struct ExpressionView: View {
     
-    @ObservedObject var root: Ref<Root>
-    let path: Attributes.Path<Root, Expression>?
+    @StateObject var viewModel: AttributeViewModel<Expression>
     let label: String
     let language: Language
     
-    @State var value: String
-    
     @EnvironmentObject var config: Config
     
-    public init(root: Ref<Root>, path: Attributes.Path<Root, Expression>?, label: String, language: Language, defaultValue: Expression = "") {
-        self.root = root
-        self.path = path
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Expression>, label: String, language: Language) {
+        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label, language: language)
+    }
+    
+    init(value: Binding<Expression>, label: String, language: Language) {
+        self.init(viewModel: AttributeViewModel(binding: value), label: label, language: language)
+    }
+    
+    init(viewModel: AttributeViewModel<Expression>, label: String, language: Language) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
         self.label = label
         self.language = language
-        self._value = State(initialValue: path.map { String(root[path: $0].value) } ?? String(defaultValue))
     }
     
     public var body: some View {
-        TextField(label, text: $value, onCommit: {
-            guard let path = self.path else {
-                return
-            }
-            do {
-                try root.value.modify(attribute: path, value: Expression(value))
-                return
-            } catch let e {
-                print("\(e)")
-            }
-            self.value = String(root[path: path].value)
-        })
+        TextField(label, text: $viewModel.value, onCommit: viewModel.sendModification)
         .font(.body)
         .background(config.fieldColor)
         .foregroundColor(config.textColor)

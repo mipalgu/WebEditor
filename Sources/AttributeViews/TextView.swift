@@ -14,21 +14,24 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct TextView<Root: Modifiable>: View {
+public struct TextView: View {
     
-    @ObservedObject var root: Ref<Root>
-    let path: Attributes.Path<Root, String>?
+    @StateObject var viewModel: AttributeViewModel<String>
     let label: String
-    
-    @State var value: String
     
     @EnvironmentObject var config: Config
     
-    public init(root: Ref<Root>, path: Attributes.Path<Root, String>?, label: String, defaultValue: String = "") {
-        self.root = root
-        self.path = path
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, String>, label: String) {
+        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label)
+    }
+    
+    init(value: Binding<String>, label: String) {
+        self.init(viewModel: AttributeViewModel(binding: value), label: label)
+    }
+    
+    init(viewModel: AttributeViewModel<String>, label: String) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
         self.label = label
-        self._value = State(initialValue: path.map { root[path: $0].value } ?? defaultValue)
     }
     
     public var body: some View {
@@ -36,7 +39,7 @@ public struct TextView<Root: Modifiable>: View {
             Text(label.capitalized)
                 .font(.headline)
                 .foregroundColor(config.textColor)
-            TextEditor(text: $value)
+            TextEditor(text: $viewModel.value)
                 .font(.body)
                 .foregroundColor(config.textColor)
                 .disableAutocorrection(false)
@@ -45,17 +48,8 @@ public struct TextView<Root: Modifiable>: View {
                         .stroke(Color.gray.opacity(0.3), lineWidth: 2)
                 )
                 .frame(minHeight: 80)
-                .onChange(of: value) {
-                    guard let path = self.path else {
-                        return
-                    }
-                    do {
-                        try root.value.modify(attribute: path, value: $0)
-                        return
-                    } catch let e {
-                        print("\(e)")
-                    }
-                    self.value = root[path: path].value
+                .onChange(of: viewModel.value) { _ in
+                    viewModel.sendModification()
                 }
         }
     }

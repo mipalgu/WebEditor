@@ -14,37 +14,50 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct LineAttributeView<Root: Modifiable>: View {
+public struct LineAttributeView: View {
     
-    @ObservedObject var root: Ref<Root>
-    @Binding var attribute: LineAttribute
-    let path: Attributes.Path<Root, LineAttribute>?
-    let label: String
+    let subView: () -> AnyView
     
-    public init(root: Ref<Root>, attribute: Binding<LineAttribute>, path: Attributes.Path<Root, LineAttribute>?, label: String) {
-        self.root = root
-        self._attribute = attribute
-        self.path = path
-        self.label = label
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, LineAttribute>, label: String) {
+        self.subView = {
+            switch root[path: path].value.type {
+            case .bool:
+                return AnyView(BoolView(root: root, path: path.boolValue, label: label))
+            case .integer:
+                return AnyView(IntegerView(root: root, path: path.integerValue, label: label))
+            case .float:
+                return AnyView(FloatView(root: root, path: path.floatValue, label: label))
+            case .expression(let language):
+                return AnyView(ExpressionView(root: root, path: path.expressionValue, label: label, language: language))
+            case .enumerated(let validValues):
+                return AnyView(EnumeratedView(root: root, path: path.enumeratedValue, label: label, validValues: validValues))
+            case .line:
+                return AnyView(LineView(root: root, path: path.lineValue, label: label))
+            }
+        }
+    }
+    
+    init(attribute: Binding<LineAttribute>, label: String) {
+        self.subView = {
+            switch attribute.wrappedValue.type {
+            case .bool:
+                return AnyView(BoolView(value: attribute.boolValue, label: label))
+            case .integer:
+                return AnyView(IntegerView(value: attribute.integerValue, label: label))
+            case .float:
+                return AnyView(FloatView(value: attribute.floatValue, label: label))
+            case .expression(let language):
+                return AnyView(ExpressionView(value: attribute.expressionValue, label: label, language: language))
+            case .enumerated(let validValues):
+                return AnyView(EnumeratedView(value: attribute.enumeratedValue, label: label, validValues: validValues))
+            case .line:
+                return AnyView(LineView(value: attribute.lineValue, label: label))
+            }
+        }
     }
     
     public var body: some View {
-        switch attribute.type {
-        case .bool:
-            BoolView(root: root, path: path?.boolValue, label: label)
-        case .integer:
-            IntegerView(root: root, path: path?.integerValue, label: label)
-        case .float:
-            FloatView(root: root, path: path?.floatValue, label: label)
-        case .expression(let language):
-            ExpressionView(root: root, path: path?.expressionValue, label: label, language: language)
-        case .enumerated(let validValues):
-            EnumeratedView(root: root, path: path?.enumeratedValue, label: label, validValues: validValues)
-        case .line:
-            LineView(root: root, path: path?.lineValue, label: label) {
-                attribute = .line($0)
-            }
-        }
+        subView()
     }
 }
 

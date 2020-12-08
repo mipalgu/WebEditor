@@ -1,8 +1,8 @@
 /*
- * AttributeViewProtocol.swift
+ * AttributeViewModel.swift
  * AttributeViews
  *
- * Created by Callum McColl on 7/12/20.
+ * Created by Callum McColl on 9/12/20.
  * Copyright © 2020 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,10 +62,42 @@ import TokamakShim
 import SwiftUI
 #endif
 
-protocol AttributeViewProtocol: View {
+import Attributes
+import Utilities
+
+class AttributeViewModel<Value>: ObservableObject {
     
-    associatedtype Value
+    private var _modify: (Value) -> Void
     
-    var viewModel: AttributeViewModel<Value> { get }
+    @Published public var value: Value
+    
+    @Published var error: String? = nil
+    
+    init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Value>) {
+        self.value = root[path: path].value
+        self._modify = { _ in }
+        self._modify = { [unowned self] in
+            do {
+                try root.value.modify(attribute: path, value: $0)
+                self.error = nil
+                self.value = root[path: path].value
+                return
+            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
+                self.error = e.message
+            } catch {}
+            self.value = root[path: path].value
+        }
+        self.listen(to: root)
+    }
+    
+    init(binding: Binding<Value>) {
+        self._modify = { binding.wrappedValue = $0 }
+        self.value = binding.wrappedValue
+    }
+    
+    func sendModification() -> Void {
+        self._modify(value)
+        self.objectWillChange.send()
+    }
     
 }

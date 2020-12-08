@@ -14,37 +14,32 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct LineView<Root: Modifiable>: AttributeViewProtocol {
+public struct LineView: AttributeViewProtocol {
     
-    @ObservedObject var root: Ref<Root>
-    let path: Attributes.Path<Root, String>?
+    @StateObject var viewModel: AttributeViewModel<String>
     let label: String
-    let onChange: (String) -> Void
-    
-    @State var value: String
     
     @EnvironmentObject var config: Config
     
-    @State var error: String? = nil
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, String>, label: String) {
+        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label)
+    }
     
-    var valueBinding: Binding<String> { $value }
+    init(value: Binding<String>, label: String) {
+        self.init(viewModel: AttributeViewModel(binding: value), label: label)
+    }
     
-    var errorBinding: Binding<String?> { $error }
-    
-    public init(root: Ref<Root>, path: Attributes.Path<Root, String>?, label: String, defaultValue: String = "", onChange: @escaping (String) -> Void = { _ in }) {
-        self.root = root
-        self.path = path
+    init(viewModel: AttributeViewModel<String>, label: String) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
         self.label = label
-        self._value = State(initialValue: path.map { root[path: $0].value } ?? defaultValue)
-        self.onChange = onChange
     }
     
     public var body: some View {
         VStack(alignment: .leading) {
-            TextField(label, text: $value, onCommit: modify)
+            TextField(label, text: $viewModel.value, onCommit: viewModel.sendModification)
             .background(config.fieldColor)
             .foregroundColor(config.textColor)
-            if let error = self.error {
+            if let error = self.viewModel.error {
                 Text(error).foregroundColor(.red)
             }
         }
