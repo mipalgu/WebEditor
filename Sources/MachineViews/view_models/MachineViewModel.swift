@@ -95,6 +95,8 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
     
     @Published public var creatingTransition: Bool = false
     
+    var dragStartLocation: CGPoint = .zero
+    
     var source: StateViewModel?
     
     var destination: StateViewModel?
@@ -105,10 +107,7 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
         guard let viewModel = source else {
             return .zero
         }
-        let dx = currentMouseLocation.x - viewModel.location.x
-        let dy = currentMouseLocation.y - viewModel.location.y
-        let theta = atan2(Double(dy), Double(dx))
-        return viewModel.findEdge(radians: CGFloat(theta))
+        return viewModel.closestPointToEdge(point: dragStartLocation, source: currentMouseLocation)
     }
     
     var tempPoint1: CGPoint {
@@ -260,6 +259,7 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
     
     public func startCreatingTransition(gesture: DragGesture.Value, sourceViewModel: StateViewModel) {
         if creatingTransition {
+            dragStartLocation = gesture.startLocation
             currentMouseLocation = gesture.location
             return
         }
