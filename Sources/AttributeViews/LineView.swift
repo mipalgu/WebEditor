@@ -14,7 +14,7 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct LineView: AttributeViewProtocol {
+public struct LineView: View {
     
     @StateObject var viewModel: AttributeViewModel<String>
     let label: String
@@ -25,8 +25,8 @@ public struct LineView: AttributeViewProtocol {
         self.init(viewModel: AttributeViewModel(root: root, path: path), label: label)
     }
     
-    init(value: Binding<String>, label: String) {
-        self.init(viewModel: AttributeViewModel(binding: value), label: label)
+    init(value: Ref<String>, label: String) {
+        self.init(viewModel: AttributeViewModel(reference: value), label: label)
     }
     
     init(viewModel: AttributeViewModel<String>, label: String) {

@@ -29,9 +29,9 @@ public struct ComplexView: View {
         }
     }
     
-    init(value: Binding<[String: Attribute]>, label: String, fields: [Field]) {
-        self.init(viewModel: AttributeViewModel(binding: value), label: label, fields: fields) {
-            AttributeView(attribute: Binding(value[$0.name])!, label: $0.name.pretty)
+    init(value: Ref<[String: Attribute]>, label: String, fields: [Field]) {
+        self.init(viewModel: AttributeViewModel(reference: value), label: label, fields: fields) {
+            AttributeView(attribute: value[$0.name].wrappedValue, label: $0.name.pretty)
         }
     }
     

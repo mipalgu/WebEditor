@@ -80,9 +80,9 @@ public struct AttributeView: View{
         }
     }
     
-    init(attribute: Binding<Attribute>, label: String) {
+    init(attribute: Ref<Attribute>, label: String) {
         self.subView = {
-            switch attribute.wrappedValue.type {
+            switch attribute.value.type {
             case .line:
                 return AnyView(LineAttributeView(attribute: attribute.lineAttribute, label: label))
             case .block:

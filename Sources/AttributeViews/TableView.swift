@@ -31,8 +31,8 @@ public struct TableView: View {
         }
     }
     
-    init(value: Binding<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
-        self.init(viewModel: AttributeViewModel(binding: value), label: label, columns: columns) {
+    init(value: Ref<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
+        self.init(viewModel: AttributeViewModel(reference: value), label: label, columns: columns) {
             TableRowView(value: value[$1], row: $0.$viewModel.value[$1])
         }
     }
@@ -78,7 +78,7 @@ struct TableRowView: View {
         self._row = row
     }
     
-    public init(value: Binding<[LineAttribute]>, row: Binding<[LineAttribute]>) {
+    public init(value: Ref<[LineAttribute]>, row: Binding<[LineAttribute]>) {
         self.subView = {
             LineAttributeView(attribute: value[$0], label: "")
         }

@@ -31,9 +31,9 @@ public struct AttributeGroupView<Root: Modifiable>: View {
         }
     }
     
-    init(group: Binding<AttributeGroup>, label: String) {
-        self.init(viewModel: AttributeViewModel(binding: group), label: label) { field in
-            AttributeView(attribute: Binding(group.attributes[field.name])!, label: field.name.pretty)
+    init(group: Ref<AttributeGroup>, label: String) {
+        self.init(viewModel: AttributeViewModel(reference: group), label: label) { field in
+            AttributeView(attribute: group.attributes[field.name].wrappedValue, label: field.name.pretty)
         }
     }
     
