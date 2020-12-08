@@ -107,4 +107,61 @@ public extension Collapsable where Self: _Collapsable {
         )
     }
     
+    func findEdge(degrees: CGFloat) -> CGPoint {
+        let normalisedDegrees = degrees.truncatingRemainder(dividingBy: 360.0)
+        let theta = normalisedDegrees > 180.0 ? normalisedDegrees - 360.0 : normalisedDegrees
+        if theta == 0.0 {
+            return right
+        }
+        if theta == 90.0 {
+            return bottom
+        }
+        if theta == -90.0 {
+            return top
+        }
+        if theta == 180.0 || theta == -180.0 {
+            return left
+        }
+        if expanded {
+            //Rectangle
+            var x: CGFloat = 0
+            var y: CGFloat = 0
+            let angle = Double(theta / 180.0) * Double.pi
+            if theta >= -45.0 && theta <= 45.0 {
+                x = right.x
+                y = location.y + x * CGFloat(tan(angle))
+            } else if theta <= 135.0 && theta >= 45.0 {
+                y = bottom.y
+                x = location.x + y / CGFloat(tan(angle))
+            } else if theta < 180.0 && theta > 135.0 {
+                x = left.x
+                y = location.y - x * CGFloat(tan(angle))
+            } else if theta > -135.0 {
+                y = top.y
+                x = location.x - y / CGFloat(tan(angle))
+            } else {
+                x = left.x
+                y = location.y - x * CGFloat(tan(angle))
+            }
+            return CGPoint(x: min(max(left.x, x), right.x), y: min(max(y, top.y), bottom.y))
+        }
+        //Ellipse
+        let radians = Double(theta) / 180.0 * Double.pi
+        let tanr = tan(radians)
+        let a = collapsedWidth / 2.0
+        let b = collapsedHeight / 2.0
+        print(tanr)
+        var x: CGFloat = CGFloat(Double(a * b) /
+            sqrt(Double(b * b) + Double(a * a) * tanr * tanr))
+        var y: CGFloat = CGFloat(Double(a * b) * tanr /
+            sqrt(Double(b * b) + Double(a * a) * tanr * tanr))
+        if radians > Double.pi / 2.0 || radians < -Double.pi / 2.0 {
+            x = -x
+            y = -y
+        }
+        x = location.x + x
+        y = location.y + y
+        return CGPoint(x: x, y: y)
+    }
+    
 }

@@ -58,10 +58,10 @@ public extension Rigidable where Self: Positionable {
             return right
         }
         if theta == 90.0 {
-            return top
+            return bottom
         }
         if theta == -90.0 {
-            return bottom
+            return top
         }
         if theta == 180.0 || theta == -180.0 {
             return left
