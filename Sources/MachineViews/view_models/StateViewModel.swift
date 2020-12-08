@@ -321,11 +321,22 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         return staticHeightEdge(theta: theta)
     }
     
-    func edge(theta: Double) -> CGPoint {
-        if expanded {
-            return rectEdge(theta: theta)
+    func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat, externalTransitions: [TransitionViewModel]) {
+        self.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight)
+        externalTransitions.forEach {
+            let s0 = $0.point3
+            let dy = s0.y - location.y
+            let dx = s0.x - location.x
+            let theta = CGFloat(atan2(Double(dy), Double(dx)))
+            $0.point3 = self.findEdge(radians: theta)
         }
-        return collapsedEdge(theta: theta)
+        transitionViewModels.forEach {
+            let s0 = $0.point0
+            let dy = s0.y - location.y
+            let dx = s0.x - location.x
+            let theta = CGFloat(atan2(Double(dy), Double(dx)))
+            $0.point0 = self.findEdge(radians: theta)
+        }
     }
     
     func transitionViewModel(transition: Transition, index: Int, target destinationViewModel: StateViewModel) -> TransitionViewModel {
