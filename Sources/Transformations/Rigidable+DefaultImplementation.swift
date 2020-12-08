@@ -71,21 +71,21 @@ public extension Rigidable where Self: Positionable {
         let angle = Double(theta / 180.0) * Double.pi
         if theta >= -45.0 && theta <= 45.0 {
             x = right.x
-            y = x * CGFloat(tan(angle))
+            y = location.y + x * CGFloat(tan(angle))
         } else if theta <= 135.0 && theta >= 45.0 {
-            y = top.y
-            x = y / CGFloat(tan(angle))
+            y = bottom.y
+            x = location.x + y / CGFloat(tan(angle))
         } else if theta < 180.0 && theta > 135.0 {
             x = left.x
-            y = x * CGFloat(tan(angle))
+            y = location.y - x * CGFloat(tan(angle))
         } else if theta > -135.0 {
-            y = bottom.y
-            x = y / CGFloat(tan(angle))
+            y = top.y
+            x = location.x - y / CGFloat(tan(angle))
         } else {
             x = left.x
-            y = x * CGFloat(tan(angle))
+            y = location.y - x * CGFloat(tan(angle))
         }
-        return CGPoint(x: x, y: y)
+        return CGPoint(x: min(max(left.x, x), right.x), y: min(max(y, top.y), bottom.y))
     }
     
     func findEdge(radians theta: CGFloat) -> CGPoint {
