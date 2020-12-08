@@ -18,65 +18,6 @@ import Utilities
 extension MachineViewModel {
     
     public convenience init(machine: Ref<Machine>, plist data: String) {
-        let f: (CGPoint, StateViewModel) -> CGPoint = { (point: CGPoint, state: StateViewModel) in
-            let dx = point.x - state.location.x
-            let dy = point.y - state.location.y
-            let degrees = CGFloat(atan2(Double(dy), Double(dx)) / Double.pi * 180.0)
-            let normalisedDegrees = degrees.truncatingRemainder(dividingBy: 360.0)
-            let theta = normalisedDegrees > 180.0 ? normalisedDegrees - 360.0 : normalisedDegrees
-            if theta == 0.0 {
-                return state.right
-            }
-            if theta == 90.0 {
-                return state.bottom
-            }
-            if theta == -90.0 {
-                return state.top
-            }
-            if theta == 180.0 || theta == -180.0 {
-                return state.left
-            }
-            if state.expanded {
-                //Rectangle
-                var x: CGFloat = 0
-                var y: CGFloat = 0
-                let angle = Double(theta / 180.0) * Double.pi
-                if theta >= -45.0 && theta <= 45.0 {
-                    x = state.right.x
-                    y = state.location.y + x * CGFloat(tan(angle))
-                } else if theta <= 135.0 && theta >= 45.0 {
-                    y = state.bottom.y
-                    x = state.location.x + y / CGFloat(tan(angle))
-                } else if theta < 180.0 && theta > 135.0 {
-                    x = state.left.x
-                    y = state.location.y - x * CGFloat(tan(angle))
-                } else if theta > -135.0 {
-                    y = state.top.y
-                    x = state.location.x - y / CGFloat(tan(angle))
-                } else {
-                    x = state.left.x
-                    y = state.location.y - x * CGFloat(tan(angle))
-                }
-                return CGPoint(x: min(max(state.left.x, x), state.right.x), y: min(max(y, state.top.y), state.bottom.y))
-            }
-            //Ellipse
-            let radians = Double(theta) / 180.0 * Double.pi
-            let tanr = tan(radians)
-            let a = state.collapsedWidth / 2.0
-            let b = state.collapsedHeight / 2.0
-            var x: CGFloat = CGFloat(Double(a * b) /
-                sqrt(Double(b * b) + Double(a * a) * tanr * tanr))
-            var y: CGFloat = CGFloat(Double(a * b) * tanr /
-                sqrt(Double(b * b) + Double(a * a) * tanr * tanr))
-            if radians > Double.pi / 2.0 || radians < -Double.pi / 2.0 {
-                x = -x
-                y = -y
-            }
-            x = state.location.x + x
-            y = state.location.y + y
-            return CGPoint(x: x, y: y)
-        }
-        
         let stateViewModels = machine.value.states.indices.map { (stateIndex: Int) -> StateViewModel in
             let stateName = machine.value.states[stateIndex].name
             let statePlist: String = data.components(separatedBy: "<key>\(stateName)</key>")[1]
@@ -88,10 +29,10 @@ extension MachineViewModel {
                 $0.transitionViewModels.filter { $0.transition.target == stateVM.name }
             }
             externalTransitions.forEach {
-                $0.point3 = f($0.point3, stateVM)
+                $0.point3 = stateVM.findEdge(point: $0.point3)
             }
             stateVM.transitionViewModels.forEach {
-                $0.point0 = f($0.point0, stateVM)
+                $0.point0 = stateVM.findEdge(point: $0.point0)
             }
         }
         self.init(machine: machine, states: stateViewModels)
