@@ -63,8 +63,8 @@ public struct MachineView: View {
                     )
                 }
                 ForEach(Array(viewModel.states.indices), id: \.self) { (stateIndex: Int) in
-                    ForEach(Array(viewModel.states[stateIndex].transitions.indices), id: \.self) { (index: Int) -> AnyView in
-                        AnyView(TransitionView(
+                    ForEach(Array(viewModel.states[stateIndex].transitions.indices), id: \.self) { index in
+                        TransitionView(
                             viewModel: viewModel.states[stateIndex].transitionViewModel(
                                 transition: viewModel.states[stateIndex].transitions[index],
                                 index: index,
@@ -78,7 +78,7 @@ public struct MachineView: View {
                         )
                         .onTapGesture(count: 1) {
                             editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: index)
-                        })
+                        }
                     }
                 }
                 if viewModel.creatingTransition {
