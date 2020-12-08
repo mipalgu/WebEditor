@@ -35,51 +35,15 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
         machine[keyPath: path.path]
     }
     
-    @Published var point0ViewModel: RigidMoveableViewModel
-    
-    @Published var point1ViewModel: RigidMoveableViewModel
-    
-    @Published var point2ViewModel: RigidMoveableViewModel
-    
-    @Published var point3ViewModel: RigidMoveableViewModel
-    
     @Published var priority: UInt8
     
-    var point0: CGPoint {
-        get {
-            point0ViewModel.location
-        }
-        set {
-            point0ViewModel.location = newValue
-        }
-    }
+    @Published var point0: CGPoint
     
-    var point1: CGPoint {
-        get {
-            point1ViewModel.location
-        }
-        set {
-            point1ViewModel.location = newValue
-        }
-    }
+    @Published var point1: CGPoint
     
-    var point2: CGPoint {
-        get {
-            point2ViewModel.location
-        }
-        set {
-            point2ViewModel.location = newValue
-        }
-    }
+    @Published var point2: CGPoint
     
-    var point3: CGPoint {
-        get {
-            point3ViewModel.location
-        }
-        set {
-            point3ViewModel.location = newValue
-        }
-    }
+    @Published var point3: CGPoint
     
     let pointDiameter: CGFloat
     
@@ -109,16 +73,12 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
         self._machine = Reference(reference: machine)
         self.path = path
-        self.point0ViewModel = RigidMoveableViewModel(location: point0, width: pointDiameter, height: pointDiameter)
-        self.point1ViewModel = RigidMoveableViewModel(location: point1, width: pointDiameter, height: pointDiameter)
-        self.point2ViewModel = RigidMoveableViewModel(location: point2, width: pointDiameter, height: pointDiameter)
-        self.point3ViewModel = RigidMoveableViewModel(location: point3, width: pointDiameter, height: pointDiameter)
+        self.point0 = point0
+        self.point1 = point1
+        self.point2 = point2
+        self.point3 = point3
         self.priority = priority
         self.pointDiameter = pointDiameter
-        self.listen(to: self.point0ViewModel)
-        self.listen(to: self.point1ViewModel)
-        self.listen(to: self.point2ViewModel)
-        self.listen(to: self.point3ViewModel)
     }
     
     public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
