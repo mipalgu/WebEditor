@@ -67,36 +67,43 @@ import Utilities
 
 class AttributeViewModel<Value>: ObservableObject {
     
-    private var _modify: (Value) -> Void
+    private let _modify: (AttributeViewModel<Value>, Value) -> Void
     
-    @Published public var value: Value
+    var value: Value {
+        get {
+            rootValue
+        } set {
+            rootValue = newValue
+        }
+    }
+    
+    @Reference var rootValue: Value
     
     @Published var error: String? = nil
     
     init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Value>) {
-        self.value = root[path: path].value
-        self._modify = { _ in }
-        self._modify = { [unowned self] in
+        self._rootValue = Reference(wrappedValue: root[path: path].value)
+        self._modify = { (me, value) in
+            defer { me.value = root[path: path].value }
             do {
-                try root.value.modify(attribute: path, value: $0)
-                self.error = nil
-                self.value = root[path: path].value
-                return
+                try root.value.modify(attribute: path, value: value)
+                me.error = nil
             } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                self.error = e.message
+                me.error = e.message
             } catch {}
-            self.value = root[path: path].value
         }
         self.listen(to: root)
+        self.listen(to: $rootValue)
     }
     
-    init(binding: Binding<Value>) {
-        self._modify = { binding.wrappedValue = $0 }
-        self.value = binding.wrappedValue
+    init(reference ref: Ref<Value>) {
+        self._modify = { ref.value = $1 }
+        self._rootValue = Reference(reference: ref)
+        self.listen(to: $rootValue)
     }
     
     func sendModification() -> Void {
-        self._modify(value)
+        self._modify(self, value)
         self.objectWillChange.send()
     }
     

@@ -15,8 +15,7 @@ import Attributes
 import Utilities
 
 public struct EnumeratedView: View {
-    
-    
+
     @StateObject var viewModel: AttributeViewModel<Expression>
     let label: String
     let validValues: Set<String>
@@ -27,8 +26,8 @@ public struct EnumeratedView: View {
         self.init(viewModel: AttributeViewModel(root: root, path: path), label: label, validValues: validValues)
     }
     
-    init(value: Binding<Expression>, label: String, validValues: Set<String>) {
-        self.init(viewModel: AttributeViewModel(binding: value), label: label, validValues: validValues)
+    init(value: Ref<Expression>, label: String, validValues: Set<String>) {
+        self.init(viewModel: AttributeViewModel(reference: value), label: label, validValues: validValues)
     }
     
     init(viewModel: AttributeViewModel<Expression>, label: String, validValues: Set<String>) {

@@ -31,8 +31,8 @@ public struct IntegerView: View {
         self.init(viewModel: AttributeViewModel(root: root, path: path), label: label)
     }
     
-    init(value: Binding<Int>, label: String) {
-        self.init(viewModel: AttributeViewModel(binding: value), label: label)
+    init(value: Ref<Int>, label: String) {
+        self.init(viewModel: AttributeViewModel(reference: value), label: label)
     }
     
     init(viewModel: AttributeViewModel<Int>, label: String) {

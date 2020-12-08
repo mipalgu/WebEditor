@@ -82,8 +82,8 @@ public struct CollectionView: View{
         }
     }
     
-    init(value: Binding<[Attribute]>, label: String, type: AttributeType) {
-        self.init(viewModel: CollectionViewModel(binding: value, type: type), label: label, type: type) {
+    init(value: Ref<[Attribute]>, label: String, type: AttributeType) {
+        self.init(viewModel: CollectionViewModel(reference: value, type: type), label: label, type: type) {
             AttributeView(attribute: value[$0], label: "")
         }
     }
@@ -101,7 +101,7 @@ public struct CollectionView: View{
                 switch type {
                 case .line:
                     HStack {
-                        AttributeView(attribute: $viewModel.newAttribute, label: "New " + label)
+                        AttributeView(attribute: viewModel.$newAttribute, label: "New " + label)
                         Button(action: viewModel.addElement, label: {
                             Image(systemName: "plus").font(.system(size: 16, weight: .regular))
                         }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
@@ -124,7 +124,7 @@ public struct CollectionView: View{
                                 Image(systemName: "trash").font(.system(size: 16, weight: .regular))
                             }).animation(.easeOut).buttonStyle(PlainButtonStyle()).foregroundColor(.red)
                         }
-                        AttributeView(attribute: $viewModel.newAttribute, label: "")
+                        AttributeView(attribute: viewModel.$newAttribute, label: "")
                     } else {
                         HStack {
                             Text(label + ":").fontWeight(.bold)

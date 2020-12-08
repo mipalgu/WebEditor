@@ -26,7 +26,7 @@ public struct CodeView<Label: View>: View {
         self.init(root: root, path: path, language: language, label: { Text(label.capitalized) })
     }
     
-    init(value: Binding<Code>, label: String, language: Language) where Label == Text {
+    init(value: Ref<Code>, label: String, language: Language) where Label == Text {
         self.init(value: value, language: language, label: { Text(label.capitalized) })
     }
     
@@ -34,8 +34,8 @@ public struct CodeView<Label: View>: View {
         self.init(viewModel: AttributeViewModel(root: root, path: path), language: language, label: label)
     }
     
-    init(value: Binding<Code>, language: Language, label: @escaping () -> Label) {
-        self.init(viewModel: AttributeViewModel(binding: value), language: language, label: label)
+    init(value: Ref<Code>, language: Language, label: @escaping () -> Label) {
+        self.init(viewModel: AttributeViewModel(reference: value), language: language, label: label)
     }
     
     init(viewModel: AttributeViewModel<Code>, language: Language, label: @escaping () -> Label) {

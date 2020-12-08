@@ -72,7 +72,7 @@ final class CollectionViewModel: AttributeViewModel<[Attribute]> {
     let _deleteElements: (CollectionViewModel, IndexSet) -> Void
     let _moveElements: (CollectionViewModel, IndexSet, Int) -> Void
     
-    @Published public var newAttribute: Attribute
+    @Reference public var newAttribute: Attribute
     
     @Published public var selection: Set<UUID> = []
     
@@ -140,13 +140,14 @@ final class CollectionViewModel: AttributeViewModel<[Attribute]> {
         self.newAttribute = type.defaultValue
         self.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
         super.init(root: root, path: path)
+        self.listen(to: $newAttribute)
     }
     
-    init(binding value: Binding<[Attribute]>, type: AttributeType) {
+    init(reference value: Ref<[Attribute]>, type: AttributeType) {
         self._addElement = { me in
-            value.wrappedValue.append(me.newAttribute)
+            value.value.append(me.newAttribute)
             me.newAttribute = type.defaultValue
-            me.currentElements = value.wrappedValue.map { ListElement($0) }
+            me.currentElements = value.value.map { ListElement($0) }
         }
         self._deleteElement = { (me, element, index) in
             let offsets: IndexSet = me.selection.contains(element.id)
@@ -155,16 +156,17 @@ final class CollectionViewModel: AttributeViewModel<[Attribute]> {
             me.deleteElements(offsets: offsets)
         }
         self._deleteElements = { (me, offsets) in
-            value.wrappedValue.remove(atOffsets: offsets)
-            me.currentElements = value.wrappedValue.map { ListElement($0) }
+            value.value.remove(atOffsets: offsets)
+            me.currentElements = value.value.map { ListElement($0) }
         }
         self._moveElements = { (me, source, destination) in
-            value.wrappedValue.move(fromOffsets: source, toOffset: destination)
-            me.currentElements = value.wrappedValue.map { ListElement($0) }
+            value.value.move(fromOffsets: source, toOffset: destination)
+            me.currentElements = value.value.map { ListElement($0) }
         }
         self.newAttribute = type.defaultValue
-        self.currentElements = value.wrappedValue.map { ListElement($0) }
-        super.init(binding: value)
+        self.currentElements = value.value.map { ListElement($0) }
+        super.init(reference: value)
+        self.listen(to: $newAttribute)
     }
     
     public func addElement() {

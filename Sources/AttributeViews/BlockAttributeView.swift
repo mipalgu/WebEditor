@@ -37,9 +37,9 @@ public struct BlockAttributeView: View{
         }
     }
     
-    init(attribute: Binding<BlockAttribute>, label: String) {
+    init(attribute: Ref<BlockAttribute>, label: String) {
         self.subView = {
-            switch attribute.wrappedValue.type {
+            switch attribute.value.type {
             case .code(let language):
                 return AnyView(CodeView(value: attribute.codeValue, label: label, language: language))
             case .text:
