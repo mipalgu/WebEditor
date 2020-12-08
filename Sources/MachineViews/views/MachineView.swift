@@ -49,16 +49,6 @@ public struct MachineView: View {
     public var body: some View {
         GeometryReader { (geometry: GeometryProxy) in
             ZStack {
-                ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) -> HiddenStateView in
-                    HiddenStateView(
-                        viewModel: stateViewModel,
-                        editorViewModel: editorViewModel,
-                        machineViewModel: viewModel,
-                        creatingTransitions: $creatingTransitions,
-                        parentWidth: geometry.size.width,
-                        parentHeight: geometry.size.height
-                    )
-                }
                 ForEach(Array(viewModel.states.indices), id: \.self) { (stateIndex: Int) in
                     ForEach(Array(viewModel.states[stateIndex].transitions.indices), id: \.self) { (index: Int) -> AnyView in
                         let stateViewModel = viewModel.states[stateIndex]
@@ -104,6 +94,16 @@ public struct MachineView: View {
                         point3: viewModel.currentMouseLocation,
                         strokeNumber: 0,
                         colour: Color.red
+                    )
+                }
+                ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) -> HiddenStateView in
+                    HiddenStateView(
+                        viewModel: stateViewModel,
+                        editorViewModel: editorViewModel,
+                        machineViewModel: viewModel,
+                        creatingTransitions: $creatingTransitions,
+                        parentWidth: geometry.size.width,
+                        parentHeight: geometry.size.height
                     )
                 }
             }
