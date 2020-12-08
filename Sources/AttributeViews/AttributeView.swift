@@ -65,11 +65,13 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct AttributeView: View{
+public struct AttributeView<Root: Modifiable>: View{
     
+    @ObservedObject var root: Ref<Root>
     let subView: () -> AnyView
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Attribute>, label: String) {
+    public init(root: Ref<Root>, path: Attributes.Path<Root, Attribute>, label: String) {
+        self.root = root
         self.subView = {
             switch root[path: path].value.type {
             case .line:
@@ -80,13 +82,14 @@ public struct AttributeView: View{
         }
     }
     
-    init(attribute: Ref<Attribute>, label: String) {
+    init(root: Ref<Root>, attribute: Ref<Attribute>, label: String) {
+        self.root = root
         self.subView = {
             switch attribute.value.type {
             case .line:
                 return AnyView(LineAttributeView(attribute: attribute.lineAttribute, label: label))
             case .block:
-                return AnyView(BlockAttributeView(attribute: attribute.blockAttribute, label: label))
+                return AnyView(BlockAttributeView(root: root, attribute: attribute.blockAttribute, label: label))
             }
         }
     }
