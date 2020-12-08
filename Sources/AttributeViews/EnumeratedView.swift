@@ -42,7 +42,7 @@ public struct EnumeratedView: View {
                 Text($0).tag($0)
                     .foregroundColor(config.textColor)
             }
-        }.pickerStyle(InlinePickerStyle())
+        }
         .onChange(of: viewModel.value) { _ in
             self.viewModel.sendModification()
         }

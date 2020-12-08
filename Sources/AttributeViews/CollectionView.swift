@@ -65,10 +65,11 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct CollectionView: View{
+public struct CollectionView<Root: Modifiable>: View{
     
+    @ObservedObject var root: Ref<Root>
     @StateObject var viewModel: CollectionViewModel
-    let subView: (Int) -> AttributeView
+    let subView: (Int) -> AttributeView<Root>
     let label: String
     let type: AttributeType
     
@@ -76,19 +77,20 @@ public struct CollectionView: View{
     
     @State var creating: Bool = false
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>, label: String, type: AttributeType) {
-        self.init(viewModel: CollectionViewModel(root: root, path: path, type: type), label: label, type: type) {
+    public init(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>, label: String, type: AttributeType) {
+        self.init(root: root, viewModel: CollectionViewModel(root: root, path: path, type: type), label: label, type: type) {
             AttributeView(root: root, path: path[$0], label: "")
         }
     }
     
-    init(value: Ref<[Attribute]>, label: String, type: AttributeType) {
-        self.init(viewModel: CollectionViewModel(reference: value, type: type), label: label, type: type) {
-            AttributeView(attribute: value[$0], label: "")
+    init(root: Ref<Root>, value: Ref<[Attribute]>, label: String, type: AttributeType) {
+        self.init(root: root, viewModel: CollectionViewModel(reference: value, type: type), label: label, type: type) {
+            AttributeView(root: root, attribute: value[$0], label: "")
         }
     }
     
-    init(viewModel: CollectionViewModel, label: String, type: AttributeType, subView: @escaping (Int) -> AttributeView) {
+    init(root: Ref<Root>, viewModel: CollectionViewModel, label: String, type: AttributeType, subView: @escaping (Int) -> AttributeView<Root>) {
+        self.root = root
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.subView = subView
         self.label = label
@@ -101,7 +103,7 @@ public struct CollectionView: View{
                 switch type {
                 case .line:
                     HStack {
-                        AttributeView(attribute: viewModel.$newAttribute, label: "New " + label)
+                        AttributeView(root: root, attribute: viewModel.$newAttribute, label: "New " + label)
                         Button(action: viewModel.addElement, label: {
                             Image(systemName: "plus").font(.system(size: 16, weight: .regular))
                         }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
@@ -124,7 +126,7 @@ public struct CollectionView: View{
                                 Image(systemName: "trash").font(.system(size: 16, weight: .regular))
                             }).animation(.easeOut).buttonStyle(PlainButtonStyle()).foregroundColor(.red)
                         }
-                        AttributeView(attribute: viewModel.$newAttribute, label: "")
+                        AttributeView(root: root, attribute: viewModel.$newAttribute, label: "")
                     } else {
                         HStack {
                             Text(label + ":").fontWeight(.bold)

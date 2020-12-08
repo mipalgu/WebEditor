@@ -14,11 +14,13 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct BlockAttributeView: View{
+public struct BlockAttributeView<Root: Modifiable>: View{
     
+    @ObservedObject var root: Ref<Root>
     let subView: () -> AnyView
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, BlockAttribute>, label: String) {
+    public init(root: Ref<Root>, path: Attributes.Path<Root, BlockAttribute>, label: String) {
+        self.root = root
         self.subView = {
             switch root[path: path].value.type {
             case .code(let language):
@@ -37,7 +39,8 @@ public struct BlockAttributeView: View{
         }
     }
     
-    init(attribute: Ref<BlockAttribute>, label: String) {
+    init(root: Ref<Root>, attribute: Ref<BlockAttribute>, label: String) {
+        self.root = root
         self.subView = {
             switch attribute.value.type {
             case .code(let language):
@@ -45,11 +48,11 @@ public struct BlockAttributeView: View{
             case .text:
                 return AnyView(TextView(value: attribute.textValue, label: label))
             case .collection(let type):
-                return AnyView(CollectionView(value: attribute.collectionValue, label: label, type: type))
+                return AnyView(CollectionView(root: root, value: attribute.collectionValue, label: label, type: type))
             case .table(let columns):
                 return AnyView(TableView(value: attribute.tableValue, label: label, columns: columns))
             case .complex(let fields):
-                return AnyView(ComplexView(value: attribute.complexValue, label: label, fields: fields))
+                return AnyView(ComplexView(root: root, value: attribute.complexValue, label: label, fields: fields))
             case .enumerableCollection(let validValues):
                 return AnyView(EnumerableCollectionView(value: attribute.enumerableCollectionValue, label: label, validValues: validValues))
             }

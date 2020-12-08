@@ -17,29 +17,13 @@ import Utilities
 
 public struct AttributeGroupView<Root: Modifiable>: View {
 
-    @StateObject var viewModel: AttributeViewModel<AttributeGroup>
-    let subView: (Field) -> AttributeView
+    @ObservedObject var root: Ref<Root>
+    let path: Attributes.Path<Root, AttributeGroup>
     let label: String
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, AttributeGroup>, label: String) {
-        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label) { field in
-            AttributeView(
-                root: root,
-                path: path.attributes[field.name].wrappedValue,
-                label: field.name.pretty
-            )
-        }
-    }
-    
-    init(group: Ref<AttributeGroup>, label: String) {
-        self.init(viewModel: AttributeViewModel(reference: group), label: label) { field in
-            AttributeView(attribute: group.attributes[field.name].wrappedValue, label: field.name.pretty)
-        }
-    }
-    
-    init(viewModel: AttributeViewModel<AttributeGroup>, label: String, subView: @escaping (Field) -> AttributeView) {
-        self._viewModel = StateObject(wrappedValue: viewModel)
-        self.subView = subView
+        self.root = root
+        self.path = path
         self.label = label
     }
     
@@ -49,8 +33,12 @@ public struct AttributeGroupView<Root: Modifiable>: View {
             Form {
                 HStack {
                     VStack(alignment: .leading) {
-                        ForEach(Array(viewModel.value.fields.enumerated()), id: \.0) { (index, field) in
-                            subView(field)
+                        ForEach(Array(root[path: path].value.fields.map { ListElement($0) }), id: \.id) { element in
+                            AttributeView(
+                                root: root,
+                                path: path.attributes[element.value.name].wrappedValue,
+                                label: element.value.name.pretty
+                            )
                         }
                     }
                     Spacer()
