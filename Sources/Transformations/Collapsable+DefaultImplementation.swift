@@ -150,7 +150,6 @@ public extension Collapsable where Self: _Collapsable {
         let tanr = tan(radians)
         let a = collapsedWidth / 2.0
         let b = collapsedHeight / 2.0
-        print(tanr)
         var x: CGFloat = CGFloat(Double(a * b) /
             sqrt(Double(b * b) + Double(a * a) * tanr * tanr))
         var y: CGFloat = CGFloat(Double(a * b) * tanr /
