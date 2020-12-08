@@ -113,7 +113,8 @@ struct StateExpandedView: View {
                         gesture: $0,
                         frameWidth: reader.size.width,
                         frameHeight: reader.size.height,
-                        collapsed: false
+                        collapsed: false,
+                        externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)
                     )
                 }.onEnded {
                     if creatingTransitions {
@@ -124,7 +125,8 @@ struct StateExpandedView: View {
                         gesture: $0,
                         frameWidth: reader.size.width,
                         frameHeight: reader.size.height,
-                        collapsed: false
+                        collapsed: false,
+                        externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)
                     )
                 }
             )

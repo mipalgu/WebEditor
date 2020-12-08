@@ -153,6 +153,8 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     var originalPoint2s: [CGPoint] = []
     
+    var originalPoint3s: [CGPoint] = []
+    
     public var name: String {
         String(machine[keyPath: path.path].name)
     }
@@ -231,21 +233,21 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self.machine.states.firstIndex(of: self.machine[keyPath: path.path]).wrappedValue
     }
     
-    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
+    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel]) {
         self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: 150.0, collapsedHeight: collapsedHeight, collapsedActions: collapsedActions, highlighted: highlighted, transitionViewModels: transitionViewModels)
         self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
     }
     
-    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
+    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel]) {
         self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: collapsedWidth, collapsedHeight: 100.0, collapsedActions: collapsedActions, highlighted: highlighted, transitionViewModels: transitionViewModels)
         self.collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
     }
     
     public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
-        self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: 150.0)
+        self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: 150.0, transitionViewModels: [])
     }
     
-    private init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel] = []) {
+    private init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel]) {
         self._machine = Reference(reference: machine)
         self.path = path
         self.location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
@@ -256,24 +258,6 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         self._collapsedHeight = collapsedHeight
         self._collapsedActions = collapsedActions
         self.highlighted = highlighted
-        if transitionViewModels.count != machine.value[keyPath: path.path].transitions.count {
-            print(transitionViewModels)
-            print(machine.value[keyPath: path.path].transitions)
-            /*let transitions = machine.value[keyPath: path.path].transitions
-            let transitionsSet = Set(transitions)
-            let outlierTransitions = transitions.filter { !transitionsSet.contains($0) }
-            let newViewModels = outlierTransitions.map {
-                let 
-                TransitionViewModel(
-                    machine: <#T##Ref<Machine>#>,
-                    path: <#T##Path<Machine, Transition>#>,
-                    source: <#T##StateViewModel#>,
-                    destination: <#T##StateViewModel#>,
-                    priority: <#T##UInt8#>
-                )
-            }*/
-            //fatalError("Not enough view models for transitions.")
-        }
         let transitionsSet = Set(transitionViewModels.map { $0.transition })
         machine.value[keyPath: path.path].transitions.forEach {
             if transitionsSet.contains($0) {
@@ -380,10 +364,12 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     }
     
     func createNewTransition(destination: StateViewModel) {
-        let newTransition = Transition(condition: "true", target: destination.name)
         do {
-            try machine.addItem(newTransition, to: path.transitions)
-            let priority = machine[keyPath: path.path].transitions.count
+            try machine.newTransition(source: self.name, target: destination.name)
+            let lastIndex = machine[keyPath: path.path].transitions.count - 1
+            try machine.modify(attribute: path.transitions[lastIndex].condition, value: "true")
+            let newTransition = machine[keyPath: path.transitions[lastIndex].path]
+            let priority = lastIndex
             let newViewModel = transitionViewModel(transition: newTransition, index: priority, target: destination)
             transitionViewModels.append(newViewModel)
         } catch let error {
@@ -392,11 +378,12 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         
     }
     
-    func moveSelf(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat, collapsed: Bool) {
+    func moveSelf(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat, collapsed: Bool, externalTransitions: [TransitionViewModel]) {
         if !isDragging {
             originalPoint0s = transitionViewModels.map { $0.point0 }
             originalPoint1s = transitionViewModels.map { $0.point1 }
             originalPoint2s = transitionViewModels.map { $0.point2 }
+            originalPoint3s = externalTransitions.map { $0.point3 }
         }
         if collapsed {
             handleCollapsedDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
@@ -409,9 +396,13 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
             vm.point1 = vm.boundTranslate(point: originalPoint1s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
             vm.point2 = vm.boundTranslate(point: originalPoint2s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
         }
+        externalTransitions.indices.forEach {
+            let vm = externalTransitions[$0]
+            vm.point3 = vm.boundTranslate(point: originalPoint3s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+        }
     }
     
-    func finishMoveSelf(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat, collapsed: Bool) {
+    func finishMoveSelf(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat, collapsed: Bool, externalTransitions: [TransitionViewModel]) {
         if collapsed {
             finishCollapsedDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         } else {
@@ -422,6 +413,10 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
             vm.point0 = vm.boundTranslate(point: originalPoint0s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
             vm.point1 = vm.boundTranslate(point: originalPoint1s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
             vm.point2 = vm.boundTranslate(point: originalPoint2s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+        }
+        externalTransitions.indices.forEach {
+            let vm = externalTransitions[$0]
+            vm.point3 = vm.boundTranslate(point: originalPoint3s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
         }
     }
     

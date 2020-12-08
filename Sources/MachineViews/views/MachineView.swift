@@ -60,22 +60,40 @@ public struct MachineView: View {
                     )
                 }
                 ForEach(Array(viewModel.states.indices), id: \.self) { (stateIndex: Int) in
-                    ForEach(Array(viewModel.states[stateIndex].transitions.indices), id: \.self) { index in
-                        TransitionView(
-                            viewModel: viewModel.states[stateIndex].transitionViewModel(
-                                transition: viewModel.states[stateIndex].transitions[index],
+                    ForEach(Array(viewModel.states[stateIndex].transitions.indices), id: \.self) { (index: Int) -> AnyView in
+                        let stateViewModel = viewModel.states[stateIndex]
+                        let transition = stateViewModel.transitions[index]
+                        guard let transitionViewModel = index >= stateViewModel.transitionViewModels.count ? nil : stateViewModel.transitionViewModels[index],
+                            stateViewModel.path.transitions[index] == transitionViewModel.path,
+                            transition == transitionViewModel.machine[keyPath: transitionViewModel.path.path]
+                        else {
+                            let transViewModel = stateViewModel.transitionViewModel(
+                                transition: stateViewModel.transitions[index],
                                 index: index,
                                 target: self.viewModel.getStateViewModel(
                                     stateName: viewModel.states[stateIndex].transitions[index].target
                                 )
-                            ),
+                            )
+                            viewModel.states[stateIndex].transitionViewModels.insert(transViewModel, at: index)
+                            return AnyView(TransitionView(
+                                viewModel: transViewModel,
+                                focused: isFocused(stateIndex: stateIndex, transitionIndex: index),
+                                frameWidth: geometry.size.width,
+                                frameHeight: geometry.size.height
+                            )
+                            .onTapGesture(count: 1) {
+                                editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: index)
+                            })
+                        }
+                        return AnyView(TransitionView(
+                            viewModel: transitionViewModel,
                             focused: isFocused(stateIndex: stateIndex, transitionIndex: index),
                             frameWidth: geometry.size.width,
                             frameHeight: geometry.size.height
                         )
                         .onTapGesture(count: 1) {
                             editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: index)
-                        }
+                        })
                     }
                 }
                 if viewModel.creatingTransition {
