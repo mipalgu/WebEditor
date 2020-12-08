@@ -366,13 +366,13 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
         return right.x < 0 || left.x > frameWidth || bottom.y < 0 || top.y > frameHeight
     }
     
-    func createNewTransition(destination: StateViewModel, point3: CGPoint) {
+    func createNewTransition(destination: StateViewModel, point0: CGPoint, point3: CGPoint) {
         do {
             try machine.newTransition(source: self.name, target: destination.name)
             let lastIndex = machine[keyPath: path.path].transitions.count - 1
             try machine.modify(attribute: path.transitions[lastIndex].condition, value: "true")
             let priority = UInt8(lastIndex)
-            let source = self.closestEdge(point: point3)
+            let source = self.closestPointToEdge(point: point0, source: point3)
             let dest = destination.closestPointToEdge(point: point3, source: source)
             let newViewModel = TransitionViewModel(machine: $machine, path: path.transitions[lastIndex], source: source, destination: dest, priority: priority)
             transitionViewModels.append(newViewModel)

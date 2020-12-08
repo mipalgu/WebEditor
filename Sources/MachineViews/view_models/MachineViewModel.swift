@@ -276,7 +276,7 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
             print("You must finish dragging a transition to a valid state.")
             return
         }
-        sourceViewModel.createNewTransition(destination: destinationCandidate, point3: gesture.location)
+        sourceViewModel.createNewTransition(destination: destinationCandidate, point0: gesture.startLocation, point3: gesture.location)
     }
     
     public func getExternalTransitionsForState(state: StateViewModel) -> [TransitionViewModel] {
