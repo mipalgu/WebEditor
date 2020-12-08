@@ -47,6 +47,7 @@ struct TransitionView: View {
             })
             if focused {
                 Circle()
+                    .coordinateSpace(name: "MAIN_VIEW")
                     .position(viewModel.point0)
                     .frame(width: 20, height: 20)
                     .gesture(DragGesture().onChanged {
@@ -55,6 +56,7 @@ struct TransitionView: View {
                         viewModel.point0 = $0.location
                     })
                 Circle()
+                    .coordinateSpace(name: "MAIN_VIEW")
                     .position(viewModel.point1)
                     .background(Color.red)
                     .frame(width: 20, height: 20)
@@ -64,6 +66,7 @@ struct TransitionView: View {
                         viewModel.point1 = $0.location
                     })
                 Circle()
+                    .coordinateSpace(name: "MAIN_VIEW")
                     .position(viewModel.point2)
                     .background(Color.blue)
                     .frame(width: 20, height: 20)
@@ -73,6 +76,7 @@ struct TransitionView: View {
                         viewModel.point2 = $0.location
                     })
                 Circle()
+                    .coordinateSpace(name: "MAIN_VIEW")
                     .position(viewModel.point3)
                     .frame(width: 20, height: 20)
                     .gesture(DragGesture().onChanged {

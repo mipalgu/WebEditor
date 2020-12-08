@@ -31,18 +31,15 @@ public struct MachineView: View {
         self._creatingTransitions = creatingTransitions
     }
     
-    func isFocused(state: StateViewModel, transitionIndex: Int) -> Binding<Bool> {
+    func isFocused(stateIndex: Int, transitionIndex: Int) -> Binding<Bool> {
         Binding(get: {
             switch editorViewModel.focusedView {
-            case .transition(let stateIndex, let transIndex):
-                return transIndex == transitionIndex && viewModel.states[stateIndex] === state
+            case .transition(let stateInd, let transInd):
+                return transInd == transitionIndex && stateIndex == stateInd
             default:
                 return false
             }
         }, set: {
-            guard let stateIndex = editorViewModel.machine.getStateIndex(viewModel: state) else {
-                return
-            }
             if $0 {
                 editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: transitionIndex)
             }
@@ -72,7 +69,7 @@ public struct MachineView: View {
                                     stateName: viewModel.states[stateIndex].transitions[index].target
                                 )
                             ),
-                            focused: isFocused(state: viewModel.states[stateIndex], transitionIndex: index),
+                            focused: isFocused(stateIndex: stateIndex, transitionIndex: index),
                             frameWidth: geometry.size.width,
                             frameHeight: geometry.size.height
                         )
