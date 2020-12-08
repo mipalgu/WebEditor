@@ -81,56 +81,7 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
         }
     }
     
-    var point0Binding: Binding<CGPoint> {
-        Binding(get: { self.point0 }, set: { self.point0 = $0 })
-    }
-    
-    var point1Binding: Binding<CGPoint> {
-        Binding(get: { self.point1 }, set: { self.point1 = $0 })
-    }
-    
-    var point2Binding: Binding<CGPoint> {
-        Binding(get: { self.point2 }, set: { self.point2 = $0 })
-    }
-    
-    var point3Binding: Binding<CGPoint> {
-        Binding(get: { self.point3 }, set: { self.point3 = $0 })
-    }
-    
-    var conditionBinding: Binding<String> {
-        Binding(
-            get: { String(self.transition.condition ?? "true") },
-            set: { try? self.machine.modify(attribute: self.path.condition, value: $0) }
-        )
-    }
-    
-    var priorityBinding: Binding<UInt8> {
-        Binding(get: { self.priority }, set: { self.priority = $0 })
-    }
-    
     let pointDiameter: CGFloat
-    
-    let arrowHeadLength: Double = 50.0
-    
-    let basePriorityLength: CGFloat = 20.0
-    
-    let priorityScale: CGFloat = 0.2
-    
-    let strokeSeparation: CGFloat = 5.0
-    
-    var lineAngle: Double {
-        let dx = Double(point1.x - point0.x)
-        let dy = Double(point1.y - point0.y)
-        return atan2(dy, dx)
-    }
-    
-    var strokeAngle: Double {
-        let unsanitisedTheta = lineAngle + Double.pi / 2.0
-        if unsanitisedTheta > Double.pi {
-            return unsanitisedTheta - Double.pi
-        }
-        return unsanitisedTheta
-    }
     
     var condition: String {
         get {
@@ -149,22 +100,6 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
         let dx = (point2.x - point1.x) / 2.0
         let dy = (point2.y - point1.y) / 2.0
         return CGPoint(x: point1.x + dx, y: point1.y + dy)
-    }
-    
-    var arrowPoint0: CGPoint {
-        let dx = point3.x - point2.x
-        let dy = point3.y - point2.y
-        let theta = atan2(Double(dy), Double(dx)) + Double.pi - Double.pi / 4.0
-        let r = arrowHeadLength
-        return CGPoint(x: point3.x + CGFloat(r * cos(theta)), y: point3.y + CGFloat(r * sin(theta)))
-    }
-    
-    var arrowPoint1: CGPoint {
-        let dx = point3.x - point2.x
-        let dy = point3.y - point2.y
-        let theta = atan2(Double(dy), Double(dx)) + Double.pi + Double.pi / 4.0
-        let r = arrowHeadLength
-        return CGPoint(x: point3.x + CGFloat(r * cos(theta)), y: point3.y + CGFloat(r * sin(theta)))
     }
     
     public var isDragging: Bool = false
@@ -208,24 +143,6 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
         let destinationTheta = theta + Double.pi > Double.pi ? theta - Double.pi : theta + Double.pi
         let destinationEdge = destination.findEdge(radians: CGFloat(destinationTheta))
         self.init(machine: machine, path: path, source: sourceEdge, destination: destinationEdge, priority: priority, pointDiameter: pointDiameter)
-    }
-    
-    func strokeLength(transition: UInt8) -> CGFloat {
-        if transition == 0 {
-            return 0.0
-        }
-        return basePriorityLength + basePriorityLength * (CGFloat(transition) - 1.0 ) * priorityScale
-    }
-    
-    func strokePoints(transition: UInt8) -> (CGPoint, CGPoint) {
-        let length = strokeLength(transition: transition)
-        let locationX = point0.x + strokeSeparation *  CGFloat(transition) * CGFloat(cos(lineAngle))
-        let locationY = point0.y + strokeSeparation *  CGFloat(transition) * CGFloat(sin(lineAngle))
-        let dx = length / 2.0 * CGFloat(cos(strokeAngle))
-        let dy = length / 2.0 * CGFloat(sin(strokeAngle))
-        let stroke0 = CGPoint(x: locationX + dx, y: locationY + dy)
-        let stroke1 = CGPoint(x: locationX - dx, y: locationY - dy)
-        return (stroke0, stroke1)
     }
     
     func translate(point: CGPoint, trans: CGSize) -> CGPoint {
