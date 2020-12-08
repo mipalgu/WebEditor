@@ -98,7 +98,6 @@ class AttributeViewModel<Value>: ObservableObject {
     init(reference ref: Ref<Value>) {
         self._modify = { ref.value = $1 }
         self._rootValue = Reference(reference: ref)
-        self.listen(to: $rootValue)
     }
     
     func sendModification() -> Void {
