@@ -170,18 +170,22 @@ final class CollectionViewModel: AttributeViewModel<[Attribute]> {
     }
     
     public func addElement() {
+        self.objectWillChange.send()
         self._addElement(self)
     }
     
     public func deleteElement(_ element: ListElement<Attribute>, atIndex index: Int) {
+        self.objectWillChange.send()
         self._deleteElement(self, element, index)
     }
     
     public func deleteElements(offsets: IndexSet) {
+        self.objectWillChange.send()
         self._deleteElements(self, offsets)
     }
     
     public func moveElements(source: IndexSet, destination: Int) {
+        self.objectWillChange.send()
         self._moveElements(self, source, destination)
     }
     
