@@ -95,6 +95,8 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
     
     @Published public var creatingTransition: Bool = false
     
+    var dragStartLocation: CGPoint = .zero
+    
     var source: StateViewModel?
     
     var destination: StateViewModel?
@@ -105,10 +107,7 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
         guard let viewModel = source else {
             return .zero
         }
-        let dx = currentMouseLocation.x - viewModel.location.x
-        let dy = currentMouseLocation.y - viewModel.location.y
-        let theta = atan2(Double(dy), Double(dx))
-        return viewModel.findEdge(radians: CGFloat(theta))
+        return viewModel.closestPointToEdge(point: dragStartLocation, source: currentMouseLocation)
     }
     
     var tempPoint1: CGPoint {
@@ -264,6 +263,7 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
             return
         }
         source = sourceViewModel
+        dragStartLocation = gesture.startLocation
         creatingTransition = true
     }
     
@@ -276,7 +276,7 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
             print("You must finish dragging a transition to a valid state.")
             return
         }
-        sourceViewModel.createNewTransition(destination: destinationCandidate)
+        sourceViewModel.createNewTransition(destination: destinationCandidate, point0: gesture.startLocation, point3: gesture.location)
     }
     
     public func getExternalTransitionsForState(state: StateViewModel) -> [TransitionViewModel] {

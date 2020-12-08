@@ -30,4 +30,18 @@ public protocol Rigidable: Positionable {
     func findEdge(degrees: CGFloat) -> CGPoint
     
     func findEdge(radians: CGFloat) -> CGPoint
+    
+    func findEdgeCenter(degrees: CGFloat) -> CGPoint
+    
+    func findEdgeCenter(radians: CGFloat) -> CGPoint
+    
+    func findEdgeCenter(point: CGPoint) -> CGPoint
+    
+    func closestEdge(point: CGPoint) -> CGPoint
+    
+    func closestPointToEdge(point: CGPoint, degrees: CGFloat) -> CGPoint
+    
+    func closestPointToEdge(point: CGPoint, radians: CGFloat) -> CGPoint
+    
+    func closestPointToEdge(point: CGPoint, source: CGPoint) -> CGPoint
 }
