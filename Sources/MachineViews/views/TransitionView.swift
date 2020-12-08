@@ -22,6 +22,10 @@ struct TransitionView: View {
     
     @Binding var focused: Bool
     
+    var frameWidth: CGFloat
+    
+    var frameHeight: CGFloat
+    
     @EnvironmentObject var config: Config
     
     var body: some View {
@@ -36,6 +40,11 @@ struct TransitionView: View {
                 colour: focused ? config.highlightColour : config.textColor
             )
             .coordinateSpace(name: "MAIN_VIEW")
+            .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
+                viewModel.handleDrag(gesture: $0, frameWidth: frameWidth, frameHeight: frameHeight)
+            }.onEnded {
+                viewModel.finishDrag(gesture: $0, frameWidth: frameWidth, frameHeight: frameHeight)
+            })
             if focused {
                 Circle()
                     .position(viewModel.point0)

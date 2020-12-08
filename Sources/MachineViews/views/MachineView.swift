@@ -72,7 +72,9 @@ public struct MachineView: View {
                                     stateName: viewModel.states[stateIndex].transitions[index].target
                                 )
                             ),
-                            focused: isFocused(state: viewModel.states[stateIndex], transitionIndex: index)
+                            focused: isFocused(state: viewModel.states[stateIndex], transitionIndex: index),
+                            frameWidth: geometry.size.width,
+                            frameHeight: geometry.size.height
                         )
                         .onTapGesture(count: 1) {
                             editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: index)

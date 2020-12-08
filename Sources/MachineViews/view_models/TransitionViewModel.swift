@@ -106,7 +106,7 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
     }
     
     func translate(point: CGPoint, trans: CGSize) -> CGPoint {
-        CGPoint(x: point.x - trans.width, y: point.y - trans.height)
+        CGPoint(x: point.x + trans.width, y: point.y + trans.height)
     }
     
     func boundPoint(point: CGPoint, frameWidth: CGFloat, frameHeight: CGFloat) -> CGPoint {
