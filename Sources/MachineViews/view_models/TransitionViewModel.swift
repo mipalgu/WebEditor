@@ -79,6 +79,7 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
         self.point3 = point3
         self.priority = priority
         self.pointDiameter = pointDiameter
+        self.listen(to: $machine)
     }
     
     public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
@@ -113,7 +114,7 @@ public final class TransitionViewModel: ObservableObject, Equatable, Hashable, D
         CGPoint(x: min(max(0, point.x), frameWidth), y: min(max(0, point.y), frameHeight))
     }
     
-    private func boundTranslate(point: CGPoint, trans: CGSize, frameWidth: CGFloat, frameHeight: CGFloat) -> CGPoint {
+    func boundTranslate(point: CGPoint, trans: CGSize, frameWidth: CGFloat, frameHeight: CGFloat) -> CGPoint {
         boundPoint(point: translate(point: point, trans: trans), frameWidth: frameWidth, frameHeight: frameHeight)
     }
     

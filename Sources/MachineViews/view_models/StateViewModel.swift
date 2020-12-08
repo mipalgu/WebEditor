@@ -404,9 +404,10 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
             handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         }
         transitionViewModels.indices.forEach {
-            transitionViewModels[$0].point0 = CGPoint(x: originalPoint0s[$0].x + gesture.translation.width, y: originalPoint0s[$0].y - gesture.translation.height)
-            transitionViewModels[$0].point1 = CGPoint(x: originalPoint1s[$0].x + gesture.translation.width, y: originalPoint1s[$0].y - gesture.translation.height)
-            transitionViewModels[$0].point2 = CGPoint(x: originalPoint2s[$0].x + gesture.translation.width, y: originalPoint2s[$0].y - gesture.translation.height)
+            let vm = transitionViewModels[$0]
+            vm.point0 = vm.boundTranslate(point: originalPoint0s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point1 = vm.boundTranslate(point: originalPoint1s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point2 = vm.boundTranslate(point: originalPoint2s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
         }
     }
     
@@ -417,9 +418,10 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
             finishDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         }
         transitionViewModels.indices.forEach {
-            transitionViewModels[$0].point0 = CGPoint(x: originalPoint0s[$0].x + gesture.translation.width, y: originalPoint0s[$0].y - gesture.translation.height)
-            transitionViewModels[$0].point1 = CGPoint(x: originalPoint1s[$0].x + gesture.translation.width, y: originalPoint1s[$0].y - gesture.translation.height)
-            transitionViewModels[$0].point2 = CGPoint(x: originalPoint2s[$0].x + gesture.translation.width, y: originalPoint2s[$0].y - gesture.translation.height)
+            let vm = transitionViewModels[$0]
+            vm.point0 = vm.boundTranslate(point: originalPoint0s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point1 = vm.boundTranslate(point: originalPoint1s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point2 = vm.boundTranslate(point: originalPoint2s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
         }
     }
     
