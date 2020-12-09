@@ -81,40 +81,6 @@ public extension Dragable where Self: StretchFromDrag {
 }
 
 public extension Dragable where Self: MoveAndStretchFromDrag {
-
-    func moveAndStretch(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
-        if isDragging {
-            updateLocationWithOffset(frameWidth: frameWidth, frameHeight: frameHeight, newLocation: gesture.location)
-            return
-        }
-        if isStretchingX && isStretchingY {
-            stretchCorner(gesture: gesture)
-            return
-        }
-        if isStretchingX {
-            stretchHorizontal(gesture: gesture)
-            return
-        }
-        if isStretchingY {
-            stretchVertical(gesture: gesture)
-            return
-        }
-        if onCorner(point: gesture.startLocation) {
-            isStretchingX = true
-            isStretchingY = true
-            return
-        }
-        if onVerticalEdge(point: gesture.startLocation) {
-            isStretchingX = true
-            return
-        }
-        if onHorizontalEdge(point: gesture.startLocation) {
-            isStretchingY = true
-            return
-        }
-        offset = CGPoint(x: gesture.startLocation.x - location.x, y: gesture.startLocation.y - location.y)
-        isDragging = true
-    }
     
     func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isStretchingY || isStretchingX {
