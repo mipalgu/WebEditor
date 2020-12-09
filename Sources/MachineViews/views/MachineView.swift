@@ -73,7 +73,7 @@ public struct MachineView: View {
                             )
                             .onTapGesture(count: 1) {
                                 editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: index)
-                            })
+                            }.clipped())
                         }
                         return AnyView(TransitionView(
                             viewModel: transitionViewModel,
@@ -83,7 +83,8 @@ public struct MachineView: View {
                         )
                         .onTapGesture(count: 1) {
                             editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: index)
-                        })
+                        }.clipped())
+                        
                     }
                 }
                 if viewModel.creatingTransition {
