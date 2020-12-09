@@ -39,4 +39,6 @@ public protocol EdgeDetector: Rigidable {
     
     func onHorizontalEdge(point: CGPoint) -> Bool
     
+    func onEdge(point: CGPoint) -> Bool
+    
 }

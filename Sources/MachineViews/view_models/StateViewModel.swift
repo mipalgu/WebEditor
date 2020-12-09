@@ -219,6 +219,8 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     
     public var offset: CGPoint = CGPoint.zero
     
+    var originalLocation: CGPoint = .zero
+    
     @Published var highlighted: Bool
     
     var machineName: String {
@@ -388,21 +390,34 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
             originalPoint1s = transitionViewModels.map { $0.point1 }
             originalPoint2s = transitionViewModels.map { $0.point2 }
             originalPoint3s = externalTransitions.map { $0.point3 }
+            originalLocation = location
         }
         if collapsed {
             handleCollapsedDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         } else {
             handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+            if isStretchingX || isStretchingY {
+                externalTransitions.forEach {
+                    $0.point3 = closestPointToEdge(point: $0.point3, source: $0.point0)
+                }
+                transitionViewModels.forEach {
+                    $0.point0 = closestPointToEdge(point: $0.point0, source: $0.point3)
+                }
+            }
         }
+        if !isDragging {
+            return
+        }
+        let translation = CGSize(width: location.x - originalLocation.x, height: location.y - originalLocation.y)
         transitionViewModels.indices.forEach {
             let vm = transitionViewModels[$0]
-            vm.point0 = vm.boundTranslate(point: originalPoint0s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            vm.point1 = vm.boundTranslate(point: originalPoint1s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            vm.point2 = vm.boundTranslate(point: originalPoint2s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point0 = vm.boundTranslate(point: originalPoint0s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point1 = vm.boundTranslate(point: originalPoint1s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point2 = vm.boundTranslate(point: originalPoint2s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
         }
         externalTransitions.indices.forEach {
             let vm = externalTransitions[$0]
-            vm.point3 = vm.boundTranslate(point: originalPoint3s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point3 = vm.boundTranslate(point: originalPoint3s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
         }
     }
     
@@ -411,16 +426,28 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
             finishCollapsedDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         } else {
             finishDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+            if isStretchingX || isStretchingY {
+                externalTransitions.forEach {
+                    $0.point3 = closestPointToEdge(point: $0.point3, source: $0.point0)
+                }
+                transitionViewModels.forEach {
+                    $0.point0 = closestPointToEdge(point: $0.point0, source: $0.point3)
+                }
+            }
         }
+        if !isDragging {
+            return
+        }
+        let translation = CGSize(width: location.x - originalLocation.x, height: location.y - originalLocation.y)
         transitionViewModels.indices.forEach {
             let vm = transitionViewModels[$0]
-            vm.point0 = vm.boundTranslate(point: originalPoint0s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            vm.point1 = vm.boundTranslate(point: originalPoint1s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            vm.point2 = vm.boundTranslate(point: originalPoint2s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point0 = vm.boundTranslate(point: originalPoint0s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point1 = vm.boundTranslate(point: originalPoint1s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point2 = vm.boundTranslate(point: originalPoint2s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
         }
         externalTransitions.indices.forEach {
             let vm = externalTransitions[$0]
-            vm.point3 = vm.boundTranslate(point: originalPoint3s[$0], trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
+            vm.point3 = vm.boundTranslate(point: originalPoint3s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
         }
     }
     

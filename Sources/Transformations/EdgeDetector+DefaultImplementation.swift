@@ -74,4 +74,8 @@ public extension EdgeDetector where Self: Rigidable {
         onTopEdge(point: point) || onBottomEdge(point: point)
     }
     
+    func onEdge(point: CGPoint) -> Bool {
+        onHorizontalEdge(point: point) || onVerticalEdge(point: point)
+    }
+    
 }
