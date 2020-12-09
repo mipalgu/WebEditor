@@ -385,7 +385,7 @@ public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
     }
     
     func moveSelf(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat, collapsed: Bool, externalTransitions: [TransitionViewModel]) {
-        if !isDragging {
+        if !isDragging && !isStretchingY && !isStretchingX {
             originalPoint0s = transitionViewModels.map { $0.point0 }
             originalPoint1s = transitionViewModels.map { $0.point1 }
             originalPoint2s = transitionViewModels.map { $0.point2 }
