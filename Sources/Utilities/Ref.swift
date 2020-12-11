@@ -65,7 +65,11 @@ import SwiftUI
 import Attributes
 
 @dynamicMemberLookup
-public class ConstRef<T>: ObservableObject {
+public class ConstRef<T>: ObservableObject, Identifiable {
+    
+    public var id: Int {
+        Int(bitPattern: Unmanaged.passUnretained(self).toOpaque())
+    }
     
     fileprivate var get: () -> T
     
