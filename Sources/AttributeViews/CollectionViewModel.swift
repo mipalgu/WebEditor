@@ -109,9 +109,10 @@ final class CollectionViewModel: AttributeViewModel<[Attribute]> {
             do {
                 try root.value.addItem(me.newAttribute, to: path)
                 me.newAttribute = type.defaultValue
-            } catch let e {
-                me.error = "\(e)"
-            }
+                me.errors = []
+            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
+                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
+            } catch {}
             me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
         }
         self._deleteElement = { (me, element, index) in
@@ -123,18 +124,19 @@ final class CollectionViewModel: AttributeViewModel<[Attribute]> {
         self._deleteElements = { (me, offsets) in
             do {
                 try root.value.deleteItems(table: path, items: offsets)
-                return
-            } catch let e {
-                me.error = "\(e)"
-            }
+                me.errors = []
+            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
+                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
+            } catch {}
             me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
         }
         self._moveElements = { (me, source, destination) in
             do {
                 try root.value.moveItems(table: path, from: source, to: destination)
-            } catch let e {
-                me.error = "\(e)"
-            }
+                me.errors = []
+            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
+                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
+            } catch {}
             me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
         }
         self.newAttribute = type.defaultValue

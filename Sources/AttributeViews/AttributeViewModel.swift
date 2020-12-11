@@ -80,17 +80,18 @@ class AttributeViewModel<Value>: ObservableObject {
     
     @Reference var rootValue: Value
     
-    @Published var error: String? = nil
+    @Published var errors: [String]
     
     init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Value>) {
+        self.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
         self._rootValue = Reference(wrappedValue: root[path: path].value)
         self._modify = { (me, value) in
             defer { me.value = root[path: path].value }
             do {
                 try root.value.modify(attribute: path, value: value)
-                me.error = nil
+                me.errors = []
             } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                me.error = e.message
+                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
             } catch {}
         }
     }
@@ -98,6 +99,7 @@ class AttributeViewModel<Value>: ObservableObject {
     init(reference ref: Ref<Value>) {
         self._modify = { ref.value = $1 }
         self._rootValue = Reference(reference: ref)
+        self.errors = []
     }
     
     func sendModification() -> Void {

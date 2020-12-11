@@ -33,9 +33,9 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
                 me.newRow.forEach {
                     $0.value = $0.type.defaultValue.value
                 }
-                me.error = nil
+                me.errors = []
             } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                me.error = e.message
+                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
             } catch {}
         }
         self._deleteElement = { (me, index) in
@@ -48,18 +48,18 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
             do {
                 try root.value.deleteItems(table: path, items: offsets)
                 me.value = root[path: path].value
-                me.error = nil
+                me.errors = []
             } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                me.error = e.message
+                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
             } catch {}
         }
         self._moveElements = { (me, source, destination) in
             do {
                 try root.value.moveItems(table: path, from: source, to: destination)
                 me.value = root[path: path].value
-                me.error = nil
+                me.errors = []
             } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                me.error = e.message
+                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
             } catch {}
         }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
@@ -159,7 +159,7 @@ public struct TableView<Root: Modifiable>: View {
                         }
                         Text("").frame(width: 15)
                     }
-                    if let error = viewModel.error {
+                    ForEach(viewModel.errors, id: \.self) { error in
                         Text(error).foregroundColor(.red)
                     }
                 }, content: {

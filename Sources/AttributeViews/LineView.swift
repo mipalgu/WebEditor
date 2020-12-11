@@ -39,7 +39,7 @@ public struct LineView: View {
             TextField(label, text: $viewModel.value, onCommit: viewModel.sendModification)
             .background(config.fieldColor)
             .foregroundColor(config.textColor)
-            if let error = self.viewModel.error {
+            ForEach(viewModel.errors, id: \.self) { error in
                 Text(error).foregroundColor(.red)
             }
         }
