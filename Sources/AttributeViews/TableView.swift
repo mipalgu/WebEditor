@@ -148,6 +148,7 @@ public struct TableView<Root: Modifiable>: View {
                                 .multilineTextAlignment(.leading)
                                 .frame(minWidth: 0, maxWidth: .infinity)
                         }
+                        Text("").frame(width: 15)
                     }
                     if let error = viewModel.error {
                         Text(error).foregroundColor(.red)
@@ -170,7 +171,7 @@ public struct TableView<Root: Modifiable>: View {
                       .foregroundColor(.blue)
                       .frame(width: 15)
                 }
-            }.padding(.leading, 15).frame(height: 50)
+            }.padding(.leading, 15).padding(.trailing, 18).frame(height: 50)
         }
     }
 }
@@ -201,6 +202,7 @@ struct TableRowView: View {
             ForEach(Array(row.indices), id: \.self) { columnIndex in
                 subView(columnIndex)
             }
+            Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
         }
     }
 }
