@@ -50,7 +50,7 @@ public struct BlockAttributeView<Root: Modifiable>: View{
             case .collection(let type):
                 return AnyView(CollectionView(root: root, value: attribute.collectionValue, label: label, type: type))
             case .table(let columns):
-                return AnyView(TableView(value: attribute.tableValue, label: label, columns: columns))
+                return AnyView(TableView(root: root, value: attribute.tableValue, label: label, columns: columns))
             case .complex(let fields):
                 return AnyView(ComplexView(root: root, value: attribute.complexValue, label: label, fields: fields))
             case .enumerableCollection(let validValues):

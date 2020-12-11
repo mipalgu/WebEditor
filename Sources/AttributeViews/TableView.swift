@@ -14,9 +14,34 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct TableView: View {
+final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
     
-    @StateObject var viewModel: AttributeViewModel<[[LineAttribute]]>
+    @Published var newRow: [Ref<LineAttribute>]
+    
+    init<Root>(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) where Root : Modifiable {
+        self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
+        super.init(root: root, path: path)
+        newRow.forEach(self.listen)
+    }
+    
+    init(reference ref: Ref<[[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) {
+        self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
+        super.init(reference: ref)
+        newRow.forEach(self.listen)
+    }
+    
+    func addElement() {}
+    
+    func moveElements(fromOffsets source: IndexSet, to destination: Int) {}
+    
+    func deleteElements(atOffsets offsets: IndexSet) {}
+    
+}
+
+public struct TableView<Root: Modifiable>: View {
+    
+    @ObservedObject var root: Ref<Root>
+    @StateObject var viewModel: TableViewModel
     let subView: (TableView, Int) -> TableRowView
     let label: String
     let columns: [BlockAttributeType.TableColumn]
@@ -25,19 +50,20 @@ public struct TableView: View {
     
     @State var selection: Set<Int> = []
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
-        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label, columns: columns) {
+    public init(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
+        self.init(root: root, viewModel: TableViewModel(root: root, path: path, columns: columns), label: label, columns: columns) {
             TableRowView(root: root, path: path[$1], row: $0.$viewModel.value[$1])
         }
     }
     
-    init(value: Ref<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
-        self.init(viewModel: AttributeViewModel(reference: value), label: label, columns: columns) {
+    init(root: Ref<Root>, value: Ref<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
+        self.init(root: root, viewModel: TableViewModel(reference: value, columns: columns), label: label, columns: columns) {
             TableRowView(value: value[$1], row: $0.$viewModel.value[$1])
         }
     }
     
-    init(viewModel: AttributeViewModel<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, Int) -> TableRowView) {
+    init(root: Ref<Root>, viewModel: TableViewModel, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, Int) -> TableRowView) {
+        self.root = root
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.subView = subView
         self.label = label
@@ -46,19 +72,35 @@ public struct TableView: View {
     
     public var body: some View {
         VStack(alignment: .leading) {
-            Text(label.capitalized)
+            Text(label.pretty.capitalized)
                 .font(.headline)
                 .foregroundColor(config.textColor)
             List(selection: $selection) {
                 HStack {
                     ForEach(Array(columns.indices), id: \.self) { index in
                         Text(columns[index].name.pretty)
+                            .multilineTextAlignment(.leading)
                             .frame(minWidth: 0, maxWidth: .infinity)
                     }
+                    Text("").frame(width: 15)
+                }
+                HStack {
+                    ForEach(viewModel.newRow) { attribute in
+                        LineAttributeView(attribute: attribute, label: "")
+                            .frame(minWidth: 0, maxWidth: .infinity)
+                    }
+                    Button(action: viewModel.addElement, label: {
+                        Image(systemName: "plus").font(.system(size: 16, weight: .regular))
+                    }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
+                    .frame(width: 15)
                 }
                 ForEach(Array(viewModel.value.indices), id: \.self) { rowIndex in
-                    subView(self, rowIndex)
-                }
+                    Divider()
+                    HStack {
+                        subView(self, rowIndex)
+                        Text("").frame(width: 15)
+                    }
+                }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
             }.frame(minHeight: 100)
         }
     }
