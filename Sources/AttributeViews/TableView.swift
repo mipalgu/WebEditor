@@ -95,13 +95,9 @@ public struct TableView<Root: Modifiable>: View {
                     .frame(width: 15)
                 }
                 ForEach(Array(viewModel.value.indices), id: \.self) { rowIndex in
-                    Divider()
-                    HStack {
-                        subView(self, rowIndex)
-                        Text("").frame(width: 15)
-                    }
+                    subView(self, rowIndex)
                 }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
-            }.frame(minHeight: 100)
+            }.frame(minHeight: CGFloat(30 * viewModel.value.count + 80))
         }
     }
 }
@@ -132,6 +128,7 @@ struct TableRowView: View {
             ForEach(Array(row.indices), id: \.self) { columnIndex in
                 subView(columnIndex)
             }
+            Text("").frame(width: 15)
         }
     }
 }
