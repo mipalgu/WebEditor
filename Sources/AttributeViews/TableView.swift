@@ -24,19 +24,17 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
     let _deleteElement: (TableViewModel, Int) -> Void
     let _deleteElements: (TableViewModel, IndexSet) -> Void
     let _moveElements: (TableViewModel, IndexSet, Int) -> Void
+    let _errorsForItem: (TableViewModel, Int, Int) -> [String]
     
     init<Root>(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) where Root : Modifiable {
         self._addElement = { me in
-            do {
-                try root.value.addItem(me.newRow.map(\.value), to: path)
-                me.value = root[path: path].value
+            if let _ = try? root.value.addItem(me.newRow.map(\.value), to: path) {
                 me.newRow.forEach {
                     $0.value = $0.type.defaultValue.value
                 }
-                me.errors = []
-            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
-            } catch {}
+            }
+            me.value = root[path: path].value
+            me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
         }
         self._deleteElement = { (me, index) in
             let offsets: IndexSet = me.selection.contains(index)
@@ -45,26 +43,23 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
             me.deleteElements(offsets: offsets)
         }
         self._deleteElements = { (me, offsets) in
-            do {
-                try root.value.deleteItems(table: path, items: offsets)
-                me.value = root[path: path].value
-                me.errors = []
-            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
-            } catch {}
+            try? root.value.deleteItems(table: path, items: offsets)
+            me.value = root[path: path].value
+            me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
         }
         self._moveElements = { (me, source, destination) in
-            do {
-                try root.value.moveItems(table: path, from: source, to: destination)
-                me.value = root[path: path].value
-                me.errors = []
-            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
-            } catch {}
+            try? root.value.moveItems(table: path, from: source, to: destination)
+            me.value = root[path: path].value
+            me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
+        }
+        self._errorsForItem = { (me, row, col) in
+            return root.value.errorBag.errors(forPath: AnyPath(path[row][col])).map(\.message)
         }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         super.init(root: root, path: path)
         newRow.forEach(self.listen)
+        self.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
+        print(root.value.errorBag.allErrors)
     }
     
     init(reference ref: Ref<[[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) {
@@ -86,6 +81,7 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
         self._moveElements = { (me, source, destination) in
             me.value.move(fromOffsets: source, toOffset: destination)
         }
+        self._errorsForItem = { (_, _, _) in [] }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         super.init(reference: ref)
         newRow.forEach(self.listen)
@@ -107,6 +103,10 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
         self._deleteElement(self, index)
     }
     
+    func errorsForItem(atRow row: Int, col: Int) -> [String] {
+        self._errorsForItem(self, row, col)
+    }
+    
 }
 
 public struct TableView<Root: Modifiable>: View {
@@ -121,7 +121,12 @@ public struct TableView<Root: Modifiable>: View {
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
         self.init(root: root, viewModel: TableViewModel(root: root, path: path, columns: columns), label: label, columns: columns) { (me, index) in
-            TableRowView(root: root, path: path[index], row: me.$viewModel.value[index]) {
+            TableRowView(
+                root: root,
+                path: path[index],
+                row: me.$viewModel.value[index],
+                errorsForItem: { me.viewModel.errorsForItem(atRow: index, col: $0) }
+            ) {
                 me.viewModel.deleteElement(atIndex: index)
             }
         }
@@ -130,7 +135,11 @@ public struct TableView<Root: Modifiable>: View {
     init(root: Ref<Root>, value: Ref<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
         let viewModel = TableViewModel(reference: value, columns: columns)
         self.init(root: root, viewModel: viewModel, label: label, columns: columns) { (me, index) in
-            TableRowView(value: value[index], row: me.$viewModel.value[index]) {
+            TableRowView(
+                value: value[index],
+                row: me.$viewModel.value[index],
+                errorsForItem: { me.viewModel.errorsForItem(atRow: index, col: $0) }
+            ) {
                 me.viewModel.deleteElement(atIndex: index)
             }
         }
@@ -170,9 +179,13 @@ public struct TableView<Root: Modifiable>: View {
             }.padding(.bottom, -15).frame(minHeight: CGFloat(30 * viewModel.value.count + 35))
             ScrollView([.vertical], showsIndicators: false) {
                 HStack {
-                    ForEach(viewModel.newRow) { attribute in
-                        LineAttributeView(attribute: attribute, label: "")
-                            .frame(minWidth: 0, maxWidth: .infinity)
+                    ForEach(Array(viewModel.newRow.enumerated()), id: \.0) { (index, attribute) in
+                        VStack {
+                            LineAttributeView(attribute: attribute, label: "")
+                            ForEach(viewModel.errorsForItem(atRow: viewModel.value.count, col: index), id: \.self) { error in
+                                Text(error).foregroundColor(.red)
+                            }
+                        }.frame(minWidth: 0, maxWidth: .infinity)
                     }
                     Button(action: viewModel.addElement, label: {
                         Image(systemName: "plus").font(.system(size: 16, weight: .regular))
@@ -189,30 +202,49 @@ struct TableRowView: View {
     
     let subView: (Int) -> LineAttributeView
     @Binding var row: [LineAttribute]
+    let errorsForItem: (Int) -> [String]
     let onDelete: () -> Void
     
     @EnvironmentObject var config: Config
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [LineAttribute]>, row: Binding<[LineAttribute]>, onDelete: @escaping () -> Void) {
+    public init<Root: Modifiable>(
+        root: Ref<Root>,
+        path: Attributes.Path<Root, [LineAttribute]>,
+        row: Binding<[LineAttribute]>,
+        errorsForItem: @escaping (Int) -> [String],
+        onDelete: @escaping () -> Void
+    ) {
         self.subView = {
             LineAttributeView(root: root, path: path[$0], label: "")
         }
         self._row = row
+        self.errorsForItem = errorsForItem
         self.onDelete = onDelete
     }
     
-    public init(value: Ref<[LineAttribute]>, row: Binding<[LineAttribute]>, onDelete: @escaping () -> Void) {
+    public init(
+        value: Ref<[LineAttribute]>,
+        row: Binding<[LineAttribute]>,
+        errorsForItem: @escaping (Int) -> [String],
+        onDelete: @escaping () -> Void
+    ) {
         self.subView = {
             LineAttributeView(attribute: value[$0], label: "")
         }
         self._row = row
+        self.errorsForItem = errorsForItem
         self.onDelete = onDelete
     }
     
     var body: some View {
         HStack {
             ForEach(Array(row.indices), id: \.self) { columnIndex in
-                subView(columnIndex)
+                VStack {
+                    subView(columnIndex)
+                    ForEach(errorsForItem(columnIndex), id: \.self) { error in
+                        Text(error).foregroundColor(.red)
+                    }
+                }
             }
             Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
         }.contextMenu {

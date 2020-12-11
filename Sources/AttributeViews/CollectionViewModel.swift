@@ -106,14 +106,11 @@ final class CollectionViewModel: AttributeViewModel<[Attribute]> {
     
     init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>, type: AttributeType) {
         self._addElement = { me in
-            do {
-                try root.value.addItem(me.newAttribute, to: path)
+            if let _ = try? root.value.addItem(me.newAttribute, to: path) {
                 me.newAttribute = type.defaultValue
-                me.errors = []
-            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
-            } catch {}
+            }
             me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+            me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
         }
         self._deleteElement = { (me, element, index) in
             let offsets: IndexSet = me.selection.contains(element.id)
@@ -122,22 +119,14 @@ final class CollectionViewModel: AttributeViewModel<[Attribute]> {
             me.deleteElements(offsets: offsets)
         }
         self._deleteElements = { (me, offsets) in
-            do {
-                try root.value.deleteItems(table: path, items: offsets)
-                me.errors = []
-            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
-            } catch {}
+            try? root.value.deleteItems(table: path, items: offsets)
             me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+            me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
         }
         self._moveElements = { (me, source, destination) in
-            do {
-                try root.value.moveItems(table: path, from: source, to: destination)
-                me.errors = []
-            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
-                me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
-            } catch {}
+            try? root.value.moveItems(table: path, from: source, to: destination)
             me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+            me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
         }
         self.newAttribute = type.defaultValue
         self.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
