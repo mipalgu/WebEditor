@@ -18,23 +18,93 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
     
     @Published var newRow: [Ref<LineAttribute>]
     
+    @Published var selection: Set<Int> = []
+    
+    let _addElement: (TableViewModel) -> Void
+    let _deleteElement: (TableViewModel, LineAttribute, Int) -> Void
+    let _deleteElements: (TableViewModel, IndexSet) -> Void
+    let _moveElements: (TableViewModel, IndexSet, Int) -> Void
+    
     init<Root>(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) where Root : Modifiable {
+        self._addElement = { me in
+            do {
+                //try root.value.addItem(me.newRow, to: path)
+                me.newRow.forEach {
+                    $0.value = $0.type.defaultValue.value
+                }
+            } catch let e {
+                me.error = "\(e)"
+            }
+            //me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+        }
+        self._deleteElement = { (me, element, index) in
+            let offsets: IndexSet = me.selection.contains(index)
+                ? IndexSet(me.value.enumerated().lazy.filter { me.selection.contains($0.offset) }.map { $0.0 })
+                : [index]
+            me.deleteElements(offsets: offsets)
+        }
+        self._deleteElements = { (me, offsets) in
+            do {
+                try root.value.deleteItems(table: path, items: offsets)
+            } catch let e {
+                me.error = "\(e)"
+            }
+            //me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+        }
+        self._moveElements = { (me, source, destination) in
+            do {
+                try root.value.moveItems(table: path, from: source, to: destination)
+            } catch let e {
+                me.error = "\(e)"
+            }
+            //me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+        }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         super.init(root: root, path: path)
         newRow.forEach(self.listen)
     }
     
     init(reference ref: Ref<[[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) {
+        self._addElement = { me in
+            me.value.append(me.newRow.map(\.value))
+            me.newRow.forEach {
+                $0.value = $0.type.defaultValue.value
+            }
+            //me.currentElements = value.value.map { ListElement($0) }
+        }
+        self._deleteElement = { (me, element, index) in
+            let offsets: IndexSet = me.selection.contains(index)
+                ? IndexSet(me.value.enumerated().lazy.filter { me.selection.contains($0.offset) }.map { $0.0 })
+                : [index]
+            me.deleteElements(offsets: offsets)
+        }
+        self._deleteElements = { (me, offsets) in
+            me.value.remove(atOffsets: offsets)
+            //me.currentElements = value.value.map { ListElement($0) }
+        }
+        self._moveElements = { (me, source, destination) in
+            me.value.move(fromOffsets: source, toOffset: destination)
+            //me.currentElements = value.value.map { ListElement($0) }
+        }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         super.init(reference: ref)
         newRow.forEach(self.listen)
     }
     
-    func addElement() {}
+    func addElement() {
+        self.objectWillChange.send()
+        self._addElement(self)
+    }
     
-    func moveElements(fromOffsets source: IndexSet, to destination: Int) {}
+    func moveElements(fromOffsets source: IndexSet, to destination: Int) {
+        self.objectWillChange.send()
+        self._moveElements(self, source, destination)
+    }
     
-    func deleteElements(atOffsets offsets: IndexSet) {}
+    func deleteElements(offsets: IndexSet) {
+        self.objectWillChange.send()
+        self._deleteElements(self, offsets)
+    }
     
 }
 
@@ -47,8 +117,6 @@ public struct TableView<Root: Modifiable>: View {
     let columns: [BlockAttributeType.TableColumn]
     
     @EnvironmentObject var config: Config
-    
-    @State var selection: Set<Int> = []
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
         self.init(root: root, viewModel: TableViewModel(root: root, path: path, columns: columns), label: label, columns: columns) {
@@ -75,7 +143,7 @@ public struct TableView<Root: Modifiable>: View {
             Text(label.pretty.capitalized)
                 .font(.headline)
                 .foregroundColor(config.textColor)
-            List(selection: $selection) {
+            List(selection: $viewModel.selection) {
                 HStack {
                     ForEach(Array(columns.indices), id: \.self) { index in
                         Text(columns[index].name.pretty)
