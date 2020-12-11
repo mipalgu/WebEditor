@@ -21,7 +21,7 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
     @Published var selection: Set<Int> = []
     
     let _addElement: (TableViewModel) -> Void
-    let _deleteElement: (TableViewModel, LineAttribute, Int) -> Void
+    let _deleteElement: (TableViewModel, Int) -> Void
     let _deleteElements: (TableViewModel, IndexSet) -> Void
     let _moveElements: (TableViewModel, IndexSet, Int) -> Void
     
@@ -38,7 +38,7 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
                 me.error = e.message
             } catch {}
         }
-        self._deleteElement = { (me, element, index) in
+        self._deleteElement = { (me, index) in
             let offsets: IndexSet = me.selection.contains(index)
                 ? IndexSet(me.value.enumerated().lazy.filter { me.selection.contains($0.offset) }.map { $0.0 })
                 : [index]
@@ -74,7 +74,7 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
                 $0.value = $0.type.defaultValue.value
             }
         }
-        self._deleteElement = { (me, element, index) in
+        self._deleteElement = { (me, index) in
             let offsets: IndexSet = me.selection.contains(index)
                 ? IndexSet(me.value.enumerated().lazy.filter { me.selection.contains($0.offset) }.map { $0.0 })
                 : [index]
@@ -103,6 +103,10 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
         self._deleteElements(self, offsets)
     }
     
+    func deleteElement(atIndex index: Int) {
+        self._deleteElement(self, index)
+    }
+    
 }
 
 public struct TableView<Root: Modifiable>: View {
@@ -116,14 +120,19 @@ public struct TableView<Root: Modifiable>: View {
     @EnvironmentObject var config: Config
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
-        self.init(root: root, viewModel: TableViewModel(root: root, path: path, columns: columns), label: label, columns: columns) {
-            TableRowView(root: root, path: path[$1], row: $0.$viewModel.value[$1])
+        self.init(root: root, viewModel: TableViewModel(root: root, path: path, columns: columns), label: label, columns: columns) { (me, index) in
+            TableRowView(root: root, path: path[index], row: me.$viewModel.value[index]) {
+                me.viewModel.deleteElement(atIndex: index)
+            }
         }
     }
     
     init(root: Ref<Root>, value: Ref<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
-        self.init(root: root, viewModel: TableViewModel(reference: value, columns: columns), label: label, columns: columns) {
-            TableRowView(value: value[$1], row: $0.$viewModel.value[$1])
+        let viewModel = TableViewModel(reference: value, columns: columns)
+        self.init(root: root, viewModel: viewModel, label: label, columns: columns) { (me, index) in
+            TableRowView(value: value[index], row: me.$viewModel.value[index]) {
+                me.viewModel.deleteElement(atIndex: index)
+            }
         }
     }
     
@@ -180,21 +189,24 @@ struct TableRowView: View {
     
     let subView: (Int) -> LineAttributeView
     @Binding var row: [LineAttribute]
+    let onDelete: () -> Void
     
     @EnvironmentObject var config: Config
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [LineAttribute]>, row: Binding<[LineAttribute]>) {
+    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, [LineAttribute]>, row: Binding<[LineAttribute]>, onDelete: @escaping () -> Void) {
         self.subView = {
             LineAttributeView(root: root, path: path[$0], label: "")
         }
         self._row = row
+        self.onDelete = onDelete
     }
     
-    public init(value: Ref<[LineAttribute]>, row: Binding<[LineAttribute]>) {
+    public init(value: Ref<[LineAttribute]>, row: Binding<[LineAttribute]>, onDelete: @escaping () -> Void) {
         self.subView = {
             LineAttributeView(attribute: value[$0], label: "")
         }
         self._row = row
+        self.onDelete = onDelete
     }
     
     var body: some View {
@@ -203,6 +215,8 @@ struct TableRowView: View {
                 subView(columnIndex)
             }
             Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
+        }.contextMenu {
+            Button("Delete", action: onDelete).keyboardShortcut(.delete)
         }
     }
 }
