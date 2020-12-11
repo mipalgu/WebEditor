@@ -82,8 +82,12 @@ public struct TableView<Root: Modifiable>: View {
                             .multilineTextAlignment(.leading)
                             .frame(minWidth: 0, maxWidth: .infinity)
                     }
-                    Text("").frame(width: 15)
                 }
+                ForEach(Array(viewModel.value.indices), id: \.self) { rowIndex in
+                    subView(self, rowIndex)
+                }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
+            }.padding(.bottom, -15).frame(minHeight: CGFloat(30 * viewModel.value.count + 30))
+            ScrollView([.vertical], showsIndicators: false) {
                 HStack {
                     ForEach(viewModel.newRow) { attribute in
                         LineAttributeView(attribute: attribute, label: "")
@@ -94,10 +98,7 @@ public struct TableView<Root: Modifiable>: View {
                     }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
                     .frame(width: 15)
                 }
-                ForEach(Array(viewModel.value.indices), id: \.self) { rowIndex in
-                    subView(self, rowIndex)
-                }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
-            }.frame(minHeight: CGFloat(30 * viewModel.value.count + 80))
+            }.padding(.leading, 15).frame(height: 50)
         }
     }
 }
@@ -128,7 +129,6 @@ struct TableRowView: View {
             ForEach(Array(row.indices), id: \.self) { columnIndex in
                 subView(columnIndex)
             }
-            Text("").frame(width: 15)
         }
     }
 }
