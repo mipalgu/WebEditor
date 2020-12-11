@@ -28,14 +28,15 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
     init<Root>(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) where Root : Modifiable {
         self._addElement = { me in
             do {
-                //try root.value.addItem(me.newRow, to: path)
+                try root.value.addItem(me.newRow.map(\.value), to: path)
+                me.value = root[path: path].value
                 me.newRow.forEach {
                     $0.value = $0.type.defaultValue.value
                 }
-            } catch let e {
-                me.error = "\(e)"
-            }
-            //me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+                me.error = nil
+            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
+                me.error = e.message
+            } catch {}
         }
         self._deleteElement = { (me, element, index) in
             let offsets: IndexSet = me.selection.contains(index)
@@ -46,18 +47,20 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
         self._deleteElements = { (me, offsets) in
             do {
                 try root.value.deleteItems(table: path, items: offsets)
-            } catch let e {
-                me.error = "\(e)"
-            }
-            //me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+                me.value = root[path: path].value
+                me.error = nil
+            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
+                me.error = e.message
+            } catch {}
         }
         self._moveElements = { (me, source, destination) in
             do {
                 try root.value.moveItems(table: path, from: source, to: destination)
-            } catch let e {
-                me.error = "\(e)"
-            }
-            //me.currentElements = root.value[keyPath: path.keyPath].map { ListElement($0) }
+                me.value = root[path: path].value
+                me.error = nil
+            } catch let e as AttributeError<Root> where e.isError(forPath: path) {
+                me.error = e.message
+            } catch {}
         }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         super.init(root: root, path: path)
@@ -70,7 +73,6 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
             me.newRow.forEach {
                 $0.value = $0.type.defaultValue.value
             }
-            //me.currentElements = value.value.map { ListElement($0) }
         }
         self._deleteElement = { (me, element, index) in
             let offsets: IndexSet = me.selection.contains(index)
@@ -80,11 +82,9 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
         }
         self._deleteElements = { (me, offsets) in
             me.value.remove(atOffsets: offsets)
-            //me.currentElements = value.value.map { ListElement($0) }
         }
         self._moveElements = { (me, source, destination) in
             me.value.move(fromOffsets: source, toOffset: destination)
-            //me.currentElements = value.value.map { ListElement($0) }
         }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         super.init(reference: ref)
@@ -92,17 +92,14 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
     }
     
     func addElement() {
-        self.objectWillChange.send()
         self._addElement(self)
     }
     
     func moveElements(fromOffsets source: IndexSet, to destination: Int) {
-        self.objectWillChange.send()
         self._moveElements(self, source, destination)
     }
     
     func deleteElements(offsets: IndexSet) {
-        self.objectWillChange.send()
         self._deleteElements(self, offsets)
     }
     
@@ -144,11 +141,16 @@ public struct TableView<Root: Modifiable>: View {
                 .font(.headline)
                 .foregroundColor(config.textColor)
             List(selection: $viewModel.selection) {
-                Section(header: HStack {
-                    ForEach(Array(columns.indices), id: \.self) { index in
-                        Text(columns[index].name.pretty)
-                            .multilineTextAlignment(.leading)
-                            .frame(minWidth: 0, maxWidth: .infinity)
+                Section(header: VStack {
+                    HStack {
+                        ForEach(Array(columns.indices), id: \.self) { index in
+                            Text(columns[index].name.pretty)
+                                .multilineTextAlignment(.leading)
+                                .frame(minWidth: 0, maxWidth: .infinity)
+                        }
+                    }
+                    if let error = viewModel.error {
+                        Text(error).foregroundColor(.red)
                     }
                 }, content: {
                     ForEach(Array(viewModel.value.indices), id: \.self) { rowIndex in
