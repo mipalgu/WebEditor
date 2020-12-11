@@ -103,6 +103,7 @@ public struct CollectionView<Root: Modifiable>: View{
                 switch type {
                 case .line:
                     HStack {
+                        Text(label.pretty + ":").fontWeight(.bold)
                         AttributeView(root: root, attribute: viewModel.$newAttribute, label: "New " + label)
                         Button(action: viewModel.addElement, label: {
                             Image(systemName: "plus").font(.system(size: 16, weight: .regular))
@@ -149,7 +150,7 @@ public struct CollectionView<Root: Modifiable>: View{
                             Button("Delete", action: { viewModel.deleteElement(element, atIndex: index) }).keyboardShortcut(.delete)
                         }
                     }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
-                }.frame(minHeight: min(CGFloat(viewModel.elements.count * (type == .line ? 30 : 80) + 10), 100))
+                }.frame(minHeight: min(CGFloat(viewModel.elements.count * (type == .line ? 30 : 80) + 15), 100))
             }
         }.padding(.top, 2)
     }
