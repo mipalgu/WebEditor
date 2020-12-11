@@ -144,17 +144,18 @@ public struct TableView<Root: Modifiable>: View {
                 .font(.headline)
                 .foregroundColor(config.textColor)
             List(selection: $viewModel.selection) {
-                HStack {
+                Section(header: HStack {
                     ForEach(Array(columns.indices), id: \.self) { index in
                         Text(columns[index].name.pretty)
                             .multilineTextAlignment(.leading)
                             .frame(minWidth: 0, maxWidth: .infinity)
                     }
-                }
-                ForEach(Array(viewModel.value.indices), id: \.self) { rowIndex in
-                    subView(self, rowIndex)
-                }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
-            }.padding(.bottom, -15).frame(minHeight: CGFloat(30 * viewModel.value.count + 30))
+                }, content: {
+                    ForEach(Array(viewModel.value.indices), id: \.self) { rowIndex in
+                        subView(self, rowIndex)
+                    }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
+                })
+            }.padding(.bottom, -15).frame(minHeight: CGFloat(30 * viewModel.value.count + 35))
             ScrollView([.vertical], showsIndicators: false) {
                 HStack {
                     ForEach(viewModel.newRow) { attribute in
@@ -163,8 +164,9 @@ public struct TableView<Root: Modifiable>: View {
                     }
                     Button(action: viewModel.addElement, label: {
                         Image(systemName: "plus").font(.system(size: 16, weight: .regular))
-                    }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
-                    .frame(width: 15)
+                    }).buttonStyle(PlainButtonStyle())
+                      .foregroundColor(.blue)
+                      .frame(width: 15)
                 }
             }.padding(.leading, 15).frame(height: 50)
         }
