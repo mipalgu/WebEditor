@@ -67,7 +67,7 @@ import Utilities
 
 public struct AttributeView<Root: Modifiable>: View{
     
-    @ObservedObject var root: Ref<Root>
+    let root: Ref<Root>
     let subView: () -> AnyView
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, Attribute>, label: String) {

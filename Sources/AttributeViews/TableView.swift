@@ -111,7 +111,7 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
 
 public struct TableView<Root: Modifiable>: View {
     
-    @ObservedObject var root: Ref<Root>
+    let root: Ref<Root>
     @StateObject var viewModel: TableViewModel
     let subView: (TableView, Int) -> TableRowView
     let label: String
@@ -136,7 +136,7 @@ public struct TableView<Root: Modifiable>: View {
         }
     }
     
-    init(root: Ref<Root>, viewModel: TableViewModel, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, Int) -> TableRowView) {
+    private init(root: Ref<Root>, viewModel: TableViewModel, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, Int) -> TableRowView) {
         self.root = root
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.subView = subView

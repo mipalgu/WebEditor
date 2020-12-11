@@ -67,9 +67,9 @@ import Attributes
 @dynamicMemberLookup
 public class ConstRef<T>: ObservableObject, Identifiable {
     
-    public var id: Int {
+    public private(set) lazy var id: Int = {
         Int(bitPattern: Unmanaged.passUnretained(self).toOpaque())
-    }
+    }()
     
     fileprivate var get: () -> T
     
@@ -100,6 +100,39 @@ extension ConstRef where T: ObservableObject {
     public convenience init(observing value: T) {
         self.init(get: { value })
         self.listen(to: value)
+    }
+    
+}
+
+extension ConstRef: Equatable where T: Equatable {
+    
+    public static func == (lhs: ConstRef<T>, rhs: ConstRef<T>) -> Bool {
+        return lhs.value == rhs.value
+    }
+    
+}
+
+extension ConstRef: Hashable where T: Hashable {
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.value)
+    }
+    
+}
+
+extension Ref: Decodable where T: Decodable {
+    
+    public convenience init(from decoder: Decoder) throws {
+        let value = try T(from: decoder)
+        self.init(copying: value)
+    }
+    
+}
+
+extension ConstRef: Encodable where T: Encodable {
+    
+    public func encode(to encoder: Encoder) throws {
+        try self.value.encode(to: encoder)
     }
     
 }

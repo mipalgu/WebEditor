@@ -16,7 +16,7 @@ import Utilities
 
 public struct ComplexView<Root: Modifiable>: View {
     
-    @ObservedObject var root: Ref<Root>
+    let root: Ref<Root>
     @StateObject var viewModel: AttributeViewModel<[String: Attribute]>
     let subView: (Field) -> AttributeView<Root>
     let label: String

@@ -67,7 +67,7 @@ import Utilities
 
 public struct CollectionView<Root: Modifiable>: View{
     
-    @ObservedObject var root: Ref<Root>
+    let root: Ref<Root>
     @StateObject var viewModel: CollectionViewModel
     let subView: (Int) -> AttributeView<Root>
     let label: String

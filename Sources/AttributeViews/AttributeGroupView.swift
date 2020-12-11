@@ -17,7 +17,7 @@ import Utilities
 
 public struct AttributeGroupView<Root: Modifiable>: View {
 
-    @ObservedObject var root: Ref<Root>
+    let root: Ref<Root>
     let path: Attributes.Path<Root, AttributeGroup>
     let label: String
     

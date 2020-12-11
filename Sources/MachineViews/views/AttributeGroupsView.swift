@@ -24,6 +24,8 @@ public struct AttributeGroupsView: View {
     
     @EnvironmentObject var config: Config
     
+    @State var selection: AttributeGroup? = nil
+    
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String) {
         self.machine = machine
         self.path = path
@@ -35,12 +37,12 @@ public struct AttributeGroupsView: View {
             Text(label.capitalized)
                 .font(.title3)
                 .foregroundColor(config.textColor)
-            TabView {
-                ForEach(Array(machine[path: path].value.indices), id: \.self) { index in
-                    AttributeGroupView(root: machine, path: path[index], label: machine[path: path][index].name.value)
+            TabView(selection: Binding($selection)) {
+                ForEach(Array(machine[path: path].value.indices).map { ListElement($0) }, id: \.id) { element in
+                    AttributeGroupView(root: machine, path: path[element.value], label: machine[path: path][element.value].name.value)
                         .padding(.horizontal, 10)
                         .tabItem {
-                            Text(machine[path: path][index].name.value.pretty)
+                            Text(machine[path: path][element.value].name.value.pretty)
                         }
                 }
                 ScrollView(.vertical, showsIndicators: true) {

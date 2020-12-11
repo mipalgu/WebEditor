@@ -73,6 +73,7 @@ class AttributeViewModel<Value>: ObservableObject {
         get {
             rootValue
         } set {
+            self.objectWillChange.send()
             rootValue = newValue
         }
     }
@@ -92,7 +93,6 @@ class AttributeViewModel<Value>: ObservableObject {
                 me.error = e.message
             } catch {}
         }
-        self.listen(to: $rootValue)
     }
     
     init(reference ref: Ref<Value>) {

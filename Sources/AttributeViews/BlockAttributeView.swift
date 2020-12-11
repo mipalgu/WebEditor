@@ -16,7 +16,7 @@ import Utilities
 
 public struct BlockAttributeView<Root: Modifiable>: View{
     
-    @ObservedObject var root: Ref<Root>
+    let root: Ref<Root>
     let subView: () -> AnyView
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, BlockAttribute>, label: String) {
