@@ -122,6 +122,8 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
         return CGPoint(x: tempPoint0.x + dx * 2.0 / 3.0, y: tempPoint0.y + dy * 2.0 / 3.0)
     }
     
+    var finishedDrag: Bool = false
+    
     public convenience init(machine: Ref<Machine>) {
         if let plist = try? String(contentsOf: machine.value.filePath.appendingPathComponent("Layout.plist")) {
             self.init(machine: machine, plist: plist)

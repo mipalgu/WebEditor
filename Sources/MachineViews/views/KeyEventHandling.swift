@@ -1,0 +1,62 @@
+//
+//  File.swift
+//  
+//
+//  Created by Morgan McColl on 12/12/20.
+//
+
+#if canImport(SwiftUI) && !canImport(TokamakShim)
+
+import SwiftUI
+
+struct KeyEventHandling: NSViewRepresentable {
+    
+    var keyDownCallback: (NSEvent) -> Void
+    
+    var keyUpCallback: (NSEvent) -> Void
+    
+    class KeyView: NSView {
+        
+        var keyDownCallback: (NSEvent) -> Void
+        
+        var keyUpCallback: (NSEvent) -> Void
+        
+        override var acceptsFirstResponder: Bool { true }
+        
+        override func keyDown(with event: NSEvent) {
+            super.keyDown(with: event)
+            self.keyDownCallback(event)
+        }
+        
+        override func keyUp(with event: NSEvent) {
+            super.keyUp(with: event)
+            self.keyUpCallback(event)
+        }
+        
+        init(keyDown: @escaping (NSEvent) -> Void, keyUp: @escaping (NSEvent) -> Void) {
+            self.keyDownCallback = keyDown
+            self.keyUpCallback = keyUp
+            super.init(frame: .zero)
+        }
+        
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+        
+    }
+    
+    func makeNSView(context: Context) -> some NSView {
+        let view = KeyView(keyDown: keyDownCallback, keyUp: keyUpCallback)
+        DispatchQueue.main.async {
+            view.window?.makeFirstResponder(view)
+        }
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSViewType, context: Context) {
+        
+    }
+    
+}
+
+#endif
