@@ -33,18 +33,7 @@ struct StateCollapsedView: View {
         GeometryReader { reader in
         Ellipse()
             .strokeBorder(viewModel.highlighted ? config.highlightColour : config.borderColour, lineWidth: 2.0, antialiased: true)
-            .background(Ellipse().foregroundColor(config.stateColour).background(KeyEventHandling(keyDownCallback: {
-                print("Key press!")
-                print("Event: \($0)")
-                if $0.keyCode == 59 {
-                    print("Control Pressed!")
-                    self.creatingTransitions = true
-                }
-            }, keyUpCallback: {
-                if $0.keyCode == 59 {
-                    self.creatingTransitions = false
-                }
-            })))
+            .background(Ellipse().foregroundColor(config.stateColour))
             .padding(.bottom, 2)
             .frame(width: viewModel.collapsedWidth, height: viewModel.collapsedHeight)
             .clipped()

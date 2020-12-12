@@ -9,7 +9,7 @@
 
 import SwiftUI
 
-struct KeyEventHandling: NSViewRepresentable {
+public struct KeyEventHandling: NSViewRepresentable {
     
     var keyDownCallback: (NSEvent) -> Void
     
@@ -45,7 +45,12 @@ struct KeyEventHandling: NSViewRepresentable {
         
     }
     
-    func makeNSView(context: Context) -> some NSView {
+    public init(keyDownCallback: @escaping (NSEvent) -> Void, keyUpCallback: @escaping (NSEvent) -> Void) {
+        self.keyDownCallback = keyDownCallback
+        self.keyUpCallback = keyUpCallback
+    }
+    
+    public func makeNSView(context: Context) -> some NSView {
         let view = KeyView(keyDown: keyDownCallback, keyUp: keyUpCallback)
         DispatchQueue.main.async {
             view.window?.makeFirstResponder(view)
@@ -53,7 +58,7 @@ struct KeyEventHandling: NSViewRepresentable {
         return view
     }
     
-    func updateNSView(_ nsView: NSViewType, context: Context) {
+    public func updateNSView(_ nsView: NSViewType, context: Context) {
         
     }
     

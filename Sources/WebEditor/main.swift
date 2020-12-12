@@ -165,6 +165,20 @@ struct WebEditorMachineView: View {
                             Text(tabs[index].name)
                                 .font(config.fontHeading)
                         }.tag(index)
+                        .background(
+                            KeyEventHandling(keyDownCallback: {
+                                print("Key press!")
+                                print("Event: \($0)")
+                                if $0.keyCode == 59 {
+                                    print("Control Pressed!")
+                                    self.creatingTransitions = true
+                                }
+                            }, keyUpCallback: {
+                                if $0.keyCode == 59 {
+                                    self.creatingTransitions = false
+                                }
+                            })
+                        )
                 }
             }.background(config.backgroundColor)
         }.background(config.backgroundColor)
