@@ -190,7 +190,7 @@ public struct TableView<Root: Modifiable>: View {
                         subView(self, index, element)
                     }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
                 })
-            }.padding(.bottom, -15).frame(minHeight: CGFloat(30 * viewModel.value.count + 35))
+            }.frame(minHeight: CGFloat(30 * viewModel.value.count + 70))
             ScrollView([.vertical], showsIndicators: false) {
                 HStack {
                     ForEach(viewModel.newRow.indices) { index in
@@ -207,7 +207,7 @@ public struct TableView<Root: Modifiable>: View {
                       .foregroundColor(.blue)
                       .frame(width: 15)
                 }
-            }.padding(.leading, 15).padding(.trailing, 18).frame(height: 50)
+            }.padding(.top, -35).padding(.leading, 15).padding(.trailing, 18).frame(height: 50)
         }.onChange(of: value.value) {
             viewModel.value = $0.map { ListElement($0) }
         }
