@@ -133,6 +133,14 @@ extension ConstRef: Encodable where T: Encodable {
     
 }
 
+extension ConstRef where T: RandomAccessCollection, T.Index: Hashable {
+    
+    public var constRefArray: [ConstRef<T.Element>] {
+        return self.value.indices.map { self[$0] }
+    }
+    
+}
+
 @dynamicMemberLookup
 public final class Ref<T>: ConstRef<T> {
     
@@ -192,6 +200,14 @@ extension Ref where T: ObservableObject {
         var value = value
         self.init(get: { value }, set: { value = $0 })
         self.listen(to: value)
+    }
+    
+}
+
+extension Ref where T: MutableCollection, T: RandomAccessCollection, T.Index: Hashable {
+    
+    public var refArray: [Ref<T.Element>] {
+        return self.value.indices.map { self[$0] }
     }
     
 }

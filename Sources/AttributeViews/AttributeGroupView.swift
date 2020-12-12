@@ -35,7 +35,7 @@ public struct AttributeGroupView<Root: Modifiable>: View {
             Form {
                 HStack {
                     VStack(alignment: .leading) {
-                        ForEach(Array(fields.value.indices).map { root[path: path].fields[$0] }, id: \.id) { element in
+                        ForEach(fields.refArray, id: \.id) { element in
                             AttributeView(
                                 root: root,
                                 path: path.attributes[element.value.name].wrappedValue,

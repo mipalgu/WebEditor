@@ -32,7 +32,6 @@ public struct EnumeratedView: View {
     }
     
     init(value: Ref<Expression>, viewModel: AttributeViewModel<Expression>, label: String, validValues: Set<String>) {
-        print("init")
         self.value = value
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.label = label
