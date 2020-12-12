@@ -128,7 +128,7 @@ public struct TableView<Root: Modifiable>: View {
     let root: Ref<Root>
     @ObservedObject var value: Ref<[[LineAttribute]]>
     @StateObject var viewModel: TableViewModel
-    let subView: (TableView, ListElement<[LineAttribute]>) -> AnyView
+    let subView: (TableView, ListElement<[LineAttribute]>) -> TableRowView
     let label: String
     let columns: [BlockAttributeType.TableColumn]
     
@@ -139,27 +139,26 @@ public struct TableView<Root: Modifiable>: View {
             guard let index = me.viewModel.value.firstIndex(where: { $0.id == element.id }) else {
                 fatalError("Cannot find element \(element).")
             }
-            return AnyView(HStack {
-                ForEach(Array(element.value.map { ListElement($0) }.enumerated()), id: \.1.id) { (columnIndex, _) in
-                    VStack {
-                        LineAttributeView(root: root, path: path[index][columnIndex], label: "")
-                        ForEach(me.viewModel.errorsForItem(atRow: index, col: columnIndex), id: \.self) { error in
-                            Text(error).foregroundColor(.red)
-                        }
-                    }
-                }
-                Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
-            }.contextMenu {
-                Button("Delete", action: { me.viewModel.deleteElement(atIndex: index, withUUID: element.id) }).keyboardShortcut(.delete)
-            })
-//            return TableRowView(
-//                root: root,
-//                path: path[index],
-//                row: me.$viewModel.value[index].value,
-//                errorsForItem: { me.viewModel.errorsForItem(atRow: index, col: $0) }
-//            ) {
-//                me.viewModel.deleteElement(atIndex: index, withUUID: me.viewModel.value[index].id)
-//            }
+//            return AnyView(HStack {
+//                ForEach(Array(element.value.map { ListElement($0) }.enumerated()), id: \.1.id) { (columnIndex, _) in
+//                    VStack {
+//                        LineAttributeView(root: root, path: path[index][columnIndex], label: "")
+//                        ForEach(me.viewModel.errorsForItem(atRow: index, col: columnIndex), id: \.self) { error in
+//                            Text(error).foregroundColor(.red)
+//                        }
+//                    }
+//                }
+//                Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
+//            }.contextMenu {
+//                Button("Delete", action: { me.viewModel.deleteElement(atIndex: index, withUUID: element.id) }).keyboardShortcut(.delete)
+//            })
+            return TableRowView(
+                root: root,
+                path: path[index],
+                row: element.value,
+                errorsForItem: { me.viewModel.errorsForItem(atRow: index, col: $0) },
+                onDelete: { me.viewModel.deleteElement(atIndex: index, withUUID: element.id) }
+            )
         }
     }
     
@@ -169,21 +168,16 @@ public struct TableView<Root: Modifiable>: View {
             guard let index = me.viewModel.value.firstIndex(where: { $0.id == element.id }) else {
                 fatalError("Cannot find element \(element).")
             }
-            return AnyView(HStack {
-                ForEach(Array(element.value.map { ListElement($0) }.enumerated()), id: \.1.id) { (columnIndex, _) in
-                    VStack {
-                        LineAttributeView(attribute: value[index][columnIndex], label: "")
-                        ForEach(me.viewModel.errorsForItem(atRow: index, col: columnIndex), id: \.self) { error in
-                            Text(error).foregroundColor(.red)
-                        }
-                    }
-                }
-                Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
-            })
+            return TableRowView(
+                value: value[index],
+                row: element.value,
+                errorsForItem: { me.viewModel.errorsForItem(atRow: index, col: $0) },
+                onDelete: { me.viewModel.deleteElement(atIndex: index, withUUID: element.id) }
+            )
         }
     }
     
-    private init(root: Ref<Root>, value: Ref<[[LineAttribute]]>, viewModel: TableViewModel, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, ListElement<[LineAttribute]>) -> AnyView) {
+    private init(root: Ref<Root>, value: Ref<[[LineAttribute]]>, viewModel: TableViewModel, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, ListElement<[LineAttribute]>) -> TableRowView) {
         self.root = root
         self.value = value
         self._viewModel = StateObject(wrappedValue: viewModel)
@@ -211,7 +205,7 @@ public struct TableView<Root: Modifiable>: View {
                         Text(error).foregroundColor(.red)
                     }
                 }, content: {
-                    ForEach(Array(viewModel.value.enumerated()), id: \.1.id) { (index, _) -> AnyView in
+                    ForEach(Array(viewModel.value.enumerated()), id: \.1.id) { (index, _) in
                         subView(self, viewModel.value[index])
                     }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
                 })
@@ -242,7 +236,7 @@ public struct TableView<Root: Modifiable>: View {
 struct TableRowView: View {
     
     let subView: (Int) -> LineAttributeView
-    @Binding var row: [LineAttribute]
+    let row: [LineAttribute]
     let errorsForItem: (Int) -> [String]
     let onDelete: () -> Void
     
@@ -251,46 +245,45 @@ struct TableRowView: View {
     public init<Root: Modifiable>(
         root: Ref<Root>,
         path: Attributes.Path<Root, [LineAttribute]>,
-        row: Binding<[LineAttribute]>,
+        row: [LineAttribute],
         errorsForItem: @escaping (Int) -> [String],
         onDelete: @escaping () -> Void
     ) {
         self.subView = {
             LineAttributeView(root: root, path: path[$0], label: "")
         }
-        self._row = row
+        self.row = row
         self.errorsForItem = errorsForItem
         self.onDelete = onDelete
     }
     
     public init(
         value: Ref<[LineAttribute]>,
-        row: Binding<[LineAttribute]>,
+        row: [LineAttribute],
         errorsForItem: @escaping (Int) -> [String],
         onDelete: @escaping () -> Void
     ) {
         self.subView = {
             LineAttributeView(attribute: value[$0], label: "")
         }
-        self._row = row
+        self.row = row
         self.errorsForItem = errorsForItem
         self.onDelete = onDelete
     }
     
     var body: some View {
         HStack {
-            Text("hello")
-//            ForEach(Array(row.indices), id: \.self) { columnIndex in
-//                VStack {
-//                    subView(columnIndex)
-//                    ForEach(errorsForItem(columnIndex), id: \.self) { error in
-//                        Text(error).foregroundColor(.red)
-//                    }
-//                }
-//            }
+            ForEach(Array(row.map { ListElement($0) }.enumerated()), id: \.1.id) { (columnIndex, _) in
+                VStack {
+                    subView(columnIndex)
+                    ForEach(errorsForItem(columnIndex), id: \.self) { error in
+                        Text(error).foregroundColor(.red)
+                    }
+                }
+            }
             Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
-        }/*.contextMenu {
+        }.contextMenu {
             Button("Delete", action: onDelete).keyboardShortcut(.delete)
-        }*/
+        }
     }
 }
