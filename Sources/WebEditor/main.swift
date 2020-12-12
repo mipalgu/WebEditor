@@ -169,12 +169,12 @@ struct WebEditorMachineView: View {
                             KeyEventHandling(keyDownCallback: {
                                 print("Key press!")
                                 print("Event: \($0)")
-                                if $0.keyCode == 59 {
+                                if $0.keyCode == 8 {
                                     print("Control Pressed!")
                                     self.creatingTransitions = true
                                 }
                             }, keyUpCallback: {
-                                if $0.keyCode == 59 {
+                                if $0.keyCode == 8 {
                                     self.creatingTransitions = false
                                 }
                             })

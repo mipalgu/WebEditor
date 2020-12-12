@@ -24,19 +24,19 @@ public struct KeyEventHandling: NSViewRepresentable {
         override var acceptsFirstResponder: Bool { true }
         
         override func keyDown(with event: NSEvent) {
-            super.keyDown(with: event)
+            //super.keyDown(with: event)
             self.keyDownCallback(event)
         }
         
         override func keyUp(with event: NSEvent) {
-            super.keyUp(with: event)
+            //super.keyUp(with: event)
             self.keyUpCallback(event)
         }
         
         init(keyDown: @escaping (NSEvent) -> Void, keyUp: @escaping (NSEvent) -> Void) {
             self.keyDownCallback = keyDown
             self.keyUpCallback = keyUp
-            super.init(frame: .zero)
+            super.init(frame: .infinite)
         }
         
         required init?(coder: NSCoder) {
