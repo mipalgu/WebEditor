@@ -16,6 +16,7 @@ import Utilities
 
 public struct CodeView<Label: View>: View {
     
+    @ObservedObject var value: Ref<Code>
     @StateObject var viewModel: AttributeViewModel<Code>
     let label: () -> Label
     let language: Language
@@ -31,14 +32,15 @@ public struct CodeView<Label: View>: View {
     }
     
     public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Code>, language: Language, label: @escaping () -> Label) {
-        self.init(viewModel: AttributeViewModel(root: root, path: path), language: language, label: label)
+        self.init(value: root[path: path], viewModel: AttributeViewModel(root: root, path: path), language: language, label: label)
     }
     
     init(value: Ref<Code>, language: Language, label: @escaping () -> Label) {
-        self.init(viewModel: AttributeViewModel(reference: value), language: language, label: label)
+        self.init(value: value, viewModel: AttributeViewModel(reference: value), language: language, label: label)
     }
     
-    init(viewModel: AttributeViewModel<Code>, language: Language, label: @escaping () -> Label) {
+    init(value: Ref<Code>, viewModel: AttributeViewModel<Code>, language: Language, label: @escaping () -> Label) {
+        self.value = value
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.language = language
         self.label = label
@@ -56,8 +58,10 @@ public struct CodeView<Label: View>: View {
                         .stroke(Color.gray.opacity(0.3), lineWidth: 2)
                 )
                 .frame(minHeight: 80)
-                .onChange(of: viewModel.value) { _ in
-                    self.viewModel.sendModification()
+                .onChange(of: value.value) {
+                    viewModel.value = $0
+                }.onChange(of: viewModel.value) { _ in
+                    viewModel.sendModification()
                 }
         }
     }

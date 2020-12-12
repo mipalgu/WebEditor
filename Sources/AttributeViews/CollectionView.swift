@@ -68,6 +68,7 @@ import Utilities
 public struct CollectionView<Root: Modifiable>: View{
     
     let root: Ref<Root>
+    @ObservedObject var value: Ref<[Attribute]>
     @StateObject var viewModel: CollectionViewModel
     let subView: (Int) -> AttributeView<Root>
     let label: String
@@ -78,19 +79,20 @@ public struct CollectionView<Root: Modifiable>: View{
     @State var creating: Bool = false
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>, label: String, type: AttributeType) {
-        self.init(root: root, viewModel: CollectionViewModel(root: root, path: path, type: type), label: label, type: type) {
+        self.init(root: root, value: root[path: path], viewModel: CollectionViewModel(root: root, path: path, type: type), label: label, type: type) {
             AttributeView(root: root, path: path[$0], label: "")
         }
     }
     
     init(root: Ref<Root>, value: Ref<[Attribute]>, label: String, type: AttributeType) {
-        self.init(root: root, viewModel: CollectionViewModel(reference: value, type: type), label: label, type: type) {
+        self.init(root: root, value: value, viewModel: CollectionViewModel(reference: value, type: type), label: label, type: type) {
             AttributeView(root: root, attribute: value[$0], label: "")
         }
     }
     
-    init(root: Ref<Root>, viewModel: CollectionViewModel, label: String, type: AttributeType, subView: @escaping (Int) -> AttributeView<Root>) {
+    init(root: Ref<Root>, value: Ref<[Attribute]>, viewModel: CollectionViewModel, label: String, type: AttributeType, subView: @escaping (Int) -> AttributeView<Root>) {
         self.root = root
+        self.value = value
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.subView = subView
         self.label = label
@@ -153,5 +155,10 @@ public struct CollectionView<Root: Modifiable>: View{
                 }.frame(minHeight: min(CGFloat(viewModel.elements.count * (type == .line ? 30 : 80) + 15), 100))
             }
         }.padding(.top, 2)
+        .onChange(of: value.value) {
+            viewModel.value = $0
+        }.onChange(of: viewModel.value) { _ in
+            viewModel.sendModification()
+        }
     }
 }

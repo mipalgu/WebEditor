@@ -16,9 +16,11 @@ import Utilities
 
 public struct LineAttributeView: View {
     
+    @ObservedObject var attribute: Ref<LineAttribute>
     let subView: () -> AnyView
     
     public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, LineAttribute>, label: String) {
+        self.attribute = root[path: path]
         self.subView = {
             switch root[path: path].value.type {
             case .bool:
@@ -38,6 +40,7 @@ public struct LineAttributeView: View {
     }
     
     init(attribute: Ref<LineAttribute>, label: String) {
+        self.attribute = attribute
         self.subView = {
             switch attribute.value.type {
             case .bool:

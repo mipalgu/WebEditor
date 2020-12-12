@@ -16,20 +16,22 @@ import Utilities
 
 public struct BoolView: View {
     
+    @ObservedObject var value: Ref<Bool>
     @StateObject var viewModel: AttributeViewModel<Bool>
     let label: String
     
     @EnvironmentObject var config: Config
     
     public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Bool>, label: String) {
-        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label)
+        self.init(value: root[path: path], viewModel: AttributeViewModel(root: root, path: path), label: label)
     }
     
     init(value: Ref<Bool>, label: String) {
-        self.init(viewModel: AttributeViewModel(reference: value), label: label)
+        self.init(value: value, viewModel: AttributeViewModel(reference: value), label: label)
     }
     
-    init(viewModel: AttributeViewModel<Bool>, label: String) {
+    init(value: Ref<Bool>, viewModel: AttributeViewModel<Bool>, label: String) {
+        self.value = value
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.label = label
     }
@@ -39,7 +41,9 @@ public struct BoolView: View {
             .animation(.easeOut)
             .font(.body)
             .foregroundColor(config.textColor)
-            .onChange(of: viewModel.value) { _ in
+            .onChange(of: value.value) {
+                viewModel.value = $0
+            }.onChange(of: viewModel.value) { _ in
                 viewModel.sendModification()
             }
     }

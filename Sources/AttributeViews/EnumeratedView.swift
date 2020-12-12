@@ -16,6 +16,7 @@ import Utilities
 
 public struct EnumeratedView: View {
 
+    @ObservedObject var value: Ref<Expression>
     @StateObject var viewModel: AttributeViewModel<Expression>
     let label: String
     let validValues: Set<String>
@@ -23,14 +24,16 @@ public struct EnumeratedView: View {
     @EnvironmentObject var config: Config
     
     public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Expression>, label: String, validValues: Set<String>) {
-        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label, validValues: validValues)
+        self.init(value: root[path: path], viewModel: AttributeViewModel(root: root, path: path), label: label, validValues: validValues)
     }
     
     init(value: Ref<Expression>, label: String, validValues: Set<String>) {
-        self.init(viewModel: AttributeViewModel(reference: value), label: label, validValues: validValues)
+        self.init(value: value, viewModel: AttributeViewModel(reference: value), label: label, validValues: validValues)
     }
     
-    init(viewModel: AttributeViewModel<Expression>, label: String, validValues: Set<String>) {
+    init(value: Ref<Expression>, viewModel: AttributeViewModel<Expression>, label: String, validValues: Set<String>) {
+        print("init")
+        self.value = value
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.label = label
         self.validValues = validValues
@@ -43,8 +46,10 @@ public struct EnumeratedView: View {
                     .foregroundColor(config.textColor)
             }
         }
-        .onChange(of: viewModel.value) { _ in
-            self.viewModel.sendModification()
+        .onChange(of: value.value) {
+            viewModel.value = $0
+        }.onChange(of: viewModel.value) { _ in
+            viewModel.sendModification()
         }
     }
 }

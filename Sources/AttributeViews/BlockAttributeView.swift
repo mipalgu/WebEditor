@@ -17,10 +17,12 @@ import Utilities
 public struct BlockAttributeView<Root: Modifiable>: View{
     
     let root: Ref<Root>
+    @ObservedObject var attribute: Ref<BlockAttribute>
     let subView: () -> AnyView
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, BlockAttribute>, label: String) {
         self.root = root
+        self.attribute = root[path: path]
         self.subView = {
             switch root[path: path].value.type {
             case .code(let language):
@@ -41,6 +43,7 @@ public struct BlockAttributeView<Root: Modifiable>: View{
     
     init(root: Ref<Root>, attribute: Ref<BlockAttribute>, label: String) {
         self.root = root
+        self.attribute = attribute
         self.subView = {
             switch attribute.value.type {
             case .code(let language):

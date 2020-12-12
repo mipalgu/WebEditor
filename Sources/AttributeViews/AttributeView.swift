@@ -68,10 +68,12 @@ import Utilities
 public struct AttributeView<Root: Modifiable>: View{
     
     let root: Ref<Root>
+    @ObservedObject var attribute: Ref<Attribute>
     let subView: () -> AnyView
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, Attribute>, label: String) {
         self.root = root
+        self.attribute = root[path: path]
         self.subView = {
             switch root[path: path].value.type {
             case .line:
@@ -84,6 +86,7 @@ public struct AttributeView<Root: Modifiable>: View{
     
     init(root: Ref<Root>, attribute: Ref<Attribute>, label: String) {
         self.root = root
+        self.attribute = attribute
         self.subView = {
             switch attribute.value.type {
             case .line:

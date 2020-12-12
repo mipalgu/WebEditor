@@ -16,6 +16,7 @@ import Utilities
 
 public struct EnumerableCollectionView: View {
     
+    @ObservedObject var value: Ref<Set<String>>
     @StateObject var viewModel: AttributeViewModel<Set<String>>
     let label: String
     let validValues: Set<String>
@@ -23,14 +24,15 @@ public struct EnumerableCollectionView: View {
     @EnvironmentObject var config: Config
     
     public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Set<String>>, label: String, validValues: Set<String>) {
-        self.init(viewModel: AttributeViewModel(root: root, path: path), label: label, validValues: validValues)
+        self.init(value: root[path: path], viewModel: AttributeViewModel(root: root, path: path), label: label, validValues: validValues)
     }
     
     init(value: Ref<Set<String>>, label: String, validValues: Set<String>) {
-        self.init(viewModel: AttributeViewModel(reference: value), label: label, validValues: validValues)
+        self.init(value: value, viewModel: AttributeViewModel(reference: value), label: label, validValues: validValues)
     }
     
-    init(viewModel: AttributeViewModel<Set<String>>, label: String, validValues: Set<String>) {
+    init(value: Ref<Set<String>>, viewModel: AttributeViewModel<Set<String>>, label: String, validValues: Set<String>) {
+        self.value = value
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.label = label
         self.validValues = validValues
@@ -61,6 +63,8 @@ public struct EnumerableCollectionView: View {
                     }
                 }
             }
+        }.onChange(of: value.value) {
+            viewModel.value = $0
         }.onChange(of: viewModel.value) { _ in
             viewModel.sendModification()
         }

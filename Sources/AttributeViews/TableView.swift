@@ -112,6 +112,7 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
 public struct TableView<Root: Modifiable>: View {
     
     let root: Ref<Root>
+    @ObservedObject var value: Ref<[[LineAttribute]]>
     @StateObject var viewModel: TableViewModel
     let subView: (TableView, Int) -> TableRowView
     let label: String
@@ -120,7 +121,7 @@ public struct TableView<Root: Modifiable>: View {
     @EnvironmentObject var config: Config
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
-        self.init(root: root, viewModel: TableViewModel(root: root, path: path, columns: columns), label: label, columns: columns) { (me, index) in
+        self.init(root: root, value: root[path: path], viewModel: TableViewModel(root: root, path: path, columns: columns), label: label, columns: columns) { (me, index) in
             TableRowView(
                 root: root,
                 path: path[index],
@@ -134,7 +135,7 @@ public struct TableView<Root: Modifiable>: View {
     
     init(root: Ref<Root>, value: Ref<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
         let viewModel = TableViewModel(reference: value, columns: columns)
-        self.init(root: root, viewModel: viewModel, label: label, columns: columns) { (me, index) in
+        self.init(root: root, value: value, viewModel: viewModel, label: label, columns: columns) { (me, index) in
             TableRowView(
                 value: value[index],
                 row: me.$viewModel.value[index],
@@ -145,8 +146,9 @@ public struct TableView<Root: Modifiable>: View {
         }
     }
     
-    private init(root: Ref<Root>, viewModel: TableViewModel, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, Int) -> TableRowView) {
+    private init(root: Ref<Root>, value: Ref<[[LineAttribute]]>, viewModel: TableViewModel, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, Int) -> TableRowView) {
         self.root = root
+        self.value = value
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.subView = subView
         self.label = label
@@ -194,6 +196,10 @@ public struct TableView<Root: Modifiable>: View {
                       .frame(width: 15)
                 }
             }.padding(.leading, 15).padding(.trailing, 18).frame(height: 50)
+        }.onChange(of: value.value) {
+            viewModel.value = $0
+        }.onChange(of: viewModel.value) { _ in
+            viewModel.sendModification()
         }
     }
 }

@@ -18,11 +18,13 @@ import Utilities
 public struct AttributeGroupView<Root: Modifiable>: View {
 
     let root: Ref<Root>
+    @ObservedObject var fields: Ref<[Field]>
     let path: Attributes.Path<Root, AttributeGroup>
     let label: String
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, AttributeGroup>, label: String) {
         self.root = root
+        self.fields = root[path: path].fields
         self.path = path
         self.label = label
     }
@@ -33,7 +35,7 @@ public struct AttributeGroupView<Root: Modifiable>: View {
             Form {
                 HStack {
                     VStack(alignment: .leading) {
-                        ForEach(Array(root[path: path].value.fields.map { ListElement($0) }), id: \.id) { element in
+                        ForEach(Array(fields.value.indices).map { root[path: path].fields[$0] }, id: \.id) { element in
                             AttributeView(
                                 root: root,
                                 path: path.attributes[element.value.name].wrappedValue,
