@@ -18,8 +18,7 @@ import AttributeViews
 
 public struct AttributeGroupsView: View {
     
-    let machine: Ref<Machine>
-    @ObservedObject var groups: Ref<[AttributeGroup]>
+    @ObservedObject var machine: Ref<Machine>
     let path: Attributes.Path<Machine, [AttributeGroup]>
     let label: String
     
@@ -29,7 +28,6 @@ public struct AttributeGroupsView: View {
     
     public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String) {
         self.machine = machine
-        self.groups = machine[path: path]
         self.path = path
         self.label = label
     }
@@ -40,11 +38,11 @@ public struct AttributeGroupsView: View {
                 .font(.title3)
                 .foregroundColor(config.textColor)
             TabView(selection: Binding($selection)) {
-                ForEach(Array(groups.refArray.enumerated()), id: \.1.id) { (index, element) in
-                    AttributeGroupView(root: machine, path: path[index], label: element.name.value)
+                ForEach(Array(machine[path: path].value.enumerated()), id: \.1.name) { (index, group) in
+                    AttributeGroupView(root: machine, path: path[index], label: group.name)
                         .padding(.horizontal, 10)
                         .tabItem {
-                            Text(element.name.value.pretty)
+                            Text(group.name.pretty)
                         }
                 }
                 ScrollView(.vertical, showsIndicators: true) {

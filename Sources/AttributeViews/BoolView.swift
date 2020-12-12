@@ -31,7 +31,6 @@ public struct BoolView: View {
     }
     
     init(value: Ref<Bool>, viewModel: AttributeViewModel<Bool>, label: String) {
-        print("init")
         self.value = value
         self._viewModel = StateObject(wrappedValue: viewModel)
         self.label = label

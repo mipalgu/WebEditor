@@ -86,7 +86,9 @@ class AttributeViewModel<Value>: ObservableObject {
         self.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
         self._rootValue = Reference(wrappedValue: root[path: path].value)
         self._modify = { (me, value) in
-            try? root.value.modify(attribute: path, value: value)
+            if let _ = try? root.value.modify(attribute: path, value: value) {
+                root.objectWillChange.send()
+            }
             me.value = root[path: path].value
             me.errors = root.value.errorBag.errors(forPath: AnyPath(path)).map(\.message)
         }

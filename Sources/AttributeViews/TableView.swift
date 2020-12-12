@@ -29,6 +29,7 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
     init<Root>(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) where Root : Modifiable {
         self._addElement = { me in
             if let _ = try? root.value.addItem(me.newRow.map(\.value), to: path) {
+                root.objectWillChange.send()
                 me.newRow.forEach {
                     $0.value = $0.type.defaultValue.value
                 }
@@ -43,12 +44,16 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
             me.deleteElements(offsets: offsets)
         }
         self._deleteElements = { (me, offsets) in
-            try? root.value.deleteItems(table: path, items: offsets)
+            if let _ = try? root.value.deleteItems(table: path, items: offsets) {
+                root.objectWillChange.send()
+            }
             me.value = root[path: path].value
             me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
         }
         self._moveElements = { (me, source, destination) in
-            try? root.value.moveItems(table: path, from: source, to: destination)
+            if let _ = try? root.value.moveItems(table: path, from: source, to: destination) {
+                root.objectWillChange.send()
+            }
             me.value = root[path: path].value
             me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
         }
@@ -59,7 +64,6 @@ final class TableViewModel: AttributeViewModel<[[LineAttribute]]> {
         super.init(root: root, path: path)
         newRow.forEach(self.listen)
         self.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
-        print(root.value.errorBag.allErrors)
     }
     
     init(reference ref: Ref<[[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) {
