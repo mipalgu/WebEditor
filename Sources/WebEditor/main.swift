@@ -149,13 +149,6 @@ struct WebEditorMachineView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Button(action: { self.creatingTransitions = !self.creatingTransitions }) {
-                // Transition Mode
-                VStack {
-                    Text("Transition Mode")
-                        .font(config.fontBody)
-                }
-            }
             MenuView(machineViewModel: Binding(get: { self.viewModel }, set: { _ in }))
                 .background(config.stateColour)
             TabView(selection: $selection) {
