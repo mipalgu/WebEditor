@@ -190,7 +190,7 @@ public struct TableView<Root: Modifiable>: View {
                         subView(self, index, element)
                     }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
                 })
-            }.frame(minHeight: CGFloat(30 * viewModel.value.count + 70))
+            }.frame(minHeight: CGFloat(28 * viewModel.value.count + 70))
             ScrollView([.vertical], showsIndicators: false) {
                 HStack {
                     ForEach(viewModel.newRow.indices) { index in
