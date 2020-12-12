@@ -67,10 +67,6 @@ import Attributes
 @dynamicMemberLookup
 public class ConstRef<T>: ObservableObject, Identifiable {
     
-    public private(set) lazy var id: Int = {
-        Int(bitPattern: Unmanaged.passUnretained(self).toOpaque())
-    }()
-    
     fileprivate var get: () -> T
     
     public var value: T {
