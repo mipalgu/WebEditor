@@ -128,30 +128,14 @@ public struct TableView<Root: Modifiable>: View {
     let root: Ref<Root>
     @ObservedObject var value: Ref<[[LineAttribute]]>
     @StateObject var viewModel: TableViewModel
-    let subView: (TableView, ListElement<[LineAttribute]>) -> TableRowView
+    let subView: (TableView, Int, ListElement<[LineAttribute]>) -> TableRowView
     let label: String
     let columns: [BlockAttributeType.TableColumn]
     
     @EnvironmentObject var config: Config
     
     public init(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
-        self.init(root: root, value: root[path: path], viewModel: TableViewModel(root: root, path: path, columns: columns), label: label, columns: columns) { (me, element) in
-            guard let index = me.viewModel.value.firstIndex(where: { $0.id == element.id }) else {
-                fatalError("Cannot find element \(element).")
-            }
-//            return AnyView(HStack {
-//                ForEach(Array(element.value.map { ListElement($0) }.enumerated()), id: \.1.id) { (columnIndex, _) in
-//                    VStack {
-//                        LineAttributeView(root: root, path: path[index][columnIndex], label: "")
-//                        ForEach(me.viewModel.errorsForItem(atRow: index, col: columnIndex), id: \.self) { error in
-//                            Text(error).foregroundColor(.red)
-//                        }
-//                    }
-//                }
-//                Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
-//            }.contextMenu {
-//                Button("Delete", action: { me.viewModel.deleteElement(atIndex: index, withUUID: element.id) }).keyboardShortcut(.delete)
-//            })
+        self.init(root: root, value: root[path: path], viewModel: TableViewModel(root: root, path: path, columns: columns), label: label, columns: columns) { (me, index, element) in
             return TableRowView(
                 root: root,
                 path: path[index],
@@ -164,10 +148,7 @@ public struct TableView<Root: Modifiable>: View {
     
     init(root: Ref<Root>, value: Ref<[[LineAttribute]]>, label: String, columns: [BlockAttributeType.TableColumn]) {
         let viewModel = TableViewModel(reference: value, columns: columns)
-        self.init(root: root, value: value, viewModel: viewModel, label: label, columns: columns) { (me, element) in
-            guard let index = me.viewModel.value.firstIndex(where: { $0.id == element.id }) else {
-                fatalError("Cannot find element \(element).")
-            }
+        self.init(root: root, value: value, viewModel: viewModel, label: label, columns: columns) { (me, index, element) in
             return TableRowView(
                 value: value[index],
                 row: element.value,
@@ -177,7 +158,7 @@ public struct TableView<Root: Modifiable>: View {
         }
     }
     
-    private init(root: Ref<Root>, value: Ref<[[LineAttribute]]>, viewModel: TableViewModel, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, ListElement<[LineAttribute]>) -> TableRowView) {
+    private init(root: Ref<Root>, value: Ref<[[LineAttribute]]>, viewModel: TableViewModel, label: String, columns: [BlockAttributeType.TableColumn], subView: @escaping (TableView, Int, ListElement<[LineAttribute]>) -> TableRowView) {
         self.root = root
         self.value = value
         self._viewModel = StateObject(wrappedValue: viewModel)
@@ -205,8 +186,8 @@ public struct TableView<Root: Modifiable>: View {
                         Text(error).foregroundColor(.red)
                     }
                 }, content: {
-                    ForEach(Array(viewModel.value.enumerated()), id: \.1.id) { (index, _) in
-                        subView(self, viewModel.value[index])
+                    ForEach(Array(viewModel.value.enumerated()), id: \.1.id) { (index, element) in
+                        subView(self, index, element)
                     }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
                 })
             }.padding(.bottom, -15).frame(minHeight: CGFloat(30 * viewModel.value.count + 35))
