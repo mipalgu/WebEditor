@@ -72,7 +72,6 @@ final class TableViewModel: ObservableObject {
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         self._rootValue = Reference(wrappedValue: root[path: path].value.map { ListElement($0) })
         self.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
-        newRow.forEach(self.listen)
     }
     
     init(reference ref: Ref<[[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) {
@@ -95,7 +94,6 @@ final class TableViewModel: ObservableObject {
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         self._rootValue = Reference(wrappedValue: ref.value.map { ListElement($0) })
         self.errors = []
-        newRow.forEach(self.listen)
     }
     
     func addElement() {

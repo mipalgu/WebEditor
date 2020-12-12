@@ -95,8 +95,11 @@ class AttributeViewModel<Value>: ObservableObject {
     }
     
     init(reference ref: Ref<Value>) {
-        self._modify = { ref.value = $1 }
-        self._rootValue = Reference(reference: ref)
+        self._modify = { (me, value) in
+            ref.value = value
+            me.value = ref.value
+        }
+        self._rootValue = Reference(wrappedValue: ref.value)
         self.errors = []
     }
     
