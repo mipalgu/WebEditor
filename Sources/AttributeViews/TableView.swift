@@ -16,59 +16,6 @@ import Utilities
 
 final class TableViewModel: ObservableObject {
     
-    struct Collection<T: Identifiable>: Identifiable, MutableCollection, RandomAccessCollection {
-        
-        struct IndexedElement: Identifiable {
-            
-            var id: T.ID {
-                return value.id
-            }
-            
-            var index: Int
-            
-            var value: T
-            
-        }
-        
-        typealias Element = IndexedElement
-        
-        typealias Index = Array<IndexedElement>.Index
-        
-        typealias SubSequence = Array<IndexedElement>.SubSequence
-        
-        fileprivate init(collection: [T]) {
-            self.collection = collection.enumerated().map { IndexedElement(index: $0, value: $1) }
-        }
-        
-        var id: Int {
-            collection.count
-        }
-        
-        private var collection: [IndexedElement]
-        
-        var startIndex: Array<IndexedElement>.Index {
-            collection.startIndex
-        }
-        
-        var endIndex: Array<IndexedElement>.Index {
-            collection.endIndex
-        }
-        
-        subscript(position: Array<IndexedElement>.Index) -> IndexedElement {
-            get {
-                return collection[position]
-            }
-            set(newValue) {
-                collection[position] = newValue
-            }
-        }
-        
-    }
-    
-    var listValue: Collection<ListElement<[LineAttribute]>> {
-        return Collection(collection: value)
-    }
-    
     var value: [ListElement<[LineAttribute]>] {
         get {
             rootValue
@@ -263,22 +210,14 @@ public struct TableView<Root: Modifiable>: View {
                     ForEach(Set(viewModel.errors).sorted(), id: \.self) { error in
                         Text(error).foregroundColor(.red)
                     }
-                }, content: { () -> AnyView in
-                    print("render")
-                    print(viewModel.value)
-                    let view = AnyView(ForEach(Array(viewModel.value.enumerated()), id: \.1.id) { (index, _) -> AnyView in
-                        print("Render row: \(index)")
-                        fflush(stdout)
-                        //return Text("hello")
-                        return subView(self, viewModel.value[index])
-                    }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements))
-                    print("finish render")
-                    return view
+                }, content: {
+                    ForEach(Array(viewModel.value.enumerated()), id: \.1.id) { (index, _) -> AnyView in
+                        subView(self, viewModel.value[index])
+                    }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
                 })
             }.padding(.bottom, -15).frame(minHeight: CGFloat(30 * viewModel.value.count + 35))
-            ScrollView([.vertical], showsIndicators: false) { () -> AnyView in
-                print("new Row: \(viewModel.newRow.count)")
-                let view = AnyView(HStack {
+            ScrollView([.vertical], showsIndicators: false) {
+                HStack {
                     ForEach(viewModel.newRow.indices) { index in
                         VStack {
                             LineAttributeView(attribute: viewModel.newRow[index], label: "")
@@ -292,9 +231,7 @@ public struct TableView<Root: Modifiable>: View {
                     }).buttonStyle(PlainButtonStyle())
                       .foregroundColor(.blue)
                       .frame(width: 15)
-                })
-                print("end new row")
-                return view
+                }
             }.padding(.leading, 15).padding(.trailing, 18).frame(height: 50)
         }.onChange(of: value.value) {
             viewModel.value = $0.map { ListElement($0) }
