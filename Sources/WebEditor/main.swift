@@ -149,13 +149,6 @@ struct WebEditorMachineView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Button(action: { self.creatingTransitions = !self.creatingTransitions }) {
-                // Transition Mode
-                VStack {
-                    Text("Transition Mode")
-                        .font(config.fontBody)
-                }
-            }
             MenuView(machineViewModel: Binding(get: { self.viewModel }, set: { _ in }))
                 .background(config.stateColour)
             TabView(selection: $selection) {
@@ -165,6 +158,20 @@ struct WebEditorMachineView: View {
                             Text(tabs[index].name)
                                 .font(config.fontHeading)
                         }.tag(index)
+                        .background(
+                            KeyEventHandling(keyDownCallback: {
+                                print("Key press!")
+                                print("Event: \($0)")
+                                if $0.keyCode == 8 {
+                                    print("Control Pressed!")
+                                    self.creatingTransitions = true
+                                }
+                            }, keyUpCallback: {
+                                if $0.keyCode == 8 {
+                                    self.creatingTransitions = false
+                                }
+                            })
+                        )
                 }
             }.background(config.backgroundColor)
         }.background(config.backgroundColor)

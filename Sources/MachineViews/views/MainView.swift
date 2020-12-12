@@ -39,6 +39,12 @@ struct MainView: View {
                     editorViewModel.changeMainView()
                     editorViewModel.changeFocus()
                 }
+                .background(KeyEventHandling(keyDownCallback: {
+                    if $0.keyCode == 53 {
+                        editorViewModel.changeMainView()
+                        editorViewModel.changeFocus()
+                    }
+                }, keyUpCallback: { _ in }))
         }
     }
 }
