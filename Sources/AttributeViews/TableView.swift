@@ -27,7 +27,7 @@ final class TableViewModel: ObservableObject {
     
     @Reference var rootValue: [ListElement<[LineAttribute]>]
     
-    @Published var errors: [String]
+    @Published var errors: [ListElement<String>]
     
     @Published var newRow: [Ref<LineAttribute>]
     
@@ -37,13 +37,13 @@ final class TableViewModel: ObservableObject {
     let _deleteElements: (TableViewModel, IndexSet) -> Void
     let _moveElements: (TableViewModel, IndexSet, Int) -> Void
     let _errorsForItem: (TableViewModel, Int, Int) -> [String]
+    let _tableErrors: () -> [String]
     let _latestValue: () -> [[LineAttribute]]
     
     init<Root>(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) where Root : Modifiable {
         self._addElement = { me in
             let result: ()? = try? root.value.addItem(me.newRow.map(\.value), to: path)
             me.update()
-            me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
             if nil != result {
                 root.objectWillChange.send()
                 me.newRow.forEach {
@@ -54,7 +54,6 @@ final class TableViewModel: ObservableObject {
         self._deleteElements = { (me, offsets) in
             let result: ()? = try? root.value.deleteItems(table: path, items: offsets)
             me.update()
-            me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
             if nil != result {
                 root.objectWillChange.send()
             }
@@ -62,10 +61,12 @@ final class TableViewModel: ObservableObject {
         self._moveElements = { (me, source, destination) in
             let result: ()? = try? root.value.moveItems(table: path, from: source, to: destination)
             me.update()
-            me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
             if nil != result {
                 root.objectWillChange.send()
             }
+        }
+        self._tableErrors = {
+            root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
         }
         self._errorsForItem = { (me, row, col) in
             return root.value.errorBag.errors(forPath: AnyPath(path[row][col])).map(\.message)
@@ -73,7 +74,8 @@ final class TableViewModel: ObservableObject {
         self._latestValue = { root[path: path].value }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         self._rootValue = Reference(wrappedValue: root[path: path].value.map { ListElement($0) })
-        self.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
+        self.errors = []
+        self.update()
     }
     
     init(reference ref: Ref<[[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) {
@@ -92,6 +94,7 @@ final class TableViewModel: ObservableObject {
             ref.value.move(fromOffsets: source, toOffset: destination)
             me.update()
         }
+        self._tableErrors = { [] }
         self._errorsForItem = { (_, _, _) in [] }
         self._latestValue = { ref.value }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
@@ -123,16 +126,20 @@ final class TableViewModel: ObservableObject {
     }
     
     func update() {
-        let value = self._latestValue()
-        if self.value.count > value.count {
-            self.value = Array(self.value[0..<value.count])
+        func _update<T>(me: TableViewModel, _ keyPath: WritableKeyPath<TableViewModel, [ListElement<T>]>, with value: [T]) {
+            var me = me
+            if me[keyPath: keyPath].count > value.count {
+                me[keyPath: keyPath] = Array(me[keyPath: keyPath][0..<value.count])
+            }
+            zip(me[keyPath: keyPath], value).enumerated().forEach {
+                me[keyPath: keyPath][$0.0].value = value[$0.0]
+            }
+            if me[keyPath: keyPath].count < value.count {
+                me[keyPath: keyPath].append(contentsOf: value[me[keyPath: keyPath].count..<value.count].map { ListElement($0) })
+            }
         }
-        zip(self.value, value).enumerated().forEach {
-            self.value[$0.0].value = value[$0.0]
-        }
-        if self.value.count < value.count {
-            self.value.append(contentsOf: value[self.value.count..<value.count].map { ListElement($0) })
-        }
+        _update(me: self, \.value, with: self._latestValue())
+        _update(me: self, \.errors, with: _tableErrors())
     }
     
 }
@@ -196,8 +203,8 @@ public struct TableView<Root: Modifiable>: View {
                         }
                         Text("").frame(width: 15)
                     }
-                    ForEach(Set(viewModel.errors).sorted(), id: \.self) { error in
-                        Text(error).foregroundColor(.red)
+                    ForEach(viewModel.errors, id: \.id) { error in
+                        Text(error.value).foregroundColor(.red)
                     }
                 }, content: {
                     ForEach(Array(viewModel.value.enumerated()), id: \.1.id) { (index, element) in
