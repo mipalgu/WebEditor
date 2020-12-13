@@ -61,7 +61,7 @@ import Foundation
 @dynamicMemberLookup
 public struct ListElement<Wrapped: Hashable>: Identifiable, Hashable {
     
-    public let id: UUID = UUID()
+    public private(set) var id: UUID = UUID()
     
     public var value: Wrapped
     
@@ -73,11 +73,15 @@ public struct ListElement<Wrapped: Hashable>: Identifiable, Hashable {
         self.value[keyPath: keyPath]
     }
     
-    public subscript<T>(dynamicMember keyPath: WritableKeyPath<Wrapped, T>) -> T {
+    public subscript<T: Equatable>(dynamicMember keyPath: WritableKeyPath<Wrapped, T>) -> T {
         get {
             self.value[keyPath: keyPath]
         } set {
+            if self.value[keyPath: keyPath] == newValue {
+                return
+            }
             self.value[keyPath: keyPath] = newValue
+            self.id = UUID()
         }
     }
     

@@ -37,11 +37,12 @@ final class TableViewModel: ObservableObject {
     let _deleteElements: (TableViewModel, IndexSet) -> Void
     let _moveElements: (TableViewModel, IndexSet, Int) -> Void
     let _errorsForItem: (TableViewModel, Int, Int) -> [String]
+    let _latestValue: () -> [[LineAttribute]]
     
     init<Root>(root: Ref<Root>, path: Attributes.Path<Root, [[LineAttribute]]>, columns: [BlockAttributeType.TableColumn]) where Root : Modifiable {
         self._addElement = { me in
             let result: ()? = try? root.value.addItem(me.newRow.map(\.value), to: path)
-            me.value = root[path: path].value.map { ListElement($0) }
+            me.update()
             me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
             if nil != result {
                 root.objectWillChange.send()
@@ -52,7 +53,7 @@ final class TableViewModel: ObservableObject {
         }
         self._deleteElements = { (me, offsets) in
             let result: ()? = try? root.value.deleteItems(table: path, items: offsets)
-            me.value = root[path: path].value.map { ListElement($0) }
+            me.update()
             me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
             if nil != result {
                 root.objectWillChange.send()
@@ -60,7 +61,7 @@ final class TableViewModel: ObservableObject {
         }
         self._moveElements = { (me, source, destination) in
             let result: ()? = try? root.value.moveItems(table: path, from: source, to: destination)
-            me.value = root[path: path].value.map { ListElement($0) }
+            me.update()
             me.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
             if nil != result {
                 root.objectWillChange.send()
@@ -69,6 +70,7 @@ final class TableViewModel: ObservableObject {
         self._errorsForItem = { (me, row, col) in
             return root.value.errorBag.errors(forPath: AnyPath(path[row][col])).map(\.message)
         }
+        self._latestValue = { root[path: path].value }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         self._rootValue = Reference(wrappedValue: root[path: path].value.map { ListElement($0) })
         self.errors = root.value.errorBag.errors(includingDescendantsForPath: path).map(\.message)
@@ -80,17 +82,18 @@ final class TableViewModel: ObservableObject {
             me.newRow.forEach {
                 $0.value = $0.type.defaultValue.value
             }
-            me.value = ref.value.map { ListElement($0) }
+            me.update()
         }
         self._deleteElements = { (me, offsets) in
             ref.value.remove(atOffsets: offsets)
-            me.value = ref.value.map { ListElement($0) }
+            me.update()
         }
         self._moveElements = { (me, source, destination) in
             ref.value.move(fromOffsets: source, toOffset: destination)
-            me.value = ref.value.map { ListElement($0) }
+            me.update()
         }
         self._errorsForItem = { (_, _, _) in [] }
+        self._latestValue = { ref.value }
         self.newRow = columns.map { Ref(copying: $0.type.defaultValue) }
         self._rootValue = Reference(wrappedValue: ref.value.map { ListElement($0) })
         self.errors = []
@@ -117,6 +120,19 @@ final class TableViewModel: ObservableObject {
     
     func errorsForItem(atRow row: Int, col: Int) -> [String] {
         self._errorsForItem(self, row, col)
+    }
+    
+    func update() {
+        let value = self._latestValue()
+        if self.value.count > value.count {
+            self.value = Array(self.value[0..<value.count])
+        }
+        zip(self.value, value).enumerated().forEach {
+            self.value[$0.0].value = value[$0.0]
+        }
+        if self.value.count < value.count {
+            self.value.append(contentsOf: value[self.value.count..<value.count].map { ListElement($0) })
+        }
     }
     
 }
@@ -206,8 +222,8 @@ public struct TableView<Root: Modifiable>: View {
                       .frame(width: 15)
                 }
             }.padding(.top, -35).padding(.leading, 15).padding(.trailing, 18).frame(height: 50)
-        }.onChange(of: value.value) {
-            viewModel.value = $0.map { ListElement($0) }
+        }.onChange(of: value.value) { _ in
+            viewModel.update()
         }
     }
 }
