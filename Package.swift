@@ -16,14 +16,12 @@ let package = Package(
         .executable(name: "WebEditor", targets: ["WebEditor"])
     ],
     dependencies: ui + [
-        .package(url: "ssh://git.mipal.net/Users/Shared/git/Machines.git",
-            .branch("meta")
-        )
+        .package(url: "ssh://git.mipal.net/Users/Shared/git/Machines.git", .branch("meta")),
+        .package(url: "ssh://git.mipal.net/Users/Shared/git/AttributeViews.git", .branch("master"))
     ],
     targets: [
-        .target(name: "Utilities", dependencies: products + ["Machines"]),
+        .target(name: "Utilities", dependencies: products + ["Machines", "AttributeViews"]),
         .target(name: "Transformations", dependencies: products),
-        .target(name: "AttributeViews", dependencies: products + ["Machines", "Utilities"]),
         .target(name: "MachineViews", dependencies: products + ["Machines", "AttributeViews", "Utilities", "Transformations"]),
         .target(
             name: "WebEditor",

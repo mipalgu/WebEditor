@@ -12,8 +12,9 @@ import SwiftUI
 #endif
 import Machines
 import Attributes
+import AttributeViews
 
-public final class Config: ObservableObject {
+public final class Config: ObservableObject, AttributeViewConfig {
     
     #if canImport(TokamakShim)
     @Published public var textColor = Color.black
