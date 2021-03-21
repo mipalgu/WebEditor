@@ -16,52 +16,55 @@ import Utilities
 
 public struct LineView: View {
     
-    @ObservedObject var value: Ref<String>
-    @StateObject var viewModel: AttributeViewModel<String>
+    @Binding var value: String
+    @State var errors: [String]
     let label: String
     
     @EnvironmentObject var config: Config
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, String>, label: String) {
-        self.init(value: root[path: path], viewModel: AttributeViewModel(root: root, path: path), label: label)
+    public init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, String>, label: String) {
+        let errors = State<[String]>(initialValue: root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message })
+        self._value = Binding(
+            get: { root.wrappedValue[keyPath: path.keyPath] },
+            set: {
+                _ = try? root.wrappedValue.modify(attribute: path, value: $0)
+                errors.wrappedValue = root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message }
+            }
+        )
+        self._errors = errors
+        self.label = label
     }
     
-    init(value: Ref<String>, label: String) {
-        self.init(value: value, viewModel: AttributeViewModel(reference: value), label: label)
-    }
-    
-    init(value: Ref<String>, viewModel: AttributeViewModel<String>, label: String) {
-        self.value = value
-        self._viewModel = StateObject(wrappedValue: viewModel)
+    init(value: Binding<String>, label: String) {
+        self._value = value
+        self._errors = State<[String]>(initialValue: [])
         self.label = label
     }
     
     public var body: some View {
         VStack(alignment: .leading) {
-            TextField(label, text: $viewModel.value, onCommit: viewModel.sendModification)
+            TextField(label, text: $value)
             .background(config.fieldColor)
             .foregroundColor(config.textColor)
-            ForEach(viewModel.errors, id: \.self) { error in
+            ForEach(errors, id: \.self) { error in
                 Text(error).foregroundColor(.red)
             }
-        }.onChange(of: value.value) {
-            viewModel.value = $0
         }
     }
 }
 
-import Machines
-
-struct LineView_Preview: PreviewProvider {
-    
-    static let root: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine())
-    
-    static var previews: some View {
-        LineView(
-            root: root,
-            path: Machine.path.states[0].name,
-            label: "State 0"
-        ).environmentObject(Config())
-    }
-    
-}
+//import Machines
+//
+//struct LineView_Preview: PreviewProvider {
+//
+//    static let root: Ref<Machine> = Ref(copying: Machine.initialSwiftMachine())
+//
+//    static var previews: some View {
+//        LineView(
+//            root: root,
+//            path: Machine.path.states[0].name,
+//            label: "State 0"
+//        ).environmentObject(Config())
+//    }
+//
+//}

@@ -16,34 +16,39 @@ import Utilities
 
 public struct ComplexView<Root: Modifiable>: View {
     
-    let root: Ref<Root>
-    @ObservedObject var value: Ref<[String: Attribute]>
-    @StateObject var viewModel: AttributeViewModel<[String: Attribute]>
+    @Binding var value: [String: Attribute]
+    @State var errors: [String]
     let subView: (Field) -> AttributeView<Root>
     let label: String
     let fields: [Field]
     
     @EnvironmentObject var config: Config
     
-    public init(root: Ref<Root>, path: Attributes.Path<Root, [String: Attribute]>, label: String, fields: [Field]) {
-        self.init(root: root, value: root[path: path], viewModel: AttributeViewModel(root: root, path: path), label: label, fields: fields) {
+    public init(root: Binding<Root>, path: Attributes.Path<Root, [String: Attribute]>, label: String, fields: [Field]) {
+        let errors = State<[String]>(initialValue: root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message })
+        self._errors = errors
+        self._value = Binding(
+            get: { root.wrappedValue[keyPath: path.keyPath] },
+            set: {
+                _ = try? root.wrappedValue.modify(attribute: path, value: $0)
+                errors.wrappedValue = root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message }
+            }
+        )
+        self.label = label
+        self.fields = fields
+        self.subView = {
             AttributeView(root: root, path: path[$0.name].wrappedValue, label: $0.name.pretty)
         }
     }
     
-    init(root: Ref<Root>, value: Ref<[String: Attribute]>, label: String, fields: [Field]) {
-        self.init(root: root, value: value, viewModel: AttributeViewModel(reference: value), label: label, fields: fields) {
-            AttributeView(root: root, attribute: value[$0.name].wrappedValue, label: $0.name.pretty)
-        }
-    }
-    
-    init(root: Ref<Root>, value: Ref<[String: Attribute]>, viewModel: AttributeViewModel<[String: Attribute]>, label: String, fields: [Field], subView: @escaping (Field) -> AttributeView<Root>) {
-        self.root = root
-        self.value = value
-        self._viewModel = StateObject(wrappedValue: viewModel)
-        self.subView = subView
+    init(root: Binding<Root>, value: Binding<[String: Attribute]>, label: String, fields: [Field]) {
+        self._value = value
+        self._errors = State<[String]>(initialValue: [])
         self.label = label
         self.fields = fields
+        self.subView = {
+            AttributeView(root: root, attribute: Binding(value[$0.name])!, label: $0.name.pretty)
+        }
     }
     
     public var body: some View {
@@ -57,10 +62,6 @@ public struct ComplexView<Root: Modifiable>: View {
                     }.padding(10).background(Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.05))
                 }
             }
-        }.onChange(of: value.value) {
-            viewModel.value = $0
-        }.onChange(of: viewModel.value) { _ in
-            viewModel.sendModification()
         }
     }
 }

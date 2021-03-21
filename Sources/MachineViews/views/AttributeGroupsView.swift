@@ -39,7 +39,7 @@ public struct AttributeGroupsView: View {
                 .foregroundColor(config.textColor)
             TabView(selection: Binding($selection)) {
                 ForEach(Array(machine[path: path].value.enumerated()), id: \.1.name) { (index, group) in
-                    AttributeGroupView(root: machine, path: path[index], label: group.name)
+                    AttributeGroupView(root: machine.asBinding, path: path[index], label: group.name)
                         .padding(.horizontal, 10)
                         .tabItem {
                             Text(group.name.pretty)
@@ -50,7 +50,7 @@ public struct AttributeGroupsView: View {
                         HStack {
                             VStack(alignment: .leading) {
                                 CollectionView(
-                                    root: machine,
+                                    root: machine.asBinding,
                                     path: Machine.path.dependencyAttributes,
                                     label: "Machine Dependencies",
                                     type: machine.value.dependencyAttributeType

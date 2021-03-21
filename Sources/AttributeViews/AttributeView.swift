@@ -67,15 +67,11 @@ import Utilities
 
 public struct AttributeView<Root: Modifiable>: View{
     
-    let root: Ref<Root>
-    @ObservedObject var attribute: Ref<Attribute>
     let subView: () -> AnyView
     
-    public init(root: Ref<Root>, path: Attributes.Path<Root, Attribute>, label: String) {
-        self.root = root
-        self.attribute = root[path: path]
+    public init(root: Binding<Root>, path: Attributes.Path<Root, Attribute>, label: String) {
         self.subView = {
-            switch root[path: path].value.type {
+            switch root.wrappedValue[keyPath: path.keyPath].type {
             case .line:
                 return AnyView(LineAttributeView(root: root, path: path.lineAttribute,label: label))
             case .block:
@@ -84,11 +80,9 @@ public struct AttributeView<Root: Modifiable>: View{
         }
     }
     
-    init(root: Ref<Root>, attribute: Ref<Attribute>, label: String) {
-        self.root = root
-        self.attribute = attribute
+    init(root: Binding<Root>, attribute: Binding<Attribute>, label: String) {
         self.subView = {
-            switch attribute.value.type {
+            switch attribute.wrappedValue.type {
             case .line:
                 return AnyView(LineAttributeView(attribute: attribute.lineAttribute, label: label))
             case .block:

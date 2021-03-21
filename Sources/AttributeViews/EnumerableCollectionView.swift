@@ -16,24 +16,30 @@ import Utilities
 
 public struct EnumerableCollectionView: View {
     
-    @ObservedObject var value: Ref<Set<String>>
-    @StateObject var viewModel: AttributeViewModel<Set<String>>
+    @Binding var value: Set<String>
+    @State var errors: [String]
     let label: String
     let validValues: Set<String>
     
     @EnvironmentObject var config: Config
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Set<String>>, label: String, validValues: Set<String>) {
-        self.init(value: root[path: path], viewModel: AttributeViewModel(root: root, path: path), label: label, validValues: validValues)
+    public init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Set<String>>, label: String, validValues: Set<String>) {
+        let errors = State<[String]>(initialValue: root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message })
+        self._errors = errors
+        self._value = Binding(
+            get: { root.wrappedValue[keyPath: path.keyPath] },
+            set: {
+                _ = try? root.wrappedValue.modify(attribute: path, value: $0)
+                errors.wrappedValue = root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message }
+            }
+        )
+        self.label = label
+        self.validValues = validValues
     }
     
-    init(value: Ref<Set<String>>, label: String, validValues: Set<String>) {
-        self.init(value: value, viewModel: AttributeViewModel(reference: value), label: label, validValues: validValues)
-    }
-    
-    init(value: Ref<Set<String>>, viewModel: AttributeViewModel<Set<String>>, label: String, validValues: Set<String>) {
-        self.value = value
-        self._viewModel = StateObject(wrappedValue: viewModel)
+    init(value: Binding<Set<String>>, label: String, validValues: Set<String>) {
+        self._value = value
+        self._errors = State<[String]>(initialValue: [])
         self.label = label
         self.validValues = validValues
     }
@@ -49,24 +55,20 @@ public struct EnumerableCollectionView: View {
                 }
             } else {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: .infinity), spacing: 10, alignment: .topLeading)]) {
-                    ForEach(Array(validValues.sorted()), id: \.self) { value in
-                        Toggle(value, isOn: Binding(
-                            get: { viewModel.value.contains(value) },
+                    ForEach(Array(validValues.sorted()), id: \.self) { element in
+                        Toggle(element, isOn: Binding(
+                            get: { value.contains(element) },
                             set: { (isChecked) in
                                 if isChecked {
-                                    viewModel.value.insert(value)
+                                    value.insert(element)
                                 } else {
-                                    viewModel.value.remove(value)
+                                    value.remove(element)
                                 }
                             }
                         ))
                     }
                 }
             }
-        }.onChange(of: value.value) {
-            viewModel.value = $0
-        }.onChange(of: viewModel.value) { _ in
-            viewModel.sendModification()
         }
     }
 }

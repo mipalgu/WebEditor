@@ -15,9 +15,9 @@ import Attributes
 import Utilities
 
 public struct IntegerView: View {
-
-    @ObservedObject var value: Ref<Int>
-    @StateObject var viewModel: AttributeViewModel<Int>
+    
+    @Binding var value: Int
+    @State var errors: [String]
     let label: String
     
     @EnvironmentObject var config: Config
@@ -28,27 +28,29 @@ public struct IntegerView: View {
         return formatter
     }
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Int>, label: String) {
-        self.init(value: root[path: path], viewModel: AttributeViewModel(root: root, path: path), label: label)
+    public init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Int>, label: String) {
+        let errors = State<[String]>(initialValue: root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message })
+        self._errors = errors
+        self._value = Binding(
+            get: { root.wrappedValue[keyPath: path.keyPath] },
+            set: {
+                _ = try? root.wrappedValue.modify(attribute: path, value: $0)
+                errors.wrappedValue = root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message }
+            }
+        )
+        self.label = label
     }
     
-    init(value: Ref<Int>, label: String) {
-        self.init(value: value, viewModel: AttributeViewModel(reference: value), label: label)
-    }
-    
-    init(value: Ref<Int>, viewModel: AttributeViewModel<Int>, label: String) {
-        self.value = value
-        self._viewModel = StateObject(wrappedValue: viewModel)
+    init(value: Binding<Int>, label: String) {
+        self._value = value
+        self._errors = State<[String]>(initialValue: [])
         self.label = label
     }
     
     public var body: some View {
-        TextField(label, value: $viewModel.value, formatter: formatter, onCommit: viewModel.sendModification)
+        TextField(label, value: $value, formatter: formatter)
             .font(.body)
             .background(config.fieldColor)
             .foregroundColor(config.textColor)
-            .onChange(of: value.value) {
-                viewModel.value = $0
-            }
     }
 }

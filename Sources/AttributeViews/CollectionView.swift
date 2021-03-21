@@ -65,38 +65,133 @@ import SwiftUI
 import Attributes
 import Utilities
 
-public struct CollectionView<Root: Modifiable>: View{
+public struct CollectionView<Root: Modifiable>: View {
     
-    let root: Ref<Root>
-    @ObservedObject var value: Ref<[Attribute]>
-    @StateObject var viewModel: CollectionViewModel
-    let subView: (Int) -> AttributeView<Root>
+    struct CollectionElement: Hashable, Identifiable {
+        
+        var id: Int {
+            self.attribute.id
+        }
+        
+        var attribute: Attribute
+        
+        var subView: () -> AttributeView<Root>
+        
+        static func ==(lhs: CollectionElement, rhs: CollectionElement) -> Bool {
+            return lhs.attribute == rhs.attribute
+        }
+        
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(attribute)
+        }
+        
+    }
+    
+    @Binding var root: Root
+    @Binding var value: [CollectionElement]
+    @State var errors: [String]
     let label: String
     let type: AttributeType
+    
+    @State var newAttribute: Attribute
+    
+    @State var selection: Set<Int>
     
     @EnvironmentObject var config: Config
     
     @State var creating: Bool = false
     
-    public init(root: Ref<Root>, path: Attributes.Path<Root, [Attribute]>, label: String, type: AttributeType) {
-        self.init(root: root, value: root[path: path], viewModel: CollectionViewModel(root: root, path: path, type: type), label: label, type: type) {
-            AttributeView(root: root, path: path[$0], label: "")
-        }
-    }
+    let addElement: () -> Void
+    let deleteElement: (CollectionElement) -> Void
+    let deleteElements: (IndexSet) -> Void
+    let moveElements: (IndexSet, Int) -> Void
     
-    init(root: Ref<Root>, value: Ref<[Attribute]>, label: String, type: AttributeType) {
-        self.init(root: root, value: value, viewModel: CollectionViewModel(reference: value, type: type), label: label, type: type) {
-            AttributeView(root: root, attribute: value[$0], label: "")
-        }
-    }
-    
-    init(root: Ref<Root>, value: Ref<[Attribute]>, viewModel: CollectionViewModel, label: String, type: AttributeType, subView: @escaping (Int) -> AttributeView<Root>) {
-        self.root = root
-        self.value = value
-        self._viewModel = StateObject(wrappedValue: viewModel)
-        self.subView = subView
+    public init(root: Binding<Root>, path: Attributes.Path<Root, [Attribute]>, label: String, type: AttributeType) {
+        self._root = root
+        let errors = State<[String]>(initialValue: root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message })
+        self._value = Binding(
+            get: {
+                root.wrappedValue[keyPath: path.keyPath].enumerated().map { (index, element) in
+                    CollectionElement(attribute: element, subView: { AttributeView(root: root, path: path[index], label: "") })
+                }
+            },
+            set: {
+                _ = try? root.wrappedValue.modify(attribute: path, value: $0.map { $0.attribute })
+                errors.wrappedValue = root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message }
+            }
+        )
+        self._errors = errors
         self.label = label
         self.type = type
+        let newAttribute = State<Attribute>(initialValue: type.defaultValue)
+        self._newAttribute = newAttribute
+        let selection = State<Set<Int>>(initialValue: [])
+        self._selection = selection
+        self.addElement = {
+            if let _ = try? root.wrappedValue.addItem(newAttribute.wrappedValue, to: path) {
+                newAttribute.wrappedValue = type.defaultValue
+            }
+            errors.wrappedValue = root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map(\.message)
+        }
+        let deleteOffsets: (IndexSet) -> Void = { (offsets) in
+            try? root.wrappedValue.deleteItems(table: path, items: offsets)
+            errors.wrappedValue = root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map(\.message)
+        }
+        self.deleteElement = { (element) in
+            guard let index = root.wrappedValue[keyPath: path.keyPath].firstIndex(of: element.attribute) else {
+                return
+            }
+            let offsets: IndexSet = selection.wrappedValue.contains(element.id)
+                ? IndexSet(root.wrappedValue[keyPath: path.keyPath].enumerated().lazy.filter { selection.wrappedValue.contains($1.id) }.map { $0.0 })
+                : [index]
+            deleteOffsets(offsets)
+        }
+        self.deleteElements = deleteOffsets
+        self.moveElements = { (source, destination) in
+            try? root.wrappedValue.moveItems(table: path, from: source, to: destination)
+            errors.wrappedValue = root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map(\.message)
+        }
+    }
+    
+    init(root: Binding<Root>, value: Binding<[Attribute]>, label: String, type: AttributeType) {
+        self._root = root
+        self._value = Binding(
+            get: {
+                value.wrappedValue.enumerated().map { (index, element) in
+                    CollectionElement(attribute: element, subView: { AttributeView(root: root, attribute: value[index], label: "") })
+                }
+            },
+            set: {
+                value.wrappedValue = $0.map { $0.attribute }
+            }
+        )
+        self._errors = State(initialValue: [])
+        self.label = label
+        self.type = type
+        let newAttribute = State<Attribute>(initialValue: type.defaultValue)
+        self._newAttribute = newAttribute
+        let selection = State<Set<Int>>(initialValue: [])
+        self._selection = selection
+        self.addElement = {
+            value.wrappedValue.append(newAttribute.wrappedValue)
+            newAttribute.wrappedValue = type.defaultValue
+        }
+        let deleteOffsets: (IndexSet) -> Void = { (offsets) in
+            value.wrappedValue.remove(atOffsets: offsets)
+        }
+        self.deleteElement = { (element) in
+            guard let index = value.wrappedValue.firstIndex(of: element.attribute) else {
+                return
+            }
+            let offsets: IndexSet = selection.wrappedValue.contains(element.id)
+                ? IndexSet(value.wrappedValue.enumerated().lazy.filter { selection.wrappedValue.contains($1.id) }.map { $0.0 })
+                : [index]
+            deleteOffsets(offsets)
+        }
+        self.deleteElements = deleteOffsets
+        self.moveElements = { (source, destination) in
+            value.wrappedValue.move(fromOffsets: source, toOffset: destination)
+        }
     }
     
     public var body: some View {
@@ -106,8 +201,8 @@ public struct CollectionView<Root: Modifiable>: View{
                 case .line:
                     HStack {
                         Text(label.pretty + ":").fontWeight(.bold)
-                        AttributeView(root: root, attribute: viewModel.$newAttribute, label: "New " + label)
-                        Button(action: viewModel.addElement, label: {
+                        AttributeView(root: $root, attribute: $newAttribute, label: "New " + label)
+                        Button(action: addElement, label: {
                             Image(systemName: "plus").font(.system(size: 16, weight: .regular))
                         }).buttonStyle(PlainButtonStyle()).foregroundColor(.blue)
                     }
@@ -117,7 +212,7 @@ public struct CollectionView<Root: Modifiable>: View{
                             Text(label + ":").fontWeight(.bold)
                             Spacer()
                             Button(action: {
-                                viewModel.addElement()
+                                addElement()
                                 creating = false
                             }, label: {
                                 Image(systemName: "square.and.pencil").font(.system(size: 16, weight: .regular))
@@ -129,7 +224,7 @@ public struct CollectionView<Root: Modifiable>: View{
                                 Image(systemName: "trash").font(.system(size: 16, weight: .regular))
                             }).animation(.easeOut).buttonStyle(PlainButtonStyle()).foregroundColor(.red)
                         }
-                        AttributeView(root: root, attribute: viewModel.$newAttribute, label: "")
+                        AttributeView(root: $root, attribute: $newAttribute, label: "")
                     } else {
                         HStack {
                             Text(label + ":").fontWeight(.bold)
@@ -142,23 +237,18 @@ public struct CollectionView<Root: Modifiable>: View{
                 }
             }.padding(.bottom, 5)
             Divider()
-            if !viewModel.elements.isEmpty {
-                List(selection: $viewModel.selection) {
-                    ForEach(Array(viewModel.elements.enumerated()), id: \.1.id) { (index, element) in
+            if !value.isEmpty {
+                List(selection: $selection) {
+                    ForEach(value, id: \.self) { element in
                         HStack(spacing: 1) {
-                            subView(index)
+                            element.subView()
                             Image(systemName: "ellipsis").font(.system(size: 16, weight: .regular)).rotationEffect(.degrees(90))
                         }.contextMenu {
-                            Button("Delete", action: { viewModel.deleteElement(element, atIndex: index) }).keyboardShortcut(.delete)
+                            Button("Delete", action: { deleteElement(element) }).keyboardShortcut(.delete)
                         }
-                    }.onMove(perform: viewModel.moveElements).onDelete(perform: viewModel.deleteElements)
-                }.frame(minHeight: min(CGFloat(viewModel.elements.count * (type == .line ? 30 : 80) + 15), 100))
+                    }.onMove(perform: moveElements).onDelete(perform: deleteElements)
+                }.frame(minHeight: min(CGFloat(value.count * (type == .line ? 30 : 80) + 15), 100))
             }
         }.padding(.top, 2)
-        .onChange(of: value.value) {
-            viewModel.value = $0
-        }.onChange(of: viewModel.value) { _ in
-            viewModel.sendModification()
-        }
     }
 }

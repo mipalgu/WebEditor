@@ -15,16 +15,12 @@ import Attributes
 import Utilities
 
 public struct BlockAttributeView<Root: Modifiable>: View{
-    
-    let root: Ref<Root>
-    @ObservedObject var attribute: Ref<BlockAttribute>
+
     let subView: () -> AnyView
     
-    public init(root: Ref<Root>, path: Attributes.Path<Root, BlockAttribute>, label: String) {
-        self.root = root
-        self.attribute = root[path: path]
+    public init(root: Binding<Root>, path: Attributes.Path<Root, BlockAttribute>, label: String) {
         self.subView = {
-            switch root[path: path].value.type {
+            switch root.wrappedValue[keyPath: path.keyPath].type {
             case .code(let language):
                 return AnyView(CodeView(root: root, path: path.codeValue, label: label, language: language))
             case .text:
@@ -41,11 +37,9 @@ public struct BlockAttributeView<Root: Modifiable>: View{
         }
     }
     
-    init(root: Ref<Root>, attribute: Ref<BlockAttribute>, label: String) {
-        self.root = root
-        self.attribute = attribute
+    init(root: Binding<Root>, attribute: Binding<BlockAttribute>, label: String) {
         self.subView = {
-            switch attribute.value.type {
+            switch attribute.wrappedValue.type {
             case .code(let language):
                 return AnyView(CodeView(value: attribute.codeValue, label: label, language: language))
             case .text:

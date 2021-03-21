@@ -16,36 +16,37 @@ import Utilities
 
 public struct BoolView: View {
     
-    @ObservedObject var value: Ref<Bool>
-    @StateObject var viewModel: AttributeViewModel<Bool>
+    @Binding var value: Bool
+    @Binding var errors: [String]
+    
     let label: String
     
     @EnvironmentObject var config: Config
     
-    public init<Root: Modifiable>(root: Ref<Root>, path: Attributes.Path<Root, Bool>, label: String) {
-        self.init(value: root[path: path], viewModel: AttributeViewModel(root: root, path: path), label: label)
+    public init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Bool>, label: String) {
+        self._value = Binding(
+            get: { root.wrappedValue[keyPath: path.keyPath] },
+            set: { _ = try? root.wrappedValue.modify(attribute: path, value: $0) }
+        )
+        self._errors = Binding(
+            get: { root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map { $0.message } },
+            set: { _ in }
+        )
+        self.label = label
     }
     
-    init(value: Ref<Bool>, label: String) {
-        self.init(value: value, viewModel: AttributeViewModel(reference: value), label: label)
-    }
-    
-    init(value: Ref<Bool>, viewModel: AttributeViewModel<Bool>, label: String) {
-        self.value = value
-        self._viewModel = StateObject(wrappedValue: viewModel)
+    init(value: Binding<Bool>, label: String) {
+        self._value = value
+        var errors: [String] = []
+        self._errors = Binding(get: { errors }, set: { errors = $0 })
         self.label = label
     }
     
     public var body: some View {
-        Toggle(label, isOn: $viewModel.value)
+        Toggle(label, isOn: $value)
             .animation(.easeOut)
             .font(.body)
             .foregroundColor(config.textColor)
-            .onChange(of: value.value) {
-                viewModel.value = $0
-            }.onChange(of: viewModel.value) { _ in
-                viewModel.sendModification()
-            }
     }
 }
 
