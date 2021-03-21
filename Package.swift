@@ -16,7 +16,7 @@ let package = Package(
         .executable(name: "WebEditor", targets: ["WebEditor"])
     ],
     dependencies: ui + [
-        .package(url: "ssh://git.mipal.net/git/Machines.git",
+        .package(url: "ssh://git.mipal.net/Users/Shared/git/Machines.git",
             .branch("meta")
         )
     ],
