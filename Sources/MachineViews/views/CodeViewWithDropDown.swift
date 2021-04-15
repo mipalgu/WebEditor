@@ -38,7 +38,7 @@ struct CodeViewWithDropDown<Label: View>: View {
                 }
             ),
             errors: Binding(
-                get: { root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map(\.message) },
+                get: { root.wrappedValue.errorBag.errors(forPath: path).map(\.message) },
                 set: { _ in }
             ),
             language: language,
