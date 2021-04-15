@@ -29,8 +29,10 @@ struct StateView: View {
     
     var body: some View {
         if viewModel.expanded {
-            return AnyView(StateExpandedView(editorViewModel: editorViewModel, viewModel: viewModel, creatingTransitions: $creatingTransitions)).clipped()
+            EmptyView()
+            //return AnyView(StateExpandedView(editorViewModel: editorViewModel, viewModel: viewModel, creatingTransitions: $creatingTransitions)).clipped()
+        } else {
+            StateCollapsedView(editorViewModel: editorViewModel, viewModel: viewModel, creatingTransitions: $creatingTransitions).clipped()
         }
-        return AnyView(StateCollapsedView(editorViewModel: editorViewModel, viewModel: viewModel, creatingTransitions: $creatingTransitions)).clipped()
     }
 }
