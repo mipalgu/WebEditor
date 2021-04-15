@@ -19,13 +19,11 @@ import AttributeViews
 struct StateExpandedView: View {
     
     @Binding var state: Machines.State
-    @Binding var width: CGFloat
-    @Binding var height: CGFloat
-    @Binding var borderColor: Color
+    @Binding var collapsedActions: [String: Bool]
     let titleView: () -> LineView<Config>
     let codeView: (Int) -> CodeViewWithDropDown<Text>
     
-    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Machines.State>, width: Binding<CGFloat> = .constant(50), height: Binding<CGFloat> = .constant(50), borderColor: Binding<Color> = .constant(.black)) {
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Machines.State>, collapsedActions: Binding<[String: Bool]>) {
         self.init(
             state: Binding(
                 get: { root.wrappedValue[keyPath: path.keyPath] },
@@ -33,46 +31,56 @@ struct StateExpandedView: View {
                     _ = try? root.wrappedValue.modify(attribute: path, value: $0)
                 }
             ),
-            width: width,
-            height: height,
-            borderColor: borderColor,
+            collapsedActions: collapsedActions,
             titleView: { LineView<Config>(root: root, path: path.name, label: "Title") },
             codeView: {
-                CodeViewWithDropDown(
+                let name = root.wrappedValue[keyPath: path.keyPath].actions[$0].name
+                return CodeViewWithDropDown(
                     root: root,
                     path: path.actions[$0].implementation,
-                    label: root.wrappedValue[keyPath: path.keyPath].actions[$0].name,
+                    label: name,
                     language: root.wrappedValue[keyPath: path.keyPath].actions[$0].language,
-                    collapsed: .constant(false)
+                    collapsed: Binding(
+                        get: {
+                            collapsedActions.wrappedValue[name] ?? false
+                        },
+                        set: {
+                            collapsedActions.wrappedValue[name] = $0
+                        }
+                    )
                 )
             }
         )
     }
     
-    init(state: Binding<Machines.State>, titleErrors: Binding<[String]> = .constant([]), actionErrors: Binding<[[String]]> = .constant([]), width: Binding<CGFloat> = .constant(50), height: Binding<CGFloat> = .constant(50), borderColor: Binding<Color> = .constant(.black)) {
+    init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, titleErrors: Binding<[String]> = .constant([]), actionErrors: Binding<[[String]]> = .constant([])) {
         self.init(
             state: state,
-            width: width,
-            height: height,
-            borderColor: borderColor,
+            collapsedActions: collapsedActions,
             titleView: { LineView(value: state.name, errors: titleErrors, label: "Title") },
             codeView: {
-                CodeViewWithDropDown(
+                let name = state.wrappedValue.actions[$0].name
+                return CodeViewWithDropDown(
                     value: state.actions[$0].implementation,
                     errors: actionErrors[$0],
-                    label: state.actions[$0].name.wrappedValue,
+                    label: name,
                     language: state.actions[$0].language.wrappedValue,
-                    collapsed: .constant(false)
+                    collapsed: Binding(
+                        get: {
+                            collapsedActions.wrappedValue[name] ?? false
+                        },
+                        set: {
+                            collapsedActions.wrappedValue[name] = $0
+                        }
+                    )
                 )
             }
         )
     }
     
-    private init(state: Binding<Machines.State>, width: Binding<CGFloat>, height: Binding<CGFloat>, borderColor: Binding<Color>, titleView: @escaping () -> LineView<Config>, codeView: @escaping (Int) -> CodeViewWithDropDown<Text>) {
+    private init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, titleView: @escaping () -> LineView<Config>, codeView: @escaping (Int) -> CodeViewWithDropDown<Text>) {
         self._state = state
-        self._width = width
-        self._height = height
-        self._borderColor = borderColor
+        self._collapsedActions = collapsedActions
         self.titleView = titleView
         self.codeView = codeView
     }
@@ -82,57 +90,63 @@ struct StateExpandedView: View {
     var body: some View {
         GeometryReader{ reader in
             VStack {
-                RoundedRectangle(cornerRadius: 20.0)
-                .strokeBorder(borderColor, lineWidth: 3.0, antialiased: true)
-                .background(RoundedRectangle(cornerRadius: 20.0).foregroundColor(config.stateColour))
-                .frame(width: width, height: height)
-                .clipped()
-                .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
-                .overlay (
-                    VStack {
-                        HStack {
-                            titleView()
-                                .multilineTextAlignment(.center)
-                                .font(config.fontTitle2)
-                                .background(config.fieldColor)
-//                                .padding(.leading, viewModel.buttonDimensions)
-//                                .frame(
-//                                    minWidth: viewModel.minTitleWidth - viewModel.buttonDimensions,
-//                                    maxWidth: viewModel.maxTitleWidth - viewModel.buttonDimensions,
-//                                    minHeight: viewModel.minTitleHeight,
-//                                    maxHeight: viewModel.maxTitleHeight
-//                                )
-                                .clipped()
-//                            Button(action: { viewModel.toggleExpand(frameWidth: reader.size.width, frameHeight: reader.size.height, externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)) }) {
-//                                Image(systemName: "arrowtriangle.down.fill")
-//                                    .font(.system(size: viewModel.buttonSize, weight: .regular))
-//                                    .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
-//                            }.buttonStyle(PlainButtonStyle())
-                        }
-                        ScrollView {
-                            VStack(spacing: 0) {
-                                ForEach(Array(state.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
-                                    codeView(index).frame(
-                                        minWidth: 0,
-                                        maxWidth: width,
-                                        maxHeight: height
-                                    )
-                                    .clipped()
-                                }
+                HStack {
+                    titleView()
+                        .multilineTextAlignment(.center)
+                        .font(config.fontTitle2)
+                        .background(config.fieldColor)
+                        .clipped()
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            ForEach(state.actions.indices, id: \.self) { index in
+                                codeView(index)
                             }
                         }
                     }
-                    .padding(.bottom, 20)
-                    .padding(.top, 10)
-                    .frame(minHeight: 50)
-//                    .background(
-//                        RoundedRectangle(cornerRadius: 20.0)
-//                        .strokeBorder(borderColor, lineWidth: 3.0, antialiased: true)
-//                        .frame(width: width - 10.0, height: height - 10.0)
-//                        .opacity(viewModel.isAccepting ? 1.0 : 0.0)
+                }
+//                RoundedRectangle(cornerRadius: 20.0)
+//                    .strokeBorder(Color.black, lineWidth: 3.0, antialiased: true)
+//                    .background(RoundedRectangle(cornerRadius: 20.0).foregroundColor(config.stateColour))
+//                    .clipped()
+//                    .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
+//                    .overlay (
+//                        VStack {
+//                            HStack {
+//                                titleView()
+//                                    .multilineTextAlignment(.center)
+//                                    .font(config.fontTitle2)
+//                                    .background(config.fieldColor)
+//    //                                .padding(.leading, viewModel.buttonDimensions)
+//    //                                .frame(
+//    //                                    minWidth: viewModel.minTitleWidth - viewModel.buttonDimensions,
+//    //                                    maxWidth: viewModel.maxTitleWidth - viewModel.buttonDimensions,
+//    //                                    minHeight: viewModel.minTitleHeight,
+//    //                                    maxHeight: viewModel.maxTitleHeight
+//    //                                )
+//                                    .clipped()
+//    //                            Button(action: { viewModel.toggleExpand(frameWidth: reader.size.width, frameHeight: reader.size.height, externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)) }) {
+//    //                                Image(systemName: "arrowtriangle.down.fill")
+//    //                                    .font(.system(size: viewModel.buttonSize, weight: .regular))
+//    //                                    .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
+//    //                            }.buttonStyle(PlainButtonStyle())
+//                            }
+//
+//                        }
+//                        .padding(.bottom, 20)
+//                        .padding(.top, 10)
+//                        .frame(minHeight: 50)
+//    //                    .background(
+//    //                        RoundedRectangle(cornerRadius: 20.0)
+//    //                        .strokeBorder(borderColor, lineWidth: 3.0, antialiased: true)
+//    //                        .frame(width: width - 10.0, height: height - 10.0)
+//    //                        .opacity(viewModel.isAccepting ? 1.0 : 0.0)
+//    //                    )
 //                    )
-                )
-            }
+            }//.strokeBorder(Color.black, lineWidth: 3.0, antialiased: true)
+            .clipShape(RoundedRectangle(cornerRadius: 20.0))
+            .background(config.stateColour)
+            .clipped()
+            .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
         }
     }
 }
@@ -173,15 +187,19 @@ struct StateExpandedView_Previews: PreviewProvider {
             ],
             transitions: []
         )
+        
         @State var titleErrors: [String] = ["An error", "A second error"]
         
-        @State var actionErrors: [[String]] = []
+        @State var actionErrors: [[String]] = Array(repeating: [], count: 5)
+        
+        @State var collapsedActions: [String: Bool] = [:]
         
         let config = Config()
         
         var body: some View {
             StateExpandedView(
                 state: $value,
+                collapsedActions: $collapsedActions,
                 titleErrors: $titleErrors,
                 actionErrors: $actionErrors
             ).environmentObject(config)

@@ -21,6 +21,8 @@ struct StateView: View {
     
     @Binding var creatingTransitions: Bool
     
+    @State var collapsedActions: [String: Bool] = [:]
+    
     init(editorViewModel: EditorViewModel, viewModel: StateViewModel, creatingTransitions: Binding<Bool>) {
         self.editorViewModel = editorViewModel
         self._viewModel = StateObject(wrappedValue: viewModel)
@@ -29,7 +31,7 @@ struct StateView: View {
     
     var body: some View {
         if viewModel.expanded {
-            EmptyView()
+            StateExpandedView(root: viewModel.$machine.asBinding, path: viewModel.path, collapsedActions: $collapsedActions)
             //return AnyView(StateExpandedView(editorViewModel: editorViewModel, viewModel: viewModel, creatingTransitions: $creatingTransitions)).clipped()
         } else {
             StateCollapsedView(editorViewModel: editorViewModel, viewModel: viewModel, creatingTransitions: $creatingTransitions).clipped()
