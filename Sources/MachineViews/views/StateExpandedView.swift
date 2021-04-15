@@ -94,13 +94,16 @@ struct StateExpandedView: View {
                     titleView()
                         .multilineTextAlignment(.center)
                         .font(config.fontTitle2)
-                        .background(config.fieldColor)
-                        .clipped()
-                    ScrollView {
-                        VStack(spacing: 0) {
-                            ForEach(state.actions.indices, id: \.self) { index in
-                                codeView(index)
-                            }
+//                    Button(action: {  }) {
+//                        Image(systemName: "arrowtriangle.down.fill")
+//                            .font(.system(size: viewModel.buttonSize, weight: .regular))
+//                            .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
+//                            }.buttonStyle(PlainButtonStyle())
+                }
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(state.actions.indices, id: \.self) { index in
+                            codeView(index)
                         }
                     }
                 }
@@ -143,11 +146,8 @@ struct StateExpandedView: View {
 //    //                    )
 //                    )
             }//.strokeBorder(Color.black, lineWidth: 3.0, antialiased: true)
-            .clipShape(RoundedRectangle(cornerRadius: 20.0))
-            .background(config.stateColour)
-            .clipped()
-            .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
-        }
+        }.clipShape(RoundedRectangle(cornerRadius: 20.0))
+        .background(config.stateColour)
     }
 }
 

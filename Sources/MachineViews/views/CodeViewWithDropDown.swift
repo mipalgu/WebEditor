@@ -92,6 +92,7 @@ struct CodeViewWithDropDown<Label: View>: View {
                             .stroke(Color.gray.opacity(0.3), lineWidth: 2)
                     )
                     .frame(minHeight: 80)
+                    .shadow(radius: 10)
             }
         }
     }
