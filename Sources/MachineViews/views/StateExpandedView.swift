@@ -64,7 +64,7 @@ struct StateExpandedView: View {
                             VStack {
                                 ForEach(Array(viewModel.actions.map(\.name).enumerated()), id: \.0) { (index, action) in
                                     CodeViewWithDropDown(
-                                        machine: viewModel.$machine.asBinding,
+                                        root: viewModel.$machine.asBinding,
                                         path: viewModel.path.actions[index].implementation,
                                         language: .swift,
                                         collapsed: viewModel.createCollapsedBinding(forAction: action)

@@ -11,14 +11,13 @@ import TokamakShim
 import SwiftUI
 #endif
 
-import Machines
 import Attributes
 import Utilities
 
 struct CodeViewWithDropDown<Label: View>: View {
     
-    @Binding var machine: Machine
-    let path: Attributes.Path<Machine, Code>
+    @Binding var value: Code
+    @Binding var errors: [String]
     let language: Language
     let label: () -> Label
     
@@ -26,22 +25,52 @@ struct CodeViewWithDropDown<Label: View>: View {
     
     @EnvironmentObject var config: Config
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Code>, label: String, language: Language, collapsed: Binding<Bool>) where Label == Text {
-        self.init(machine: machine, path: path, language: language, collapsed: collapsed) { Text(label.capitalized) }
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, label: String, language: Language, collapsed: Binding<Bool>) where Label == Text {
+        self.init(root: root, path: path, language: language, collapsed: collapsed) { Text(label.capitalized) }
     }
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Code>, language: Language, collapsed: Binding<Bool>, label: @escaping () -> Label) {
-        self._machine = machine
-        self.path = path
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, language: Language, collapsed: Binding<Bool>, label: @escaping () -> Label) {
+        self.init(
+            value: Binding(
+                get: { root.wrappedValue[keyPath: path.keyPath] },
+                set: {
+                    _ = try? root.wrappedValue.modify(attribute: path, value: $0)
+                }
+            ),
+            errors: Binding(
+                get: { root.wrappedValue.errorBag.errors(forPath: AnyPath(path)).map(\.message) },
+                set: { _ in }
+            ),
+            language: language,
+            collapsed: collapsed,
+            label: label
+        )
+    }
+    
+    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), label: String, language: Language, collapsed: Binding<Bool>) where Label == Text {
+        self.init(
+            value: value,
+            errors: errors,
+            language: language,
+            collapsed: collapsed,
+            label: { Text(label.pretty) }
+        )
+    }
+    
+    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), language: Language, collapsed: Binding<Bool>, label: @escaping () -> Label) {
+        self._value = value
+        self._errors = errors
         self.language = language
         self._collapsed = collapsed
         self.label = label
     }
     
-    
     var body: some View {
         VStack(alignment: .leading) {
-            HStack() {
+            HStack(spacing: 0) {
+                if !errors.isEmpty {
+                    Text("*").foregroundColor(.red)
+                }
                 label()
                 Button(action: { collapsed = !collapsed }) {
                     Image(systemName: collapsed ? "arrowtriangle.right.fill" : "arrowtriangle.down.fill")
@@ -51,22 +80,75 @@ struct CodeViewWithDropDown<Label: View>: View {
                 Spacer()
             }
             if !collapsed {
-                TextEditor(text: Binding(get: { machine[keyPath: path.path] }, set: {
-                    do {
-                        try machine.modify(attribute: path, value: Code($0))
-                    } catch let e {
-                        print("\(e)")
-                    }
-                }))
-                .font(config.fontBody)
-                .foregroundColor(config.textColor)
-                .disableAutocorrection(true)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 2)
-                )
-                .frame(minHeight: 80)
+                ForEach(errors, id: \.self) { error in
+                    Text(error).foregroundColor(.red)
+                }
+                TextEditor(text: $value)
+                    .font(config.fontBody)
+                    .foregroundColor(config.textColor)
+                    .disableAutocorrection(true)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 2)
+                    )
+                    .frame(minHeight: 80)
             }
+        }
+    }
+    
+}
+
+struct CodeViewWithDropDown_Previews: PreviewProvider {
+    
+    struct Root_Preview: View {
+        
+        @State var modifiable: EmptyModifiable = EmptyModifiable(attributes: [
+            AttributeGroup(
+                name: "Fields", fields: [Field(name: "code", type: .code(language: .swift))], attributes: ["code": .code("print(\"Hello World!\")", language: .swift)], metaData: [:])
+        ])
+        
+        let path = EmptyModifiable.path.attributes[0].attributes["code"].wrappedValue.codeValue
+        
+        let config = Config()
+        
+        @State var collapsed: Bool = false
+        
+        var body: some View {
+            CodeViewWithDropDown(
+                root: $modifiable,
+                path: path,
+                label: "Root",
+                language: .swift,
+                collapsed: $collapsed
+            ).environmentObject(config)
+        }
+        
+    }
+    
+    struct Binding_Preview: View {
+        
+        @State var value: Code = "print(\"Hello World!\")"
+        @State var errors: [String] = ["An error", "A second error"]
+        @State var collapsed: Bool = false
+        
+        let config = Config()
+        
+        var body: some View {
+            CodeViewWithDropDown(
+                value: $value,
+                errors: $errors,
+                label: "Binding",
+                language: .swift,
+                collapsed: $collapsed
+            ).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Root_Preview()
+            Binding_Preview()
         }
     }
 }
