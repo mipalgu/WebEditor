@@ -18,11 +18,8 @@ import Utilities
 
 struct StateView: View {
     
-    @ObservedObject var editorViewModel: EditorViewModel
-    
-    @StateObject var viewModel: StateViewModel
-    
-    @Binding var creatingTransitions: Bool
+    @Binding var machine: Machine
+    let path: Attributes.Path<Machine, Machines.State>
     
     @State var collapsedActions: [String: Bool] = [:]
     
@@ -32,22 +29,18 @@ struct StateView: View {
     @State var collapsedWidth: CGFloat = 150
     @State var collapsedHeight: CGFloat = 200
     
+    @State var expanded: Bool = false
+    
     @EnvironmentObject var config: Config
     
-    init(editorViewModel: EditorViewModel, viewModel: StateViewModel, creatingTransitions: Binding<Bool>) {
-        self.editorViewModel = editorViewModel
-        self._viewModel = StateObject(wrappedValue: viewModel)
-        self._creatingTransitions = creatingTransitions
-    }
-    
     var body: some View {
-        if viewModel.expanded {
-            StateExpandedView(root: viewModel.$machine.asBinding, path: viewModel.path, collapsedActions: $collapsedActions) {
-                StateTitleView(machine: viewModel.$machine.asBinding, path: viewModel.path.name, expanded: $viewModel.expanded)
+        if expanded {
+            StateExpandedView(root: $machine, path: path, collapsedActions: $collapsedActions) {
+                StateTitleView(machine: $machine, path: path.name, expanded: $expanded)
             }.frame(width: max(expandedWidth, 300), height: max(expandedHeight, 200))
         } else {
             StateCollapsedView {
-                StateTitleView(machine: viewModel.$machine.asBinding, path: viewModel.path.name, expanded: $viewModel.expanded)
+                StateTitleView(machine: $machine, path: path.name, expanded: $expanded)
             }.frame(width: max(collapsedWidth, 75), height: max(collapsedHeight, 100))
         }
     }
