@@ -29,8 +29,8 @@ struct StateView: View {
     @State var expandedWidth: CGFloat = 300
     @State var expandedHeight: CGFloat = 200
     
-    @State var collapsedWidth: CGFloat = 75
-    @State var collapsedHeight: CGFloat = 100
+    @State var collapsedWidth: CGFloat = 150
+    @State var collapsedHeight: CGFloat = 200
     
     @EnvironmentObject var config: Config
     
@@ -44,9 +44,11 @@ struct StateView: View {
         if viewModel.expanded {
             StateExpandedView(root: viewModel.$machine.asBinding, path: viewModel.path, collapsedActions: $collapsedActions) {
                 StateTitleView(machine: viewModel.$machine.asBinding, path: viewModel.path.name, expanded: $viewModel.expanded)
-            }.frame(width: max(expandedWidth, 75), height: max(expandedHeight, 100))
+            }.frame(width: max(expandedWidth, 300), height: max(expandedHeight, 200))
         } else {
-            StateCollapsedView(editorViewModel: editorViewModel, viewModel: viewModel, creatingTransitions: $creatingTransitions)
+            StateCollapsedView {
+                StateTitleView(machine: viewModel.$machine.asBinding, path: viewModel.path.name, expanded: $viewModel.expanded)
+            }.frame(width: max(collapsedWidth, 75), height: max(collapsedHeight, 100))
         }
     }
 }

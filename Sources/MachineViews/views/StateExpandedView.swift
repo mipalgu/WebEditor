@@ -88,7 +88,7 @@ struct StateExpandedView<TitleView: View>: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        GeometryReader{ reader in
+        Group {
             VStack {
                 titleView()
                 ScrollView {
@@ -98,47 +98,8 @@ struct StateExpandedView<TitleView: View>: View {
                         }
                     }
                 }
-//                RoundedRectangle(cornerRadius: 20.0)
-//                    .strokeBorder(Color.black, lineWidth: 3.0, antialiased: true)
-//                    .background(RoundedRectangle(cornerRadius: 20.0).foregroundColor(config.stateColour))
-//                    .clipped()
-//                    .shadow(color: config.shadowColour, radius: 10, x: 0, y: 10)
-//                    .overlay (
-//                        VStack {
-//                            HStack {
-//                                titleView()
-//                                    .multilineTextAlignment(.center)
-//                                    .font(config.fontTitle2)
-//                                    .background(config.fieldColor)
-//    //                                .padding(.leading, viewModel.buttonDimensions)
-//    //                                .frame(
-//    //                                    minWidth: viewModel.minTitleWidth - viewModel.buttonDimensions,
-//    //                                    maxWidth: viewModel.maxTitleWidth - viewModel.buttonDimensions,
-//    //                                    minHeight: viewModel.minTitleHeight,
-//    //                                    maxHeight: viewModel.maxTitleHeight
-//    //                                )
-//                                    .clipped()
-//    //                            Button(action: { viewModel.toggleExpand(frameWidth: reader.size.width, frameHeight: reader.size.height, externalTransitions: editorViewModel.machine.getExternalTransitionsForState(state: viewModel)) }) {
-//    //                                Image(systemName: "arrowtriangle.down.fill")
-//    //                                    .font(.system(size: viewModel.buttonSize, weight: .regular))
-//    //                                    .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
-//    //                            }.buttonStyle(PlainButtonStyle())
-//                            }
-//
-//                        }
-//                        .padding(.bottom, 20)
-//                        .padding(.top, 10)
-//                        .frame(minHeight: 50)
-//    //                    .background(
-//    //                        RoundedRectangle(cornerRadius: 20.0)
-//    //                        .strokeBorder(borderColor, lineWidth: 3.0, antialiased: true)
-//    //                        .frame(width: width - 10.0, height: height - 10.0)
-//    //                        .opacity(viewModel.isAccepting ? 1.0 : 0.0)
-//    //                    )
-//                    )
-            }//.strokeBorder(Color.black, lineWidth: 3.0, antialiased: true)
+            }.padding(10).background(config.stateColour)
         }.clipShape(RoundedRectangle(cornerRadius: 20.0))
-        .background(config.stateColour)
     }
 }
 
