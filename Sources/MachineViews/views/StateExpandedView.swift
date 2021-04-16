@@ -16,14 +16,14 @@ import Attributes
 import Utilities
 import AttributeViews
 
-struct StateExpandedView: View {
+struct StateExpandedView<TitleView: View>: View {
     
     @Binding var state: Machines.State
     @Binding var collapsedActions: [String: Bool]
-    let titleView: () -> LineView<Config>
+    let titleView: () -> TitleView
     let codeView: (Int) -> CodeViewWithDropDown<Text>
     
-    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Machines.State>, collapsedActions: Binding<[String: Bool]>) {
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Machines.State>, collapsedActions: Binding<[String: Bool]>, titleView: @escaping () -> TitleView) {
         self.init(
             state: Binding(
                 get: { root.wrappedValue[keyPath: path.keyPath] },
@@ -32,7 +32,7 @@ struct StateExpandedView: View {
                 }
             ),
             collapsedActions: collapsedActions,
-            titleView: { LineView<Config>(root: root, path: path.name, label: "Title") },
+            titleView: titleView,
             codeView: {
                 let name = root.wrappedValue[keyPath: path.keyPath].actions[$0].name
                 return CodeViewWithDropDown(
@@ -53,11 +53,11 @@ struct StateExpandedView: View {
         )
     }
     
-    init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, titleErrors: Binding<[String]> = .constant([]), actionErrors: Binding<[[String]]> = .constant([])) {
+    init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, actionErrors: Binding<[[String]]> = .constant([]), titleView: @escaping () -> TitleView) {
         self.init(
             state: state,
             collapsedActions: collapsedActions,
-            titleView: { LineView(value: state.name, errors: titleErrors, label: "Title") },
+            titleView: titleView,
             codeView: {
                 let name = state.wrappedValue.actions[$0].name
                 return CodeViewWithDropDown(
@@ -78,7 +78,7 @@ struct StateExpandedView: View {
         )
     }
     
-    private init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, titleView: @escaping () -> LineView<Config>, codeView: @escaping (Int) -> CodeViewWithDropDown<Text>) {
+    private init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, titleView: @escaping () -> TitleView, codeView: @escaping (Int) -> CodeViewWithDropDown<Text>) {
         self._state = state
         self._collapsedActions = collapsedActions
         self.titleView = titleView
@@ -90,16 +90,7 @@ struct StateExpandedView: View {
     var body: some View {
         GeometryReader{ reader in
             VStack {
-                HStack {
-                    titleView()
-                        .multilineTextAlignment(.center)
-                        .font(config.fontTitle2)
-//                    Button(action: {  }) {
-//                        Image(systemName: "arrowtriangle.down.fill")
-//                            .font(.system(size: viewModel.buttonSize, weight: .regular))
-//                            .frame(width: viewModel.buttonDimensions, height: viewModel.buttonDimensions)
-//                            }.buttonStyle(PlainButtonStyle())
-                }
+                titleView()
                 ScrollView {
                     VStack(spacing: 0) {
                         ForEach(state.actions.indices, id: \.self) { index in
@@ -197,12 +188,13 @@ struct StateExpandedView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateExpandedView(
+            StateExpandedView<LineView<Config>>(
                 state: $value,
                 collapsedActions: $collapsedActions,
-                titleErrors: $titleErrors,
                 actionErrors: $actionErrors
-            ).environmentObject(config)
+            ) {
+                LineView<Config>(value: $value.name, errors: $titleErrors, label: "State Name")
+            }.environmentObject(config)
         }
         
     }
