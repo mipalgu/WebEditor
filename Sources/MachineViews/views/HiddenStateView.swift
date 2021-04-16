@@ -17,49 +17,29 @@ import Utilities
 
 struct HiddenStateView: View {
     
-    @ObservedObject var viewModel: StateViewModel
+    @Binding var machine: Machine
+    let path: Attributes.Path<Machine, Machines.State>
     
-    @ObservedObject var editorViewModel: EditorViewModel
-    
-    @ObservedObject var machineViewModel: MachineViewModel
-    
-    @Binding var creatingTransitions: Bool
-    
-    var parentWidth: CGFloat
-    
-    var parentHeight: CGFloat
+    @Binding var hidden: Bool
+    @Binding var highlighted: Bool
     
     @EnvironmentObject var config: Config
     
-    var point: Binding<CGPoint> {
-        Binding(get: { () -> CGPoint in viewModel.location }, set: {(_) -> Void in return})
-    }
-    
-    var label: Binding<String> {
-        Binding(get: { () -> String in viewModel.name }, set: {(_) -> Void in return})
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, hidden: Binding<Bool>, highlighted: Binding<Bool>) {
+        self._machine = machine
+        self.path = path
+        self._hidden = hidden
+        self._highlighted = highlighted
     }
     
     var body: some View {
-        if !viewModel.isHidden(frameWidth: parentWidth, frameHeight: parentHeight) {
-            StateView(machine: $viewModel.machine, path: viewModel.path)
-                .contextMenu {
-                    Button(action: {
-                        machineViewModel.deleteState(stateViewModel: viewModel)
-                    }) {
-                        Text("Delete")
-                            .font(config.fontBody)
-                    }
-                    .keyboardShortcut(.delete)
-                }
-                .coordinateSpace(name: "MAIN_VIEW")
+        if !hidden {
+            StateView(machine: $machine, path: path)
         } else {
-            if viewModel.highlighted {
-                BoundedLabelView(pointOffScreen: point, label: label, frameWidth: parentWidth, frameHeight: parentHeight)
-                    .coordinateSpace(name: "MAIN_VIEW")
-                    .foregroundColor(config.highlightColour)
+            if highlighted {
+                Text(machine[keyPath: path.keyPath].name).font(config.fontBody).foregroundColor(config.highlightColour)
             } else {
-                BoundedLabelView(pointOffScreen: point, label: label, frameWidth: parentWidth, frameHeight: parentHeight)
-                    .coordinateSpace(name: "MAIN_VIEW")
+                Text(machine[keyPath: path.keyPath].name).font(config.fontBody)
             }
         }
     }

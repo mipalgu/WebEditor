@@ -99,12 +99,10 @@ public struct MachineView: View {
                 }
                 ForEach(viewModel.states, id: \.name) { (stateViewModel: StateViewModel) -> HiddenStateView in
                     HiddenStateView(
-                        viewModel: stateViewModel,
-                        editorViewModel: editorViewModel,
-                        machineViewModel: viewModel,
-                        creatingTransitions: $creatingTransitions,
-                        parentWidth: geometry.size.width,
-                        parentHeight: geometry.size.height
+                        machine: stateViewModel.$machine.asBinding,
+                        path: stateViewModel.path,
+                        hidden: .constant(false),
+                        highlighted: .constant(false)
                     )
                 }
             }
