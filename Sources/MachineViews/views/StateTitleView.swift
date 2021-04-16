@@ -81,7 +81,7 @@ struct StateTitleView: View {
                 .multilineTextAlignment(.center)
                 .font(config.fontTitle2)
             Button(action: { expanded.toggle() }) {
-                Image(systemName: "arrowtriangle.down.fill")
+                Image(systemName: expanded ? "arrowtriangle.down.fill" : "arrowtriangle.right.fill")
                     .font(.system(size: 8, weight: .regular))
                     .frame(width: 15, height: 15)
             }.buttonStyle(PlainButtonStyle())
