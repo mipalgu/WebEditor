@@ -18,9 +18,9 @@ import Utilities
 
 class StateViewModel2: ObservableObject, Identifiable, Equatable, MoveAndStretchFromDrag, _Collapsable, Collapsable {
     
-    @Binding var machine: Machine
+    @Binding public var machine: Machine
     
-    let path: Attributes.Path<Machine, Machines.State>
+    public let path: Attributes.Path<Machine, Machines.State>
     
     @Published var isDragging: Bool = false
     
@@ -66,7 +66,7 @@ class StateViewModel2: ObservableObject, Identifiable, Equatable, MoveAndStretch
         lhs === rhs
     }
     
-    private init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0) {
+    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0) {
         self._machine = machine
         self.path = path
         self.location = location
