@@ -20,34 +20,23 @@ struct StateView: View {
     
     @Binding var machine: Machine
     let path: Attributes.Path<Machine, Machines.State>
-    @Binding var width: CGFloat
-    @Binding var height: CGFloat
     
-    @State var collapsedActions: [String: Bool] = [:]
-    @State var expanded: Bool
+    @Binding var expanded: Bool
+    @Binding var collapsedWidth: CGFloat
+    @Binding var collapsedHeight: CGFloat
+    @Binding var expandedWidth: CGFloat
+    @Binding var expandedHeight: CGFloat
+    @Binding var collapsedActions: [String: Bool]
     
-    @State var collapsedWidth: CGFloat
-    @State var collapsedHeight: CGFloat
-    @State var expandedWidth: CGFloat
-    @State var expandedHeight: CGFloat
-    
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, width: Binding<CGFloat> = .constant(300), height: Binding<CGFloat> = .constant(200), expanded: Bool = false) {
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, expanded: Binding<Bool> = .constant(false), collapsedWidth: Binding<CGFloat> = .constant(150), collapseHeight: Binding<CGFloat> = .constant(200), expandedWidth: Binding<CGFloat> = .constant(300), expandedHeight: Binding<CGFloat> = .constant(200), collapsedActions: Binding<[String: Bool]> = .constant([:])) {
         self._machine = machine
         self.path = path
-        self._width = width
-        self._height = height
-        self._expanded = State(initialValue: expanded)
-        if expanded {
-            self._collapsedWidth = State(initialValue: 150)
-            self._collapsedHeight = State(initialValue: 200)
-            self._expandedWidth = State(initialValue: width.wrappedValue)
-            self._expandedHeight = State(initialValue: height.wrappedValue)
-        } else {
-            self._collapsedWidth = State(initialValue: width.wrappedValue)
-            self._collapsedHeight = State(initialValue: height.wrappedValue)
-            self._expandedWidth = State(initialValue: 300)
-            self._expandedHeight = State(initialValue: 200)
-        }
+        self._expanded = expanded
+        self._collapsedWidth = collapsedWidth
+        self._collapsedHeight = collapseHeight
+        self._expandedWidth = expandedWidth
+        self._expandedHeight = expandedHeight
+        self._collapsedActions = collapsedActions
     }
     
     @EnvironmentObject var config: Config
@@ -57,23 +46,11 @@ struct StateView: View {
             if expanded {
                 StateExpandedView(root: $machine, path: path, collapsedActions: $collapsedActions) {
                     StateTitleView(machine: $machine, path: path.name, expanded: $expanded)
-                }.frame(width: max(width, 300), height: max(height, 200))
+                }.frame(width: max(expandedWidth, 300), height: max(expandedHeight, 200))
             } else {
                 StateCollapsedView {
                     StateTitleView(machine: $machine, path: path.name, expanded: $expanded)
-                }.frame(width: max(width, 75), height: max(height, 100))
-            }
-        }.onChange(of: expanded) { newValue in
-            if newValue {
-                collapsedWidth = width
-                collapsedHeight = height
-                width = expandedWidth
-                height = expandedHeight
-            } else {
-                expandedWidth = width
-                expandedHeight = height
-                width = collapsedWidth
-                height = collapsedHeight
+                }.frame(width: max(collapsedWidth, 75), height: max(collapsedHeight, 100))
             }
         }
     }
