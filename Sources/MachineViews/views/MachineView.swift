@@ -114,6 +114,8 @@ public struct MachineView: View {
     
     @StateObject var viewModel = MachineViewModel2()
     
+    let coordinateSpace = "MAIN_VIEW"
+    
     public init(machine: Binding<Machine>, creatingTransitions: Binding<Bool>) {
         self._machine = machine
         self._creatingTransitions = creatingTransitions
@@ -139,7 +141,8 @@ public struct MachineView: View {
             ZStack {
                 Image("grid", bundle: Bundle.module)
                     .resizable(resizingMode: .tile)
-                    .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
                         .onChanged {
                             self.viewModel.moveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                         }.onEnded {
@@ -150,30 +153,29 @@ public struct MachineView: View {
                     if viewModel.viewModel(for: machine.states[index]).isText {
                         Text(machine.states[index].name)
                             .font(config.fontBody)
-                            .coordinateSpace(name: "MAIN_VIEW")
+                            .coordinateSpace(name: coordinateSpace)
                             .position(viewModel.clampPosition(point: viewModel.viewModel(for: machine.states[index]).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height))
                             //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
                     } else {
-                        StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded, collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions)
-                            .coordinateSpace(name: "MAIN_VIEW")
-                            .position(viewModel.viewModel(for: machine.states[index]).location)
-                            .frame(
-                                width: viewModel.viewModel(for: machine.states[index]).width,
-                                height: viewModel.viewModel(for: machine.states[index]).height
-                            )
-                            .gesture(
-                                DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
-                                    .onChanged {
-                                        self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                                    }.onEnded {
-                                        self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                                    }
-                            )
+                        VStack {
+                            StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded, collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions)
+                                .frame(
+                                    width: viewModel.viewModel(for: machine.states[index]).width,
+                                    height: viewModel.viewModel(for: machine.states[index]).height
+                                )
+                        }.coordinateSpace(name: coordinateSpace)
+                        .position(viewModel.viewModel(for: machine.states[index]).location)
+                        .gesture(
+                            DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+                                .onChanged {
+                                    self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
+                                }.onEnded {
+                                    self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
+                                }
+                        )
                     }
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)
-            .coordinateSpace(name: "MAIN_VIEW")
-            .position(x: geometry.size.width / 2.0, y: geometry.size.height / 2.0)
         }
     }
 }
