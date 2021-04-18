@@ -141,23 +141,19 @@ public struct MachineView: View {
 //                    )
 //                }
                 ForEach(Array(machine.states.indices), id: \.self) { index in
-                    HiddenStateView(
-                        machine: $machine,
-                        path: machine.path.states[index],
-                        hidden: .constant(false),
-                        highlighted: .constant(false)
-                    ).frame(
-                        width: viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).collapsedWidth,
-                        height: viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).collapsedHeight
-                    )
-                    .gesture(
-                        DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
-                            .onChanged {
-                                self.viewModel.handleDrag(state: machine[keyPath: machine.path.states[index].name.keyPath], gesture: $0, frameWidth: 10000, frameHeight: 10000)
-                            }.onEnded {
-                                self.viewModel.finishDrag(state: machine[keyPath: machine.path.states[index].name.keyPath], gesture: $0, frameWidth: 10000, frameHeight: 10000)
-                            }
-                    )
+                    HiddenStateView(machine: $machine, path: machine.path.states[index])
+                        .frame(
+                            width: viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).collapsedWidth,
+                            height: viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).collapsedHeight
+                        )
+                        .gesture(
+                            DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
+                                .onChanged {
+                                    self.viewModel.handleDrag(state: machine[keyPath: machine.path.states[index].name.keyPath], gesture: $0, frameWidth: 10000, frameHeight: 10000)
+                                }.onEnded {
+                                    self.viewModel.finishDrag(state: machine[keyPath: machine.path.states[index].name.keyPath], gesture: $0, frameWidth: 10000, frameHeight: 10000)
+                                }
+                        )
                 }
             }
             .background(
