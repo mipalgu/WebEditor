@@ -19,6 +19,10 @@ final class MachineViewModel2: ObservableObject {
     
     @Published var data: [StateName: StateViewModel2]
     
+    var isMoving: Bool = false
+    
+    var startLocations: [StateName: CGPoint] = [:]
+    
     init(data: [StateName: StateViewModel2] = [:]) {
         self.data = data
     }
@@ -55,6 +59,47 @@ final class MachineViewModel2: ObservableObject {
     
     func finishDrag(state: Machines.State, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         mutate(state) { $0.finishDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight) }
+    }
+    
+    public func moveElements(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if isMoving {
+            data.keys.forEach {
+                let newX = startLocations[$0]!.x + gesture.translation.width
+                let newY = startLocations[$0]!.y + gesture.translation.height
+                data[$0]?.location = CGPoint(
+                    x: newX,
+                    y: newY
+                )
+                if newX > frameWidth || newY > frameHeight || newX < 0.0 || newY < 0.0 {
+                    data[$0]?.isText = true
+                } else {
+                    data[$0]?.isText = false
+                }
+//                data[$0].transitionViewModels.forEach {
+//                    $0.point0 = $0.translate(point: $0.startLocation.0, trans: gesture.translation)
+//                    $0.point1 = $0.translate(point: $0.startLocation.1, trans: gesture.translation)
+//                    $0.point2 = $0.translate(point: $0.startLocation.2, trans: gesture.translation)
+//                    $0.point3 = $0.translate(point: $0.startLocation.3, trans: gesture.translation)
+//                }
+            }
+            return
+        }
+        data.forEach {
+            startLocations[$0.0] = $0.1.location
+        }
+        isMoving = true
+    }
+    
+    public func finishMoveElements(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        moveElements(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+        isMoving = false
+    }
+    
+    public func clampPosition(point: CGPoint, frameWidth: CGFloat, frameHeight: CGFloat) -> CGPoint {
+        CGPoint(
+            x: max(min(point.x, frameWidth), 0.0),
+            y: max(min(point.y, frameHeight), 0.0)
+        )
     }
     
 }
@@ -144,9 +189,11 @@ public struct MachineView: View {
                     if viewModel.viewModel(for: machine.states[index]).isText {
                         Text(machine.states[index].name)
                             .font(config.fontBody)
+                            .coordinateSpace(name: "MAIN_VIEW")
+                            .position(viewModel.clampPosition(point: viewModel.viewModel(for: machine.states[index]).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height))
                             //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
                     } else {
-                        StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded)
+                        StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded, collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions)
                             .coordinateSpace(name: "MAIN_VIEW")
                             .position(viewModel.viewModel(for: machine.states[index]).location)
                             .frame(
@@ -156,9 +203,9 @@ public struct MachineView: View {
                             .gesture(
                                 DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
                                     .onChanged {
-                                        self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: 10000, frameHeight: 10000)
+                                        self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                                     }.onEnded {
-                                        self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: 10000, frameHeight: 10000)
+                                        self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                                     }
                             )
                     }
