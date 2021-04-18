@@ -32,11 +32,11 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeD
 
     let collapsedMinWidth: CGFloat = 150.0
     
-    let collapsedMaxWidth: CGFloat = 750.0
+    let collapsedMaxWidth: CGFloat = 160.0
     
     let collapsedMinHeight: CGFloat = 100.0
     
-    let collapsedMaxHeight: CGFloat = 500.0
+    let collapsedMaxHeight: CGFloat = 125.0
     
     var _expandedWidth: CGFloat
     
@@ -46,11 +46,11 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeD
     
     let expandedMinWidth: CGFloat = 200.0
     
-    let expandedMaxWidth: CGFloat = 1200.0
+    let expandedMaxWidth: CGFloat = 600.0
     
     let expandedMinHeight: CGFloat = 150.0
     
-    var expandedMaxHeight: CGFloat = 600.0
+    var expandedMaxHeight: CGFloat = 300.0
     
     var isStretchingX: Bool = false
     
