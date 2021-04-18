@@ -19,6 +19,10 @@ final class MachineViewModel2: ObservableObject {
     
     @Published var data: [StateName: StateViewModel2]
     
+    var isMoving: Bool = false
+    
+    var startLocations: [StateName: CGPoint] = [:]
+    
     init(data: [StateName: StateViewModel2] = [:]) {
         self.data = data
     }
@@ -55,6 +59,33 @@ final class MachineViewModel2: ObservableObject {
     
     func finishDrag(state: Machines.State, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         mutate(state) { $0.finishDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight) }
+    }
+    
+    public func moveElements(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if isMoving {
+            data.keys.forEach {
+                data[$0]?.location = CGPoint(
+                    x: startLocations[$0]!.x + gesture.translation.width,
+                    y: startLocations[$0]!.y + gesture.translation.height
+                )
+//                data[$0].transitionViewModels.forEach {
+//                    $0.point0 = $0.translate(point: $0.startLocation.0, trans: gesture.translation)
+//                    $0.point1 = $0.translate(point: $0.startLocation.1, trans: gesture.translation)
+//                    $0.point2 = $0.translate(point: $0.startLocation.2, trans: gesture.translation)
+//                    $0.point3 = $0.translate(point: $0.startLocation.3, trans: gesture.translation)
+//                }
+            }
+            return
+        }
+        data.forEach {
+            startLocations[$0.0] = $0.1.location
+        }
+        isMoving = true
+    }
+    
+    public func finishMoveElements(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        moveElements(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+        isMoving = false
     }
     
 }
@@ -171,6 +202,13 @@ public struct MachineView: View {
                     coordinateSpace: "MAIN_VIEW",
                     backgroundColor: config.backgroundColor,
                     foregroundColor: config.stateColour
+                )
+                .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
+                    .onChanged {
+                        self.viewModel.moveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
+                    }.onEnded {
+                        self.viewModel.finishMoveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
+                    }
                 )
             )
         }
