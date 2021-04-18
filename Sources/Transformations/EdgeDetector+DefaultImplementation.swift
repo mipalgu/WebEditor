@@ -257,7 +257,7 @@ public extension EdgeDetector where Self: Collapsable & Rigidable {
     }
     
     func onEdge(point: CGPoint) -> Bool {
-        onHorizontalEdge(point: point) || onVerticalEdge(point: point)
+        onHorizontalEdge(point: point) || onVerticalEdge(point: point) || onCorner(point: point)
     }
     
 }
