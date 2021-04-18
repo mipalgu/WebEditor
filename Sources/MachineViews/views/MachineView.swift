@@ -111,6 +111,13 @@ final class MachineViewModel2: ObservableObject {
         return CGPoint(x: newX, y: newY)
     }
     
+    func assignExpanded(for state: Machines.State, newValue: Bool, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if newValue == viewModel(for: state).expanded {
+            return
+        }
+        mutate(state) { $0.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight) }
+    }
+    
 }
 
 public struct MachineView: View {
@@ -174,7 +181,15 @@ public struct MachineView: View {
                         .position(viewModel.clampPosition(point: viewModel.viewModel(for: machine.states[index]).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height, dx: textWidth / 2.0, dy: textHeight / 2.0))
                     } else {
                         VStack {
-                            StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded, collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions)
+                            StateView(
+                                machine: $machine,
+                                path: machine.path.states[index],
+                                expanded: Binding(
+                                    get: { viewModel.viewModel(for: machine.states[index]).expanded },
+                                    set: { viewModel.assignExpanded(for: machine.states[index], newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
+                                ),
+                                collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions
+                            )
                                 .frame(
                                     width: viewModel.viewModel(for: machine.states[index]).width,
                                     height: viewModel.viewModel(for: machine.states[index]).height
