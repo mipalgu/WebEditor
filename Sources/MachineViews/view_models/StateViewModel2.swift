@@ -78,13 +78,13 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeD
         let newLocation: CGPoint
         if self.expanded {
             newLocation = CGPoint(
-                x: self.location.x - self.expandedWidth / 2.0 + self.collapsedWidth / 2.0,
-                y: self.location.y - self.expandedHeight / 2.0 + self.collapsedHeight / 2.0
+                x: self.location.x,
+                y: self.location.y + (self.expandedHeight - self.collapsedHeight) / 2.0
             )
         } else {
             newLocation = CGPoint(
-                x: self.location.x - self.collapsedWidth / 2.0 + self.expandedWidth / 2.0,
-                y: self.location.y - self.collapsedHeight / 2.0 + self.expandedHeight / 2.0
+                x: self.location.x,
+                y: self.location.y + (self.collapsedHeight - self.expandedHeight) / 2.0
             )
         }
         self.setLocation(width: frameWidth, height: frameHeight, newLocation: newLocation)
