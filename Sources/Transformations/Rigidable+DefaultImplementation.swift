@@ -11,6 +11,14 @@ import TokamakShim
 import SwiftUI
 #endif
 
+public protocol _Rigidable {
+    
+    var _width: CGFloat { get set }
+    
+    var _height: CGFloat { get set }
+    
+}
+
 public extension Rigidable where Self: Positionable {
     
     var bottom: CGPoint {

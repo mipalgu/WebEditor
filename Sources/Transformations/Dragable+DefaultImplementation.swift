@@ -17,6 +17,8 @@ public protocol StretchFromDrag: Dragable, Stretchable {}
 
 public protocol MoveAndStretchFromDrag: MoveFromDrag, StretchFromDrag {}
 
+public protocol NoMoveOnTextRepresentable: MoveAndStretchFromDrag, RigidCollapsableTextRepresentable {}
+
 public extension Dragable where Self: MoveFromDrag {
     
     mutating func moveFromDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
@@ -103,6 +105,29 @@ public extension Dragable where Self: MoveAndStretchFromDrag {
         self.isDragging = false
         self.isStretchingY = false
         self.isStretchingX = false
+    }
+    
+}
+
+public extension NoMoveOnTextRepresentable {
+    
+    mutating func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if isText {
+            return
+        }
+        if isStretchingY || isStretchingX {
+            stretchFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+            return
+        }
+        if isDragging {
+            moveFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+            return
+        }
+        if onEdge(point: gesture.startLocation) {
+            stretchFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+            return
+        }
+        moveFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
     }
     
 }
