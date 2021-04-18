@@ -22,7 +22,10 @@ let package = Package(
     targets: [
         .target(name: "Utilities", dependencies: products + ["Machines", "AttributeViews"]),
         .target(name: "Transformations", dependencies: products),
-        .target(name: "MachineViews", dependencies: products + ["Machines", "AttributeViews", "Utilities", "Transformations"]),
+        .target(
+            name: "MachineViews",
+            dependencies: products + ["Machines", "AttributeViews", "Utilities", "Transformations"]
+        ),
         .target(
             name: "WebEditor",
             dependencies: products + [

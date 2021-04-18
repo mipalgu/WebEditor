@@ -164,16 +164,7 @@ public struct MachineView: View {
                     }
                 }
             }
-            .background(
-                GridView(
-                    width: geometry.size.width,
-                    height: geometry.size.height,
-                    coordinateSpace: "MAIN_VIEW",
-                    backgroundColor: config.backgroundColor,
-                    foregroundColor: config.stateColour
-                )
-            )
-        }
+        }.background(Image("grid", bundle: Bundle.module).resizable(resizingMode: .tile))
     }
 }
 
