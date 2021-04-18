@@ -23,37 +23,37 @@ final class MachineViewModel2: ObservableObject {
         self.data = data
     }
     
-    func viewModel(for state: StateName) -> StateViewModel2 {
-        guard let viewModel = data[state] else {
+    func viewModel(for state: Machines.State) -> StateViewModel2 {
+        guard let viewModel = data[state.name] else {
             let newViewModel = StateViewModel2()
-            data[state] = newViewModel
+            data[state.name] = newViewModel
             return newViewModel
         }
         return viewModel
     }
     
-    private func mutate(_ stateName: StateName, perform: (inout StateViewModel2) -> Void) {
-        var viewModel = self.viewModel(for: stateName)
+    private func mutate(_ state: Machines.State, perform: (inout StateViewModel2) -> Void) {
+        var viewModel = self.viewModel(for: state)
         perform(&viewModel)
-        data[stateName] = viewModel
+        data[state.name] = viewModel
     }
     
-    func binding(to stateName: StateName) -> Binding<StateViewModel2> {
+    func binding(to state: Machines.State) -> Binding<StateViewModel2> {
         return Binding(
             get: {
-                return self.viewModel(for: stateName)
+                return self.viewModel(for: state)
             },
             set: {
-                self.data[stateName] = $0
+                self.data[state.name] = $0
             }
         )
     }
     
-    func handleDrag(state: StateName, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func handleDrag(state: Machines.State, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         mutate(state) { $0.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight) }
     }
     
-    func finishDrag(state: StateName, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func finishDrag(state: Machines.State, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         mutate(state) { $0.finishDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight) }
     }
     
@@ -141,19 +141,25 @@ public struct MachineView: View {
 //                    )
 //                }
                 ForEach(Array(machine.states.indices), id: \.self) { index in
-                    HiddenStateView(machine: $machine, path: machine.path.states[index])
-                        .frame(
-                            width: viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).collapsedWidth,
-                            height: viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).collapsedHeight
-                        )
-                        .gesture(
-                            DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
-                                .onChanged {
-                                    self.viewModel.handleDrag(state: machine[keyPath: machine.path.states[index].name.keyPath], gesture: $0, frameWidth: 10000, frameHeight: 10000)
-                                }.onEnded {
-                                    self.viewModel.finishDrag(state: machine[keyPath: machine.path.states[index].name.keyPath], gesture: $0, frameWidth: 10000, frameHeight: 10000)
-                                }
-                        )
+                    if viewModel.viewModel(for: machine.states[index]).isText {
+                        Text(machine.states[index].name)
+                            .font(config.fontBody)
+                            //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
+                    } else {
+                        StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded)
+                            .frame(
+                                width: viewModel.viewModel(for: machine.states[index]).width,
+                                height: viewModel.viewModel(for: machine.states[index]).height
+                            )
+                            .gesture(
+                                DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
+                                    .onChanged {
+                                        self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: 10000, frameHeight: 10000)
+                                    }.onEnded {
+                                        self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: 10000, frameHeight: 10000)
+                                    }
+                            )
+                    }
                 }
             }
             .background(
