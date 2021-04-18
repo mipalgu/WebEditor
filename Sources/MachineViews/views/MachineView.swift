@@ -64,10 +64,17 @@ final class MachineViewModel2: ObservableObject {
     public func moveElements(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isMoving {
             data.keys.forEach {
+                let newX = startLocations[$0]!.x + gesture.translation.width
+                let newY = startLocations[$0]!.y + gesture.translation.height
                 data[$0]?.location = CGPoint(
-                    x: startLocations[$0]!.x + gesture.translation.width,
-                    y: startLocations[$0]!.y + gesture.translation.height
+                    x: newX,
+                    y: newY
                 )
+                if newX > frameWidth || newY > frameHeight || newX < 0.0 || newY < 0.0 {
+                    data[$0]?.isText = true
+                } else {
+                    data[$0]?.isText = false
+                }
 //                data[$0].transitionViewModels.forEach {
 //                    $0.point0 = $0.translate(point: $0.startLocation.0, trans: gesture.translation)
 //                    $0.point1 = $0.translate(point: $0.startLocation.1, trans: gesture.translation)
@@ -86,6 +93,13 @@ final class MachineViewModel2: ObservableObject {
     public func finishMoveElements(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         moveElements(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         isMoving = false
+    }
+    
+    public func clampPosition(point: CGPoint, frameWidth: CGFloat, frameHeight: CGFloat) -> CGPoint {
+        CGPoint(
+            x: max(min(point.x, frameWidth), 0.0),
+            y: max(min(point.y, frameHeight), 0.0)
+        )
     }
     
 }
@@ -175,6 +189,8 @@ public struct MachineView: View {
                     if viewModel.viewModel(for: machine.states[index]).isText {
                         Text(machine.states[index].name)
                             .font(config.fontBody)
+                            .coordinateSpace(name: "MAIN_VIEW")
+                            .position(viewModel.clampPosition(point: viewModel.viewModel(for: machine.states[index]).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height))
                             //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
                     } else {
                         StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded)
