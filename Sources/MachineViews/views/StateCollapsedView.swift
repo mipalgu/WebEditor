@@ -22,10 +22,11 @@ struct StateCollapsedView<TitleView: View>: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        Group {
+        ZStack {
+            config.stateColour
             VStack {
                 titleView()
-            }.padding(15).background(config.stateColour)
+            }.padding(15)
         }.clipShape(Ellipse())
     }
     
