@@ -126,7 +126,7 @@ public extension Collapsable where Self: _Collapsable {
         set {
             let newWidth = min(max(collapsedMinWidth, newValue), collapsedMaxWidth)
             _collapsedWidth = newWidth
-            _collapsedHeight = collapsedMinHeight / collapsedMinWidth * newWidth
+//            _collapsedHeight = collapsedMinHeight / collapsedMinWidth * newWidth
         }
     }
     
@@ -137,7 +137,7 @@ public extension Collapsable where Self: _Collapsable {
         set {
             let newHeight = min(max(collapsedMinHeight, newValue), collapsedMaxHeight)
             _collapsedHeight = newHeight
-            _collapsedWidth = collapsedMinWidth / collapsedMinHeight * newHeight
+//            _collapsedWidth = collapsedMinWidth / collapsedMinHeight * newHeight
         }
     }
     
