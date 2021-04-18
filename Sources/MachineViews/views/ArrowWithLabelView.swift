@@ -15,19 +15,19 @@ import Utilities
 
 struct ArrowWithLabelView: View {
     
-    var point0: CGPoint
+    @Binding var point0: CGPoint
     
-    var point1: CGPoint
+    @Binding var point1: CGPoint
     
-    var point2: CGPoint
+    @Binding var point2: CGPoint
     
-    var point3: CGPoint
+    @Binding var point3: CGPoint
     
-    var strokeNumber: UInt8
+    @Binding var strokeNumber: UInt8
     
     @Binding var label: String
     
-    var colour: Color
+    var color: Color
     
     @EnvironmentObject public var config: Config
     
@@ -39,14 +39,11 @@ struct ArrowWithLabelView: View {
     
     var body: some View {
         ZStack {
-            ArrowView(point0: point0, point1: point1, point2: point2, point3: point3, strokeNumber: strokeNumber, colour: colour)
-                .coordinateSpace(name: "MAIN_VIEW")
+            ArrowView(point0: $point0, point1: $point1, point2: $point2, point3: $point3, strokeNumber: $strokeNumber, colour: color)
             TextField("", text: $label)
-                .coordinateSpace(name: "MAIN_VIEW")
                 .font(config.fontBody)
                 .fixedSize()
                 .position(center)
         }
-        .coordinateSpace(name: "MAIN_VIEW")
     }
 }
