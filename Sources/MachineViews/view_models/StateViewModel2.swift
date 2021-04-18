@@ -73,7 +73,6 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeD
     }
     
     mutating func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
-        print("Hello")
         self.expanded = !self.expanded
         let newLocation: CGPoint
         if self.expanded {
