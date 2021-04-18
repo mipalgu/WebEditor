@@ -95,11 +95,20 @@ final class MachineViewModel2: ObservableObject {
         isMoving = false
     }
     
-    public func clampPosition(point: CGPoint, frameWidth: CGFloat, frameHeight: CGFloat) -> CGPoint {
-        CGPoint(
-            x: max(min(point.x, frameWidth), 0.0),
-            y: max(min(point.y, frameHeight), 0.0)
-        )
+    public func clampPosition(point: CGPoint, frameWidth: CGFloat, frameHeight: CGFloat, dx: CGFloat = 0.0, dy: CGFloat = 0.0) -> CGPoint {
+        var newX: CGFloat = point.x
+        var newY: CGFloat = point.y
+        if point.x < dx {
+            newX = dx
+        } else if point.x > frameWidth - dx {
+            newX = frameWidth - dx
+        }
+        if point.y < dy {
+            newY = dy
+        } else if point.y > frameHeight - dy {
+            newY = frameHeight - dy
+        }
+        return CGPoint(x: newX, y: newY)
     }
     
 }
@@ -115,6 +124,10 @@ public struct MachineView: View {
     @StateObject var viewModel = MachineViewModel2()
     
     let coordinateSpace = "MAIN_VIEW"
+    
+    let textWidth: CGFloat = 50.0
+    
+    let textHeight: CGFloat = 20.0
     
     public init(machine: Binding<Machine>, creatingTransitions: Binding<Bool>) {
         self._machine = machine
@@ -151,11 +164,14 @@ public struct MachineView: View {
                     )
                 ForEach(Array(machine.states.indices), id: \.self) { index in
                     if viewModel.viewModel(for: machine.states[index]).isText {
-                        Text(machine.states[index].name)
-                            .font(config.fontBody)
-                            .coordinateSpace(name: coordinateSpace)
-                            .position(viewModel.clampPosition(point: viewModel.viewModel(for: machine.states[index]).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height))
+                        VStack {
+                            Text(machine.states[index].name)
+                                .font(config.fontBody)
+                                .frame(width: textWidth, height: textHeight)
                             //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
+                        }
+                        .coordinateSpace(name: coordinateSpace)
+                        .position(viewModel.clampPosition(point: viewModel.viewModel(for: machine.states[index]).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height, dx: textWidth / 2.0, dy: textHeight / 2.0))
                     } else {
                         VStack {
                             StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded, collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions)
