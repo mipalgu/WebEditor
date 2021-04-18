@@ -172,6 +172,8 @@ public struct MachineView: View {
                     }
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)
+            .coordinateSpace(name: "MAIN_VIEW")
+            .position(x: geometry.size.width / 2.0, y: geometry.size.height / 2.0)
         }
     }
 }
