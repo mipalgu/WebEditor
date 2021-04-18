@@ -203,9 +203,9 @@ public struct MachineView: View {
                             .gesture(
                                 DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
                                     .onChanged {
-                                        self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: 10000, frameHeight: 10000)
+                                        self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                                     }.onEnded {
-                                        self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: 10000, frameHeight: 10000)
+                                        self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                                     }
                             )
                     }
