@@ -76,11 +76,14 @@ struct StateTitleView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        Toggle(isOn: $expanded) {
-            LineView<Config>(root: $machine, path: path, label: "State Name")
-                .multilineTextAlignment(.center)
-                .font(config.fontTitle2)
-        }.toggleStyle(ArrowToggleStyle())
+        HStack {
+            Toggle(isOn: $expanded) {
+                LineView<Config>(root: $machine, path: path, label: "State Name")
+                    .multilineTextAlignment(.center)
+                    .font(config.fontBody.bold())
+            }.toggleStyle(ArrowToggleStyle())
+            Spacer()
+        }
     }
     
 }
@@ -88,7 +91,7 @@ struct StateTitleView: View {
 struct ArrowToggleStyle: ToggleStyle {
     
     func makeBody(configuration: Configuration) -> some View {
-        HStack {
+        HStack(spacing: 0) {
             configuration.label
             Button(action: { configuration.isOn.toggle() }) {
                 Image(systemName: configuration.isOn ? "arrowtriangle.down.fill" : "arrowtriangle.right.fill")
