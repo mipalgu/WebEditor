@@ -1,8 +1,8 @@
 /*
- * StateTitleView.swift
- * MachineViews
+ * ArrowToggleStyle.swift
+ * 
  *
- * Created by Callum McColl on 16/4/21.
+ * Created by Callum McColl on 19/4/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,50 +62,28 @@ import TokamakShim
 import SwiftUI
 #endif
 
-import Attributes
-import Machines
-import AttributeViews
-import Utilities
-
-struct StateTitleView: View {
+struct ArrowToggleStyle: ToggleStyle {
     
-    @Binding var machine: Machine
-    let path: Attributes.Path<Machine, String>
-    @Binding var expanded: Bool
-    
-    @EnvironmentObject var config: Config
-    
-    var body: some View {
-        HStack {
-            Toggle(isOn: $expanded) {
-                LineView<Config>(root: $machine, path: path, label: "State Name")
-                    .multilineTextAlignment(.center)
-                    .font(config.fontBody.bold())
-            }.toggleStyle(ArrowToggleStyle())
-            Spacer()
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 0) {
+            configuration.label
+            Button(action: { configuration.isOn.toggle() }) {
+                Image(systemName: configuration.isOn ? "arrowtriangle.down.fill" : "arrowtriangle.right.fill")
+                    .font(.system(size: 8, weight: .regular))
+                    .frame(width: 15, height: 15)
+            }.buttonStyle(PlainButtonStyle()).padding(5)
+            .onHover { hovering in
+                #if canImport(SwiftUI)
+                if hovering {
+                    NSCursor.push(.pointingHand)()
+                } else {
+                    NSCursor.pop()
+                }
+                #else
+                _ = hovering
+                #endif
+            }
         }
     }
     
-}
-
-struct StateTitleView_Previews: PreviewProvider {
-    
-    struct Preview: View {
-        
-        @State var machine: Machine = Machine.initialSwiftMachine()
-        @State var expanded: Bool = false
-        
-        let config = Config()
-        
-        var body: some View {
-            StateTitleView(machine: $machine, path: Machine.path.states[0].name, expanded: $expanded)
-        }
-        
-    }
-    
-    static var previews: some View {
-        VStack {
-            Preview()
-        }
-    }
 }
