@@ -19,22 +19,46 @@ final class MachineViewModel2: ObservableObject {
     
     @Published var data: [StateName: StateViewModel2]
     
+    @Published var transitions: [StateName: [TransitionViewModel2]]
+//    
+//    @Published var transitionOrder: [StateName: [UUID]]
+    
     var isMoving: Bool = false
     
     var startLocations: [StateName: CGPoint] = [:]
     
-    init(data: [StateName: StateViewModel2] = [:]) {
+    init(data: [StateName: StateViewModel2] = [:], transitions: [StateName: [TransitionViewModel2]] = [:]) {
         self.data = data
+        self.transitions = transitions
+        
     }
     
     func viewModel(for state: Machines.State) -> StateViewModel2 {
-        guard let viewModel = data[state.name] else {
+        return viewModel(for: state.name)
+    }
+    
+    func viewModel(for stateName: StateName) -> StateViewModel2 {
+        guard let viewModel = data[stateName] else {
             let newViewModel = StateViewModel2()
-            data[state.name] = newViewModel
+            data[stateName] = newViewModel
             return newViewModel
         }
         return viewModel
     }
+    
+//    func transitionViewModel(for state: Machines.State, index: Int) -> TransitionViewModel2 {
+//        let stateViewModel = viewModel(for: state)
+//        guard let viewModel = transitions[state.name]?[index] else {
+//            let targetStateName = state.transitions[index].target
+//            let targetViewModel = self.viewModel(for: targetStateName)
+//            let sourceEdge = stateViewModel.findEdge(point: targetViewModel.location)
+//            let targetEdge = targetViewModel.findEdge(point: stateViewModel.location)
+//            let newViewModel = TransitionViewModel2(source: sourceEdge, target: targetEdge)
+//            appendToOrder(stateName: state.name, id: newViewModel.id)
+//            return newViewModel
+//        }
+//        return viewModel
+//    }
     
     private func mutate(_ state: Machines.State, perform: (inout StateViewModel2) -> Void) {
         var viewModel = self.viewModel(for: state)
@@ -180,30 +204,32 @@ public struct MachineView: View {
                         .coordinateSpace(name: coordinateSpace)
                         .position(viewModel.clampPosition(point: viewModel.viewModel(for: machine.states[index]).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height, dx: textWidth / 2.0, dy: textHeight / 2.0))
                     } else {
-                        VStack {
-                            StateView(
-                                machine: $machine,
-                                path: machine.path.states[index],
-                                expanded: Binding(
-                                    get: { viewModel.viewModel(for: machine.states[index]).expanded },
-                                    set: { viewModel.assignExpanded(for: machine.states[index], newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
-                                ),
-                                collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions
-                            )
-                                .frame(
-                                    width: viewModel.viewModel(for: machine.states[index]).width,
-                                    height: viewModel.viewModel(for: machine.states[index]).height
+                        ZStack {
+                            VStack {
+                                StateView(
+                                    machine: $machine,
+                                    path: machine.path.states[index],
+                                    expanded: Binding(
+                                        get: { viewModel.viewModel(for: machine.states[index]).expanded },
+                                        set: { viewModel.assignExpanded(for: machine.states[index], newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
+                                    ),
+                                    collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions
                                 )
-                        }.coordinateSpace(name: coordinateSpace)
-                        .position(viewModel.viewModel(for: machine.states[index]).location)
-                        .gesture(
-                            DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
-                                .onChanged {
-                                    self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                                }.onEnded {
-                                    self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                                }
-                        )
+                                    .frame(
+                                        width: viewModel.viewModel(for: machine.states[index]).width,
+                                        height: viewModel.viewModel(for: machine.states[index]).height
+                                    )
+                            }.coordinateSpace(name: coordinateSpace)
+                            .position(viewModel.viewModel(for: machine.states[index]).location)
+                            .gesture(
+                                DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+                                    .onChanged {
+                                        self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
+                                    }.onEnded {
+                                        self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
+                                    }
+                            )
+                        }
                     }
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)

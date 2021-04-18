@@ -15,15 +15,15 @@ import Utilities
 
 struct ArrowView: View {
     
-    var point0: CGPoint
+    @Binding var point0: CGPoint
     
-    var point1: CGPoint
+    @Binding var point1: CGPoint
     
-    var point2: CGPoint
+    @Binding var point2: CGPoint
     
-    var point3: CGPoint
+    @Binding var point3: CGPoint
     
-    var strokeNumber: UInt8
+    @Binding var strokeNumber: UInt8
     
     var colour: Color
     

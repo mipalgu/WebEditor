@@ -18,74 +18,69 @@ import AttributeViews
 
 struct TransitionView: View {
     
-    @ObservedObject var viewModel: TransitionViewModel
+    @Binding var point0: CGPoint
+    
+    @Binding var point1: CGPoint
+    
+    @Binding var point2: CGPoint
+    
+    @Binding var point3: CGPoint
+    
+    @Binding var strokeNumber: UInt8
+    
+    @Binding var label: String
     
     @Binding var focused: Bool
-    
-    var frameWidth: CGFloat
-    
-    var frameHeight: CGFloat
     
     @EnvironmentObject var config: Config
     
     var body: some View {
-//        ZStack {
-//            ArrowWithLabelView(
-//                point0: viewModel.point0,
-//                point1: viewModel.point1,
-//                point2: viewModel.point2,
-//                point3: viewModel.point3,
-//                strokeNumber: viewModel.priority,
-//                label: Binding(get: { viewModel.condition}, set: { viewModel.condition = $0 }),
-//                colour: focused ? config.highlightColour : config.textColor
-//            )
-//            .coordinateSpace(name: "MAIN_VIEW")
-//            .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW")).onChanged {
-//                viewModel.handleDrag(gesture: $0, frameWidth: frameWidth, frameHeight: frameHeight)
-//            }.onEnded {
-//                viewModel.finishDrag(gesture: $0, frameWidth: frameWidth, frameHeight: frameHeight)
-//            })
-//            if focused {
-//                Circle()
-//                    .coordinateSpace(name: "MAIN_VIEW")
-//                    .position(viewModel.point0)
-//                    .frame(width: 20, height: 20)
-//                    .gesture(DragGesture().onChanged {
-//                        viewModel.point0 = $0.location
-//                    }.onEnded {
-//                        viewModel.point0 = $0.location
-//                    })
-//                Circle()
-//                    .coordinateSpace(name: "MAIN_VIEW")
-//                    .position(viewModel.point1)
-//                    .background(Color.red)
-//                    .frame(width: 20, height: 20)
-//                    .gesture(DragGesture().onChanged {
-//                        viewModel.point1 = $0.location
-//                    }.onEnded {
-//                        viewModel.point1 = $0.location
-//                    })
-//                Circle()
-//                    .coordinateSpace(name: "MAIN_VIEW")
-//                    .position(viewModel.point2)
-//                    .background(Color.blue)
-//                    .frame(width: 20, height: 20)
-//                    .gesture(DragGesture().onChanged {
-//                        viewModel.point2 = $0.location
-//                    }.onEnded {
-//                        viewModel.point2 = $0.location
-//                    })
-//                Circle()
-//                    .coordinateSpace(name: "MAIN_VIEW")
-//                    .position(viewModel.point3)
-//                    .frame(width: 20, height: 20)
-//                    .gesture(DragGesture().onChanged {
-//                        viewModel.point3 = $0.location
-//                    }.onEnded {
-//                        viewModel.point3 = $0.location
-//                    })
-//            }
-//        }
-        EmptyView()
+        ZStack {
+            ArrowWithLabelView(
+                point0: $point0,
+                point1: $point1,
+                point2: $point2,
+                point3: $point3,
+                strokeNumber: $strokeNumber,
+                label: $label,
+                color: focused ? config.highlightColour : config.textColor
+            )
+            if focused {
+                Circle()
+                    .position(point0)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        self.point0 = $0.location
+                    }.onEnded {
+                        point0 = $0.location
+                    })
+                Circle()
+                    .position(point1)
+                    .background(Color.red)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point1 = $0.location
+                    }.onEnded {
+                        point1 = $0.location
+                    })
+                Circle()
+                    .position(point2)
+                    .background(Color.blue)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point2 = $0.location
+                    }.onEnded {
+                        point2 = $0.location
+                    })
+                Circle()
+                    .position(point3)
+                    .frame(width: 20, height: 20)
+                    .gesture(DragGesture().onChanged {
+                        point3 = $0.location
+                    }.onEnded {
+                        point3 = $0.location
+                    })
+            }
+        }
     }
 }
