@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-public protocol _Collapsable: class {
+public protocol _Collapsable {
     
     var _collapsedWidth: CGFloat {get set}
     
@@ -71,7 +71,7 @@ public extension Collapsable where Self: _Collapsable {
         }
     }
     
-    func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
+    mutating func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
         self.expanded = !self.expanded
         self.setLocation(width: frameWidth, height: frameHeight, newLocation: self.location)
     }
@@ -91,7 +91,7 @@ public extension Collapsable where Self: _Collapsable {
         )
     }
     
-    func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint) {
+    mutating func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint) {
         let x = newLocation.x
         let y = newLocation.y
         if expanded {

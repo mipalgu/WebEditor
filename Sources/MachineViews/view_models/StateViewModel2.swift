@@ -16,25 +16,21 @@ import Attributes
 import Transformations
 import Utilities
 
-class StateViewModel2: ObservableObject, Identifiable, Equatable, MoveAndStretchFromDrag, _Collapsable, Collapsable {
+struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable {
     
-    @Binding public var machine: Machine
+    var isDragging: Bool = false
     
-    public let path: Attributes.Path<Machine, Machines.State>
+    var _collapsedWidth: CGFloat
     
-    @Published var isDragging: Bool = false
+    var _collapsedHeight: CGFloat
     
-    @Published var _collapsedWidth: CGFloat
+    var expanded: Bool
     
-    @Published var _collapsedHeight: CGFloat
+    var location: CGPoint
     
-    @Published var expanded: Bool
+    var width: CGFloat
     
-    @Published var location: CGPoint
-    
-    @Published var width: CGFloat
-    
-    @Published var height: CGFloat
+    var height: CGFloat
     
     let collapsedMinWidth: CGFloat = 150.0
     
@@ -62,13 +58,7 @@ class StateViewModel2: ObservableObject, Identifiable, Equatable, MoveAndStretch
     
     let verticalEdgeTolerance: CGFloat = 20.0
     
-    static func == (lhs: StateViewModel2, rhs: StateViewModel2) -> Bool {
-        lhs === rhs
-    }
-    
-    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0) {
-        self._machine = machine
-        self.path = path
+    public init(location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0) {
         self.location = location
         self.width = width
         self.height = height

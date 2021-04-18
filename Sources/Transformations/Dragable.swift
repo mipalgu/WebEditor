@@ -11,12 +11,12 @@ import TokamakShim
 import SwiftUI
 #endif
 
-public protocol Dragable: class {
+public protocol Dragable {
     
     var isDragging: Bool {get set}
     
-    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat)
+    mutating func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat)
     
-    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat)
+    mutating func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat)
     
 }

@@ -21,12 +21,12 @@ public extension Stretchable where Self: EdgeDetector {
         (gesture.location.y - location.y) * 2.0
     }
     
-    func stretchCorner(gesture: DragGesture.Value) {
+    mutating func stretchCorner(gesture: DragGesture.Value) {
         stretchVertical(gesture: gesture)
         stretchHorizontal(gesture: gesture)
     }
     
-    func stretchHorizontal(gesture: DragGesture.Value) {
+    mutating func stretchHorizontal(gesture: DragGesture.Value) {
         if gesture.location.x >= self.location.x {
             self.width = stretchWidth(gesture: gesture)
         } else {
@@ -35,7 +35,7 @@ public extension Stretchable where Self: EdgeDetector {
         self.location = CGPoint(x: max(self.location.x, self.width / 2.0), y: self.location.y)
     }
     
-    func stretchVertical(gesture: DragGesture.Value) {
+    mutating func stretchVertical(gesture: DragGesture.Value) {
         if gesture.location.y >= self.location.y {
             self.height = stretchHeight(gesture: gesture)
         } else {
@@ -55,12 +55,12 @@ public extension Stretchable where Self: EdgeDetector & Collapsable {
         (gesture.location.y - location.y) * 2.0
     }
     
-    func stretchCorner(gesture: DragGesture.Value) {
+    mutating func stretchCorner(gesture: DragGesture.Value) {
         stretchVertical(gesture: gesture)
         stretchHorizontal(gesture: gesture)
     }
     
-    func stretchHorizontal(gesture: DragGesture.Value) {
+    mutating func stretchHorizontal(gesture: DragGesture.Value) {
         let newWidth = gesture.location.x >= self.location.x ? stretchWidth(gesture: gesture) : -stretchWidth(gesture: gesture)
         if expanded {
             width = newWidth
@@ -71,7 +71,7 @@ public extension Stretchable where Self: EdgeDetector & Collapsable {
         self.location = CGPoint(x: max(self.location.x, self.collapsedWidth / 2.0), y: self.location.y)
     }
     
-    func stretchVertical(gesture: DragGesture.Value) {
+    mutating func stretchVertical(gesture: DragGesture.Value) {
         let newHeight = gesture.location.y >= self.location.y ? stretchHeight(gesture: gesture) : -stretchHeight(gesture: gesture)
         if expanded {
             self.height = newHeight

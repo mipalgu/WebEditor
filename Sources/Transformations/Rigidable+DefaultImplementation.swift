@@ -38,7 +38,7 @@ public extension Rigidable where Self: Positionable {
         )
     }
     
-    func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint) {
+    mutating func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint) {
         let x = newLocation.x
         let y = newLocation.y
         self.location = CGPoint(

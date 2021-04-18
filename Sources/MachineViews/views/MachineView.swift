@@ -15,6 +15,50 @@ import Machines
 import Attributes
 import Utilities
 
+final class MachineViewModel2: ObservableObject {
+    
+    @Published var data: [StateName: StateViewModel2]
+    
+    init(data: [StateName: StateViewModel2] = [:]) {
+        self.data = data
+    }
+    
+    func viewModel(for state: StateName) -> StateViewModel2 {
+        guard let viewModel = data[state] else {
+            let newViewModel = StateViewModel2()
+            data[state] = newViewModel
+            return newViewModel
+        }
+        return viewModel
+    }
+    
+    private func mutate(_ stateName: StateName, perform: (inout StateViewModel2) -> Void) {
+        var viewModel = viewModel(for: stateName)
+        perform(&viewModel)
+        data[stateName] = viewModel
+    }
+    
+    func binding(to stateName: StateName) -> Binding<StateViewModel2> {
+        return Binding(
+            get: {
+                return self.viewModel(for: stateName)
+            },
+            set: {
+                self.data[stateName] = $0
+            }
+        )
+    }
+    
+    func handleDrag(state: StateName, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        mutate(state) { $0.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight) }
+    }
+    
+    func finishDrag(state: StateName, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        mutate(state) { $0.finishDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight) }
+    }
+    
+}
+
 public struct MachineView: View {
     
     @Binding var machine: Machine
@@ -22,6 +66,8 @@ public struct MachineView: View {
     @Binding var creatingTransitions: Bool
     
     @EnvironmentObject var config: Config
+    
+    @StateObject var viewModel = MachineViewModel2()
     
     public init(machine: Binding<Machine>, creatingTransitions: Binding<Bool>) {
         self._machine = machine
@@ -94,16 +140,23 @@ public struct MachineView: View {
 //                        colour: Color.red
 //                    )
 //                }
-                ForEach(Array(machine.states.indices), id: \.self) {
+                ForEach(Array(machine.states.indices), id: \.self) { index in
                     HiddenStateView(
                         machine: $machine,
-                        path: machine.path.states[$0],
-                        viewModel: StateViewModel2(
-                            machine: $machine,
-                            path: machine.path.states[$0]
-                        ),
+                        path: machine.path.states[index],
                         hidden: .constant(false),
                         highlighted: .constant(false)
+                    ).frame(
+                        width: viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).collapsedWidth,
+                        height: viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).collapsedHeight
+                    )
+                    .gesture(
+                        DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
+                            .onChanged {
+                                self.viewModel.handleDrag(state: machine[keyPath: machine.path.states[index].name.keyPath], gesture: $0, frameWidth: 10000, frameHeight: 10000)
+                            }.onEnded {
+                                self.viewModel.finishDrag(state: machine[keyPath: machine.path.states[index].name.keyPath], gesture: $0, frameWidth: 10000, frameHeight: 10000)
+                            }
                     )
                 }
             }

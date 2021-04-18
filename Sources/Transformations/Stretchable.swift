@@ -17,10 +17,10 @@ public protocol Stretchable: EdgeDetector {
     
     var isStretchingY: Bool { get set }
     
-    func stretchCorner(gesture: DragGesture.Value)
+    mutating func stretchCorner(gesture: DragGesture.Value)
     
-    func stretchHorizontal(gesture: DragGesture.Value)
+    mutating func stretchHorizontal(gesture: DragGesture.Value)
     
-    func stretchVertical(gesture: DragGesture.Value)
+    mutating func stretchVertical(gesture: DragGesture.Value)
     
 }
