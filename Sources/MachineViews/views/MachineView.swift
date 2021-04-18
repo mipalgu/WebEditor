@@ -193,7 +193,7 @@ public struct MachineView: View {
                             .position(viewModel.clampPosition(point: viewModel.viewModel(for: machine.states[index]).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height))
                             //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
                     } else {
-                        StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded)
+                        StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded, collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions)
                             .coordinateSpace(name: "MAIN_VIEW")
                             .position(viewModel.viewModel(for: machine.states[index]).location)
                             .frame(
@@ -219,6 +219,8 @@ public struct MachineView: View {
                     backgroundColor: config.backgroundColor,
                     foregroundColor: config.stateColour
                 )
+//                .coordinateSpace(name: "MAIN_VIEW")
+                .position(x: geometry.size.width / 2.0, y: geometry.size.height / 2.0)
                 .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
                     .onChanged {
                         self.viewModel.moveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)

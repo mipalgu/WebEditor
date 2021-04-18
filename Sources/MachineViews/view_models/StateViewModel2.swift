@@ -60,6 +60,8 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeD
     
     let verticalEdgeTolerance: CGFloat = 20.0
     
+    var collapsedActions: [String: Bool] = [:]
+    
     public init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false) {
         self.location = location
         self._expandedWidth = expandedWidth
