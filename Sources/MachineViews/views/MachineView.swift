@@ -33,7 +33,7 @@ final class MachineViewModel2: ObservableObject {
     }
     
     private func mutate(_ stateName: StateName, perform: (inout StateViewModel2) -> Void) {
-        var viewModel = viewModel(for: stateName)
+        var viewModel = self.viewModel(for: stateName)
         perform(&viewModel)
         data[stateName] = viewModel
     }

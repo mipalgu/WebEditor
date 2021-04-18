@@ -30,6 +30,10 @@ public class MachineViewModel: ObservableObject, DynamicViewModel, Hashable {
         hasher.combine(machine)
     }
 
+    public var width: CGFloat = 1000.0
+    
+    public var height: CGFloat = 1000.0
+    
 
     @Reference public var machine: Machine
 

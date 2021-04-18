@@ -11,15 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-public protocol _BoundedSize: class {
-    
-    var _width: CGFloat { get set }
-    
-    var _height: CGFloat { get set }
-    
-}
-
-public extension BoundedSize where Self: _BoundedSize & Rigidable {
+public extension BoundedSize where Self: _Rigidable & Rigidable {
     
     var width: CGFloat {
         get {

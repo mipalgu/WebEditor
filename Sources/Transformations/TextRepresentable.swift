@@ -11,6 +11,4 @@ public protocol TextRepresentable {
     
     var isText: Bool { get set}
     
-    var label: String { get set }
-    
 }

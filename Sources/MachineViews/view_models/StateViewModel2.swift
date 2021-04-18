@@ -16,7 +16,9 @@ import Attributes
 import Transformations
 import Utilities
 
-struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable {
+struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable {
+    
+    var isText: Bool
     
     var isDragging: Bool = false
     
@@ -27,11 +29,7 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable {
     var expanded: Bool
     
     var location: CGPoint
-    
-    var width: CGFloat
-    
-    var height: CGFloat
-    
+
     let collapsedMinWidth: CGFloat = 150.0
     
     let collapsedMaxWidth: CGFloat = 750.0
@@ -40,15 +38,19 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable {
     
     let collapsedMaxHeight: CGFloat = 500.0
     
+    var _expandedWidth: CGFloat
+    
+    var _expandedHeight: CGFloat
+    
     var offset: CGPoint = CGPoint.zero
     
-    let minWidth: CGFloat = 200.0
+    let expandedMinWidth: CGFloat = 200.0
     
-    let maxWidth: CGFloat = 1200.0
+    let expandedMaxWidth: CGFloat = 1200.0
     
-    let minHeight: CGFloat = 300.0
+    let expandedMinHeight: CGFloat = 300.0
     
-    var maxHeight: CGFloat = 600.0
+    var expandedMaxHeight: CGFloat = 600.0
     
     var isStretchingX: Bool = false
     
@@ -58,13 +60,14 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable {
     
     let verticalEdgeTolerance: CGFloat = 20.0
     
-    public init(location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0) {
+    public init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false) {
         self.location = location
-        self.width = width
-        self.height = height
+        self._expandedWidth = expandedWidth
+        self._expandedHeight = expandedHeight
         self.expanded = expanded
         self._collapsedWidth = collapsedWidth
         self._collapsedHeight = collapsedHeight
+        self.isText = isText
     }
 
 }

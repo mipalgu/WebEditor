@@ -19,6 +19,18 @@ public protocol Collapsable: Moveable, BoundedSize  {
     
     var collapsedHeight: CGFloat {get set}
     
+    var expandedWidth: CGFloat { get set }
+    
+    var expandedHeight: CGFloat { get set }
+    
+    var expandedMinWidth: CGFloat {get}
+    
+    var expandedMaxWidth: CGFloat {get}
+    
+    var expandedMinHeight: CGFloat {get}
+    
+    var expandedMaxHeight: CGFloat {get}
+    
     var collapsedMinWidth: CGFloat {get}
     
     var collapsedMaxWidth: CGFloat {get}

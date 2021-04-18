@@ -17,36 +17,106 @@ public protocol _Collapsable {
     
     var _collapsedHeight: CGFloat {get set}
     
+    var _expandedWidth: CGFloat { get set }
+    
+    var _expandedHeight: CGFloat { get set }
+    
 }
 
 public extension Collapsable where Self: _Collapsable {
     
-    var bottom: CGPoint {
-        if expanded {
-            return CGPoint(x: location.x, y: location.y + height / 2.0)
+    var _width: CGFloat {
+        get {
+            if expanded {
+                return expandedWidth
+            }
+            return collapsedWidth
         }
-        return CGPoint(x: location.x, y: location.y + collapsedHeight / 2.0)
+        set {
+            if expanded {
+                expandedWidth = newValue
+                return
+            }
+            collapsedWidth = newValue
+        }
+    }
+    
+    var _height: CGFloat {
+        get {
+            if expanded {
+                return expandedHeight
+            }
+            return collapsedHeight
+        }
+        set {
+            if expanded {
+                expandedHeight = newValue
+                return
+            }
+            collapsedHeight = newValue
+        }
+    }
+    
+    var expandedWidth: CGFloat {
+        get {
+            max(min(_expandedWidth, expandedMaxWidth), expandedMinWidth)
+        }
+        set {
+            _expandedWidth = max(min(newValue, expandedMaxWidth), expandedMinWidth)
+        }
+    }
+    
+    var expandedHeight: CGFloat {
+        get {
+            max(min(_expandedHeight, expandedMaxHeight), expandedMinHeight)
+        }
+        set {
+            _expandedHeight = max(min(newValue, expandedMaxHeight), expandedMinHeight)
+        }
+    }
+    
+    var minWidth: CGFloat {
+        if expanded {
+            return expandedMinWidth
+        }
+        return collapsedMinWidth
+    }
+    
+    var maxWidth: CGFloat {
+        if expanded {
+            return expandedMaxWidth
+        }
+        return collapsedMaxWidth
+    }
+    
+    var minHeight: CGFloat {
+        if expanded {
+            return expandedMinHeight
+        }
+        return collapsedMinHeight
+    }
+    
+    var maxHeight: CGFloat {
+        if expanded {
+            return expandedMaxHeight
+        }
+        return collapsedMaxHeight
+    }
+    
+    var bottom: CGPoint {
+        CGPoint(x: location.x, y: location.y + height / 2.0)
     }
     
     var top: CGPoint {
-        if expanded {
-            return CGPoint(x: location.x, y: location.y - height / 2.0)
-        }
-        return CGPoint(x: location.x, y: location.y - collapsedHeight / 2.0)
+        CGPoint(x: location.x, y: location.y - height / 2.0)
     }
     
     var right: CGPoint {
-        if expanded {
-            return CGPoint(x: location.x + width / 2.0, y: location.y)
-        }
-        return CGPoint(x: location.x + collapsedWidth / 2.0, y: location.y)
+        CGPoint(x: location.x + width / 2.0, y: location.y)
     }
     
     var left: CGPoint {
-        if expanded {
-            return CGPoint(x: location.x - width / 2.0, y: location.y)
-        }
-        return CGPoint(x: location.x - collapsedWidth / 2.0, y: location.y)
+        CGPoint(x: location.x - width / 2.0, y: location.y)
     }
     
     var collapsedWidth: CGFloat {
@@ -79,31 +149,18 @@ public extension Collapsable where Self: _Collapsable {
     func getLocation(width: CGFloat, height: CGFloat) -> CGPoint {
         let x = self.location.x
         let y = self.location.y
-        if expanded {
-            return CGPoint(
-                x: min(max(self.width / 2.0, x), width - self.width / 2.0),
-                y: min(max(self.height / 2.0, y), height - self.height / 2.0)
-            )
-        }
         return CGPoint(
-            x: min(max(self.collapsedWidth / 2.0, x), width - self.collapsedWidth / 2.0),
-            y: min(max(self.collapsedHeight / 2.0, y), height - self.collapsedHeight / 2.0)
+            x: min(max(self.width / 2.0, x), width - self.width / 2.0),
+            y: min(max(self.height / 2.0, y), height - self.height / 2.0)
         )
     }
     
     mutating func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint) {
         let x = newLocation.x
         let y = newLocation.y
-        if expanded {
-            self.location = CGPoint(
-                x: min(max(self.width / 2.0, x), width - self.width / 2.0),
-                y: min(max(self.height / 2.0, y), height - self.height / 2.0)
-            )
-            return
-        }
         self.location = CGPoint(
-            x: min(max(self.collapsedWidth / 2.0, x), width - self.collapsedWidth / 2.0),
-            y: min(max(self.collapsedHeight / 2.0, y), height - self.collapsedHeight / 2.0)
+            x: min(max(self.width / 2.0, x), width - self.width / 2.0),
+            y: min(max(self.height / 2.0, y), height - self.height / 2.0)
         )
     }
     
