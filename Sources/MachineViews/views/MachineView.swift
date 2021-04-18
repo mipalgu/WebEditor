@@ -1,6 +1,6 @@
 //
 //  MachineView.swift
-//  
+//
 //
 //  Created by Morgan McColl on 16/11/20.
 //
@@ -137,54 +137,15 @@ public struct MachineView: View {
     public var body: some View {
         GeometryReader { (geometry: GeometryProxy) in
             ZStack {
-//                ForEach(machine.path.states, id: \.self) { statePath in
-//                    ForEach(Array(viewModel.states[stateIndex].transitions.indices), id: \.self) { (index: Int) -> AnyView in
-//                        let stateViewModel = viewModel.states[stateIndex]
-//                        let transition = stateViewModel.transitions[index]
-//                        guard let transitionViewModel = index >= stateViewModel.transitionViewModels.count ? nil : stateViewModel.transitionViewModels[index],
-//                            stateViewModel.path.transitions[index] == transitionViewModel.path,
-//                            transition == transitionViewModel.machine[keyPath: transitionViewModel.path.path]
-//                        else {
-//                            let transViewModel = stateViewModel.transitionViewModel(
-//                                transition: stateViewModel.transitions[index],
-//                                index: index,
-//                                target: self.viewModel.getStateViewModel(
-//                                    stateName: viewModel.states[stateIndex].transitions[index].target
-//                                )
-//                            )
-//                            viewModel.states[stateIndex].transitionViewModels.insert(transViewModel, at: index)
-//                            return AnyView(TransitionView(
-//                                viewModel: transViewModel,
-//                                focused: isFocused(stateIndex: stateIndex, transitionIndex: index),
-//                                frameWidth: geometry.size.width,
-//                                frameHeight: geometry.size.height
-//                            )
-//                            .onTapGesture(count: 1) {
-//                                editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: index)
-//                            }.clipped())
-//                        }
-//                        return AnyView(TransitionView(
-//                            viewModel: transitionViewModel,
-//                            focused: isFocused(stateIndex: stateIndex, transitionIndex: index),
-//                            frameWidth: geometry.size.width,
-//                            frameHeight: geometry.size.height
-//                        )
-//                        .onTapGesture(count: 1) {
-//                            editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: index)
-//                        }.clipped())
-//
-//                    }
-//                }
-//                if viewModel.creatingTransition {
-//                    ArrowView(
-//                        point0: viewModel.tempPoint0,
-//                        point1: viewModel.tempPoint1,
-//                        point2: viewModel.tempPoint2,
-//                        point3: viewModel.currentMouseLocation,
-//                        strokeNumber: 0,
-//                        colour: Color.red
-//                    )
-//                }
+                Image("grid", bundle: Bundle.module)
+                    .resizable(resizingMode: .tile)
+                    .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("MAIN_VIEW"))
+                        .onChanged {
+                            self.viewModel.moveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
+                        }.onEnded {
+                            self.viewModel.finishMoveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
+                        }
+                    )
                 ForEach(Array(machine.states.indices), id: \.self) { index in
                     if viewModel.viewModel(for: machine.states[index]).isText {
                         Text(machine.states[index].name)
@@ -210,8 +171,8 @@ public struct MachineView: View {
                             )
                     }
                 }
-            }
-        }.background(Image("grid", bundle: Bundle.module).resizable(resizingMode: .tile))
+            }.frame(width: geometry.size.width, height: geometry.size.height)
+        }
     }
 }
 
