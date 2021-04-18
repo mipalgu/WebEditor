@@ -64,8 +64,8 @@ final class MachineViewModel2: ObservableObject {
     public func moveElements(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isMoving {
             data.keys.forEach {
-                let newX = startLocations[$0]!.x + gesture.translation.width
-                let newY = startLocations[$0]!.y + gesture.translation.height
+                let newX = startLocations[$0]!.x - gesture.translation.width
+                let newY = startLocations[$0]!.y - gesture.translation.height
                 data[$0]?.location = CGPoint(
                     x: newX,
                     y: newY
