@@ -147,6 +147,8 @@ public struct MachineView: View {
                             //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
                     } else {
                         StateView(machine: $machine, path: machine.path.states[index], expanded: viewModel.binding(to: machine.states[index]).expanded)
+                            .coordinateSpace(name: "MAIN_VIEW")
+                            .position(viewModel.viewModel(for: machine.states[index]).location)
                             .frame(
                                 width: viewModel.viewModel(for: machine.states[index]).width,
                                 height: viewModel.viewModel(for: machine.states[index]).height
