@@ -84,3 +84,38 @@ struct TransitionView: View {
         }
     }
 }
+
+struct TransitionView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        @State var point0: CGPoint = CGPoint(x: 100, y: 100)
+        @State var point1: CGPoint = CGPoint(x: 200, y: 200)
+        @State var point2: CGPoint = CGPoint(x: 300, y: 200)
+        @State var point3: CGPoint = CGPoint(x: 300, y: 100)
+        @State var strokeNumber: UInt8 = 2
+        @State var label: String = "true"
+        @State var focused: Bool = false
+        
+        let config = Config()
+        
+        var body: some View {
+            TransitionView(
+                point0: $point0,
+                point1: $point1,
+                point2: $point2,
+                point3: $point3,
+                strokeNumber: $strokeNumber,
+                label: $label,
+                focused: $focused
+            ).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
+        }
+    }
+}
