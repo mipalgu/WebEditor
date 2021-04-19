@@ -47,3 +47,38 @@ struct ArrowWithLabelView: View {
         }
     }
 }
+
+struct ArrowWithLabelView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        @State var point0: CGPoint = CGPoint(x: 50, y: 50)
+        @State var point1: CGPoint = CGPoint(x: 100, y: 100)
+        @State var point2: CGPoint = CGPoint(x: 150, y: 100)
+        @State var point3: CGPoint = CGPoint(x: 150, y: 50)
+        @State var strokeNumber: UInt8 = 2
+        @State var label: String = "true"
+        let color: Color = .black
+        
+        let config = Config()
+        
+        var body: some View {
+            ArrowWithLabelView(
+                point0: $point0,
+                point1: $point1,
+                point2: $point2,
+                point3: $point3,
+                strokeNumber: $strokeNumber,
+                label: $label,
+                color: color
+            ).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
+        }
+    }
+}
