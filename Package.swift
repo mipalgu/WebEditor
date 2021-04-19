@@ -13,6 +13,7 @@ let package = Package(
     name: "WebEditor",
     platforms: [.macOS(.v11)],
     products: [
+        .library(name: "MachineViews", targets: ["MachineViews"]),
         .executable(name: "WebEditor", targets: ["WebEditor"])
     ],
     dependencies: ui + [
