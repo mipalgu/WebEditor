@@ -98,7 +98,7 @@ struct StateTitleView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateTitleView(machine: $machine, path: Machine.path.states[0].name, expanded: $expanded)
+            StateTitleView(machine: $machine, path: Machine.path.states[0].name, expanded: $expanded).environmentObject(config)
         }
         
     }
