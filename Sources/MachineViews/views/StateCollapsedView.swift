@@ -11,8 +11,6 @@ import TokamakShim
 import SwiftUI
 #endif
 
-import Machines
-import Attributes
 import Utilities
 
 struct StateCollapsedView<TitleView: View>: View {
@@ -30,4 +28,32 @@ struct StateCollapsedView<TitleView: View>: View {
         }.clipShape(Ellipse())
     }
     
+}
+
+import Machines
+import AttributeViews
+
+struct StateCollapsedView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        @State var machine: Machine = Machine.initialSwiftMachine()
+        
+        @State var expanded: Bool = false
+        
+        let config = Config()
+        
+        var body: some View {
+            StateCollapsedView {
+                StateTitleView(machine: $machine, path: Machine.path.states[0].name, expanded: $expanded)
+            }.environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
+        }
+    }
 }
