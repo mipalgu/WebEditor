@@ -47,3 +47,45 @@ struct StateView: View {
         }
     }
 }
+
+struct StateView_Previews: PreviewProvider {
+    
+    struct Expanded_Preview: View {
+        
+        @State var machine: Machine = Machine.initialSwiftMachine()
+        
+        @State var expanded: Bool = true
+        
+        @State var collapsedActions: [String: Bool] = [:]
+        
+        let config = Config()
+        
+        var body: some View {
+            StateView(machine: $machine, path: Machine.path.states[0], expanded: $expanded, collapsedActions: $collapsedActions).environmentObject(config)
+        }
+        
+    }
+    
+    struct Collapsed_Preview: View {
+        
+        @State var machine: Machine = Machine.initialSwiftMachine()
+        
+        @State var expanded: Bool = false
+        
+        @State var collapsedActions: [String: Bool] = [:]
+        
+        let config = Config()
+        
+        var body: some View {
+            StateView(machine: $machine, path: Machine.path.states[0], expanded: $expanded, collapsedActions: $collapsedActions).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Collapsed_Preview().frame(width: 200, height: 100)
+            Expanded_Preview().frame(minHeight: 400)
+        }
+    }
+}
