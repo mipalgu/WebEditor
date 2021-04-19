@@ -255,3 +255,25 @@ public struct MachineView: View {
     }
 }
 
+struct MachineView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        @State var machine: Machine = Machine.initialSwiftMachine()
+        
+        @State var creatingTransitions: Bool = false
+        
+        let config = Config()
+        
+        var body: some View {
+            MachineView(machine: $machine, creatingTransitions: $creatingTransitions).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
+        }
+    }
+}
