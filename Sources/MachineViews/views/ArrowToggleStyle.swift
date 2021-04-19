@@ -64,25 +64,47 @@ import SwiftUI
 
 struct ArrowToggleStyle: ToggleStyle {
     
+    enum Side {
+        case left
+        case right
+    }
+    
+    let side: Side
+    
+    init(side: Side = .right) {
+        self.side = side
+    }
+    
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 0) {
-            configuration.label
-            Button(action: { configuration.isOn.toggle() }) {
-                Image(systemName: configuration.isOn ? "arrowtriangle.down.fill" : "arrowtriangle.right.fill")
-                    .font(.system(size: 8, weight: .regular))
-                    .frame(width: 15, height: 15)
-            }.buttonStyle(PlainButtonStyle()).padding(5)
-            .onHover { hovering in
-                #if canImport(SwiftUI)
-                if hovering {
-                    NSCursor.push(.pointingHand)()
-                } else {
-                    NSCursor.pop()
-                }
-                #else
-                _ = hovering
-                #endif
+            switch side {
+            case .left:
+                button(configuration)
+                configuration.label
+            case .right:
+                configuration.label
+                button(configuration)
             }
+            
+        }
+    }
+    
+    private func button(_ configuration: Configuration) -> some View {
+        Button(action: { configuration.isOn.toggle() }) {
+            Image(systemName: configuration.isOn ? "arrowtriangle.down.fill" : "arrowtriangle.right.fill")
+                .font(.system(size: 8, weight: .regular))
+                .frame(width: 15, height: 15)
+        }.buttonStyle(PlainButtonStyle()).padding(5)
+        .onHover { hovering in
+            #if canImport(SwiftUI)
+            if hovering {
+                NSCursor.push(.pointingHand)()
+            } else {
+                NSCursor.pop()
+            }
+            #else
+            _ = hovering
+            #endif
         }
     }
     

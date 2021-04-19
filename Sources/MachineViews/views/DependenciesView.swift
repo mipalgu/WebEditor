@@ -42,29 +42,13 @@ struct DependenciesView: View {
     
     var body: some View {
         VStack {
+            Toggle(isOn: $collapsed, label: {
+                Text(label.capitalized)
+                    .font(config.fontTitle3)
+                    .padding(.horizontal, 10)
+                    .padding(collapseLeft ? .leading : .trailing, buttonWidth / 2.0 + 10.0)
+            }).toggleStyle(ArrowToggleStyle(side: collapseLeft ? .left : .right))
             if !collapsed {
-                HStack {
-                    if !collapseLeft {
-                        Button(action: { collapsed = true }) {
-                            Image(systemName: "arrow.right.to.line.alt")
-                                .font(.system(size: buttonSize, weight: .regular))
-                                .frame(width: buttonWidth, height: buttonHeight)
-                        }.buttonStyle(PlainButtonStyle())
-                    }
-                    Spacer()
-                    Text(label.capitalized)
-                        .font(config.fontTitle3)
-                        .padding(.horizontal, 10)
-                        .padding(collapseLeft ? .leading : .trailing, buttonWidth / 2.0 + 10.0)
-                    Spacer()
-                    if collapseLeft {
-                        Button(action: { collapsed = true }) {
-                            Image(systemName: "arrow.left.to.line.alt")
-                                .font(.system(size: buttonSize, weight: .regular))
-                                .frame(width: buttonWidth, height: buttonHeight)
-                        }.buttonStyle(PlainButtonStyle())
-                    }
-                }
                 ForEach(rootMachineModels, id: \.self.value) {ref in
                     VStack(alignment: .leading) {
                         HStack {
