@@ -46,6 +46,24 @@ final class MachineViewModel2: ObservableObject {
         return viewModel
     }
     
+    func viewModel(for transition: Int, originatingFrom state: Machines.State) -> TransitionViewModel2 {
+        return viewModel(for: transition, originatingFrom: state.name)
+    }
+    
+    func viewModel(for transition: Int, originatingFrom stateName: StateName) -> TransitionViewModel2 {
+        guard let viewModels = transitions[stateName] else {
+            let newViewModel = TransitionViewModel2(source: .zero, target: .zero)
+            transitions[stateName] = Array(repeating: newViewModel, count: transition + 1)
+            return newViewModel
+        }
+        if viewModels.count <= transition {
+            let newViewModel = TransitionViewModel2(source: .zero, target: .zero)
+            transitions[stateName]?.append(contentsOf: Array(repeating: newViewModel, count: viewModels.count - transition - 1))
+            return newViewModel
+        }
+        return viewModels[transition]
+    }
+    
 //    func transitionViewModel(for state: Machines.State, index: Int) -> TransitionViewModel2 {
 //        let stateViewModel = viewModel(for: state)
 //        guard let viewModel = transitions[state.name]?[index] else {
