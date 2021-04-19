@@ -48,7 +48,7 @@ struct TransitionView: View {
             if focused {
                 Circle()
                     .position(point0)
-                    .frame(width: 20, height: 20)
+                    .frame(width: 10, height: 10)
                     .gesture(DragGesture().onChanged {
                         self.point0 = $0.location
                     }.onEnded {
@@ -57,7 +57,7 @@ struct TransitionView: View {
                 Circle()
                     .position(point1)
                     .background(Color.red)
-                    .frame(width: 20, height: 20)
+                    .frame(width: 10, height: 10)
                     .gesture(DragGesture().onChanged {
                         point1 = $0.location
                     }.onEnded {
@@ -66,7 +66,7 @@ struct TransitionView: View {
                 Circle()
                     .position(point2)
                     .background(Color.blue)
-                    .frame(width: 20, height: 20)
+                    .frame(width: 10, height: 10)
                     .gesture(DragGesture().onChanged {
                         point2 = $0.location
                     }.onEnded {
@@ -74,7 +74,7 @@ struct TransitionView: View {
                     })
                 Circle()
                     .position(point3)
-                    .frame(width: 20, height: 20)
+                    .frame(width: 10, height: 10)
                     .gesture(DragGesture().onChanged {
                         point3 = $0.location
                     }.onEnded {
@@ -87,12 +87,38 @@ struct TransitionView: View {
 
 struct TransitionView_Previews: PreviewProvider {
     
-    struct Preview: View {
+    struct Focused_Preview: View {
         
-        @State var point0: CGPoint = CGPoint(x: 100, y: 100)
-        @State var point1: CGPoint = CGPoint(x: 200, y: 200)
-        @State var point2: CGPoint = CGPoint(x: 300, y: 200)
-        @State var point3: CGPoint = CGPoint(x: 300, y: 100)
+        @State var point0: CGPoint = CGPoint(x: 50, y: 50)
+        @State var point1: CGPoint = CGPoint(x: 100, y: 100)
+        @State var point2: CGPoint = CGPoint(x: 150, y: 100)
+        @State var point3: CGPoint = CGPoint(x: 150, y: 50)
+        @State var strokeNumber: UInt8 = 2
+        @State var label: String = "true"
+        @State var focused: Bool = true
+        
+        let config = Config()
+        
+        var body: some View {
+            TransitionView(
+                point0: $point0,
+                point1: $point1,
+                point2: $point2,
+                point3: $point3,
+                strokeNumber: $strokeNumber,
+                label: $label,
+                focused: $focused
+            ).environmentObject(config)
+        }
+        
+    }
+    
+    struct Unfocused_Preview: View {
+        
+        @State var point0: CGPoint = CGPoint(x: 50, y: 50)
+        @State var point1: CGPoint = CGPoint(x: 100, y: 100)
+        @State var point2: CGPoint = CGPoint(x: 150, y: 100)
+        @State var point3: CGPoint = CGPoint(x: 150, y: 50)
         @State var strokeNumber: UInt8 = 2
         @State var label: String = "true"
         @State var focused: Bool = false
@@ -115,7 +141,8 @@ struct TransitionView_Previews: PreviewProvider {
     
     static var previews: some View {
         VStack {
-            Preview()
+            Focused_Preview()
+            Unfocused_Preview()
         }
     }
 }
