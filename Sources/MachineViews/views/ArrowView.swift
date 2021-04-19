@@ -93,3 +93,36 @@ struct ArrowView: View {
         }
     }
 }
+
+struct ArrowView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        @State var point0: CGPoint = CGPoint(x: 50, y: 50)
+        @State var point1: CGPoint = CGPoint(x: 100, y: 100)
+        @State var point2: CGPoint = CGPoint(x: 150, y: 100)
+        @State var point3: CGPoint = CGPoint(x: 150, y: 50)
+        @State var strokeNumber: UInt8 = 2
+        let color: Color = .black
+        
+        let config = Config()
+        
+        var body: some View {
+            ArrowView(
+                point0: $point0,
+                point1: $point1,
+                point2: $point2,
+                point3: $point3,
+                strokeNumber: $strokeNumber,
+                colour: color
+            ).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
+        }
+    }
+}
