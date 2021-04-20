@@ -46,37 +46,25 @@ struct TransitionView: View {
                 color: focused ? config.highlightColour : config.textColor
             )
             if focused {
-                VStack {
-                    Circle().frame(width: 10, height: 10)
-                }.position(point0)
+                AnchorPoint().position(point0)
                     .gesture(DragGesture().onChanged {
                         self.point0 = $0.location
                     }.onEnded {
                         point0 = $0.location
                     })
-                VStack {
-                    Circle()
-                        .foregroundColor(Color.red)
-                        .frame(width: 10, height: 10)
-                }.position(point1)
+                AnchorPoint(color: .red).position(point1)
                     .gesture(DragGesture().onChanged {
                         point1 = $0.location
                     }.onEnded {
                         point1 = $0.location
                     })
-                VStack {
-                    Circle()
-                        .foregroundColor(Color.blue)
-                        .frame(width: 10, height: 10)
-                }.position(point2)
+                AnchorPoint(color: .blue).position(point2)
                     .gesture(DragGesture().onChanged {
                         point2 = $0.location
                     }.onEnded {
                         point2 = $0.location
                     })
-                VStack {
-                    Circle().frame(width: 10, height: 10)
-                }.position(point3)
+                AnchorPoint().position(point3)
                     .gesture(DragGesture().onChanged {
                         point3 = $0.location
                     }.onEnded {
