@@ -43,6 +43,7 @@ struct TransitionView: View {
                 point3: $point3,
                 strokeNumber: $strokeNumber,
                 label: $label,
+                editing: $focused,
                 color: focused ? config.highlightColour : config.textColor
             )
             if focused {

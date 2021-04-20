@@ -27,6 +27,8 @@ struct ArrowWithLabelView: View {
     
     @Binding var label: String
     
+    @Binding var editing: Bool
+    
     var color: Color
     
     @EnvironmentObject public var config: Config
@@ -40,17 +42,24 @@ struct ArrowWithLabelView: View {
     var body: some View {
         ZStack {
             ArrowView(point0: $point0, point1: $point1, point2: $point2, point3: $point3, strokeNumber: $strokeNumber, colour: color)
-            TextField("", text: $label)
-                .font(config.fontBody)
-                .fixedSize()
-                .position(center)
+            if editing {
+                TextField("", text: $label)
+                    .font(config.fontBody)
+                    .fixedSize()
+                    .position(center)
+            } else {
+                Text(label)
+                    .font(config.fontBody.italic())
+                    .fixedSize()
+                    .position(center)
+            }
         }
     }
 }
 
 struct ArrowWithLabelView_Previews: PreviewProvider {
     
-    struct Preview: View {
+    struct Editing_Preview: View {
         
         @State var point0: CGPoint = CGPoint(x: 50, y: 50)
         @State var point1: CGPoint = CGPoint(x: 100, y: 100)
@@ -58,6 +67,7 @@ struct ArrowWithLabelView_Previews: PreviewProvider {
         @State var point3: CGPoint = CGPoint(x: 150, y: 50)
         @State var strokeNumber: UInt8 = 2
         @State var label: String = "true"
+        @State var editing: Bool = true
         let color: Color = .black
         
         let config = Config()
@@ -70,6 +80,35 @@ struct ArrowWithLabelView_Previews: PreviewProvider {
                 point3: $point3,
                 strokeNumber: $strokeNumber,
                 label: $label,
+                editing: $editing,
+                color: color
+            ).environmentObject(config)
+        }
+        
+    }
+    
+    struct NotEditing_Preview: View {
+        
+        @State var point0: CGPoint = CGPoint(x: 50, y: 50)
+        @State var point1: CGPoint = CGPoint(x: 100, y: 100)
+        @State var point2: CGPoint = CGPoint(x: 150, y: 100)
+        @State var point3: CGPoint = CGPoint(x: 150, y: 50)
+        @State var strokeNumber: UInt8 = 2
+        @State var label: String = "true"
+        @State var editing: Bool = false
+        let color: Color = .black
+        
+        let config = Config()
+        
+        var body: some View {
+            ArrowWithLabelView(
+                point0: $point0,
+                point1: $point1,
+                point2: $point2,
+                point3: $point3,
+                strokeNumber: $strokeNumber,
+                label: $label,
+                editing: $editing,
                 color: color
             ).environmentObject(config)
         }
@@ -78,7 +117,8 @@ struct ArrowWithLabelView_Previews: PreviewProvider {
     
     static var previews: some View {
         VStack {
-            Preview()
+            Editing_Preview()
+            NotEditing_Preview()
         }
     }
 }
