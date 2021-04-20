@@ -68,7 +68,7 @@ struct AnchorPoint: View {
     let height: CGFloat
     let color: Color
     
-    init(width: CGFloat = 10, height: CGFloat = 10, color: Color = .black) {
+    init(width: CGFloat = 10, height: CGFloat = 10, color: Color = .black.opacity(0.01)) {
         self.width = width
         self.height = height
         self.color = color
@@ -76,8 +76,28 @@ struct AnchorPoint: View {
     
     var body: some View {
         VStack {
-            Circle().frame(width: width, height: height).foregroundColor(color)
+            Circle()
+                .strokeBorder()
+                .background(Circle().foregroundColor(color).opacity(0.8))
+                .frame(width: width, height: height)
         }
     }
     
+}
+
+struct AnchorPoint_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        var body: some View {
+            AnchorPoint(width: 100, height: 100, color: .red)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
+        }
+    }
 }
