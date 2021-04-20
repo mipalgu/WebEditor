@@ -25,7 +25,7 @@ struct StateCollapsedView<TitleView: View>: View {
             VStack {
                 titleView()
             }.padding(15)
-        }.clipShape(Ellipse())
+        }.background(Ellipse().stroke()).clipShape(Ellipse())
     }
     
 }
