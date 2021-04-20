@@ -46,35 +46,37 @@ struct TransitionView: View {
                 color: focused ? config.highlightColour : config.textColor
             )
             if focused {
-                Circle()
-                    .position(point0)
-                    .frame(width: 10, height: 10)
+                VStack {
+                    Circle().frame(width: 10, height: 10)
+                }.position(point0)
                     .gesture(DragGesture().onChanged {
                         self.point0 = $0.location
                     }.onEnded {
                         point0 = $0.location
                     })
-                Circle()
-                    .position(point1)
-                    .background(Color.red)
-                    .frame(width: 10, height: 10)
+                VStack {
+                    Circle()
+                        .foregroundColor(Color.red)
+                        .frame(width: 10, height: 10)
+                }.position(point1)
                     .gesture(DragGesture().onChanged {
                         point1 = $0.location
                     }.onEnded {
                         point1 = $0.location
                     })
-                Circle()
-                    .position(point2)
-                    .background(Color.blue)
-                    .frame(width: 10, height: 10)
+                VStack {
+                    Circle()
+                        .foregroundColor(Color.blue)
+                        .frame(width: 10, height: 10)
+                }.position(point2)
                     .gesture(DragGesture().onChanged {
                         point2 = $0.location
                     }.onEnded {
                         point2 = $0.location
                     })
-                Circle()
-                    .position(point3)
-                    .frame(width: 10, height: 10)
+                VStack {
+                    Circle().frame(width: 10, height: 10)
+                }.position(point3)
                     .gesture(DragGesture().onChanged {
                         point3 = $0.location
                     }.onEnded {
