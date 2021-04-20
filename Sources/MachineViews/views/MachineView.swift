@@ -201,8 +201,7 @@ public struct MachineView: View {
     public var body: some View {
         GeometryReader { (geometry: GeometryProxy) in
             ZStack {
-                Image("grid", bundle: Bundle.module)
-                    .resizable(resizingMode: .tile)
+                GridView()
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
                         .onChanged {
