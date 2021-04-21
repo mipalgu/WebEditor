@@ -337,9 +337,7 @@ public struct MachineView: View {
                     ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                 }
                 ForEach(Array(machine.states.indices), id: \.self) { index in
-                    if !self.viewModel.viewModel(for: machine.states[index].name).isText {
                         ForEach(Array(machine.states[index].transitions.indices), id: \.self) { t in
-                            if !self.viewModel.viewModel(for: machine.states[index].transitions[t].target).isText {
                                 TransitionView(
                                     machine: $machine,
                                     path: machine.path.states[index].transitions[t],
@@ -347,8 +345,7 @@ public struct MachineView: View {
                                     strokeNumber: UInt8(t),
                                     focused: .constant(false)
                                 )
-                            }
-                        }
+                                .clipped()
                     }
                 }
                 ForEach(Array(machine.states.indices), id: \.self) { index in
@@ -409,6 +406,7 @@ public struct MachineView: View {
                     }
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)
+            .clipped()
         }
     }
 }
