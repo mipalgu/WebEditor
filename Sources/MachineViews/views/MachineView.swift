@@ -309,10 +309,12 @@ final class MachineViewModel2: ObservableObject {
         movingSourceTransitions.indices.forEach {
             let x = movingSourceTransitions[$0].x
             let y = movingSourceTransitions[$0].y
+            let relativeX = x - model.location.x
+            let relativeY = y - model.location.y
             let dx = (model.width - originalDimensions.0) / 2.0
             let dy = (model.height - originalDimensions.1) / 2.0
-            let newX = x > 0 ? x - dx : x + dx
-            let newY = y > 0 ? y - dy : y + dy
+            let newX = relativeX < 0 ? x - dx : x + dx
+            let newY = relativeY < 0 ? y - dy : y + dy
             let point = CGPoint(x: newX, y: newY)
             transitions[movingState]![$0].curve.point0 = point
         }
@@ -320,10 +322,12 @@ final class MachineViewModel2: ObservableObject {
             movingTargetTransitions[name]!.keys.forEach { index in
                 let x = movingTargetTransitions[name]![index]!.x
                 let y = movingTargetTransitions[name]![index]!.y
+                let relativeX = x - model.location.x
+                let relativeY = y - model.location.y
                 let dx = (model.width - originalDimensions.0) / 2.0
                 let dy = (model.height - originalDimensions.1) / 2.0
-                let newX = x > 0 ? x - dx : x + dx
-                let newY = y > 0 ? y - dy : y + dy
+                let newX = relativeX < 0 ? x - dx : x + dx
+                let newY = relativeY < 0 ? y - dy : y + dy
                 let point = CGPoint(x: newX, y: newY)
                 transitions[name]![index].curve.point3 = point
             }
@@ -331,10 +335,6 @@ final class MachineViewModel2: ObservableObject {
     }
     
     func finishMovingTransitions() {
-        isStateMoving = false
-    }
-    
-    func finishStretchingTransitions() {
         isStateMoving = false
     }
     
