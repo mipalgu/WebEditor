@@ -108,20 +108,6 @@ final class MachineViewModel2: ObservableObject {
         return transitionViewModel
     }
     
-//    func transitionViewModel(for state: Machines.State, index: Int) -> TransitionViewModel2 {
-//        let stateViewModel = viewModel(for: state)
-//        guard let viewModel = transitions[state.name]?[index] else {
-//            let targetStateName = state.transitions[index].target
-//            let targetViewModel = self.viewModel(for: targetStateName)
-//            let sourceEdge = stateViewModel.findEdge(point: targetViewModel.location)
-//            let targetEdge = targetViewModel.findEdge(point: stateViewModel.location)
-//            let newViewModel = TransitionViewModel2(source: sourceEdge, target: targetEdge)
-//            appendToOrder(stateName: state.name, id: newViewModel.id)
-//            return newViewModel
-//        }
-//        return viewModel
-//    }
-    
     private func mutate(_ state: Machines.State, perform: (inout StateViewModel2) -> Void) {
         var viewModel = self.viewModel(for: state)
         perform(&viewModel)

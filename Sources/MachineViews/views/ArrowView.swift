@@ -15,39 +15,33 @@ import Utilities
 
 struct ArrowView: View {
     
-    @Binding var point0: CGPoint
-    
-    @Binding var point1: CGPoint
-    
-    @Binding var point2: CGPoint
-    
-    @Binding var point3: CGPoint
+    @Binding var curve: Curve
     
     let strokeNumber: UInt8
     
     var colour: Color
     
     var arrowPoint0: CGPoint {
-        let theta = atan2(Double(point3.y - point2.y), Double(point3.x - point2.x)) +  Double.pi - Double.pi / 6.0
-        let y = point3.y + CGFloat(10.0 * sin(theta))
-        let x = point3.x + CGFloat(10.0 * cos(theta))
+        let theta = atan2(Double(curve.point3.y - curve.point2.y), Double(curve.point3.x - curve.point2.x)) +  Double.pi - Double.pi / 6.0
+        let y = curve.point3.y + CGFloat(10.0 * sin(theta))
+        let x = curve.point3.x + CGFloat(10.0 * cos(theta))
         return CGPoint(x: x, y: y)
     }
     
     var arrowPoint1: CGPoint {
-        let theta = atan2(Double(point3.y - point2.y), Double(point3.x - point2.x)) + Double.pi + Double.pi / 6.0
-        let y = point3.y + CGFloat(10.0 * sin(theta))
-        let x = point3.x + CGFloat(10.0 * cos(theta))
+        let theta = atan2(Double(curve.point3.y - curve.point2.y), Double(curve.point3.x - curve.point2.x)) + Double.pi + Double.pi / 6.0
+        let y = curve.point3.y + CGFloat(10.0 * sin(theta))
+        let x = curve.point3.x + CGFloat(10.0 * cos(theta))
         return CGPoint(x: x, y: y)
     }
     
     var strokeTheta: Double {
-        atan2(Double(point1.y - point0.y), Double(point1.x - point0.x))
+        atan2(Double(curve.point1.y - curve.point0.y), Double(curve.point1.x - curve.point0.x))
     }
     
     func getStrokeCenter(number: UInt8) -> CGPoint {
         let offset = 3.0 + 3.0 * Double(number)
-        return CGPoint(x: point0.x + CGFloat(offset * cos(strokeTheta)), y: point0.y + CGFloat(offset * sin(strokeTheta)))
+        return CGPoint(x: curve.point0.x + CGFloat(offset * cos(strokeTheta)), y: curve.point0.y + CGFloat(offset * sin(strokeTheta)))
     }
     
     func strokePoint0(number: UInt8) -> CGPoint {
@@ -69,11 +63,11 @@ struct ArrowView: View {
     var body: some View {
         ZStack {
             Path { path in
-                path.move(to: point0)
-                path.addCurve(to: point3, control1: point1, control2: point2)
-                path.move(to: point3)
+                path.move(to: curve.point0)
+                path.addCurve(to: curve.point3, control1: curve.point1, control2: curve.point2)
+                path.move(to: curve.point3)
                 path.addLine(to: arrowPoint0)
-                path.move(to: point3)
+                path.move(to: curve.point3)
                 path.addLine(to: arrowPoint1)
             }
             .stroke(colour, lineWidth: 2)
@@ -98,21 +92,21 @@ struct ArrowView_Previews: PreviewProvider {
     
     struct Preview: View {
         
-        @State var point0: CGPoint = CGPoint(x: 50, y: 50)
-        @State var point1: CGPoint = CGPoint(x: 100, y: 100)
-        @State var point2: CGPoint = CGPoint(x: 150, y: 100)
-        @State var point3: CGPoint = CGPoint(x: 150, y: 50)
-        @State var strokeNumber: UInt8 = 2
+        @State var curve = Curve(
+            point0: CGPoint(x: 50, y: 50),
+            point1: CGPoint(x: 100, y: 100),
+            point2: CGPoint(x: 150, y: 100),
+            point3: CGPoint(x: 150, y: 50)
+        )
+        
+        let strokeNumber: UInt8 = 2
         let color: Color = .black
         
         let config = Config()
         
         var body: some View {
             ArrowView(
-                point0: $point0,
-                point1: $point1,
-                point2: $point2,
-                point3: $point3,
+                curve: $curve,
                 strokeNumber: strokeNumber,
                 colour: color
             ).environmentObject(config)

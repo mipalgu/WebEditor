@@ -22,13 +22,7 @@ struct TransitionView: View {
     
     let path: Attributes.Path<Machine, Transition>
     
-    @Binding var point0: CGPoint
-    
-    @Binding var point1: CGPoint
-    
-    @Binding var point2: CGPoint
-    
-    @Binding var point3: CGPoint
+    @Binding var curve: Curve
     
     let strokeNumber: UInt8
     
@@ -39,10 +33,7 @@ struct TransitionView: View {
     var body: some View {
         ZStack {
             ArrowWithLabelView(
-                point0: $point0,
-                point1: $point1,
-                point2: $point2,
-                point3: $point3,
+                curve: $curve,
                 strokeNumber: strokeNumber,
                 editing: $focused,
                 color: focused ? config.highlightColour : config.textColor,
@@ -61,32 +52,32 @@ struct TransitionView: View {
             )
             if focused {
                 AnchorPoint()
-                    .position(point0)
+                    .position(curve.point0)
                     .gesture(DragGesture().onChanged {
-                        self.point0 = $0.location
+                        self.curve.point0 = $0.location
                     }.onEnded {
-                        point0 = $0.location
+                        curve.point0 = $0.location
                     })
                 AnchorPoint(color: .red)
-                    .position(point1)
+                    .position(curve.point1)
                     .gesture(DragGesture().onChanged {
-                        point1 = $0.location
+                        curve.point1 = $0.location
                     }.onEnded {
-                        point1 = $0.location
+                        curve.point1 = $0.location
                     })
                 AnchorPoint(color: .blue)
-                    .position(point2)
+                    .position(curve.point2)
                     .gesture(DragGesture().onChanged {
-                        point2 = $0.location
+                        curve.point2 = $0.location
                     }.onEnded {
-                        point2 = $0.location
+                        curve.point2 = $0.location
                     })
                 AnchorPoint()
-                    .position(point3)
+                    .position(curve.point3)
                     .gesture(DragGesture().onChanged {
-                        point3 = $0.location
+                        curve.point3 = $0.location
                     }.onEnded {
-                        point3 = $0.location
+                        curve.point3 = $0.location
                     })
             }
         }
