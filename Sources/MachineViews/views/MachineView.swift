@@ -199,8 +199,32 @@ final class MachineViewModel2: ObservableObject {
         mutate(state) { $0.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight) }
     }
     
-    func createNewTransition(sourceState: StateViewModel2, source: CGPoint, target: CGPoint) {
-        
+    private func isWithinBounds(testPoint: CGPoint, center: CGPoint, width: CGFloat, height: CGFloat) -> Bool {
+        testPoint.x >= center.x - width / 2.0 && testPoint.x <= center.x + width / 2.0
+            && testPoint.y <= center.y + height / 2.0
+            && testPoint.y >= center.y - height / 2.0
+    }
+    
+    private func findStateFromPoint(point: CGPoint) -> (StateName, StateViewModel2)? {
+        for d in data {
+            if d.1.isWithin(point: point) {
+                return d
+            }
+        }
+        return nil
+    }
+    
+    func createNewTransition(sourceState: StateName, source: CGPoint, target: CGPoint) -> StateName? {
+        guard let (targetName, targetState) = findStateFromPoint(point: target) else {
+            return nil
+        }
+        let source = viewModel(for: sourceState)
+        guard let _ = transitions[sourceState] else {
+            transitions[sourceState] = [TransitionViewModel2(source: source, target: targetState)]
+            return targetName
+        }
+        transitions[sourceState]!.append(TransitionViewModel2(source: source, target: targetState))
+        return targetName
     }
     
     
@@ -290,8 +314,11 @@ public struct MachineView: View {
                                     }
                                     .modifiers(.control)
                                     .onEnded {
-                                        self.viewModel.createNewTransition(sourceState: viewModel.viewModel(for: machine.states[index]), source: $0.startLocation, target: $0.location)
                                         self.creatingCurve = nil
+                                        guard let targetName = self.viewModel.createNewTransition(sourceState: machine.states[index].name, source: $0.startLocation, target: $0.location) else {
+                                            return
+                                        }
+                                        try? machine.newTransition(source: machine.states[index].name, target: targetName)
                                     }
                             )
                             .gesture(
