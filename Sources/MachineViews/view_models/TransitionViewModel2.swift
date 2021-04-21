@@ -76,4 +76,10 @@ struct TransitionViewModel2: Identifiable   {
         self.init(source: sourceEdge, target: targetEdge)
     }
     
+    init(source: StateViewModel2, sourcePoint: CGPoint, target: StateViewModel2, targetPoint: CGPoint) {
+        let sourceEdge = source.findEdge(point: sourcePoint)
+        let targetEdge = target.findEdge(point: targetPoint)
+        self.init(source: sourceEdge, target: targetEdge)
+    }
+    
 }

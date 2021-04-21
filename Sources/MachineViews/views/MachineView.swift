@@ -218,12 +218,12 @@ final class MachineViewModel2: ObservableObject {
         guard let (targetName, targetState) = findStateFromPoint(point: target) else {
             return nil
         }
-        let source = viewModel(for: sourceState)
+        let sourceModel = viewModel(for: sourceState)
         guard let _ = transitions[sourceState] else {
-            transitions[sourceState] = [TransitionViewModel2(source: source, target: targetState)]
+            transitions[sourceState] = [TransitionViewModel2(source: sourceModel, sourcePoint: source, target: targetState, targetPoint: target)]
             return targetName
         }
-        transitions[sourceState]!.append(TransitionViewModel2(source: source, target: targetState))
+        transitions[sourceState]!.append(TransitionViewModel2(source: sourceModel, sourcePoint: source, target: targetState, targetPoint: target))
         return targetName
     }
     
