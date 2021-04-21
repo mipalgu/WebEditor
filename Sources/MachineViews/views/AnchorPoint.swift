@@ -68,7 +68,7 @@ struct AnchorPoint: View {
     let height: CGFloat
     let color: Color
     
-    init(width: CGFloat = 10, height: CGFloat = 10, color: Color = .black.opacity(0.01)) {
+    init(width: CGFloat = 10, height: CGFloat = 10, color: Color = Color.black.opacity(0.01)) {
         self.width = width
         self.height = height
         self.color = color
