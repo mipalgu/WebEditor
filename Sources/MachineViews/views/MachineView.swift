@@ -283,7 +283,7 @@ public struct MachineView: View {
                                 DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
                                     .modifiers(.control)
                                     .onChanged {
-                                        self.creatingCurve = Curve(point0: $0.startLocation, point1: .zero, point2: .zero, point3: $0.location)
+                                        self.creatingCurve = Curve(source: $0.startLocation, target: $0.location)
                                     }
                                     .modifiers(.control)
                                     .onEnded {
@@ -304,7 +304,7 @@ public struct MachineView: View {
                     }
                 }
                 if let curve = creatingCurve {
-                    ArrowView(curve: .constant(curve), strokeNumber: 0, colour: .blue)
+                    ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)
         }
