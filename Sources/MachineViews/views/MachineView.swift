@@ -211,9 +211,7 @@ public struct MachineView: View {
     
     @Binding var machine: Machine
     
-    @Binding var creatingTransitions: Bool
-    
-    @State var transitionStartLocation: CGPoint = .zero
+    @State var creatingCurve: Curve? = nil
     
     @EnvironmentObject var config: Config
     
@@ -225,9 +223,8 @@ public struct MachineView: View {
     
     let textHeight: CGFloat = 20.0
     
-    public init(machine: Binding<Machine>, creatingTransitions: Binding<Bool>) {
+    public init(machine: Binding<Machine>) {
         self._machine = machine
-        self._creatingTransitions = creatingTransitions
         self._viewModel = StateObject(wrappedValue: MachineViewModel2(states: machine.states.wrappedValue))
     }
     
@@ -284,22 +281,30 @@ public struct MachineView: View {
                             .position(viewModel.viewModel(for: machine.states[index]).location)
                             .gesture(
                                 DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+                                    .modifiers(.control)
+                                    .onChanged {
+                                        self.creatingCurve = Curve(point0: $0.startLocation, point1: .zero, point2: .zero, point3: $0.location)
+                                    }
+                                    .modifiers(.control)
+                                    .onEnded {
+                                        self.viewModel.createNewTransition(sourceState: viewModel.viewModel(for: machine.states[index]), source: $0.startLocation, target: $0.location)
+                                        self.creatingCurve = nil
+                                    }
+                            )
+                            .gesture(
+                                DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
                                     .onChanged {
                                         self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                                     }.onEnded {
                                         self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                                     }
                             )
-                            .gesture(
-                                DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
-                                    .modifiers(.control)
-                                    .onEnded {
-                                        self.viewModel.createNewTransition(sourceState: viewModel.viewModel(for: machine.states[index]), source: $0.startLocation, target: $0.location)
-                                    }
-                                    
-                            )
+                            
                         }
                     }
+                }
+                if let curve = creatingCurve {
+                    ArrowView(curve: .constant(curve), strokeNumber: 0, colour: .blue)
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)
         }
@@ -317,7 +322,7 @@ struct MachineView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            MachineView(machine: $machine, creatingTransitions: $creatingTransitions).environmentObject(config)
+            MachineView(machine: $machine).environmentObject(config)
         }
         
     }

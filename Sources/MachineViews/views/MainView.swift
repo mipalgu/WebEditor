@@ -30,7 +30,7 @@ struct MainView: View {
     var body: some View {
         switch type {
         case .machine, .transition:
-            MachineView(machine: $machineViewModel.machine, creatingTransitions: $creatingTransitions)
+            MachineView(machine: $machineViewModel.machine)
                 .coordinateSpace(name: "MAIN_VIEW")
                 
         case .state(let stateIndex):
