@@ -32,9 +32,10 @@ final class MachineViewModel2: ObservableObject {
         self.transitions = transitions
     }
     
-    init(states: [Machines.State], transitions: [StateName: [Transition]]) {
+    init(states: [Machines.State]) {
         var data: [StateName: StateViewModel2] = [:]
         var transitions: [StateName: [TransitionViewModel2]] = [:]
+        transitions.reserveCapacity(states.count)
         var x: CGFloat = 100.0;
         var y: CGFloat = 100;
         states.indices.forEach {
@@ -52,10 +53,7 @@ final class MachineViewModel2: ObservableObject {
         }
         states.indices.forEach { stateIndex in
             var transitionViewModels: [TransitionViewModel2] = []
-            guard let stateTransitions = transitions[states[stateIndex].name] else {
-                transitions[states[stateIndex].name] = transitionViewModels
-                return
-            }
+            let stateTransitions = states[stateIndex].transitions
             stateTransitions.indices.forEach { index in
                 transitionViewModels.append(
                     TransitionViewModel2(
@@ -230,11 +228,7 @@ public struct MachineView: View {
     public init(machine: Binding<Machine>, creatingTransitions: Binding<Bool>) {
         self._machine = machine
         self._creatingTransitions = creatingTransitions
-        var transDict: [StateName: [Transition]] = [:]
-        machine.states.wrappedValue.forEach {
-            transDict[$0.name] = $0.transitions
-        }
-        self._viewModel = StateObject(wrappedValue: MachineViewModel2(states: machine.states.wrappedValue, transitions: transDict))
+        self._viewModel = StateObject(wrappedValue: MachineViewModel2(states: machine.states.wrappedValue))
     }
     
 //    func isFocused(stateIndex: Int, transitionIndex: Int) -> Binding<Bool> {
@@ -292,6 +286,17 @@ public struct MachineView: View {
                         }
                     )
                 ForEach(Array(machine.states.indices), id: \.self) { index in
+                    ForEach(Array(machine.states[index].transitions.indices), id: \.self) { t in
+                        TransitionView(
+                            machine: $machine,
+                            path: machine.path.states[index].transitions[t],
+                            curve: viewModel.binding(to: t, originatingFrom: machine.states[index]).curve,
+                            strokeNumber: UInt8(t),
+                            focused: .constant(false)
+                        )
+                    }
+                }
+                ForEach(Array(machine.states.indices), id: \.self) { index in
                     if viewModel.viewModel(for: machine.states[index]).isText {
                         VStack {
                             Text(machine.states[index].name)
@@ -336,15 +341,6 @@ public struct MachineView: View {
                                     
                             )
                         }
-                    }
-                    ForEach(Array(machine.states[index].transitions.indices), id: \.self) { t in
-                        TransitionView(
-                            machine: $machine,
-                            path: machine.path.states[index].transitions[t],
-                            curve: viewModel.binding(to: t, originatingFrom: machine.states[index]).curve,
-                            strokeNumber: UInt8(t),
-                            focused: .constant(false)
-                        )
                     }
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)
