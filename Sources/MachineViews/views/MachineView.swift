@@ -29,6 +29,14 @@ final class MachineViewModel2: ObservableObject {
     
     var transitionStartLocations: [StateName: [Curve]] = [:]
     
+    var isStateMoving: Bool = false
+    
+    var movingState: StateName = ""
+    
+    var movingSourceTransitions: [CGPoint] = []
+    
+    var movingTargetTransitions: [StateName: [Int: CGPoint]] = [:]
+    
     init(data: [StateName: StateViewModel2] = [:], transitions: [StateName: [TransitionViewModel2]] = [:]) {
         self.data = data
         self.transitions = transitions
@@ -247,6 +255,43 @@ final class MachineViewModel2: ObservableObject {
         return targetName
     }
     
+    func moveTransitions(state: StateName, gesture: DragGesture.Value) {
+        if !isStateMoving {
+            isStateMoving = true
+            movingState = state
+            movingSourceTransitions = transitions[state]!.map { $0.curve.point0 }
+            var targetTransitions: [StateName: [Int: CGPoint]] = [:]
+            transitions.keys.forEach { name in
+                var targetsDictionary: [Int: CGPoint] = [:]
+                transitions[name]!.indices.forEach({ index in
+                    let model = transitions[name]![index]
+                    if findStateFromPoint(point: model.curve.point3)?.0 == state {
+                        targetsDictionary[index] = model.curve.point3
+                    }
+                })
+                targetTransitions[name] = targetsDictionary
+            }
+        }
+        movingSourceTransitions.indices.forEach {
+            let newX = movingSourceTransitions[$0].x + gesture.translation.width
+            let newY = movingSourceTransitions[$0].y + gesture.translation.height
+            let point = CGPoint(x: newX, y: newY)
+            transitions[movingState]![$0].curve.point0 = point
+        }
+        movingTargetTransitions.keys.forEach { name in
+            movingTargetTransitions[name]!.keys.forEach { index in
+                let newX = movingTargetTransitions[name]![index]!.x + gesture.translation.width
+                let newY = movingTargetTransitions[name]![index]!.y + gesture.translation.height
+                let point = CGPoint(x: newX, y: newY)
+                transitions[name]![index].curve.point3 = point
+            }
+        }
+    }
+    
+    func finishMovingTransitions(state: StateName, gesture: DragGesture.Value) {
+        moveTransitions(state: state, gesture: gesture)
+        isStateMoving = false
+    }
     
     
 }
@@ -345,8 +390,10 @@ public struct MachineView: View {
                                 DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
                                     .onChanged {
                                         self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
+                                        self.viewModel.moveTransitions(state: machine.states[index].name, gesture: $0)
                                     }.onEnded {
                                         self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
+                                        self.viewModel.finishMovingTransitions(state: machine.states[index].name, gesture: $0)
                                     }
                             )
                             
