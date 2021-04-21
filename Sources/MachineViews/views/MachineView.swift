@@ -125,6 +125,17 @@ final class MachineViewModel2: ObservableObject {
         )
     }
     
+    func binding(to transition: Int, originatingFrom state: Machines.State) -> Binding<TransitionViewModel2> {
+        return Binding(
+            get: {
+                return self.viewModel(for: transition, originatingFrom: state)
+            },
+            set: {
+                self.transitions[state.name]?[transition] = $0
+            }
+        )
+    }
+    
     func handleDrag(state: Machines.State, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         mutate(state) { $0.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight) }
     }
@@ -326,9 +337,15 @@ public struct MachineView: View {
                             )
                         }
                     }
-//                    ForEach(Array(viewModel.machine.states[index].transitions.indices), id: \.self) { t in
-//                        TransitionView(
-//                    }
+                    ForEach(Array(machine.states[index].transitions.indices), id: \.self) { t in
+                        TransitionView(
+                            machine: $machine,
+                            path: machine.path.states[index].transitions[t],
+                            curve: viewModel.binding(to: t, originatingFrom: machine.states[index]).curve,
+                            strokeNumber: UInt8(t),
+                            focused: .constant(false)
+                        )
+                    }
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)
         }
