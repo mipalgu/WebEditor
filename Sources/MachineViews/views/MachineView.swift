@@ -333,14 +333,18 @@ public struct MachineView: View {
                     ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                 }
                 ForEach(Array(machine.states.indices), id: \.self) { index in
-                    ForEach(Array(machine.states[index].transitions.indices), id: \.self) { t in
-                        TransitionView(
-                            machine: $machine,
-                            path: machine.path.states[index].transitions[t],
-                            curve: viewModel.binding(to: t, originatingFrom: machine.states[index]).curve,
-                            strokeNumber: UInt8(t),
-                            focused: .constant(false)
-                        )
+                    if !self.viewModel.viewModel(for: machine.states[index].name).isText {
+                        ForEach(Array(machine.states[index].transitions.indices), id: \.self) { t in
+                            if !self.viewModel.viewModel(for: machine.states[index].transitions[t].target).isText {
+                                TransitionView(
+                                    machine: $machine,
+                                    path: machine.path.states[index].transitions[t],
+                                    curve: viewModel.binding(to: t, originatingFrom: machine.states[index]).curve,
+                                    strokeNumber: UInt8(t),
+                                    focused: .constant(false)
+                                )
+                            }
+                        }
                     }
                 }
                 ForEach(Array(machine.states.indices), id: \.self) { index in
