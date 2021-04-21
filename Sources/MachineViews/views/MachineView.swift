@@ -39,7 +39,7 @@ final class MachineViewModel2: ObservableObject {
         var transitions: [StateName: [TransitionViewModel2]] = [:]
         transitions.reserveCapacity(states.count)
         var x: CGFloat = 100.0;
-        var y: CGFloat = 100;
+        var y: CGFloat = 100.0;
         states.indices.forEach {
             let newViewModel = StateViewModel2(location: CGPoint(x: x, y: y), expandedWidth: 100.0, expandedHeight: 100.0, expanded: true, collapsedWidth: 150.0, collapsedHeight: 100.0, isText: false)
             if y > 800 {
@@ -158,12 +158,6 @@ final class MachineViewModel2: ObservableObject {
                 } else {
                     data[$0]?.isText = false
                 }
-//                data[$0].transitionViewModels.forEach {
-//                    $0.point0 = $0.translate(point: $0.startLocation.0, trans: gesture.translation)
-//                    $0.point1 = $0.translate(point: $0.startLocation.1, trans: gesture.translation)
-//                    $0.point2 = $0.translate(point: $0.startLocation.2, trans: gesture.translation)
-//                    $0.point3 = $0.translate(point: $0.startLocation.3, trans: gesture.translation)
-//                }
             }
             transitionStartLocations.keys.forEach { name in
                 transitions[name]!.indices.forEach {
