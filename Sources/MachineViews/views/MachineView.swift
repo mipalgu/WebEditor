@@ -255,22 +255,24 @@ final class MachineViewModel2: ObservableObject {
         return targetName
     }
     
-    func moveTransitions(state: StateName, gesture: DragGesture.Value) {
+    func moveTransitions(state: StateName, gesture: DragGesture.Value, states: [Machines.State]) {
         if !isStateMoving {
             isStateMoving = true
             movingState = state
             movingSourceTransitions = transitions[state]!.map { $0.curve.point0 }
             var targetTransitions: [StateName: [Int: CGPoint]] = [:]
-            transitions.keys.forEach { name in
+            states.forEach { stateObj in
+                let name = stateObj.name
+                let stateTransitions = stateObj.transitions
                 var targetsDictionary: [Int: CGPoint] = [:]
-                transitions[name]!.indices.forEach({ index in
-                    let model = transitions[name]![index]
-                    if findStateFromPoint(point: model.curve.point3)?.0 == state {
-                        targetsDictionary[index] = model.curve.point3
+                stateTransitions.indices.forEach({ index in
+                    if stateTransitions[index].target == state {
+                        targetsDictionary[index] = transitions[name]![index].curve.point3
                     }
                 })
                 targetTransitions[name] = targetsDictionary
             }
+            return
         }
         movingSourceTransitions.indices.forEach {
             let newX = movingSourceTransitions[$0].x + gesture.translation.width
@@ -288,8 +290,8 @@ final class MachineViewModel2: ObservableObject {
         }
     }
     
-    func finishMovingTransitions(state: StateName, gesture: DragGesture.Value) {
-        moveTransitions(state: state, gesture: gesture)
+    func finishMovingTransitions(state: StateName, gesture: DragGesture.Value, states: [Machines.State]) {
+        moveTransitions(state: state, gesture: gesture, states: states)
         isStateMoving = false
     }
     
@@ -394,10 +396,10 @@ public struct MachineView: View {
                                 DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
                                     .onChanged {
                                         self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                                        self.viewModel.moveTransitions(state: machine.states[index].name, gesture: $0)
+                                        self.viewModel.moveTransitions(state: machine.states[index].name, gesture: $0, states: machine.states)
                                     }.onEnded {
                                         self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                                        self.viewModel.finishMovingTransitions(state: machine.states[index].name, gesture: $0)
+                                        self.viewModel.finishMovingTransitions(state: machine.states[index].name, gesture: $0, states: machine.states)
                                     }
                             )
                             
