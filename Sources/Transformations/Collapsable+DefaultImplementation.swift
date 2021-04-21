@@ -220,4 +220,24 @@ public extension Collapsable where Self: _Collapsable {
         return CGPoint(x: x, y: y)
     }
     
+    func isWithin(point: CGPoint) -> Bool {
+        if expanded {
+            return point.x >= left.x && point.x <= right.x && point.y >= top.y && point.y <= bottom.y
+        }
+        let dx = point.x - location.x
+        let dy = point.y - location.y
+        let angle = atan2(Double(dy), Double(dx)) / Double.pi * 180.0
+        let edge = findEdge(degrees: CGFloat(angle))
+        if angle >= 90 {
+            return point.x >= edge.x && point.y <= edge.y
+        }
+        if angle <= -90 {
+            return point.x >= edge.x && point.y >= edge.y
+        }
+        if angle >= 0 {
+            return point.x <= edge.x && point.y <= edge.y
+        }
+        return point.x <= edge.x && point.y >= edge.y
+    }
+    
 }
