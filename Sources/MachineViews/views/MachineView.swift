@@ -231,48 +231,6 @@ public struct MachineView: View {
         self._viewModel = StateObject(wrappedValue: MachineViewModel2(states: machine.states.wrappedValue))
     }
     
-//    func isFocused(stateIndex: Int, transitionIndex: Int) -> Binding<Bool> {
-//        Binding(get: {
-//            switch editorViewModel.focusedView {
-//            case .transition(let stateInd, let transInd):
-//                return transInd == transitionIndex && stateIndex == stateInd
-//            default:
-//                return false
-//            }
-//        }, set: {
-//            if $0 {
-//                editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: transitionIndex)
-//            }
-//        })
-//    }
-    
-//    func transitionView(transitionIndex t: Int, sourceIndex index: Int, targetName: StateName) -> TransitionView {
-//        return TransitionView(
-//            point0: Binding(
-//                get: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point0 },
-//                set: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point0 = $0 }
-//            ),
-//            point1: Binding(
-//                get: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point1 },
-//                set: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point1 = $0 }
-//            ),
-//            point2: Binding(
-//                get: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point2 },
-//                set: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point2 = $0 }
-//            ),
-//            point3: Binding(
-//                get: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point3 },
-//                set: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point3 = $0 }
-//            ),
-//            strokeNumber: t,
-//            label: Binding(
-//                get: { machine.states[index].transitions[t].condition },
-//                set: { machine.states[index].transitions[t].condition = $0 }
-//            )
-//            focused: .constant(false)
-//        )
-//    }
-    
     public var body: some View {
         GeometryReader { (geometry: GeometryProxy) in
             ZStack {
