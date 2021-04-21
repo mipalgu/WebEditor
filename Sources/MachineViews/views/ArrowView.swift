@@ -23,7 +23,7 @@ struct ArrowView: View {
     
     @Binding var point3: CGPoint
     
-    @Binding var strokeNumber: UInt8
+    let strokeNumber: UInt8
     
     var colour: Color
     
@@ -113,7 +113,7 @@ struct ArrowView_Previews: PreviewProvider {
                 point1: $point1,
                 point2: $point2,
                 point3: $point3,
-                strokeNumber: $strokeNumber,
+                strokeNumber: strokeNumber,
                 colour: color
             ).environmentObject(config)
         }

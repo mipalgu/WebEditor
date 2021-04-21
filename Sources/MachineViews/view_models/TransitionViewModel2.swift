@@ -8,7 +8,7 @@
 import Foundation
 import Transformations
 
-struct TransitionViewModel2: Identifiable  {
+struct TransitionViewModel2: Identifiable   {
     
     var id: UUID = UUID()
         
@@ -20,17 +20,14 @@ struct TransitionViewModel2: Identifiable  {
     
     var point3: CGPoint
     
-    var priority: UInt
-    
-    init(point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint, priority: UInt) {
+    init(point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint) {
         self.point0 = point0
         self.point1 = point1
         self.point2 = point2
         self.point3 = point3
-        self.priority = priority
     }
     
-    init(source: CGPoint, target: CGPoint, priority: UInt) {
+    init(source: CGPoint, target: CGPoint) {
         self.point0 = source
         self.point3 = target
         let middle = CGPoint(
@@ -49,17 +46,16 @@ struct TransitionViewModel2: Identifiable  {
             x: target.x - quarter.x,
             y: target.y - quarter.y
         )
-        self.priority = priority
     }
     
-    init(source: StateViewModel2, target: StateViewModel2, priority: UInt) {
+    init(source: StateViewModel2, target: StateViewModel2) {
         let dx = target.location.x - source.location.x
         let dy = target.location.y - source.location.y
         let angle = atan2(Double(dy), Double(dx)) / Double.pi * 180.0
         let sourceEdge = source.findEdge(degrees: CGFloat(angle))
         let targetAngle = angle + 180.0
         let targetEdge = target.findEdge(degrees: CGFloat(targetAngle))
-        self.init(source: sourceEdge, target: targetEdge, priority: priority)
+        self.init(source: sourceEdge, target: targetEdge)
     }
     
 }

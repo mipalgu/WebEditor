@@ -18,6 +18,10 @@ import AttributeViews
 
 struct TransitionView: View {
     
+    @Binding var machine: Machine
+    
+    let path: Attributes.Path<Machine, Transition>
+    
     @Binding var point0: CGPoint
     
     @Binding var point1: CGPoint
@@ -26,9 +30,7 @@ struct TransitionView: View {
     
     @Binding var point3: CGPoint
     
-    @Binding var strokeNumber: UInt8
-    
-    @Binding var label: String
+    let strokeNumber: UInt8
     
     @Binding var focused: Bool
     
@@ -41,10 +43,21 @@ struct TransitionView: View {
                 point1: $point1,
                 point2: $point2,
                 point3: $point3,
-                strokeNumber: $strokeNumber,
-                label: $label,
+                strokeNumber: strokeNumber,
                 editing: $focused,
-                color: focused ? config.highlightColour : config.textColor
+                color: focused ? config.highlightColour : config.textColor,
+                label: { Text(machine[keyPath: path.keyPath].condition ?? "") } ,
+                editLabel: { LineView<Config>(
+                    value: Binding(
+                        get: { machine[keyPath: path.keyPath].condition ?? "" },
+                        set: { _ = try? machine.modify(attribute: path.condition, value: Optional($0)) }
+                    ),
+                    errors: Binding(
+                        get: { machine.errorBag.errors(includingDescendantsForPath: path.condition).map(\.message) },
+                        set: { _ in }
+                    ),
+                    label: ""
+                ) }
             )
             if focused {
                 AnchorPoint()
@@ -80,64 +93,64 @@ struct TransitionView: View {
     }
 }
 
-struct TransitionView_Previews: PreviewProvider {
-    
-    struct Focused_Preview: View {
-        
-        @State var point0: CGPoint = CGPoint(x: 50, y: 50)
-        @State var point1: CGPoint = CGPoint(x: 100, y: 100)
-        @State var point2: CGPoint = CGPoint(x: 150, y: 100)
-        @State var point3: CGPoint = CGPoint(x: 150, y: 50)
-        @State var strokeNumber: UInt8 = 2
-        @State var label: String = "true"
-        @State var focused: Bool = true
-        
-        let config = Config()
-        
-        var body: some View {
-            TransitionView(
-                point0: $point0,
-                point1: $point1,
-                point2: $point2,
-                point3: $point3,
-                strokeNumber: $strokeNumber,
-                label: $label,
-                focused: $focused
-            ).environmentObject(config)
-        }
-        
-    }
-    
-    struct Unfocused_Preview: View {
-        
-        @State var point0: CGPoint = CGPoint(x: 50, y: 50)
-        @State var point1: CGPoint = CGPoint(x: 100, y: 100)
-        @State var point2: CGPoint = CGPoint(x: 150, y: 100)
-        @State var point3: CGPoint = CGPoint(x: 150, y: 50)
-        @State var strokeNumber: UInt8 = 2
-        @State var label: String = "true"
-        @State var focused: Bool = false
-        
-        let config = Config()
-        
-        var body: some View {
-            TransitionView(
-                point0: $point0,
-                point1: $point1,
-                point2: $point2,
-                point3: $point3,
-                strokeNumber: $strokeNumber,
-                label: $label,
-                focused: $focused
-            ).environmentObject(config)
-        }
-        
-    }
-    
-    static var previews: some View {
-        VStack {
-            Focused_Preview()
-            Unfocused_Preview()
-        }
-    }
-}
+//struct TransitionView_Previews: PreviewProvider {
+//    
+//    struct Focused_Preview: View {
+//        
+//        @State var point0: CGPoint = CGPoint(x: 50, y: 50)
+//        @State var point1: CGPoint = CGPoint(x: 100, y: 100)
+//        @State var point2: CGPoint = CGPoint(x: 150, y: 100)
+//        @State var point3: CGPoint = CGPoint(x: 150, y: 50)
+//        @State var strokeNumber: UInt8 = 2
+//        @State var label: String = "true"
+//        @State var focused: Bool = true
+//        
+//        let config = Config()
+//        
+//        var body: some View {
+//            TransitionView(
+//                machine: Machi
+//                point0: $point0,
+//                point1: $point1,
+//                point2: $point2,
+//                point3: $point3,
+//                strokeNumber: strokeNumber,
+//                focused: $focused
+//            ).environmentObject(config)
+//        }
+//        
+//    }
+//    
+//    struct Unfocused_Preview: View {
+//        
+//        @State var point0: CGPoint = CGPoint(x: 50, y: 50)
+//        @State var point1: CGPoint = CGPoint(x: 100, y: 100)
+//        @State var point2: CGPoint = CGPoint(x: 150, y: 100)
+//        @State var point3: CGPoint = CGPoint(x: 150, y: 50)
+//        @State var strokeNumber: UInt8 = 2
+//        @State var label: String = "true"
+//        @State var focused: Bool = false
+//        
+//        let config = Config()
+//        
+//        var body: some View {
+//            TransitionView(
+//                point0: $point0,
+//                point1: $point1,
+//                point2: $point2,
+//                point3: $point3,
+//                strokeNumber: $strokeNumber,
+//                label: $label,
+//                focused: $focused
+//            ).environmentObject(config)
+//        }
+//        
+//    }
+//    
+//    static var previews: some View {
+//        VStack {
+//            Focused_Preview()
+//            Unfocused_Preview()
+//        }
+//    }
+//}

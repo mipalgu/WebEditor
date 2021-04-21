@@ -13,7 +13,7 @@ import SwiftUI
 
 import Utilities
 
-struct ArrowWithLabelView: View {
+struct ArrowWithLabelView<LabelView: View, EditLabelView: View>: View {
     
     @Binding var point0: CGPoint
     
@@ -23,13 +23,15 @@ struct ArrowWithLabelView: View {
     
     @Binding var point3: CGPoint
     
-    @Binding var strokeNumber: UInt8
-    
-    @Binding var label: String
+    let strokeNumber: UInt8
     
     @Binding var editing: Bool
     
     var color: Color
+    
+    let label: () -> LabelView
+    
+    let editLabel: () -> EditLabelView
     
     @EnvironmentObject public var config: Config
     
@@ -41,15 +43,17 @@ struct ArrowWithLabelView: View {
     
     var body: some View {
         ZStack {
-            ArrowView(point0: $point0, point1: $point1, point2: $point2, point3: $point3, strokeNumber: $strokeNumber, colour: color)
+            ArrowView(point0: $point0, point1: $point1, point2: $point2, point3: $point3, strokeNumber: strokeNumber, colour: color)
             if editing {
-                TextField("", text: $label)
-                    .font(config.fontBody)
+//                TextField("", text: $label)
+//                    .font(config.fontBody)
+                editLabel()
                     .fixedSize()
                     .position(center)
             } else {
-                Text(label)
-                    .font(config.fontBody.italic())
+//                Text(label)
+//                    .font(config.fontBody.italic())
+                label()
                     .fixedSize()
                     .position(center)
             }
@@ -78,10 +82,11 @@ struct ArrowWithLabelView_Previews: PreviewProvider {
                 point1: $point1,
                 point2: $point2,
                 point3: $point3,
-                strokeNumber: $strokeNumber,
-                label: $label,
+                strokeNumber: strokeNumber,
                 editing: $editing,
-                color: color
+                color: color,
+                label: { Text(label) },
+                editLabel: { TextField("", text: $label) }
             ).environmentObject(config)
         }
         
@@ -106,10 +111,11 @@ struct ArrowWithLabelView_Previews: PreviewProvider {
                 point1: $point1,
                 point2: $point2,
                 point3: $point3,
-                strokeNumber: $strokeNumber,
-                label: $label,
+                strokeNumber: strokeNumber,
                 editing: $editing,
-                color: color
+                color: color,
+                label: { Text(label) },
+                editLabel: { TextField("", text: $label) }
             ).environmentObject(config)
         }
         

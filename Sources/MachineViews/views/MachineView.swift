@@ -30,7 +30,44 @@ final class MachineViewModel2: ObservableObject {
     init(data: [StateName: StateViewModel2] = [:], transitions: [StateName: [TransitionViewModel2]] = [:]) {
         self.data = data
         self.transitions = transitions
-        
+    }
+    
+    init(states: [Machines.State], transitions: [StateName: [Transition]]) {
+        var data: [StateName: StateViewModel2] = [:]
+        var transitions: [StateName: [TransitionViewModel2]] = [:]
+        var x: CGFloat = 100.0;
+        var y: CGFloat = 100;
+        states.indices.forEach {
+            let newViewModel = StateViewModel2(location: CGPoint(x: x, y: y), expandedWidth: 100.0, expandedHeight: 100.0, expanded: true, collapsedWidth: 150.0, collapsedHeight: 100.0, isText: false)
+            if y > 800 {
+                x = 0
+                y = 0
+            } else if x > 800 {
+                x = 0
+                y += 100.0
+            } else {
+                x += 100.0
+            }
+            data[states[$0].name] = newViewModel
+        }
+        states.indices.forEach { stateIndex in
+            var transitionViewModels: [TransitionViewModel2] = []
+            guard let stateTransitions = transitions[states[stateIndex].name] else {
+                transitions[states[stateIndex].name] = transitionViewModels
+                return
+            }
+            stateTransitions.indices.forEach { index in
+                transitionViewModels.append(
+                    TransitionViewModel2(
+                        source: data[states[stateIndex].name]!,
+                        target: data[states[stateIndex].transitions[index].target]!
+                    )
+                )
+            }
+            transitions[states[stateIndex].name] = transitionViewModels
+        }
+        self.data = data
+        self.transitions = transitions
     }
     
     func viewModel(for state: Machines.State) -> StateViewModel2 {
@@ -46,22 +83,29 @@ final class MachineViewModel2: ObservableObject {
         return viewModel
     }
     
-    func viewModel(for transition: Int, originatingFrom state: Machines.State) -> TransitionViewModel2 {
-        return viewModel(for: transition, originatingFrom: state.name)
+    private func setupNewTransition(for transition: Int, originatingFrom stateName: StateName, goingTo targetState: StateName) -> TransitionViewModel2 {
+        let source = viewModel(for: stateName)
+        let target = viewModel(for: targetState)
+        return TransitionViewModel2(source: source, target: target)
     }
     
-    func viewModel(for transition: Int, originatingFrom stateName: StateName) -> TransitionViewModel2 {
+    func viewModel(for transition: Int, originatingFrom state: Machines.State) -> TransitionViewModel2 {
+        return viewModel(for: transition, originatingFrom: state.name, goingTo: state.transitions[transition].target)
+    }
+    
+    func viewModel(for transition: Int, originatingFrom stateName: StateName, goingTo targetState: StateName) -> TransitionViewModel2 {
         guard let viewModels = transitions[stateName] else {
-            let newViewModel = TransitionViewModel2(source: .zero, target: .zero)
-            transitions[stateName] = Array(repeating: newViewModel, count: transition + 1)
+            let newViewModel = setupNewTransition(for: transition, originatingFrom: stateName, goingTo: targetState)
+            transitions[stateName] = [newViewModel]
             return newViewModel
         }
-        if viewModels.count <= transition {
-            let newViewModel = TransitionViewModel2(source: .zero, target: .zero)
-            transitions[stateName]?.append(contentsOf: Array(repeating: newViewModel, count: viewModels.count - transition - 1))
+        guard transition < viewModels.count && transition >= 0 else {
+            let newViewModel = setupNewTransition(for: transition, originatingFrom: stateName, goingTo: targetState)
+            transitions[stateName]!.append(newViewModel)
             return newViewModel
         }
-        return viewModels[transition]
+        let transitionViewModel = viewModels[transition]
+        return transitionViewModel
     }
     
 //    func transitionViewModel(for state: Machines.State, index: Int) -> TransitionViewModel2 {
@@ -160,6 +204,12 @@ final class MachineViewModel2: ObservableObject {
         mutate(state) { $0.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight) }
     }
     
+    func createNewTransition(sourceState: StateViewModel2, source: CGPoint, target: CGPoint) {
+        
+    }
+    
+    
+    
 }
 
 public struct MachineView: View {
@@ -168,9 +218,11 @@ public struct MachineView: View {
     
     @Binding var creatingTransitions: Bool
     
+    @State var transitionStartLocation: CGPoint = .zero
+    
     @EnvironmentObject var config: Config
     
-    @StateObject var viewModel = MachineViewModel2()
+    @StateObject var viewModel: MachineViewModel2
     
     let coordinateSpace = "MAIN_VIEW"
     
@@ -181,6 +233,11 @@ public struct MachineView: View {
     public init(machine: Binding<Machine>, creatingTransitions: Binding<Bool>) {
         self._machine = machine
         self._creatingTransitions = creatingTransitions
+        var transDict: [StateName: [Transition]] = [:]
+        machine.states.wrappedValue.forEach {
+            transDict[$0.name] = $0.transitions
+        }
+        self._viewModel = StateObject(wrappedValue: MachineViewModel2(states: machine.states.wrappedValue, transitions: transDict))
     }
     
 //    func isFocused(stateIndex: Int, transitionIndex: Int) -> Binding<Bool> {
@@ -196,6 +253,33 @@ public struct MachineView: View {
 //                editorViewModel.focusedView = ViewType.transition(stateIndex: stateIndex, transitionIndex: transitionIndex)
 //            }
 //        })
+//    }
+    
+//    func transitionView(transitionIndex t: Int, sourceIndex index: Int, targetName: StateName) -> TransitionView {
+//        return TransitionView(
+//            point0: Binding(
+//                get: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point0 },
+//                set: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point0 = $0 }
+//            ),
+//            point1: Binding(
+//                get: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point1 },
+//                set: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point1 = $0 }
+//            ),
+//            point2: Binding(
+//                get: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point2 },
+//                set: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point2 = $0 }
+//            ),
+//            point3: Binding(
+//                get: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point3 },
+//                set: { viewModel.viewModel(for: t, originatingFrom: machine.states[index]).point3 = $0 }
+//            ),
+//            strokeNumber: t,
+//            label: Binding(
+//                get: { machine.states[index].transitions[t].condition },
+//                set: { machine.states[index].transitions[t].condition = $0 }
+//            )
+//            focused: .constant(false)
+//        )
 //    }
     
     public var body: some View {
@@ -246,8 +330,19 @@ public struct MachineView: View {
                                         self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                                     }
                             )
+                            .gesture(
+                                DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+                                    .modifiers(.control)
+                                    .onEnded {
+                                        self.viewModel.createNewTransition(sourceState: viewModel.viewModel(for: machine.states[index]), source: $0.startLocation, target: $0.location)
+                                    }
+                                    
+                            )
                         }
                     }
+//                    ForEach(Array(viewModel.machine.states[index].transitions.indices), id: \.self) { t in
+//                        TransitionView(
+//                    }
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)
         }
