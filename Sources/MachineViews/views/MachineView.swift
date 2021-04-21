@@ -240,6 +240,9 @@ public struct MachineView: View {
                             self.viewModel.finishMoveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
                         }
                     )
+                if let curve = creatingCurve {
+                    ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
+                }
                 ForEach(Array(machine.states.indices), id: \.self) { index in
                     ForEach(Array(machine.states[index].transitions.indices), id: \.self) { t in
                         TransitionView(
@@ -302,9 +305,6 @@ public struct MachineView: View {
                             
                         }
                     }
-                }
-                if let curve = creatingCurve {
-                    ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)
         }
