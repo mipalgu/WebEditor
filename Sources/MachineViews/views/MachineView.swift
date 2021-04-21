@@ -27,6 +27,8 @@ final class MachineViewModel2: ObservableObject {
     
     var startLocations: [StateName: CGPoint] = [:]
     
+    var transitionStartLocations: [StateName: [Curve]] = [:]
+    
     init(data: [StateName: StateViewModel2] = [:], transitions: [StateName: [TransitionViewModel2]] = [:]) {
         self.data = data
         self.transitions = transitions
@@ -163,10 +165,34 @@ final class MachineViewModel2: ObservableObject {
 //                    $0.point3 = $0.translate(point: $0.startLocation.3, trans: gesture.translation)
 //                }
             }
+            transitionStartLocations.keys.forEach { name in
+                transitions[name]!.indices.forEach {
+                    let x0 = transitionStartLocations[name]![$0].point0.x - gesture.translation.width
+                    let y0 = transitionStartLocations[name]![$0].point0.y - gesture.translation.height
+                    let x1 = transitionStartLocations[name]![$0].point1.x - gesture.translation.width
+                    let y1 = transitionStartLocations[name]![$0].point1.y - gesture.translation.height
+                    let x2 = transitionStartLocations[name]![$0].point2.x - gesture.translation.width
+                    let y2 = transitionStartLocations[name]![$0].point2.y - gesture.translation.height
+                    let x3 = transitionStartLocations[name]![$0].point3.x - gesture.translation.width
+                    let y3 = transitionStartLocations[name]![$0].point3.y - gesture.translation.height
+                    let curve = Curve(
+                        point0: CGPoint(x: x0, y: y0),
+                        point1: CGPoint(x: x1, y: y1),
+                        point2: CGPoint(x: x2, y: y2),
+                        point3: CGPoint(x: x3, y: y3)
+                    )
+                    transitions[name]![$0].curve = curve
+                }
+            }
             return
         }
         data.forEach {
             startLocations[$0.0] = $0.1.location
+        }
+        transitions.forEach {
+            transitionStartLocations[$0.0] = $0.1.map {
+                $0.curve
+            }
         }
         isMoving = true
     }

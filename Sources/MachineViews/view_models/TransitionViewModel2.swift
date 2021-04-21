@@ -82,4 +82,9 @@ struct TransitionViewModel2: Identifiable   {
         self.init(source: sourceEdge, target: targetEdge)
     }
     
+    mutating func moveEndPoint(distanceTravelled dS: CGPoint) {
+        self.curve.point3.x += dS.x
+        self.curve.point3.y += dS.y
+    }
+    
 }
