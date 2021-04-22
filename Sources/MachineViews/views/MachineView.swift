@@ -537,7 +537,11 @@ public struct MachineView: View {
                                         guard let targetName = self.viewModel.createNewTransition(sourceState: machine.states[index].name, source: $0.startLocation, target: $0.location) else {
                                             return
                                         }
-                                        try? machine.newTransition(source: machine.states[index].name, target: targetName)
+                                        guard let _ = try? machine.newTransition(source: machine.states[index].name, target: targetName) else {
+                                            return
+                                        }
+                                        let lastIndex = machine.states[index].transitions.count - 1
+                                        try? machine.modify(attribute: machine.path.states[index].transitions[lastIndex].condition, value: "true")
                                     }
                             )
                             .gesture(
