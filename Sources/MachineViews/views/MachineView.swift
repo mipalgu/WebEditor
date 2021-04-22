@@ -420,6 +420,44 @@ final class MachineViewModel2: ObservableObject {
         return Set(focusedStates + focusedTransitions)
     }
     
+    func createTransitionGesture(forView view: MachineView, forState index: Int) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
+            .modifiers(.control)
+            .onChanged {
+                view.creatingCurve = Curve(source: $0.startLocation, target: $0.location)
+            }
+            .modifiers(.control)
+            .onEnded {
+                view.creatingCurve = nil
+                guard let targetName = self.createNewTransition(sourceState: view.machine.states[index].name, source: $0.startLocation, target: $0.location) else {
+                    return
+                }
+                guard let _ = try? view.machine.newTransition(source: view.machine.states[index].name, target: targetName) else {
+                    return
+                }
+                let lastIndex = view.machine.states[index].transitions.count - 1
+                guard lastIndex >= 0 else {
+                    return
+                }
+                try? view.machine.modify(attribute: Machine.path.states[index].transitions[lastIndex].condition, value: "true")
+            }
+    }
+    
+    func dragStateGesture(forView view: MachineView, forState index: Int, size: CGSize) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
+            .onChanged {
+                self.handleDrag(state: view.machine.states[index], gesture: $0, frameWidth: size.width, frameHeight: size.height)
+                if !self.viewModel(for: view.machine.states[index].name).isStretchingX && !self.viewModel(for: view.machine.states[index].name).isStretchingY {
+                    self.moveTransitions(state: view.machine.states[index].name, gesture: $0, states: view.machine.states, frameWidth: size.width, frameHeight: size.height)
+                } else {
+                    self.stretchTransitions(state: view.machine.states[index].name, states: view.machine.states)
+                }
+            }.onEnded {
+                self.finishMovingTransitions()
+                self.finishDrag(state: view.machine.states[index], gesture: $0, frameWidth: size.width, frameHeight: size.height)
+            }
+    }
+    
     
 }
 
@@ -525,43 +563,8 @@ public struct MachineView: View {
                             .onTapGesture() {
                                 config.focusedObjects = FocusedObjects(principle: .state(stateIndex: index))
                             }
-                            .gesture(
-                                DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
-                                    .modifiers(.control)
-                                    .onChanged {
-                                        self.creatingCurve = Curve(source: $0.startLocation, target: $0.location)
-                                    }
-                                    .modifiers(.control)
-                                    .onEnded {
-                                        self.creatingCurve = nil
-                                        guard let targetName = self.viewModel.createNewTransition(sourceState: machine.states[index].name, source: $0.startLocation, target: $0.location) else {
-                                            return
-                                        }
-                                        guard let _ = try? machine.newTransition(source: machine.states[index].name, target: targetName) else {
-                                            return
-                                        }
-                                        let lastIndex = machine.states[index].transitions.count - 1
-                                        guard lastIndex >= 0 else {
-                                            return
-                                        }
-                                        try? machine.modify(attribute: machine.path.states[index].transitions[lastIndex].condition, value: "true")
-                                    }
-                            )
-                            .gesture(
-                                DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
-                                    .onChanged {
-                                        self.viewModel.handleDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                                        if !self.viewModel.viewModel(for: machine.states[index].name).isStretchingX && !self.viewModel.viewModel(for: machine.states[index].name).isStretchingY {
-                                            self.viewModel.moveTransitions(state: machine.states[index].name, gesture: $0, states: machine.states, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                                        } else {
-                                            self.viewModel.stretchTransitions(state: machine.states[index].name, states: machine.states)
-                                        }
-                                    }.onEnded {
-                                        self.viewModel.finishMovingTransitions()
-                                        self.viewModel.finishDrag(state: machine.states[index], gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                                    }
-                            )
-                            
+                            .gesture(viewModel.createTransitionGesture(forView: self, forState: index))
+                            .gesture(viewModel.dragStateGesture(forView: self, forState: index, size: geometry.size))
                         }
                     }
                 }
