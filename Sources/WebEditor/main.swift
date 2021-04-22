@@ -166,6 +166,9 @@ struct WebEditorMachineView: View {
                                     print("Control Pressed!")
                                     self.creatingTransitions = true
                                 }
+                                if $0.keyCode == 51 {
+                                    print("Delete!")
+                                }
                             }, keyUpCallback: {
                                 if $0.keyCode == 8 {
                                     self.creatingTransitions = false

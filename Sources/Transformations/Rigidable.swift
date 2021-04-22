@@ -44,4 +44,6 @@ public protocol Rigidable: Positionable {
     func closestPointToEdge(point: CGPoint, radians: CGFloat) -> CGPoint
     
     func closestPointToEdge(point: CGPoint, source: CGPoint) -> CGPoint
+    
+    func moveToEdge(point: CGPoint, edge: CGPoint) -> CGPoint
 }

@@ -83,7 +83,7 @@ public struct EditorView: View {
                             )
                         FocusedAttributesView(
                             machine: machineViewModel.$machine,
-                            viewType: $viewModel.focusedView,
+                            viewType: $config.focusedObjects.principle,
                             label: "Attributes",
                             collapsed: Binding(
                                 get: { viewModel.rightPaneCollapsed },

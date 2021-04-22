@@ -23,12 +23,14 @@ struct StateView: View {
     
     @Binding var expanded: Bool
     @Binding var collapsedActions: [String: Bool]
+    var focused: Bool
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, expanded: Binding<Bool> = .constant(false), collapsedActions: Binding<[String: Bool]> = .constant([:])) {
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, expanded: Binding<Bool> = .constant(false), collapsedActions: Binding<[String: Bool]> = .constant([:]), focused: Bool = false) {
         self._machine = machine
         self.path = path
         self._expanded = expanded
         self._collapsedActions = collapsedActions
+        self.focused = focused
     }
     
     @EnvironmentObject var config: Config
@@ -36,7 +38,7 @@ struct StateView: View {
     var body: some View {
         Group {
             if expanded {
-                StateExpandedView(root: $machine, path: path, collapsedActions: $collapsedActions) {
+                StateExpandedView(root: $machine, path: path, collapsedActions: $collapsedActions, focused: focused) {
                     StateTitleView(machine: $machine, path: path.name, expanded: $expanded)
                 }
             } else {

@@ -346,6 +346,30 @@ final class MachineViewModel2: ObservableObject {
         isStateMoving = false
     }
     
+    private func isWithinBound(corner0: CGPoint, corner1: CGPoint, position: CGPoint) -> Bool {
+        position.x >= min(corner0.x, corner1.x) &&
+            position.x <= max(corner0.x, corner1.x) &&
+            position.y >= min(corner0.y, corner1.y) &&
+            position.y <= max(corner0.y, corner1.y)
+    }
+    
+    func findObjectsInSelection(corner0: CGPoint, corner1: CGPoint, states: [Machines.State]) -> Set<ViewType> {
+        let focusedStates = states.indices.filter {
+            let position = viewModel(for: states[$0]).location
+            return isWithinBound(corner0: corner0, corner1: corner1, position: position)
+        }.map { ViewType.state(stateIndex: $0) }
+        var focusedTransitions: [ViewType] = []
+        states.indices.forEach { stateIndex in
+            focusedTransitions.append(contentsOf: transitionViewModels(for: states[stateIndex].name).indices.filter { index in
+                let position = transitionViewModels(for: states[stateIndex].name)[index].location
+                return isWithinBound(corner0: corner0, corner1: corner1, position: position)
+            }.map {
+                ViewType.transition(stateIndex: stateIndex, transitionIndex: $0)
+            })
+        }
+        return Set(focusedStates + focusedTransitions)
+    }
+    
     
 }
 
@@ -365,6 +389,8 @@ public struct MachineView: View {
     
     let textHeight: CGFloat = 20.0
     
+    @State var selectedBox: (CGPoint, CGPoint)?
+    
     public init(machine: Binding<Machine>) {
         self._machine = machine
         self._viewModel = StateObject(wrappedValue: MachineViewModel2(states: machine.states.wrappedValue))
@@ -381,6 +407,18 @@ public struct MachineView: View {
                     .onTapGesture {
                         config.focusedObjects = FocusedObjects()
                     }
+                    .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+                        .modifiers(.control)
+                        .onChanged {
+                            selectedBox = ($0.startLocation, $0.location)
+                            config.focusedObjects = FocusedObjects(selected: viewModel.findObjectsInSelection(corner0: $0.startLocation, corner1: $0.location, states: machine.states))
+                        }
+                        .modifiers(.control)
+                        .onEnded {
+                            config.focusedObjects = FocusedObjects(selected: viewModel.findObjectsInSelection(corner0: $0.startLocation, corner1: $0.location, states: machine.states))
+                            selectedBox = nil
+                        }
+                    )
                     .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
                         .onChanged {
                             self.viewModel.moveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
@@ -426,7 +464,8 @@ public struct MachineView: View {
                                         get: { viewModel.viewModel(for: machine.states[index]).expanded },
                                         set: { viewModel.assignExpanded(for: machine.states[index], newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
                                     ),
-                                    collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions
+                                    collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions,
+                                    focused: config.focusedObjects.selected.contains(.state(stateIndex: index))
                                 )
                                     .frame(
                                         width: viewModel.viewModel(for: machine.states[index]).width,
@@ -434,6 +473,9 @@ public struct MachineView: View {
                                     )
                             }.coordinateSpace(name: coordinateSpace)
                             .position(viewModel.viewModel(for: machine.states[index]).location)
+                            .onTapGesture() {
+                                config.focusedObjects = FocusedObjects(principle: .state(stateIndex: index))
+                            }
                             .gesture(
                                 DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
                                     .modifiers(.control)
@@ -466,6 +508,13 @@ public struct MachineView: View {
                             
                         }
                     }
+                }
+                if selectedBox != nil {
+                    Rectangle()
+                        .background(config.highlightColour)
+                        .opacity(0.2)
+                        .frame(width: width(point0: selectedBox!.0, point1: selectedBox!.1), height: height(point0: selectedBox!.0, point1: selectedBox!.1))
+                        .position(center(point0: selectedBox!.0, point1: selectedBox!.1))
                 }
             }.frame(width: geometry.size.width, height: geometry.size.height)
             .clipped()

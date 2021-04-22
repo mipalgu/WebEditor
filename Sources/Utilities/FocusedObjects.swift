@@ -23,4 +23,9 @@ public struct FocusedObjects {
         self.selected = [principle]
     }
     
+    public init(selected: Set<ViewType>) {
+        self.principle = .machine
+        self.selected = selected
+    }
+    
 }

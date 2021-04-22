@@ -22,8 +22,9 @@ struct StateExpandedView<TitleView: View>: View {
     @Binding var collapsedActions: [String: Bool]
     let titleView: () -> TitleView
     let codeView: (Int) -> CodeViewWithDropDown<Text>
+    var focused: Bool = false
     
-    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Machines.State>, collapsedActions: Binding<[String: Bool]>, titleView: @escaping () -> TitleView) {
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Machines.State>, collapsedActions: Binding<[String: Bool]>, focused: Bool = false, titleView: @escaping () -> TitleView) {
         self.init(
             state: Binding(
                 get: { root.wrappedValue[keyPath: path.keyPath] },
@@ -33,6 +34,7 @@ struct StateExpandedView<TitleView: View>: View {
             ),
             collapsedActions: collapsedActions,
             titleView: titleView,
+            focused: focused,
             codeView: {
                 let name = root.wrappedValue[keyPath: path.keyPath].actions[$0].name
                 return CodeViewWithDropDown(
@@ -53,11 +55,12 @@ struct StateExpandedView<TitleView: View>: View {
         )
     }
     
-    init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, actionErrors: Binding<[[String]]> = .constant([]), titleView: @escaping () -> TitleView) {
+    init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, actionErrors: Binding<[[String]]> = .constant([]),  focused: Bool = false, titleView: @escaping () -> TitleView) {
         self.init(
             state: state,
             collapsedActions: collapsedActions,
             titleView: titleView,
+            focused: focused,
             codeView: {
                 let name = state.wrappedValue.actions[$0].name
                 return CodeViewWithDropDown(
@@ -78,11 +81,12 @@ struct StateExpandedView<TitleView: View>: View {
         )
     }
     
-    private init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, titleView: @escaping () -> TitleView, codeView: @escaping (Int) -> CodeViewWithDropDown<Text>) {
+    private init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, titleView: @escaping () -> TitleView, focused: Bool = false, codeView: @escaping (Int) -> CodeViewWithDropDown<Text>) {
         self._state = state
         self._collapsedActions = collapsedActions
         self.titleView = titleView
         self.codeView = codeView
+        self.focused = focused
     }
     
     @EnvironmentObject var config: Config
@@ -99,7 +103,13 @@ struct StateExpandedView<TitleView: View>: View {
                     }
                 }
             }.padding(10).background(config.stateColour)
-        }.clipShape(RoundedRectangle(cornerRadius: 20.0))
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 20.0))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(focused ? config.highlightColour : config.borderColour, lineWidth: 2)
+        )
+        
     }
 }
 

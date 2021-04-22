@@ -15,7 +15,10 @@ import Utilities
 
 struct StateCollapsedView<TitleView: View>: View {
     
+    var focused: Bool = false
+    
     let titleView: () -> TitleView
+    
     
     @EnvironmentObject var config: Config
     
@@ -26,6 +29,10 @@ struct StateCollapsedView<TitleView: View>: View {
                 titleView()
             }.padding(15)
         }.background(Ellipse().stroke()).clipShape(Ellipse())
+        .overlay(
+            Ellipse()
+                .stroke(focused ? config.highlightColour : config.borderColour, lineWidth: 2)
+        )
     }
     
 }

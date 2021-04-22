@@ -7,6 +7,7 @@
 
 import Foundation
 import Transformations
+import Utilities
 
 struct Curve {
     
@@ -48,11 +49,20 @@ struct Curve {
     
 }
 
-struct TransitionViewModel2: Identifiable   {
+struct TransitionViewModel2: Identifiable, Positionable   {
     
     var id: UUID = UUID()
     
     var curve: Curve
+    
+    var location: CGPoint {
+        get {
+            curve.point1 + (curve.point2 - curve.point1) / 2.0
+        }
+        set {
+            return
+        }
+    }
     
     init(curve: Curve) {
         self.curve = curve
@@ -77,8 +87,14 @@ struct TransitionViewModel2: Identifiable   {
     }
     
     init(source: StateViewModel2, sourcePoint: CGPoint, target: StateViewModel2, targetPoint: CGPoint) {
-        let sourceEdge = source.findEdge(point: sourcePoint)
+        
+        var sourceEdge = source.findEdge(point: sourcePoint)
         let targetEdge = target.findEdge(point: targetPoint)
+        let targetSourceEdge = source.findEdgeCenter(degrees: targetEdge<)
+        let sourceCenter = source.findEdgeCenter(degrees: sourceEdge<)
+        if targetSourceEdge != sourceCenter {
+            sourceEdge = source.moveToEdge(point: sourcePoint, edge: targetSourceEdge)
+        }
         self.init(source: sourceEdge, target: targetEdge)
     }
     

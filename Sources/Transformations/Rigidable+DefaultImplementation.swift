@@ -11,6 +11,8 @@ import TokamakShim
 import SwiftUI
 #endif
 
+import Utilities
+
 public protocol _Rigidable {
     
     var _width: CGFloat { get set }
@@ -190,6 +192,15 @@ public extension Rigidable where Self: Positionable {
         let dy = source.y - location.y
         let theta = CGFloat(atan2(Double(dy), Double(dx)))
         return closestPointToEdge(point: point, radians: theta)
+    }
+    
+    func moveToEdge(point: CGPoint, edge: CGPoint) -> CGPoint {
+        let relativeEdge = edge - point
+        let angle = relativeEdge<
+        if angle >= -45 && angle <= 45 || angle >= 135 || angle <= -135 {
+            return CGPoint(x: edge.x, y: point.y)
+        }
+        return CGPoint(x: point.x, y: edge.y)
     }
     
 }
