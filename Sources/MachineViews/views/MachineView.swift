@@ -458,6 +458,27 @@ final class MachineViewModel2: ObservableObject {
             }
     }
     
+    func selectionBoxGesture(forView view: MachineView) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
+            .modifiers(.control)
+            .onChanged {
+                view.selectedBox = ($0.startLocation, $0.location)
+            }
+            .modifiers(.control)
+            .onEnded {
+                view.config.focusedObjects = FocusedObjects(selected: self.findObjectsInSelection(corner0: $0.startLocation, corner1: $0.location, states: view.machine.states))
+                view.selectedBox = nil
+            }
+    }
+    
+    func dragCanvasGesture(coordinateSpace: String, size: CGSize) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+            .onChanged {
+                self.moveElements(gesture: $0, frameWidth: size.width, frameHeight: size.height)
+            }.onEnded {
+                self.finishMoveElements(gesture: $0, frameWidth: size.width, frameHeight: size.height)
+            }
+    }
     
 }
 
@@ -489,30 +510,10 @@ public struct MachineView: View {
             ZStack {
                 GridView()
                     .frame(width: geometry.size.width, height: geometry.size.height)
-                    .onTapGesture(count: 2) {
-                        try? machine.newState()
-                    }
-                    .onTapGesture {
-                        config.focusedObjects = FocusedObjects()
-                    }
-                    .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
-                        .modifiers(.control)
-                        .onChanged {
-                            selectedBox = ($0.startLocation, $0.location)
-                        }
-                        .modifiers(.control)
-                        .onEnded {
-                            config.focusedObjects = FocusedObjects(selected: viewModel.findObjectsInSelection(corner0: $0.startLocation, corner1: $0.location, states: machine.states))
-                            selectedBox = nil
-                        }
-                    )
-                    .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
-                        .onChanged {
-                            self.viewModel.moveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                        }.onEnded {
-                            self.viewModel.finishMoveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
-                        }
-                    )
+                    .onTapGesture(count: 2) { try? machine.newState() }
+                    .onTapGesture { config.focusedObjects = FocusedObjects() }
+                    .gesture(viewModel.selectionBoxGesture(forView: self))
+                    .gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
                 if let curve = creatingCurve {
                     ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                 }
@@ -542,30 +543,25 @@ public struct MachineView: View {
                         .coordinateSpace(name: coordinateSpace)
                         .position(viewModel.clampPosition(point: viewModel.viewModel(for: machine.states[index]).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height, dx: textWidth / 2.0, dy: textHeight / 2.0))
                     } else {
-                        ZStack {
-                            VStack {
-                                StateView(
-                                    machine: $machine,
-                                    path: machine.path.states[index],
-                                    expanded: Binding(
-                                        get: { viewModel.viewModel(for: machine.states[index]).expanded },
-                                        set: { viewModel.assignExpanded(for: machine.states[index], newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
-                                    ),
-                                    collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions,
-                                    focused: config.focusedObjects.selected.contains(.state(stateIndex: index))
-                                )
-                                    .frame(
-                                        width: viewModel.viewModel(for: machine.states[index]).width,
-                                        height: viewModel.viewModel(for: machine.states[index]).height
-                                    )
-                            }.coordinateSpace(name: coordinateSpace)
-                            .position(viewModel.viewModel(for: machine.states[index]).location)
-                            .onTapGesture() {
-                                config.focusedObjects = FocusedObjects(principle: .state(stateIndex: index))
-                            }
-                            .gesture(viewModel.createTransitionGesture(forView: self, forState: index))
-                            .gesture(viewModel.dragStateGesture(forView: self, forState: index, size: geometry.size))
-                        }
+                        VStack {
+                            StateView(
+                                machine: $machine,
+                                path: machine.path.states[index],
+                                expanded: Binding(
+                                    get: { viewModel.viewModel(for: machine.states[index]).expanded },
+                                    set: { viewModel.assignExpanded(for: machine.states[index], newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
+                                ),
+                                collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions,
+                                focused: config.focusedObjects.selected.contains(.state(stateIndex: index))
+                            ).frame(
+                                width: viewModel.viewModel(for: machine.states[index]).width,
+                                height: viewModel.viewModel(for: machine.states[index]).height
+                            )
+                        }.coordinateSpace(name: coordinateSpace)
+                        .position(viewModel.viewModel(for: machine.states[index]).location)
+                        .onTapGesture { config.focusedObjects = FocusedObjects(principle: .state(stateIndex: index)) }
+                        .gesture(viewModel.createTransitionGesture(forView: self, forState: index))
+                        .gesture(viewModel.dragStateGesture(forView: self, forState: index, size: geometry.size))
                     }
                 }
                 if selectedBox != nil {
