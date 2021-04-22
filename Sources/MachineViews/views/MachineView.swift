@@ -93,6 +93,14 @@ final class MachineViewModel2: ObservableObject {
         return viewModel
     }
     
+    func transitionViewModels(for state: StateName) -> [TransitionViewModel2] {
+        guard let models = transitions[state] else {
+            transitions[state] = []
+            return []
+        }
+        return models
+    }
+    
     private func setupNewTransition(for transition: Int, originatingFrom stateName: StateName, goingTo targetState: StateName) -> TransitionViewModel2 {
         let source = viewModel(for: stateName)
         let target = viewModel(for: targetState)
@@ -259,7 +267,7 @@ final class MachineViewModel2: ObservableObject {
     
     private func findMovingTransitions(state: StateName, states: [Machines.State]) {
         movingState = state
-        movingSourceTransitions = transitions[state]!.map { $0.curve.point0 }
+        movingSourceTransitions = transitionViewModels(for: state).map { $0.curve.point0 }
         var targetTransitions: [StateName: [Int: CGPoint]] = [:]
         states.forEach { stateObj in
             let name = stateObj.name
@@ -367,6 +375,9 @@ public struct MachineView: View {
             ZStack {
                 GridView()
                     .frame(width: geometry.size.width, height: geometry.size.height)
+                    .onTapGesture(count: 2) {
+                        try? machine.newState()
+                    }
                     .onTapGesture {
                         config.focusedObjects = FocusedObjects()
                     }
