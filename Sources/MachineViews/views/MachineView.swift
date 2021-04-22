@@ -541,6 +541,9 @@ public struct MachineView: View {
                                             return
                                         }
                                         let lastIndex = machine.states[index].transitions.count - 1
+                                        guard lastIndex >= 0 else {
+                                            return
+                                        }
                                         try? machine.modify(attribute: machine.path.states[index].transitions[lastIndex].condition, value: "true")
                                     }
                             )
