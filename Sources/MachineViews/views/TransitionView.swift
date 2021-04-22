@@ -26,7 +26,7 @@ struct TransitionView: View {
     
     let strokeNumber: UInt8
     
-    @Binding var focused: Bool
+    var focused: Bool
     
     @EnvironmentObject var config: Config
     
@@ -35,7 +35,7 @@ struct TransitionView: View {
             ArrowWithLabelView(
                 curve: $curve,
                 strokeNumber: strokeNumber,
-                editing: $focused,
+                editing: focused,
                 color: focused ? config.highlightColour : config.textColor,
                 label: { Text(machine[keyPath: path.keyPath].condition ?? "") } ,
                 editLabel: { LineView<Config>(

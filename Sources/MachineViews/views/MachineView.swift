@@ -367,6 +367,9 @@ public struct MachineView: View {
             ZStack {
                 GridView()
                     .frame(width: geometry.size.width, height: geometry.size.height)
+                    .onTapGesture {
+                        config.focusedObjects = FocusedObjects()
+                    }
                     .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
                         .onChanged {
                             self.viewModel.moveElements(gesture: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height)
@@ -384,9 +387,12 @@ public struct MachineView: View {
                                     path: machine.path.states[index].transitions[t],
                                     curve: viewModel.binding(to: t, originatingFrom: machine.states[index]).curve,
                                     strokeNumber: UInt8(t),
-                                    focused: .constant(false)
+                                    focused: config.focusedObjects.selected.contains(.transition(stateIndex: index, transitionIndex: t))
                                 )
                                 .clipped()
+                                .onTapGesture {
+                                    config.focusedObjects = FocusedObjects(principle: .transition(stateIndex: index, transitionIndex: t))
+                                }
                     }
                 }
                 ForEach(Array(machine.states.indices), id: \.self) { index in

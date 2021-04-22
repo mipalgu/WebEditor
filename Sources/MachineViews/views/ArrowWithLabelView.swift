@@ -19,7 +19,7 @@ struct ArrowWithLabelView<LabelView: View, EditLabelView: View>: View {
     
     let strokeNumber: UInt8
     
-    @Binding var editing: Bool
+    var editing: Bool
     
     var color: Color
     
@@ -68,7 +68,7 @@ struct ArrowWithLabelView_Previews: PreviewProvider {
         
         let strokeNumber: UInt8 = 2
         @State var label: String = "true"
-        @State var editing: Bool = true
+        var editing: Bool = true
         let color: Color = .black
         
         let config = Config()
@@ -77,7 +77,7 @@ struct ArrowWithLabelView_Previews: PreviewProvider {
             ArrowWithLabelView(
                 curve: $curve,
                 strokeNumber: strokeNumber,
-                editing: $editing,
+                editing: editing,
                 color: color,
                 label: { Text(label) },
                 editLabel: { TextField("", text: $label) }
@@ -97,7 +97,7 @@ struct ArrowWithLabelView_Previews: PreviewProvider {
         
         let strokeNumber: UInt8 = 2
         @State var label: String = "true"
-        @State var editing: Bool = false
+        var editing: Bool = false
         let color: Color = .black
         
         let config = Config()
@@ -106,7 +106,7 @@ struct ArrowWithLabelView_Previews: PreviewProvider {
             ArrowWithLabelView(
                 curve: $curve,
                 strokeNumber: strokeNumber,
-                editing: $editing,
+                editing: editing,
                 color: color,
                 label: { Text(label) },
                 editLabel: { TextField("", text: $label) }

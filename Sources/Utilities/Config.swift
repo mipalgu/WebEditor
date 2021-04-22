@@ -101,6 +101,8 @@ public final class Config: ObservableObject, AttributeViewConfig {
     
     @Published public var alertView: DialogType = .none
     
+    @Published public var focusedObjects: FocusedObjects = FocusedObjects()
+    
     public init() {}
     
 }

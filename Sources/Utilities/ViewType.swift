@@ -24,3 +24,5 @@ public enum DialogType {
     case openMachine
     case none
 }
+
+extension ViewType: Hashable {}
