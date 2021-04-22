@@ -80,6 +80,56 @@ final class MachineViewModel2: ObservableObject {
         self.transitions = transitions
     }
     
+    public convenience init(machine: Machine, plist data: String) {
+        var trans: [StateName: [TransitionViewModel2]] = [:]
+        var stateViewModels: [StateName: StateViewModel2] = [:]
+        machine.states.indices.forEach { (stateIndex: Int) in
+            let stateName = machine.states[stateIndex].name
+            let statePlist: String = data.components(separatedBy: "<key>\(stateName)</key>")[1]
+                .components(separatedBy: "<key>zoomedOnExitHeight</key>")[0]
+            let transitionsPlist: String = statePlist.components(separatedBy: "<key>Transitions</key>")[1].components(separatedBy: "<key>bgColour</key>")[0]
+            let transitionViewModels = machine.states[stateIndex].transitions.indices.map { (priority: Int) -> TransitionViewModel2 in
+                let transitionPlist = transitionsPlist.components(separatedBy: "</dict>")[priority]
+                    .components(separatedBy: "<dict>")[1]
+                return TransitionViewModel2(plist: transitionPlist)
+            }
+            trans[stateName] = transitionViewModels
+            stateViewModels[stateName] = StateViewModel2(plist: statePlist)
+        }
+//        stateViewModels.forEach { stateVM in
+//            let externalTransitions: [TransitionViewModel2] = stateViewModels.flatMap {
+//                $0.transitionViewModels.filter { $0.transition.target == stateVM.name }
+//            }
+//            externalTransitions.forEach {
+//                $0.curve.point3 = stateVM.findEdge(point: $0.point3)
+//            }
+//            stateVM.transitionViewModels.forEach {
+//                $0.point0 = stateVM.findEdge(point: $0.point0)
+//            }
+//        }
+        self.init(data: stateViewModels, transitions: trans)
+    }
+    
+    public func toPlist(machine: Machine) -> String {
+        let helper = StringHelper()
+        let statesPlist = helper.reduceLines(data: data.map { (name, state) in
+            guard
+                let state = machine.states.first(where: { $0.name == name }),
+                let stateViewModel = data[name],
+                let transitionViewModels = transitions[name]
+            else {
+                return ""
+            }
+            return stateViewModel.toPList(transitionViewModels: transitionViewModels, state: state)
+        })
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" +
+            "<plist version=\"1.0\">\n<dict>\n" + helper.tab(
+                data: "<key>States</key>\n<dict>\n" + helper.tab(data: statesPlist) + "\n</dict>\n<key>Version</key>\n<string>1.3</string>"
+            ) +
+        "\n</dict>\n</plist>"
+    }
+    
     func viewModel(for state: Machines.State) -> StateViewModel2 {
         return viewModel(for: state.name)
     }
@@ -411,7 +461,6 @@ public struct MachineView: View {
                         .modifiers(.control)
                         .onChanged {
                             selectedBox = ($0.startLocation, $0.location)
-                            config.focusedObjects = FocusedObjects(selected: viewModel.findObjectsInSelection(corner0: $0.startLocation, corner1: $0.location, states: machine.states))
                         }
                         .modifiers(.control)
                         .onEnded {
