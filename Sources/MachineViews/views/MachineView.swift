@@ -479,18 +479,18 @@ public struct MachineView: View {
                     ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                 }
                 ForEach(Array(machine.states.indices), id: \.self) { index in
-                        ForEach(Array(machine.states[index].transitions.indices), id: \.self) { t in
-                                TransitionView(
-                                    machine: $machine,
-                                    path: machine.path.states[index].transitions[t],
-                                    curve: viewModel.binding(to: t, originatingFrom: machine.states[index]).curve,
-                                    strokeNumber: UInt8(t),
-                                    focused: config.focusedObjects.selected.contains(.transition(stateIndex: index, transitionIndex: t))
-                                )
-                                .clipped()
-                                .onTapGesture {
-                                    config.focusedObjects = FocusedObjects(principle: .transition(stateIndex: index, transitionIndex: t))
-                                }
+                    ForEach(Array(machine.states[index].transitions.indices), id: \.self) { t in
+                        TransitionView(
+                            machine: $machine,
+                            path: machine.path.states[index].transitions[t],
+                            curve: viewModel.binding(to: t, originatingFrom: machine.states[index]).curve,
+                            strokeNumber: UInt8(t),
+                            focused: config.focusedObjects.selected.contains(.transition(stateIndex: index, transitionIndex: t))
+                        )
+                        .clipped()
+                        .onTapGesture {
+                            config.focusedObjects = FocusedObjects(principle: .transition(stateIndex: index, transitionIndex: t))
+                        }
                     }
                 }
                 ForEach(Array(machine.states.indices), id: \.self) { index in
