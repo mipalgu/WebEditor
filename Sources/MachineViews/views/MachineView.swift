@@ -502,7 +502,11 @@ public struct MachineView: View {
     
     public init(machine: Binding<Machine>) {
         self._machine = machine
-        self._viewModel = StateObject(wrappedValue: MachineViewModel2(states: machine.states.wrappedValue))
+        guard let plist = try? String(contentsOf: machine.filePath.wrappedValue.appendingPathComponent("Layout.plist")) else {
+            self._viewModel = StateObject(wrappedValue: MachineViewModel2(states: machine.states.wrappedValue))
+            return
+        }
+        self._viewModel = StateObject(wrappedValue: MachineViewModel2(machine: machine.wrappedValue, plist: plist))
     }
     
     public var body: some View {
