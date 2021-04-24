@@ -23,7 +23,7 @@ struct CodeViewWithDropDown<Label: View>: View {
     
     @Binding var collapsed: Bool
     
-    @EnvironmentObject var config: Config
+//    @EnvironmentObject var config: Config
     
     init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, label: String, language: Language, collapsed: Binding<Bool>) where Label == Text {
         self.init(root: root, path: path, language: language, collapsed: collapsed) { Text(label.capitalized) }
@@ -84,8 +84,8 @@ struct CodeViewWithDropDown<Label: View>: View {
                     Text(error).foregroundColor(.red)
                 }
                 TextEditor(text: $value)
-                    .font(config.fontBody)
-                    .foregroundColor(config.textColor)
+//                    .font(config.fontBody)
+//                    .foregroundColor(config.textColor)
                     .disableAutocorrection(true)
                     .overlay(
                         RoundedRectangle(cornerRadius: 5)
