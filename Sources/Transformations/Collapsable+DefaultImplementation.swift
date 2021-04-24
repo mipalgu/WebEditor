@@ -11,6 +11,8 @@ import TokamakShim
 import SwiftUI
 #endif
 
+import GUUI
+
 public protocol _Collapsable {
     
     var _collapsedWidth: CGFloat {get set}
@@ -267,6 +269,34 @@ public extension Collapsable where Self: _Collapsable {
             return point.x <= edge.x && point.y <= edge.y
         }
         return point.x <= edge.x && point.y >= edge.y
+    }
+    
+    func findEdgeCenter(degrees: CGFloat) -> CGPoint {
+        if !expanded {
+            return findEdge(degrees: degrees)
+        }
+        let normalisedDegrees = degrees.truncatingRemainder(dividingBy: 360.0)
+        let theta = normalisedDegrees > 180.0 ? normalisedDegrees - 360.0 : normalisedDegrees
+        if theta >= -45.0 && theta <= 45.0 {
+            return right
+        } else if theta <= 135.0 && theta >= 45.0 {
+            return bottom
+        } else if theta >= -135.0 && theta < -45.0 {
+            return top
+        }
+        return left
+    }
+    
+    func moveToEdge(point: CGPoint, edge: CGPoint) -> CGPoint {
+        if !expanded {
+            return edge
+        }
+        let relativeEdge = edge - point
+        let angle = relativeEdge<
+        if angle >= -45 && angle <= 45 || angle >= 135 || angle <= -135 {
+            return CGPoint(x: edge.x, y: point.y)
+        }
+        return CGPoint(x: point.x, y: edge.y)
     }
     
 }

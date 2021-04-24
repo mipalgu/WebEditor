@@ -53,12 +53,32 @@ struct TransitionViewModel2: Identifiable, Positionable   {
         let targetSourceEdge = source.findEdgeCenter(degrees: (targetEdge - source.location)<)
         let sourceCenter = source.findEdgeCenter(degrees: (sourceEdge - source.location)<)
         if targetSourceEdge != sourceCenter {
-            sourceEdge = source.moveToEdge(point: sourcePoint, edge: targetSourceEdge)
+            if source.expanded {
+                sourceEdge = source.moveToEdge(point: sourcePoint, edge: targetSourceEdge)
+            } else {
+                let sourceDeg = (sourceEdge - source.location)<
+                let targetDeg = (targetEdge - source.location)<
+                if abs(sourceDeg - targetDeg) > 90.0 {
+                    sourceEdge = source.moveToEdge(point: sourcePoint, edge: targetSourceEdge)
+                }
+            }
         }
         let targetsPreferredEdge = target.findEdgeCenter(degrees: (sourceEdge - target.location)<)
         let targetEdgeCenter = target.findEdgeCenter(degrees: (targetEdge - target.location)<)
         if targetEdgeCenter != targetsPreferredEdge {
-            targetEdge = target.moveToEdge(point: targetEdge, edge: targetsPreferredEdge)
+            if target.expanded {
+                targetEdge = target.moveToEdge(point: targetEdge, edge: targetsPreferredEdge)
+            } else {
+                let targetSourceDeg = (sourceEdge - target.location)<
+                let targetEdgeDeg = (targetEdge - target.location)<
+                let dDeg = targetSourceDeg - targetEdgeDeg
+                if dDeg > 90.0 {
+                    targetEdge = target.findEdge(degrees: targetEdgeDeg + 90.0)
+                }
+                if dDeg < -90.0 {
+                    targetEdge = target.findEdge(degrees: targetEdgeDeg - 90.0)
+                }
+            }
         }
         self.init(source: sourceEdge, target: targetEdge)
     }
