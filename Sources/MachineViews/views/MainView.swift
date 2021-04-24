@@ -34,17 +34,18 @@ struct MainView: View {
                 .coordinateSpace(name: "MAIN_VIEW")
                 
         case .state(let stateIndex):
-            StateEditView(viewModel: machineViewModel.states[stateIndex])
-                .onTapGesture(count: 2) {
-                    editorViewModel.changeMainView()
-                    editorViewModel.changeFocus()
-                }
-                .background(KeyEventHandling(keyDownCallback: {
-                    if $0.keyCode == 53 {
-                        editorViewModel.changeMainView()
-                        editorViewModel.changeFocus()
-                    }
-                }, keyUpCallback: { _ in }))
+//            StateEditView(viewModel: machineViewModel.states[stateIndex])
+//                .onTapGesture(count: 2) {
+//                    editorViewModel.changeMainView()
+//                    editorViewModel.changeFocus()
+//                }
+//                .background(KeyEventHandling(keyDownCallback: {
+//                    if $0.keyCode == 53 {
+//                        editorViewModel.changeMainView()
+//                        editorViewModel.changeFocus()
+//                    }
+//                }, keyUpCallback: { _ in }))
+            EmptyView()
         }
     }
 }

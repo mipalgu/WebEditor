@@ -18,45 +18,56 @@ import AttributeViews
 
 struct StateEditView: View {
     
-    @ObservedObject var viewModel: StateViewModel
+    @Binding var machine: Machine
+    let path: Attributes.Path<Machine, Machines.State>
     
     @EnvironmentObject var config: Config
     
-    init(viewModel: StateViewModel) {
-        self.viewModel = viewModel
+    var body: some View {
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(alignment: .leading) {
+                    LineView<Config>(root: $machine, path: path.name, label: "State Name")
+                        .multilineTextAlignment(.center)
+                        .font(config.fontTitle2)
+                        .background(config.fieldColor)
+                        .foregroundColor(config.textColor)
+                    ForEach(Array(machine[keyPath: path.keyPath].actions.enumerated()), id: \.1) { (index, action) in
+                        CodeView<Config, Text>(root: $machine, path: path.actions[index].implementation, language: .swift) {
+                            let view = Text(action.name + ":").font(config.fontHeading).underline().foregroundColor(config.stateTextColour)
+                            if action.implementation.isEmpty {
+                                return view.italic()
+                            } else {
+                                return view
+                            }
+                        }
+                        .frame(minHeight: max(geometry.size.height / 3 - 25, 50))
+                    }
+                }.padding(10)
+            }.frame(height: geometry.size.height)
+        }
+    }
+}
+
+struct StateEditView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        @State var machine: Machine = Machine.initialSwiftMachine()
+        
+        let path = Machine.path.states[0]
+        
+        let config = Config()
+        
+        var body: some View {
+            StateEditView(machine: $machine, path: path).environmentObject(config)
+        }
+        
     }
     
-    var body: some View {
-        EmptyView()
-//        GeometryReader { reader in
-//            ScrollView {
-//                VStack(alignment: .leading) {
-//                    LineView<Config>(root: viewModel.$machine.asBinding, path: viewModel.path.name, label: viewModel.name)
-//                        .multilineTextAlignment(.center)
-//                        .font(config.fontTitle2)
-//                        .background(config.fieldColor)
-//                        .foregroundColor(config.textColor)
-//                        .frame(minWidth: min(viewModel.minEditWidth - 2.0 * viewModel.editPadding, reader.size.width - 2.0 * viewModel.editPadding), maxWidth: reader.size.width - 2.0 * viewModel.editPadding, maxHeight: viewModel.maxTitleHeight, alignment: .center)
-//                    ForEach(Array(viewModel.actions.enumerated()), id: \.0) { (index, action) in
-//                        CodeView<Config, AnyView>(root: viewModel.$machine.asBinding, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
-//                            if viewModel.isEmpty(forAction: action.name) {
-//                                return AnyView(
-//                                    Text(action.name + ":").font(config.fontHeading).underline().italic().foregroundColor(config.stateTextColour)
-//                                )
-//                            } else {
-//                                return AnyView(
-//                                    Text(action.name + ":").font(config.fontHeading).underline().foregroundColor(config.stateTextColour)
-//                                )
-//                            }
-//                        }
-//                        .padding(.top, viewModel.editActionPadding)
-//                        .padding(.horizontal, 0)
-//                        .frame(width: reader.size.width - 2.0 * viewModel.editPadding, height: viewModel.getHeightOfActionForEdit(height: reader.size.height))
-//
-//                    }
-//                }
-//            }
-//            .padding(viewModel.editPadding)
-//        }
+    static var previews: some View {
+        VStack {
+            Preview()
+        }
     }
 }
