@@ -33,24 +33,30 @@ struct DependenciesView: View {
     
     @State var expandedDependencies: [URL: Bool] = [:]
     
+    let padding: CGFloat = 10
+    
     var body: some View {
         VStack {
-            Toggle(isOn: $expanded) {
-                Text(name.pretty)
-                    .background(focus == url ? config.highlightColour : Color.clear)
-            }
-            .toggleStyle(ArrowToggleStyle())
+            VStack {
+                VStack {
+                    Toggle(isOn: $expanded) {
+                        Text(name.pretty)
+                    }
+                    .toggleStyle(ArrowToggleStyle())
+                }.padding(.leading, padding)
+            }.background(focus == url ? config.highlightColour : Color.clear)
             if expanded {
                 ForEach(Array(dependencies.enumerated()), id: \.1) { (index, dep) in
                     DependencyView(
                         expanded: Binding(get: { expandedDependencies[dep.filePath] ?? false }, set: { expandedDependencies[dep.filePath] = $0 }),
                         focus: $focus,
                         dependency: $dependencies[index],
-                        machines: $machines
+                        machines: $machines,
+                        padding: padding + padding
                     )
                 }
             }
-        }.padding(.leading, 10)
+        }
     }
     
 }

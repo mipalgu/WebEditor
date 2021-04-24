@@ -27,6 +27,8 @@ struct DependencyView: View {
     
     @State var expandedDependencies: [URL: Bool] = [:]
     
+    let padding: CGFloat
+    
     @EnvironmentObject var config: Config
     
     func machine(for url: URL) -> Machine? {
@@ -46,28 +48,30 @@ struct DependencyView: View {
     
     var body: some View {
         VStack {
-            Toggle(isOn: $expanded) {
-                Text(dependency.name.pretty)
-                    .foregroundColor(machineBinding == nil ? .red : config.textColor)
-                    .background(focus == dependency.filePath ? config.highlightColour : Color.clear)
-            }
-            .toggleStyle(ArrowToggleStyle())
-            .onTapGesture {
-                focus = dependency.filePath
-            }
+            VStack {
+                Toggle(isOn: $expanded) {
+                    Text(dependency.name.pretty)
+                        .foregroundColor(machineBinding == nil ? .red : config.textColor)
+                }
+                .toggleStyle(ArrowToggleStyle())
+                .onTapGesture {
+                    focus = dependency.filePath
+                }
+                
+            }.padding(.leading, 10)
+            .background(focus == dependency.filePath ? config.highlightColour : Color.clear)
             if expanded, let binding = machineBinding {
                 ForEach(Array(binding.wrappedValue.dependencies.enumerated()), id: \.1.filePath) { (index, dep) in
                     DependencyView(
                         expanded: Binding(get: { expandedDependencies[dep.filePath] ?? false }, set: { expandedDependencies[dep.filePath] = $0 }),
                         focus: $focus,
                         dependency: binding.dependencies[index],
-                        machines: $machines
+                        machines: $machines,
+                        padding: padding + padding
                     )
                 }
             }
         }
-        .padding(.leading, 10)
-        .clipped()
     }
 }
 
@@ -90,7 +94,8 @@ struct DependencyView_Previews: PreviewProvider {
                 expanded: $expanded,
                 focus: $focus,
                 dependency: $dependency,
-                machines: $machines
+                machines: $machines,
+                padding: 10
             ).environmentObject(config)
         }
         
