@@ -18,7 +18,7 @@ import AttributeViews
 
 public struct AttributeGroupsView: View {
     
-    @ObservedObject var machine: Ref<Machine>
+    @Binding var machine: Machine
     let path: Attributes.Path<Machine, [AttributeGroup]>
     let label: String
     
@@ -26,8 +26,8 @@ public struct AttributeGroupsView: View {
     
     @State var selection: AttributeGroup? = nil
     
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String) {
-        self.machine = machine
+    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String) {
+        self._machine = machine
         self.path = path
         self.label = label
     }
@@ -39,7 +39,7 @@ public struct AttributeGroupsView: View {
                 .foregroundColor(config.textColor)
             TabView(selection: Binding($selection)) {
                 ForEach(Array(machine[path: path].value.enumerated()), id: \.1.name) { (index, group) in
-                    AttributeGroupView<Config>(root: machine.asBinding, path: path[index], label: group.name)
+                    AttributeGroupView<Config>(root: $machine, path: path[index], label: group.name)
                         .padding(.horizontal, 10)
                         .tabItem {
                             Text(group.name.pretty)
@@ -50,10 +50,10 @@ public struct AttributeGroupsView: View {
                         HStack {
                             VStack(alignment: .leading) {
                                 CollectionView<Config>(
-                                    root: machine.asBinding,
+                                    root: $machine,
                                     path: Machine.path.dependencyAttributes,
                                     label: "Machine Dependencies",
-                                    type: machine.value.dependencyAttributeType
+                                    type: machine.dependencyAttributeType
                                 )
                             }
                             Spacer()

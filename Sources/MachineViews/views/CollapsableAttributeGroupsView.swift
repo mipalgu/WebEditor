@@ -17,17 +17,11 @@ import Utilities
 
 struct CollapsableAttributeGroupsView: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    
+    @Binding var machine: Machine
     let path: Attributes.Path<Machine, [AttributeGroup]>
-    let label: String
-    
-    @Binding var collapsed: Bool
-    
-    let collapseLeft: Bool
-    let buttonSize: CGFloat
-    let buttonWidth: CGFloat
-    let buttonHeight: CGFloat
+    let label: String = ""
+    @State var collapsed: Bool = false
+    let collapseLeft: Bool = false
     
     @EnvironmentObject var config: Config
     
@@ -38,41 +32,41 @@ struct CollapsableAttributeGroupsView: View {
                     if !collapseLeft {
                         Button(action: { collapsed = true }) {
                             Image(systemName: "arrow.right.to.line.alt")
-                                .font(.system(size: buttonSize, weight: .regular))
-                                .frame(width: buttonWidth, height: buttonHeight)
+                                .font(.system(size: 20, weight: .regular))
+                                .frame(width: 30, height: 30)
                         }.buttonStyle(PlainButtonStyle())
                     }
                     Spacer()
                     Text(label.capitalized)
                         .font(config.fontTitle3)
                         .padding(.horizontal, 10)
-                        .padding(collapseLeft ? .leading : .trailing, buttonWidth / 2.0 + 10.0)
+                        .padding(collapseLeft ? .leading : .trailing, 25.0)
                     Spacer()
                     if collapseLeft {
                         
                         Button(action: { collapsed = true }) {
                             Image(systemName: "arrow.left.to.line.alt")
-                                .font(.system(size: buttonSize, weight: .regular))
-                                .frame(width: buttonWidth, height: buttonHeight)
+                                .font(.system(size: 20, weight: .regular))
+                                .frame(width: 30, height: 30)
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                AttributeGroupsView(machine: machine, path: path, label: "")
+                AttributeGroupsView(machine: machine, path: path, label: label)
             } else {
                 HStack {
                     if collapseLeft {
                             Spacer()
                             Button(action: { collapsed = false }) {
                                 Image(systemName: "arrow.right.to.line.alt")
-                                    .font(.system(size: buttonSize, weight: .regular))
-                                    .frame(width: buttonWidth, height: buttonHeight)
+                                    .font(.system(size: 20, weight: .regular))
+                                    .frame(width: 30, height: 30)
                             }.buttonStyle(PlainButtonStyle())
                         
                     } else {
                         Button(action: { collapsed = false }) {
                             Image(systemName: "arrow.left.to.line.alt")
-                                .font(.system(size: buttonSize, weight: .regular))
-                                .frame(width: buttonWidth, height: buttonHeight)
+                                .font(.system(size: 20, weight: .regular))
+                                .frame(width: 30, height: 30)
                         }.buttonStyle(PlainButtonStyle())
                         Spacer()
                     }
