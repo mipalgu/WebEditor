@@ -17,35 +17,123 @@ import Utilities
 
 struct MainView: View {
     
-    @ObservedObject var editorViewModel: EditorViewModel
+    enum Root {
+        
+        var arrangement: Arrangement {
+            get {
+                switch self {
+                case .arrangement(let arrangement):
+                    return arrangement
+                default:
+                    fatalError("Attempting to fetch arrangment from \(self)")
+                }
+            } set {
+                self = .arrangement(newValue)
+            }
+        }
+        
+        var machine: Machine {
+            get {
+                switch self {
+                case .machine(let machine):
+                    return machine
+                default:
+                    fatalError("Attempting to fetch machine from \(self)")
+                }
+            } set {
+                self = .machine(newValue)
+            }
+        }
+        
+        case arrangement(Arrangement)
+        case machine(Machine)
+        
+    }
     
-    @ObservedObject var machineViewModel: MachineViewModel
+    @State var focus: URL
     
-    @Binding var type: ViewType
+    @State var viewModels: [URL: MachineViewModel2] = [:]
     
-    @Binding var creatingTransitions: Bool
+    @State var machines: [URL: Machine] = [:]
+    
+    @State var root: Root
+    
+    init(arrangement: Arrangement) {
+        self._focus = State(initialValue: arrangement.filePath)
+        self._root = State(initialValue: .arrangement(arrangement))
+    }
+    
+    init(machine: Machine) {
+        self._focus = State(initialValue: machine.filePath)
+        self._root = State(initialValue: .machine(machine))
+    }
     
     @EnvironmentObject var config: Config
     
+    func machine(for url: URL) -> Machine? {
+        if let machine = machines[url] {
+            return machine
+        }
+        guard let loadedMachine = try? Machine(filePath: url) else {
+            return nil
+        }
+        machines[url] = loadedMachine
+        return loadedMachine
+    }
+    
     var body: some View {
-        switch type {
-        case .machine, .transition:
-            MachineView(machine: $machineViewModel.machine)
-                .coordinateSpace(name: "MAIN_VIEW")
-                
-        case .state(let stateIndex):
-//            StateEditView(viewModel: machineViewModel.states[stateIndex])
-//                .onTapGesture(count: 2) {
-//                    editorViewModel.changeMainView()
-//                    editorViewModel.changeFocus()
-//                }
-//                .background(KeyEventHandling(keyDownCallback: {
-//                    if $0.keyCode == 53 {
-//                        editorViewModel.changeMainView()
-//                        editorViewModel.changeFocus()
-//                    }
-//                }, keyUpCallback: { _ in }))
-            EmptyView()
+        HStack {
+            switch root {
+            case .arrangement:
+                DependenciesView(
+                    focus: $focus,
+                    name: .constant(root.arrangement.name),
+                    url: $root.arrangement.filePath,
+                    dependencies: $root.arrangement.rootMachines,
+                    machines: $machines
+                )
+            case .machine:
+                DependenciesView(
+                    focus: $focus,
+                    name: .constant(root.machine.name),
+                    url: $root.machine.filePath,
+                    dependencies: $root.machine.dependencies,
+                    machines: $machines
+                )
+            }
+            switch root {
+            case .arrangement(let arrangement):
+                if focus == arrangement.filePath {
+                    EmptyView() // Arrangement view.
+                } else if machines[focus] != nil {
+                    MachineView(machine: Binding(get: { machines[focus]!}, set: { machines[focus] = $0}))
+                }
+            case .machine(let rootMachine):
+                if focus == rootMachine.filePath {
+                    MachineView(machine: $root.machine)
+                } else if machine(for: focus) != nil {
+                    MachineView(machine: Binding(get: { machines[focus]!}, set: { machines[focus] = $0}))
+                }
+            }
+        }
+    }
+}
+
+struct MainView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        let config = Config()
+        
+        var body: some View {
+            MainView(machine: Machine.initialSwiftMachine()).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
         }
     }
 }
