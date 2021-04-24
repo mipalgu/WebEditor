@@ -41,7 +41,9 @@ final class MachineViewModel2: ObservableObject {
     
     var originalDimensions: (CGFloat, CGFloat) = (0.0, 0.0)
     
-//    private var cache: IDCache<Machines.State> = IDCache()
+    private var cache: IDCache<Machines.State> = IDCache()
+    
+    private var transitionCache: IDCache<Transition> = IDCache()
     
     init(data: [StateName: StateViewModel2] = [:], transitions: [StateName: [TransitionViewModel2]] = [:]) {
         self.data = data
@@ -556,7 +558,17 @@ final class MachineViewModel2: ObservableObject {
         data[name] = nil
     }
     
-//    func states(machine: Machine) -> [Row<>]
+    func states(_ machine: Machine) -> [Row<Machines.State>] {
+        machine.states.enumerated().map {
+            Row(id: cache.id(for: $1), index: $0, data: $1)
+        }
+    }
+    
+    func transitions(_ row: Row<Machines.State>) -> [Row<Transition>] {
+        row.data.transitions.enumerated().map {
+            Row(id: transitionCache.id(for: $1), index: $0, data: $1)
+        }
+    }
     
 }
 
@@ -599,56 +611,56 @@ public struct MachineView: View {
                 if let curve = creatingCurve {
                     ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                 }
-                ForEach(Array(machine.states.indices), id: \.self) { index in
-                    ForEach(Array(machine.states[index].transitions.indices), id: \.self) { t in
+                ForEach(viewModel.states(machine), id: \.self) { stateRow in
+                    ForEach(viewModel.transitions(stateRow), id: \.self) { transitionRow in
                         TransitionView(
                             machine: $machine,
-                            path: machine.path.states[index].transitions[t],
-                            curve: viewModel.binding(to: t, originatingFrom: machine.states[index]).curve,
-                            strokeNumber: UInt8(t),
-                            focused: config.focusedObjects.selected.contains(.transition(stateIndex: index, transitionIndex: t))
+                            path: machine.path.states[stateRow.index].transitions[transitionRow.index],
+                            curve: viewModel.binding(to: transitionRow.index, originatingFrom: stateRow.data).curve,
+                            strokeNumber: UInt8(transitionRow.index),
+                            focused: config.focusedObjects.selected.contains(.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index))
                         )
                         .clipped()
                         .onTapGesture {
-                            config.focusedObjects = FocusedObjects(principle: .transition(stateIndex: index, transitionIndex: t))
+                            config.focusedObjects = FocusedObjects(principle: .transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index))
                         }
                     }
                 }
-                ForEach(Array(machine.states.indices), id: \.self) { index in
-                    if viewModel.viewModel(for: machine.states[index]).isText {
+                ForEach(viewModel.states(machine), id: \.self) { row in
+                    if viewModel.viewModel(for: row.data).isText {
                         VStack {
-                            Text(machine.states[index].name)
+                            Text(row.data.name)
                                 .font(config.fontBody)
                                 .frame(width: textWidth, height: textHeight)
                             //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
                         }
                         .coordinateSpace(name: coordinateSpace)
-                        .position(viewModel.clampPosition(point: viewModel.viewModel(for: machine.states[index]).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height, dx: textWidth / 2.0, dy: textHeight / 2.0))
+                        .position(viewModel.clampPosition(point: viewModel.viewModel(for: row.data).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height, dx: textWidth / 2.0, dy: textHeight / 2.0))
                     } else {
                         VStack {
                             StateView(
                                 machine: $machine,
-                                path: machine.path.states[index],
+                                path: machine.path.states[row.index],
                                 expanded: Binding(
-                                    get: { viewModel.viewModel(for: machine.states[index]).expanded },
-                                    set: { viewModel.assignExpanded(for: machine.states[index], newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
+                                    get: { viewModel.viewModel(for: row.data).expanded },
+                                    set: { viewModel.assignExpanded(for: row.data, newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
                                 ),
-                                collapsedActions: viewModel.binding(to: machine.states[index]).collapsedActions,
-                                focused: config.focusedObjects.selected.contains(.state(stateIndex: index))
+                                collapsedActions: viewModel.binding(to: row.data).collapsedActions,
+                                focused: config.focusedObjects.selected.contains(.state(stateIndex: row.index))
                             ).frame(
-                                width: viewModel.viewModel(for: machine.states[index]).width,
-                                height: viewModel.viewModel(for: machine.states[index]).height
+                                width: viewModel.viewModel(for: row.data).width,
+                                height: viewModel.viewModel(for: row.data).height
                             )
                         }.coordinateSpace(name: coordinateSpace)
-                        .position(viewModel.viewModel(for: machine.states[index]).location)
-                        .onTapGesture { config.focusedObjects = FocusedObjects(principle: .state(stateIndex: index)) }
-                        .gesture(viewModel.createTransitionGesture(forView: self, forState: index))
-                        .gesture(viewModel.dragStateGesture(forView: self, forState: index, size: geometry.size))
-                        .onChange(of: viewModel.viewModel(for: machine.states[index]).expanded) { _ in
-                            self.viewModel.updateTransitionLocations(source: machine.states[index], states: machine.states)
+                        .position(viewModel.viewModel(for: row.data).location)
+                        .onTapGesture { config.focusedObjects = FocusedObjects(principle: .state(stateIndex: row.index)) }
+                        .gesture(viewModel.createTransitionGesture(forView: self, forState: row.index))
+                        .gesture(viewModel.dragStateGesture(forView: self, forState: row.index, size: geometry.size))
+                        .onChange(of: viewModel.viewModel(for: row.data).expanded) { _ in
+                            self.viewModel.updateTransitionLocations(source: row.data, states: machine.states)
                         }
                         .contextMenu {
-                            Button("Delete", action: { viewModel.deleteState(view: self, at: index) }).keyboardShortcut(.delete)
+                            Button("Delete", action: { viewModel.deleteState(view: self, at: row.index) }).keyboardShortcut(.delete)
                         }
                     }
                 }
