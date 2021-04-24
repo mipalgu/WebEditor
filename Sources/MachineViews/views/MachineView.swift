@@ -14,6 +14,7 @@ import SwiftUI
 import Machines
 import Attributes
 import Utilities
+import GUUI
 //import AttributeViews
 
 final class MachineViewModel2: ObservableObject {

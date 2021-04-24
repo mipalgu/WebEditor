@@ -8,6 +8,7 @@
 import Foundation
 import Transformations
 import Utilities
+import GUUI
 
 struct Curve {
     

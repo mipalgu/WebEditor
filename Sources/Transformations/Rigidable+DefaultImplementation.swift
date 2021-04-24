@@ -11,7 +11,7 @@ import TokamakShim
 import SwiftUI
 #endif
 
-import Utilities
+import GUUI
 
 public protocol _Rigidable {
     
