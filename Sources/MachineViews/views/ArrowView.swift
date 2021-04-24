@@ -58,7 +58,7 @@ struct ArrowView: View {
         return CGPoint(x: center.x + CGFloat(length * cos(point1Theta)), y: center.y + CGFloat(length * sin(point1Theta)))
     }
     
-    @EnvironmentObject public var config: Config
+//    @EnvironmentObject public var config: Config
     
     var body: some View {
         ZStack {
@@ -72,14 +72,14 @@ struct ArrowView: View {
             }
             .stroke(colour, lineWidth: 2)
             //.coordinateSpace(name: "MAIN_VIEW")
-            .foregroundColor(config.textColor)
+//            .foregroundColor(config.textColor)
             if strokeNumber > 0 {
                 ForEach(1...strokeNumber, id: \.self) { number in
                     Path { strokePath in
                         strokePath.move(to: strokePoint0(number: number))
                         strokePath.addLine(to: strokePoint1(number: number))
                     }
-                    .stroke(config.textColor, lineWidth: 2)
+                    .stroke(Color.black, lineWidth: 2)
                     .border(Color.black, width: 2)
                     //.coordinateSpace(name: "MAIN_VIEW")
                 }

@@ -21,7 +21,7 @@ struct StateEditView: View {
     @Binding var machine: Machine
     let path: Attributes.Path<Machine, Machines.State>
     
-    @EnvironmentObject var config: Config
+//    @EnvironmentObject var config: Config
     
     var body: some View {
         GeometryReader { geometry in
@@ -29,12 +29,15 @@ struct StateEditView: View {
                 VStack(alignment: .leading) {
                     LineView<Config>(root: $machine, path: path.name, label: "State Name")
                         .multilineTextAlignment(.center)
-                        .font(config.fontTitle2)
-                        .background(config.fieldColor)
-                        .foregroundColor(config.textColor)
+//                        .font(config.fontTitle2)
+//                        .background(config.fieldColor)
+//                        .foregroundColor(config.textColor)
                     ForEach(Array(machine[keyPath: path.keyPath].actions.enumerated()), id: \.1) { (index, action) in
                         CodeView<Config, Text>(root: $machine, path: path.actions[index].implementation, language: .swift) {
-                            let view = Text(action.name + ":").font(config.fontHeading).underline().foregroundColor(config.stateTextColour)
+                            let view = Text(action.name + ":")
+                                //.font(config.fontHeading)
+                                .underline()
+//                                .foregroundColor(config.stateTextColour)
                             if action.implementation.isEmpty {
                                 return view.italic()
                             } else {

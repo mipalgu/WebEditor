@@ -21,7 +21,7 @@ public struct CanvasView: View {
     
     @Binding var machine: Machine
     
-    @EnvironmentObject var config: Config
+//    @EnvironmentObject var config: Config
     
     @StateObject var viewModel: MachineViewModel2
     
@@ -68,7 +68,7 @@ public struct CanvasView: View {
                             .gesture(viewModel.selectionBoxGesture(forView: self))
                             .gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
                         if let curve = creatingCurve {
-                            ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
+                            ArrowView(curve: .constant(curve), strokeNumber: 0, colour: Color.blue)
                         }
                         ForEach(viewModel.states(machine), id: \.self) { stateRow in
                             ForEach(viewModel.transitions(stateRow), id: \.self) { transitionRow in
@@ -90,7 +90,7 @@ public struct CanvasView: View {
                             if viewModel.viewModel(for: row.data).isText {
                                 VStack {
                                     Text(row.data.name)
-                                        .font(config.fontBody)
+//                                        .font(config.fontBody)
                                         .frame(width: textWidth, height: textHeight)
                                     //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
                                 }
@@ -127,7 +127,7 @@ public struct CanvasView: View {
                         }
                         if selectedBox != nil {
                             Rectangle()
-                                .background(config.highlightColour)
+                                .background(Color.blue)
                                 .opacity(0.2)
                                 .frame(width: width(point0: selectedBox!.0, point1: selectedBox!.1), height: height(point0: selectedBox!.0, point1: selectedBox!.1))
                                 .position(center(point0: selectedBox!.0, point1: selectedBox!.1))

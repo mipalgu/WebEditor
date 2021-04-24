@@ -89,7 +89,7 @@ struct StateExpandedView<TitleView: View>: View {
         self.focused = focused
     }
     
-    @EnvironmentObject var config: Config
+//    @EnvironmentObject var config: Config
     
     var body: some View {
         Group {
@@ -102,12 +102,13 @@ struct StateExpandedView<TitleView: View>: View {
                         }
                     }
                 }
-            }.padding(10).background(config.stateColour)
+            }.padding(10)
+//                .background(config.stateColour)
         }
         .clipShape(RoundedRectangle(cornerRadius: 20.0))
         .overlay(
             RoundedRectangle(cornerRadius: 20)
-                .stroke(focused ? config.highlightColour : config.borderColour, lineWidth: 2)
+                .stroke(Color.black, lineWidth: 2)
         )
         
     }

@@ -28,7 +28,7 @@ struct TransitionView: View {
     
     var focused: Bool
     
-    @EnvironmentObject var config: Config
+//    @EnvironmentObject var config: Config
     
     var body: some View {
         ZStack {
@@ -36,7 +36,7 @@ struct TransitionView: View {
                 curve: $curve,
                 strokeNumber: strokeNumber,
                 editing: focused,
-                color: focused ? config.highlightColour : config.textColor,
+                color: focused ? Color.blue : Color.black,
                 label: { Text(machine[keyPath: path.keyPath].condition ?? "") } ,
                 editLabel: { LineView<Config>(
                     value: Binding(
