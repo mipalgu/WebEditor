@@ -14,6 +14,7 @@ import SwiftUI
 import Machines
 import Attributes
 import Utilities
+//import AttributeViews
 
 final class MachineViewModel2: ObservableObject {
     
@@ -38,6 +39,8 @@ final class MachineViewModel2: ObservableObject {
     var movingTargetTransitions: [StateName: [Int: CGPoint]] = [:]
     
     var originalDimensions: (CGFloat, CGFloat) = (0.0, 0.0)
+    
+//    private var cache: IDCache<Machines.State> = IDCache()
     
     init(data: [StateName: StateViewModel2] = [:], transitions: [StateName: [TransitionViewModel2]] = [:]) {
         self.data = data
@@ -315,9 +318,9 @@ final class MachineViewModel2: ObservableObject {
         return targetName
     }
     
-    private func findMovingTransitions(state: StateName, states: [Machines.State]) {
+    private func findMovingTransitions(state: StateName, states: [Machines.State]) -> ([CGPoint], [StateName: [Int: CGPoint]]) {
         movingState = state
-        movingSourceTransitions = transitionViewModels(for: state).map { $0.curve.point0 }
+        let movingSources = transitionViewModels(for: state).map { $0.curve.point0 }
         var targetTransitions: [StateName: [Int: CGPoint]] = [:]
         states.forEach { stateObj in
             let name = stateObj.name
@@ -331,7 +334,7 @@ final class MachineViewModel2: ObservableObject {
             targetTransitions[name] = targetsDictionary
             
         }
-        movingTargetTransitions = targetTransitions
+        return (movingSources, targetTransitions)
     }
     
     private func displaceTransitions(sourceTransitions: [CGPoint], targetTransitions: [StateName: [Int: CGPoint]], dS: CGSize, frame: CGSize, source: StateName) {
@@ -357,7 +360,9 @@ final class MachineViewModel2: ObservableObject {
     func moveTransitions(state: StateName, gesture: DragGesture.Value, states: [Machines.State], frame: CGSize) {
         if !isStateMoving {
             isStateMoving = true
-            findMovingTransitions(state: state, states: states)
+            let effected = findMovingTransitions(state: state, states: states)
+            movingSourceTransitions = effected.0
+            movingTargetTransitions = effected.1
             return
         }
         displaceTransitions(sourceTransitions: movingSourceTransitions, targetTransitions: movingTargetTransitions, dS: gesture.translation, frame: frame, source: movingState)
@@ -381,7 +386,9 @@ final class MachineViewModel2: ObservableObject {
         let model = viewModel(for: state)
         if !isStateMoving {
             isStateMoving = true
-            findMovingTransitions(state: state, states: states)
+            let effected = findMovingTransitions(state: state, states: states)
+            movingSourceTransitions = effected.0
+            movingTargetTransitions = effected.1
             originalDimensions = (model.width, model.height)
             return
         }
@@ -501,6 +508,55 @@ final class MachineViewModel2: ObservableObject {
             }
     }
     
+    func updateTransitionsSources(source: Machines.State) {
+        let sourceViewModel = self.viewModel(for: source)
+        guard
+            let ts = transitions[source.name],
+            ts.count == source.transitions.count
+        else {
+            return
+        }
+        let newViewModels = source.transitions.indices.map {
+            TransitionViewModel2(
+                source: sourceViewModel,
+                sourcePoint: transitions[source.name]![$0].curve.point0,
+                target: viewModel(for: source.transitions[$0].target),
+                targetPoint: transitions[source.name]![$0].curve.point3
+            )
+        }
+        transitions[source.name] = newViewModels
+    }
+    
+    func updateTransitionsTargets(source: Machines.State, states: [Machines.State]) {
+        let targets = findMovingTransitions(state: source.name, states: states).1
+        targets.keys.forEach { name in
+            targets[name]!.forEach { (index, _) in
+                transitions[name]![index] = TransitionViewModel2(
+                    source: viewModel(for: name),
+                    sourcePoint: transitions[name]![index].curve.point0,
+                    target: viewModel(for: source.name),
+                    targetPoint: transitions[name]![index].curve.point3
+                )
+            }
+        }
+    }
+    
+    func updateTransitionLocations(source: Machines.State, states: [Machines.State]) {
+        updateTransitionsSources(source: source)
+        updateTransitionsTargets(source: source, states: states)
+    }
+    
+    func deleteState(view: MachineView, at index: Int) {
+        let name = view.machine.states[index].name
+        guard let _ = try? view.machine.deleteState(atIndex: index) else {
+            print(view.machine.errorBag.errors(includingDescendantsForPath: view.machine.path.states[index]))
+            return
+        }
+        data[name] = nil
+    }
+    
+//    func states(machine: Machine) -> [Row<>]
+    
 }
 
 public struct MachineView: View {
@@ -587,9 +643,12 @@ public struct MachineView: View {
                         .onTapGesture { config.focusedObjects = FocusedObjects(principle: .state(stateIndex: index)) }
                         .gesture(viewModel.createTransitionGesture(forView: self, forState: index))
                         .gesture(viewModel.dragStateGesture(forView: self, forState: index, size: geometry.size))
-//                        .onChange(of: viewModel.viewModel(for: machine.sates[index]).expanded) {
-//
-//                        }
+                        .onChange(of: viewModel.viewModel(for: machine.states[index]).expanded) { _ in
+                            self.viewModel.updateTransitionLocations(source: machine.states[index], states: machine.states)
+                        }
+                        .contextMenu {
+                            Button("Delete", action: { viewModel.deleteState(view: self, at: index) }).keyboardShortcut(.delete)
+                        }
                     }
                 }
                 if selectedBox != nil {
