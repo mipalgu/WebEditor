@@ -17,7 +17,7 @@ import Utilities
 
 public struct MainView: View {
     
-    enum Root {
+    enum Root: Equatable {
         
         var arrangement: Arrangement {
             get {
@@ -82,41 +82,44 @@ public struct MainView: View {
     }
     
     public var body: some View {
-        HStack {
-            switch root {
-            case .arrangement:
-                DependenciesView(
-                    focus: $focus,
-                    name: .constant(root.arrangement.name),
-                    url: $root.arrangement.filePath,
-                    dependencies: $root.arrangement.rootMachines,
-                    machines: $machines
-                )
-            case .machine:
-                DependenciesView(
-                    focus: $focus,
-                    name: .constant(root.machine.name),
-                    url: $root.machine.filePath,
-                    dependencies: $root.machine.dependencies,
-                    machines: $machines
-                )
-            }
-            switch root {
-            case .arrangement(let arrangement):
-                if focus == arrangement.filePath {
-                    EmptyView() // Arrangement view.
-                } else if machines[focus] != nil {
-                    MachineView(machine: Binding(get: { machines[focus]!}, set: { machines[focus] = $0}))
+        VStack(alignment: .leading) {
+            HStack {
+                switch root {
+                case .arrangement:
+                    DependenciesView(
+                        focus: $focus,
+                        name: .constant(root.arrangement.name),
+                        url: $root.arrangement.filePath,
+                        dependencies: $root.arrangement.rootMachines,
+                        machines: $machines
+                    )
+                case .machine:
+                    DependenciesView(
+                        focus: $focus,
+                        name: .constant(root.machine.name),
+                        url: $root.machine.filePath,
+                        dependencies: $root.machine.dependencies,
+                        machines: $machines
+                    )
                 }
-            case .machine(let rootMachine):
-                if focus == rootMachine.filePath {
-                    MachineView(machine: $root.machine)
-                } else if machine(for: focus) != nil {
-                    MachineView(machine: Binding(get: { machines[focus]!}, set: { machines[focus] = $0}))
+                switch root {
+                case .arrangement(let arrangement):
+                    if focus == arrangement.filePath {
+                        EmptyView() // Arrangement view.
+                    } else if machines[focus] != nil {
+                        MachineView(machine: Binding(get: { machines[focus]!}, set: { machines[focus] = $0}))
+                    }
+                case .machine(let rootMachine):
+                    if focus == rootMachine.filePath {
+                        MachineView(machine: $root.machine)
+                    } else if machine(for: focus) != nil {
+                        MachineView(machine: Binding(get: { machines[focus]!}, set: { machines[focus] = $0}))
+                    }
                 }
             }
         }
     }
+    
 }
 
 struct MainView_Previews: PreviewProvider {

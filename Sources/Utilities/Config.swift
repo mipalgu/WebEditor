@@ -99,7 +99,7 @@ public final class Config: ObservableObject, AttributeViewConfig {
     
     @Published public var rightPaneStartPoint: CGFloat = 200.0
     
-    @Published public var alertView: DialogType = .none
+    //@Published public var alertView: DialogType = .none
     
 //    @Published public var focusedObjects: FocusedObjects = FocusedObjects()
     

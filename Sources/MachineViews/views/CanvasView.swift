@@ -52,90 +52,93 @@ public struct CanvasView: View {
     }
     
     public var body: some View {
-        if let editState = edittingState {
-            StateEditView(machine: $machine, path: machine.path.states[editState])
-                .contextMenu {
-                    Button("Go Back", action: { edittingState = nil }).keyboardShortcut(.escape)
-                }
-        } else {
-            GeometryReader { (geometry: GeometryProxy) in
-                ZStack {
-                    GridView()
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .onTapGesture(count: 2) { try? machine.newState() }
-                        .onTapGesture { selectedObjects = [] }
-                        .gesture(viewModel.selectionBoxGesture(forView: self))
-                        .gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
-                    if let curve = creatingCurve {
-                        ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
+        Group {
+            if let editState = edittingState {
+                StateEditView(machine: $machine, path: machine.path.states[editState])
+                    .contextMenu {
+                        Button("Go Back", action: { edittingState = nil }).keyboardShortcut(.escape)
                     }
-                    ForEach(viewModel.states(machine), id: \.self) { stateRow in
-                        ForEach(viewModel.transitions(stateRow), id: \.self) { transitionRow in
-                            TransitionView(
-                                machine: $machine,
-                                path: machine.path.states[stateRow.index].transitions[transitionRow.index],
-                                curve: viewModel.binding(to: transitionRow.index, originatingFrom: stateRow.data).curve,
-                                strokeNumber: UInt8(transitionRow.index),
-                                focused: selectedObjects.contains(.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index))
-                            )
-                            .clipped()
-                            .onTapGesture {
-                                focus = .transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index)
-                                selectedObjects = [.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index)]
-                            }
+            } else {
+                GeometryReader { (geometry: GeometryProxy) in
+                    ZStack {
+                        GridView()
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .onTapGesture(count: 2) { try? machine.newState() }
+                            .onTapGesture { selectedObjects = [] }
+                            .gesture(viewModel.selectionBoxGesture(forView: self))
+                            .gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
+                        if let curve = creatingCurve {
+                            ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                         }
-                    }
-                    ForEach(viewModel.states(machine), id: \.self) { row in
-                        if viewModel.viewModel(for: row.data).isText {
-                            VStack {
-                                Text(row.data.name)
-                                    .font(config.fontBody)
-                                    .frame(width: textWidth, height: textHeight)
-                                //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
-                            }
-                            .coordinateSpace(name: coordinateSpace)
-                            .position(viewModel.clampPosition(point: viewModel.viewModel(for: row.data).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height, dx: textWidth / 2.0, dy: textHeight / 2.0))
-                        } else {
-                            VStack {
-                                StateView(
+                        ForEach(viewModel.states(machine), id: \.self) { stateRow in
+                            ForEach(viewModel.transitions(stateRow), id: \.self) { transitionRow in
+                                TransitionView(
                                     machine: $machine,
-                                    path: machine.path.states[row.index],
-                                    expanded: Binding(
-                                        get: { viewModel.viewModel(for: row.data).expanded },
-                                        set: { viewModel.assignExpanded(for: row.data, newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
-                                    ),
-                                    collapsedActions: viewModel.binding(to: row.data).collapsedActions,
-                                    focused: selectedObjects.contains(.state(stateIndex: row.index))
-                                ).frame(
-                                    width: viewModel.viewModel(for: row.data).width,
-                                    height: viewModel.viewModel(for: row.data).height
+                                    path: machine.path.states[stateRow.index].transitions[transitionRow.index],
+                                    curve: viewModel.binding(to: transitionRow.index, originatingFrom: stateRow.data).curve,
+                                    strokeNumber: UInt8(transitionRow.index),
+                                    focused: selectedObjects.contains(.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index))
                                 )
-                            }.coordinateSpace(name: coordinateSpace)
-                            .position(viewModel.viewModel(for: row.data).location)
-                            .onTapGesture(count: 2) { edittingState = row.index }
-                            .onTapGesture { selectedObjects = [.state(stateIndex: row.index)] }
-                            .gesture(viewModel.createTransitionGesture(forView: self, forState: row.index))
-                            .gesture(viewModel.dragStateGesture(forView: self, forState: row.index, size: geometry.size))
-                            .onChange(of: viewModel.viewModel(for: row.data).expanded) { _ in
-                                self.viewModel.updateTransitionLocations(source: row.data, states: machine.states)
-                            }
-                            .contextMenu {
-                                Button("Delete", action: { viewModel.deleteState(view: self, at: row.index); selectedObjects = [] }).keyboardShortcut(.delete)
+                                .clipped()
+                                .onTapGesture {
+                                    focus = .transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index)
+                                    selectedObjects = [.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index)]
+                                }
                             }
                         }
-                    }
-                    if selectedBox != nil {
-                        Rectangle()
-                            .background(config.highlightColour)
-                            .opacity(0.2)
-                            .frame(width: width(point0: selectedBox!.0, point1: selectedBox!.1), height: height(point0: selectedBox!.0, point1: selectedBox!.1))
-                            .position(center(point0: selectedBox!.0, point1: selectedBox!.1))
-                    }
-                }.frame(width: geometry.size.width, height: geometry.size.height)
-                .clipped()
+                        ForEach(viewModel.states(machine), id: \.self) { row in
+                            if viewModel.viewModel(for: row.data).isText {
+                                VStack {
+                                    Text(row.data.name)
+                                        .font(config.fontBody)
+                                        .frame(width: textWidth, height: textHeight)
+                                    //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
+                                }
+                                .coordinateSpace(name: coordinateSpace)
+                                .position(viewModel.clampPosition(point: viewModel.viewModel(for: row.data).location, frameWidth: geometry.size.width, frameHeight: geometry.size.height, dx: textWidth / 2.0, dy: textHeight / 2.0))
+                            } else {
+                                VStack {
+                                    StateView(
+                                        machine: $machine,
+                                        path: machine.path.states[row.index],
+                                        expanded: Binding(
+                                            get: { viewModel.viewModel(for: row.data).expanded },
+                                            set: { viewModel.assignExpanded(for: row.data, newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
+                                        ),
+                                        collapsedActions: viewModel.binding(to: row.data).collapsedActions,
+                                        focused: selectedObjects.contains(.state(stateIndex: row.index))
+                                    ).frame(
+                                        width: viewModel.viewModel(for: row.data).width,
+                                        height: viewModel.viewModel(for: row.data).height
+                                    )
+                                }.coordinateSpace(name: coordinateSpace)
+                                .position(viewModel.viewModel(for: row.data).location)
+                                .onTapGesture(count: 2) { edittingState = row.index }
+                                .onTapGesture { selectedObjects = [.state(stateIndex: row.index)] }
+                                .gesture(viewModel.createTransitionGesture(forView: self, forState: row.index))
+                                .gesture(viewModel.dragStateGesture(forView: self, forState: row.index, size: geometry.size))
+                                .onChange(of: viewModel.viewModel(for: row.data).expanded) { _ in
+                                    self.viewModel.updateTransitionLocations(source: row.data, states: machine.states)
+                                }
+                                .contextMenu {
+                                    Button("Delete", action: { viewModel.deleteState(view: self, at: row.index); selectedObjects = [] }).keyboardShortcut(.delete)
+                                }
+                            }
+                        }
+                        if selectedBox != nil {
+                            Rectangle()
+                                .background(config.highlightColour)
+                                .opacity(0.2)
+                                .frame(width: width(point0: selectedBox!.0, point1: selectedBox!.1), height: height(point0: selectedBox!.0, point1: selectedBox!.1))
+                                .position(center(point0: selectedBox!.0, point1: selectedBox!.1))
+                        }
+                    }.frame(width: geometry.size.width, height: geometry.size.height)
+                    .clipped()
+                }
             }
         }
     }
+    
 }
 
 struct MachineView_Previews: PreviewProvider {

@@ -15,12 +15,21 @@ import Machines
 import Attributes
 import Utilities
 import AttributeViews
+import GUUI
 
 public struct AttributeGroupsView: View {
+    
+    class Temp {
+        
+        var idCache = IDCache<AttributeGroup>()
+        
+    }
     
     @Binding var machine: Machine
     let path: Attributes.Path<Machine, [AttributeGroup]>
     let label: String
+    
+    let temp = Temp()
     
     @EnvironmentObject var config: Config
     
@@ -32,17 +41,23 @@ public struct AttributeGroupsView: View {
         self.label = label
     }
     
+    var groups: [Row<AttributeGroup>] {
+        machine[keyPath: path.path].enumerated().map {
+            Row(id: temp.idCache.id(for: $1), index: $0, data: $1)
+        }
+    }
+    
     public var body: some View {
         VStack {
             Text(label.capitalized)
                 .font(.title3)
                 .foregroundColor(config.textColor)
             TabView(selection: Binding($selection)) {
-                ForEach(Array(machine[keyPath: path.path].enumerated()), id: \.1.name) { (index, group) in
-                    AttributeGroupView<Config>(root: $machine, path: path[index], label: group.name)
+                ForEach(groups, id: \.self) { row in
+                    AttributeGroupView<Config>(root: $machine, path: path[row.index], label: row.data.name)
                         .padding(.horizontal, 10)
                         .tabItem {
-                            Text(group.name.pretty)
+                            Text(row.data.name.pretty)
                         }
                 }
                 ScrollView(.vertical, showsIndicators: true) {
