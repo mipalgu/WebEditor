@@ -18,7 +18,7 @@ struct MachineView: View {
     
     @Binding var machine: Machine
     
-    @State var focus: Focus
+    @State var focus: Focus = .machine
     
     var path: Attributes.Path<Machine, [AttributeGroup]> {
         switch focus {
