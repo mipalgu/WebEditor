@@ -48,13 +48,17 @@ struct TransitionViewModel2: Identifiable, Positionable   {
     }
     
     init(source: StateViewModel2, sourcePoint: CGPoint, target: StateViewModel2, targetPoint: CGPoint) {
-        
         var sourceEdge = source.findEdge(point: sourcePoint)
-        let targetEdge = target.findEdge(point: targetPoint)
-        let targetSourceEdge = source.findEdgeCenter(degrees: targetEdge<)
-        let sourceCenter = source.findEdgeCenter(degrees: sourceEdge<)
+        var targetEdge = target.findEdge(point: targetPoint)
+        let targetSourceEdge = source.findEdgeCenter(degrees: (targetEdge - source.location)<)
+        let sourceCenter = source.findEdgeCenter(degrees: (sourceEdge - source.location)<)
         if targetSourceEdge != sourceCenter {
             sourceEdge = source.moveToEdge(point: sourcePoint, edge: targetSourceEdge)
+        }
+        let targetsPreferredEdge = target.findEdgeCenter(degrees: (sourceEdge - target.location)<)
+        let targetEdgeCenter = target.findEdgeCenter(degrees: (targetEdge - target.location)<)
+        if targetEdgeCenter != targetsPreferredEdge {
+            targetEdge = target.moveToEdge(point: targetEdge, edge: targetsPreferredEdge)
         }
         self.init(source: sourceEdge, target: targetEdge)
     }
