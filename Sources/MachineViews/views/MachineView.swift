@@ -660,7 +660,7 @@ public struct MachineView: View {
                             self.viewModel.updateTransitionLocations(source: row.data, states: machine.states)
                         }
                         .contextMenu {
-                            Button("Delete", action: { viewModel.deleteState(view: self, at: row.index) }).keyboardShortcut(.delete)
+                            Button("Delete", action: { viewModel.deleteState(view: self, at: row.index); config.focusedObjects = FocusedObjects() }).keyboardShortcut(.delete)
                         }
                     }
                 }
