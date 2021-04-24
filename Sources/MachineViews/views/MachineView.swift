@@ -451,11 +451,11 @@ final class MachineViewModel2: ObservableObject {
     
     func createTransitionGesture(forView view: MachineView, forState index: Int) -> some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
-            .modifiers(.control)
+            .modifiers(.command)
             .onChanged {
                 view.creatingCurve = Curve(source: $0.startLocation, target: $0.location)
             }
-            .modifiers(.control)
+            .modifiers(.command)
             .onEnded {
                 view.creatingCurve = nil
                 guard let targetName = self.createNewTransition(sourceState: view.machine.states[index].name, source: $0.startLocation, target: $0.location) else {
