@@ -47,29 +47,29 @@ public struct EditorView: View {
             VStack {
                 HStack {
                     GeometryReader{ reader in
-                        DependenciesView(
-                            machines: $machines,
-                            rootMachines: $rootMachines,
-                            currentIndex: $currentIndex,
-                            collapsed: Binding(
-                                get: { viewModel.leftPaneCollapsed },
-                                set: { self.viewModel.leftPaneCollapsed = $0 }
-                            ),
-                            collapseLeft: true,
-                            buttonSize: viewModel.buttonSize,
-                            buttonWidth: viewModel.buttonWidth,
-                            buttonHeight: viewModel.buttonHeight
-                        )
-                            .frame(width: viewModel.leftPaneWidth)
-                            .position(x: viewModel.leftPaneWidth / 2.0, y: reader.size.height / 2.0)
-                        Divider()
-                            .frame(width: viewModel.dividerWidth, height: reader.size.height)
-                            .background(config.borderColour)
-                            .position(x: viewModel.leftDividerLocation, y: reader.size.height / 2.0)
-                            .gesture(DragGesture(minimumDistance: 0.0)
-                                .onChanged({ viewModel.dragLeftDividor(gesture: $0) })
-                                .onEnded({ viewModel.finishDraggingLeft(gesture: $0) })
-                            )
+//                        DependenciesView(
+//                            machines: $machines,
+//                            rootMachines: $rootMachines,
+//                            currentIndex: $currentIndex,
+//                            collapsed: Binding(
+//                                get: { viewModel.leftPaneCollapsed },
+//                                set: { self.viewModel.leftPaneCollapsed = $0 }
+//                            ),
+//                            collapseLeft: true,
+//                            buttonSize: viewModel.buttonSize,
+//                            buttonWidth: viewModel.buttonWidth,
+//                            buttonHeight: viewModel.buttonHeight
+//                        )
+//                            .frame(width: viewModel.leftPaneWidth)
+//                            .position(x: viewModel.leftPaneWidth / 2.0, y: reader.size.height / 2.0)
+//                        Divider()
+//                            .frame(width: viewModel.dividerWidth, height: reader.size.height)
+//                            .background(config.borderColour)
+//                            .position(x: viewModel.leftDividerLocation, y: reader.size.height / 2.0)
+//                            .gesture(DragGesture(minimumDistance: 0.0)
+//                                .onChanged({ viewModel.dragLeftDividor(gesture: $0) })
+//                                .onEnded({ viewModel.finishDraggingLeft(gesture: $0) })
+//                            )
                         MainView(editorViewModel: viewModel, machineViewModel: machineViewModel, type: $viewModel.mainView, creatingTransitions: $creatingTransitions)
                             .position(CGPoint(x: viewModel.leftDividerLocation + viewModel.getMainViewWidth(width: reader.size.width) / 2.0, y: reader.size.height / 2.0))
                             .frame(width: viewModel.getMainViewWidth(width: reader.size.width))

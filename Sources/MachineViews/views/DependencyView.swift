@@ -19,7 +19,7 @@ struct DependencyView: View {
     
     @Binding var expanded: Bool
     
-    @Binding var focus: Dependency
+    @Binding var focus: URL
     
     @Binding var dependency: MachineDependency
     
@@ -47,11 +47,13 @@ struct DependencyView: View {
     var body: some View {
         VStack {
             Toggle(isOn: $expanded) {
-                Text(dependency.name.pretty).foregroundColor(machineBinding == nil ? .red : config.fieldColor)
+                Text(dependency.name.pretty)
+                    .foregroundColor(machineBinding == nil ? .red : config.textColor)
+                    .background(focus == dependency.filePath ? config.highlightColour : Color.clear)
             }
             .toggleStyle(ArrowToggleStyle())
             .onTapGesture {
-                focus = .machine(dependency.filePath)
+                focus = dependency.filePath
             }
             if expanded, let binding = machineBinding {
                 ForEach(Array(binding.wrappedValue.dependencies.enumerated()), id: \.1.filePath) { (index, dep) in
@@ -75,9 +77,9 @@ struct DependencyView_Previews: PreviewProvider {
         
         @State var expanded: Bool = false
         
-        @State var focus: Dependency = .machine(URL(fileURLWithPath: "/Users/callum/src/MiPal/GUNao/fsms/nao/SwiftMachines/SoccerPlayer/Player.machine"))
+        @State var focus: URL = Machine.initialSwiftMachine().filePath
         
-        @State var dependency: MachineDependency = MachineDependency(name: "Initial Swift Machine", filePath: URL(fileURLWithPath: "/Users/callum/src/MiPal/GUNao/fsms/nao/SwiftMachines/SoccerPlayer/Player.machine"))
+        @State var dependency: MachineDependency = MachineDependency(name: "Initial Swift Machine", filePath: Machine.initialSwiftMachine().filePath)
         
         @State var machines: [URL: Machine] = [:]
         

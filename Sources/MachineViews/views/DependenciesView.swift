@@ -17,31 +17,75 @@ import Utilities
 
 struct DependenciesView: View {
     
-    @Binding var machines: [Ref<Machine>]
+    @Binding var focus: URL
     
-    @Binding var rootMachines: [MachineDependency]
+    @Binding var name: String
     
-    @Binding var currentIndex: Int
+    @Binding var url: URL
     
-    @Binding var collapsed: Bool
+    @Binding var dependencies: [MachineDependency]
     
-    let collapseLeft: Bool
-    let buttonSize: CGFloat
-    let buttonWidth: CGFloat
-    let buttonHeight: CGFloat
-    
-    let label = "Dependencies"
-    
-    @State var rootMachinesExpanded: Set<String> = Set()
-    
-    var rootMachineModels: [Ref<Machine>] {
-        rootMachines.compactMap { rootMachine in  machines.first(where: { $0.value.name == rootMachine.name }) }
-    }
+    @Binding var machines: [URL: Machine]
     
     @EnvironmentObject var config: Config
     
+    @State var expanded: Bool = false
+    
+    @State var expandedDependencies: [URL: Bool] = [:]
+    
     var body: some View {
-        EmptyView()
+        VStack {
+            Toggle(isOn: $expanded) {
+                Text(name.pretty)
+                    .background(focus == url ? config.highlightColour : Color.clear)
+            }
+            .toggleStyle(ArrowToggleStyle())
+            if expanded {
+                ForEach(Array(dependencies.enumerated()), id: \.1) { (index, dep) in
+                    DependencyView(
+                        expanded: Binding(get: { expandedDependencies[dep.filePath] ?? false }, set: { expandedDependencies[dep.filePath] = $0 }),
+                        focus: $focus,
+                        dependency: $dependencies[index],
+                        machines: $machines
+                    )
+                }
+            }
+        }.padding(.leading, 10)
     }
     
+}
+
+struct Dependencies_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        @State var focus: URL = Machine.initialSwiftMachine().filePath
+        
+        @State var name: String = "Initial Swift Machine"
+        
+        @State var url: URL = Machine.initialSwiftMachine().filePath
+        
+        @State var dependencies: [MachineDependency] = Machine.initialSwiftMachine().dependencies
+        
+        @State var machines: [URL: Machine] = [:]
+        
+        let config = Config()
+        
+        var body: some View {
+            DependenciesView(
+                focus: $focus,
+                name: $name,
+                url: $url,
+                dependencies: $dependencies,
+                machines: $machines
+            ).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
+        }
+    }
 }
