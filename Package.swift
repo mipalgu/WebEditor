@@ -18,14 +18,15 @@ let package = Package(
     ],
     dependencies: ui + [
         .package(url: "ssh://git.mipal.net/Users/Shared/git/Machines.git", .branch("meta")),
-        .package(url: "ssh://git.mipal.net/Users/Shared/git/AttributeViews.git", .branch("master"))
+        .package(url: "ssh://git.mipal.net/Users/Shared/git/AttributeViews.git", .branch("master")),
+        .package(name: "GUUI", url: "ssh://git.mipal.net/Users/Shared/git/GUUI.git", .branch("master"))
     ],
     targets: [
         .target(name: "Utilities", dependencies: products + ["Machines", "AttributeViews"]),
         .target(name: "Transformations", dependencies: products + ["Utilities"]),
         .target(
             name: "MachineViews",
-            dependencies: products + ["Machines", "AttributeViews", "Utilities", "Transformations"]
+            dependencies: products + ["Machines", "AttributeViews", "Utilities", "Transformations", "GUUI"]
         ),
         .target(
             name: "WebEditor",
