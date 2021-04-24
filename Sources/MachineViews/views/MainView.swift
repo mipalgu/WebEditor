@@ -15,7 +15,7 @@ import Machines
 import Attributes
 import Utilities
 
-struct MainView: View {
+public struct MainView: View {
     
     enum Root {
         
@@ -58,12 +58,12 @@ struct MainView: View {
     
     @State var root: Root
     
-    init(arrangement: Arrangement) {
+    public init(arrangement: Arrangement) {
         self._focus = State(initialValue: arrangement.filePath)
         self._root = State(initialValue: .arrangement(arrangement))
     }
     
-    init(machine: Machine) {
+    public init(machine: Machine) {
         self._focus = State(initialValue: machine.filePath)
         self._root = State(initialValue: .machine(machine))
     }
@@ -81,7 +81,7 @@ struct MainView: View {
         return loadedMachine
     }
     
-    var body: some View {
+    public var body: some View {
         HStack {
             switch root {
             case .arrangement:
