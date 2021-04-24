@@ -51,7 +51,7 @@ struct CollapsableAttributeGroupsView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                AttributeGroupsView(machine: machine, path: path, label: label)
+                AttributeGroupsView(machine: $machine, path: path, label: label)
             } else {
                 HStack {
                     if collapseLeft {

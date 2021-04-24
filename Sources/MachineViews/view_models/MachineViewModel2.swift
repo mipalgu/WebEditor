@@ -451,7 +451,7 @@ final class MachineViewModel2: ObservableObject {
         return Set(focusedStates + focusedTransitions)
     }
     
-    func createTransitionGesture(forView view: MachineView, forState index: Int) -> some Gesture {
+    func createTransitionGesture(forView view: CanvasView, forState index: Int) -> some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
             .modifiers(.command)
             .onChanged {
@@ -474,7 +474,7 @@ final class MachineViewModel2: ObservableObject {
             }
     }
     
-    func dragStateGesture(forView view: MachineView, forState index: Int, size: CGSize) -> some Gesture {
+    func dragStateGesture(forView view: CanvasView, forState index: Int, size: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
             .onChanged {
                 self.handleDrag(state: view.machine.states[index], gesture: $0, frameWidth: size.width, frameHeight: size.height)
@@ -489,7 +489,7 @@ final class MachineViewModel2: ObservableObject {
             }
     }
     
-    func selectionBoxGesture(forView view: MachineView) -> some Gesture {
+    func selectionBoxGesture(forView view: CanvasView) -> some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
             .modifiers(.control)
             .onChanged {
@@ -497,7 +497,7 @@ final class MachineViewModel2: ObservableObject {
             }
             .modifiers(.control)
             .onEnded {
-                view.config.focusedObjects = FocusedObjects(selected: self.findObjectsInSelection(corner0: $0.startLocation, corner1: $0.location, states: view.machine.states))
+                view.selectedObjects = self.findObjectsInSelection(corner0: $0.startLocation, corner1: $0.location, states: view.machine.states)
                 view.selectedBox = nil
             }
     }
@@ -549,7 +549,7 @@ final class MachineViewModel2: ObservableObject {
         updateTransitionsTargets(source: source, states: states)
     }
     
-    func deleteState(view: MachineView, at index: Int) {
+    func deleteState(view: CanvasView, at index: Int) {
         let name = view.machine.states[index].name
         guard let _ = try? view.machine.deleteState(atIndex: index) else {
             print(view.machine.errorBag.errors(includingDescendantsForPath: view.machine.path.states[index]))

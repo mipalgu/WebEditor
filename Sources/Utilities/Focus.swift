@@ -14,14 +14,13 @@ import Machines
 import Attributes
 
 public enum Focus {
-    case arrangement(arrangement: Binding<Arrangement>)
-    case machine(machine: Binding<Machine>)
-    case state(state: Binding<Machines.State>)
-    case transition(transition: Binding<Transition>)
+    case machine
+    case state(stateIndex: Int)
+    case transition(stateIndex: Int, transitionIndex: Int)
 }
 //
-//public enum DialogType {
-//    case saveMachine(id: UUID)
-//    case openMachine
-//    case none
-//}
+public enum DialogType {
+    case saveMachine(id: UUID)
+    case openMachine
+    case none
+}

@@ -10,6 +10,8 @@ import TokamakShim
 #else
 import SwiftUI
 #endif
+import Attributes
+import Utilities
 import Machines
 
 struct MachineView: View {
@@ -18,21 +20,20 @@ struct MachineView: View {
     
     @State var focus: Focus
     
-    var path: Machines.Path {
+    var path: Attributes.Path<Machine, [AttributeGroup]> {
         switch focus {
-            case .machine(focusedMachine): return focusedMachine.path
-            case .state(state): return machine.path.states[machine.states.firstIndex(where: { $0 == state })!]
-            default: return machine.path
+            case .machine:
+                return machine.path.attributes
+            case .state(let stateIndex):
+                return machine.path.states[stateIndex].attributes
+            case .transition(let stateIndex, let transitionIndex):
+                return machine.path.states[stateIndex].transitions[transitionIndex].attributes
         }
     }
     
     var body: some View {
         HStack {
-            switch focus {
-                case .machine(machine): CanvasView(machine: machine)
-                case .state(state): StateEditView()
-                default: EmptyView()
-            }
+            CanvasView(machine: $machine, focus: $focus)
             CollapsableAttributeGroupsView(machine: $machine, path: path)
         }
     }

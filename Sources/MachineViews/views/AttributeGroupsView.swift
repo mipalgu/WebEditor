@@ -38,7 +38,7 @@ public struct AttributeGroupsView: View {
                 .font(.title3)
                 .foregroundColor(config.textColor)
             TabView(selection: Binding($selection)) {
-                ForEach(Array(machine[path: path].value.enumerated()), id: \.1.name) { (index, group) in
+                ForEach(Array(machine[keyPath: path.path].enumerated()), id: \.1.name) { (index, group) in
                     AttributeGroupView<Config>(root: $machine, path: path[index], label: group.name)
                         .padding(.horizontal, 10)
                         .tabItem {
