@@ -141,18 +141,18 @@ public struct CanvasView: View {
     
 }
 
-struct MachineView_Previews: PreviewProvider {
+struct CanvasView_Previews: PreviewProvider {
     
     struct Preview: View {
         
         @State var machine: Machine = Machine.initialSwiftMachine()
         
-        @State var creatingTransitions: Bool = false
+        @State var focus: Focus = .machine
         
         let config = Config()
         
         var body: some View {
-            MachineView(machine: $machine, focus: .machine).environmentObject(config)
+            CanvasView(machine: $machine, focus: $focus).environmentObject(config)
         }
         
     }
