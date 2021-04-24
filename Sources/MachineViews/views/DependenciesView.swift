@@ -56,6 +56,7 @@ struct DependenciesView: View {
                     )
                 }
             }
+            Spacer()
         }
     }
     
