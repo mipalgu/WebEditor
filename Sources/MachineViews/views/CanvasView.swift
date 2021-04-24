@@ -21,25 +21,25 @@ public struct CanvasView: View {
     
     @Binding var machine: Machine
     
-    @State var creatingCurve: Curve? = nil
-    
-    @State var edittingState: Int? = nil
-    
     @EnvironmentObject var config: Config
     
     @StateObject var viewModel: MachineViewModel2
+    
+    @Binding var focus: Focus
+    
+    @State var selectedBox: (CGPoint, CGPoint)?
+    
+    @State var selectedObjects: Set<ViewType> = []
+    
+    @State var creatingCurve: Curve? = nil
+    
+    @State var edittingState: Int? = nil
     
     let coordinateSpace = "MAIN_VIEW"
     
     let textWidth: CGFloat = 50.0
     
     let textHeight: CGFloat = 20.0
-    
-    @State var selectedBox: (CGPoint, CGPoint)?
-    
-    @State var selectedObjects: Set<ViewType> = []
-    
-    @Binding var focus: Focus
     
     public init(machine: Binding<Machine>, focus: Binding<Focus>) {
         self._machine = machine
