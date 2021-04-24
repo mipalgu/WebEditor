@@ -105,7 +105,7 @@ public struct MainView: View {
                 switch root {
                 case .arrangement(let arrangement):
                     if focus == arrangement.filePath {
-                        EmptyView() // Arrangement view.
+                        ArrangementView(arrangement: $root.arrangement)
                     } else if machines[focus] != nil {
                         MachineView(machine: Binding(get: { machines[focus]!}, set: { machines[focus] = $0}))
                     }
