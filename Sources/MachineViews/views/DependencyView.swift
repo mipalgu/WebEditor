@@ -17,65 +17,93 @@ import Utilities
 
 struct DependencyView: View {
     
-    @Binding var machines: [Ref<Machine>]
+    @Binding var expanded: Bool
     
-    @Binding var currentIndex: Int
+    @Binding var focus: URL
     
-    @Binding var dependency: Ref<Machine>
+    @Binding var dependency: MachineDependency
     
-    @State var collapsed: Bool = true
+    @Binding var machines: [URL: Machine]
+    
+    @State var expandedDependencies: [URL: Bool] = [:]
+    
+    let padding: CGFloat
     
     @EnvironmentObject var config: Config
     
+    func machine(for url: URL) -> Machine? {
+        if let machine = machines[url] {
+            return machine
+        }
+        guard let loadedMachine = try? Machine(filePath: url) else {
+            return nil
+        }
+        machines[url] = loadedMachine
+        return loadedMachine
+    }
+    
+    var machineBinding: Binding<Machine>? {
+        Binding(Binding(get: { machine(for: dependency.filePath) }, set: { machines[dependency.filePath] = $0 }))
+    }
+    
     var body: some View {
         VStack {
-            HStack {
-                if machines.count > 0 {
-                    if !collapsed {
-                        Button(action: { collapsed = true }) {
-                            Image(systemName: "arrowtriangle.down.fill")
-                                .font(.system(size: 8.0, weight: .regular))
-                                .frame(width: 15.0, height: 15.0)
-                        }.buttonStyle(PlainButtonStyle())
-                        
-                    } else {
-                        Button(action: { collapsed = false }) {
-                            Image(systemName: "arrowtriangle.right.fill")
-                                .font(.system(size: 8.0, weight: .regular))
-                                .frame(width: 15.0, height: 15.0)
-                        }.buttonStyle(PlainButtonStyle())
-                    }
+            VStack {
+                Toggle(isOn: $expanded) {
+                    Text(dependency.name.pretty)
+                        .foregroundColor(machineBinding == nil ? .red : config.textColor)
                 }
-                DependencyLabelView(
-                    machines: $machines,
-                    currentIndex: $currentIndex,
-                    name: Binding(
-                        get: { dependency.value.name },
-                        set: {_ in }
-                    ),
-                    collapsed: Binding(get: { collapsed }, set: { collapsed = $0 })
-                )
-                Spacer()
-            }
-            if !collapsed {
-                if machines.count > 0 {
-                    ForEach(Array(dependency.value.dependencies.indices), id: \.self) { (index: Int) -> AnyView in
-                        guard let machine = machines.first(where: { $0.value.name == dependency.value.dependencies[index].name }) else {
-                            return AnyView(EmptyView())
-                        }
-                        return AnyView(DependencyView(
-                            machines: $machines,
-                            currentIndex: $currentIndex,
-                            dependency: Binding(get: { machine }, set: { _ in })
-                        ))
-                    }
-                } else {
-                    Text("Nothing")
+                .toggleStyle(ArrowToggleStyle())
+                .onTapGesture {
+                    focus = dependency.filePath
+                }
+                
+            }.padding(.leading, 10)
+            .background(focus == dependency.filePath ? config.highlightColour : Color.clear)
+            if expanded, let binding = machineBinding {
+                ForEach(Array(binding.wrappedValue.dependencies.enumerated()), id: \.1.filePath) { (index, dep) in
+                    DependencyView(
+                        expanded: Binding(get: { expandedDependencies[dep.filePath] ?? false }, set: { expandedDependencies[dep.filePath] = $0 }),
+                        focus: $focus,
+                        dependency: binding.dependencies[index],
+                        machines: $machines,
+                        padding: padding + padding
+                    )
                 }
             }
         }
-        .padding(.leading, 10)
-        .clipped()
     }
 }
 
+struct DependencyView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        @State var expanded: Bool = false
+        
+        @State var focus: URL = Machine.initialSwiftMachine().filePath
+        
+        @State var dependency: MachineDependency = MachineDependency(name: "Initial Swift Machine", filePath: Machine.initialSwiftMachine().filePath)
+        
+        @State var machines: [URL: Machine] = [:]
+        
+        let config = Config()
+        
+        var body: some View {
+            DependencyView(
+                expanded: $expanded,
+                focus: $focus,
+                dependency: $dependency,
+                machines: $machines,
+                padding: 10
+            ).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
+        }
+    }
+}
