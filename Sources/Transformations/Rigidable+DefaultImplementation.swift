@@ -57,8 +57,12 @@ public extension Rigidable where Self: Positionable {
         )
     }
     
+    func isWithin(point: CGPoint, padding: CGFloat) -> Bool {
+        point.x >= left.x - padding && point.x <= right.x + padding && point.y >= top.y - padding && point.y <= bottom.y + padding
+    }
+    
     func isWithin(point: CGPoint) -> Bool {
-        point.x >= left.x && point.x <= right.x && point.y >= top.y && point.y <= bottom.y
+        isWithin(point: point, padding: 0)
     }
     
     func findEdge(degrees: CGFloat) -> CGPoint {

@@ -27,6 +27,8 @@ public protocol Rigidable: Positionable {
     
     func isWithin(point: CGPoint) -> Bool
     
+    func isWithin(point: CGPoint, padding: CGFloat) -> Bool
+    
     func findEdge(degrees: CGFloat) -> CGPoint
     
     func findEdge(radians: CGFloat) -> CGPoint

@@ -251,24 +251,25 @@ public extension Collapsable where Self: _Collapsable {
         return CGPoint(x: x, y: y)
     }
     
-    func isWithin(point: CGPoint) -> Bool {
+    func isWithin(point: CGPoint, padding: CGFloat) -> Bool {
         if expanded {
-            return point.x >= left.x && point.x <= right.x && point.y >= top.y && point.y <= bottom.y
+            return point.x >= left.x - padding && point.x <= right.x + padding && point.y >= top.y - padding && point.y <= bottom.y + padding
         }
         let dx = point.x - location.x
         let dy = point.y - location.y
         let angle = atan2(Double(dy), Double(dx)) / Double.pi * 180.0
         let edge = findEdge(degrees: CGFloat(angle))
         if angle >= 90 {
-            return point.x >= edge.x && point.y <= edge.y
+            return point.x >= edge.x - padding && point.y <= edge.y + padding
         }
         if angle <= -90 {
-            return point.x >= edge.x && point.y >= edge.y
+            return point.x >= edge.x - padding && point.y >= edge.y - padding
         }
         if angle >= 0 {
-            return point.x <= edge.x && point.y <= edge.y
+            return point.x <= edge.x + padding && point.y <= edge.y + padding
         }
-        return point.x <= edge.x && point.y >= edge.y
+        return point.x <= edge.x + padding && point.y >= edge.y - padding
+        
     }
     
     func findEdgeCenter(degrees: CGFloat) -> CGPoint {

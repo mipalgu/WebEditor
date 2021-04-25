@@ -118,13 +118,10 @@ final class MachineViewModel2: ObservableObject {
             let viewModels = trans[state]!
             rectifiedTransitions[state] = viewModels.map { transition in
                 guard
+                    stateViewModels[state] != nil,
                     let target = stateViewModels.values.first(where: {
-                        transition.curve.point3.x >= $0.location.x - $0.width / 2.0 - 20 &&
-                            transition.curve.point3.x <= $0.location.x + $0.width / 2.0 + 20 &&
-                            transition.curve.point3.y >= $0.location.y - $0.height / 2.0 - 20 &&
-                            transition.curve.point3.y <= $0.location.y + $0.height / 2.0 + 20
-                    }),
-                    stateViewModels[state] != nil
+                        $0.isWithin(point: transition.curve.point3, padding: 20.0)
+                    })
                 else {
                     return transition
                 }
