@@ -88,6 +88,13 @@ public struct CanvasView: View {
                                     focus = .transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index)
                                     selectedObjects = [.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index)]
                                 }
+                                .contextMenu {
+                                    Button(
+                                        "Straighten",
+                                        action: {
+                                            viewModel.straighten(state: machine.states[stateRow.index].name, transition: transitionRow.index)
+                                        })
+                                }
                             }
                         }
                         ForEach(viewModel.states(machine), id: \.self) { row in

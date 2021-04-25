@@ -590,4 +590,15 @@ final class MachineViewModel2: ObservableObject {
         }
     }
     
+    func straighten(state: StateName, transition: Int) {
+        guard
+            let ts = transitions[state],
+            ts.count > transition
+        else {
+            return
+        }
+        let viewModel = ts[transition]
+        transitions[state]![transition] = TransitionViewModel2(source: viewModel.curve.point0, target: viewModel.curve.point3)
+    }
+    
 }

@@ -56,9 +56,17 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeD
     
     var isStretchingY: Bool = false
     
-    let horizontalEdgeTolerance: CGFloat = 20.0
+    let _collapsedTolerance: CGFloat = 0
     
-    let verticalEdgeTolerance: CGFloat = 20.0
+    let _expandedTolerance: CGFloat = 20.0
+    
+    var horizontalEdgeTolerance: CGFloat {
+        expanded ? _expandedTolerance : _collapsedTolerance
+    }
+    
+    var verticalEdgeTolerance: CGFloat {
+        horizontalEdgeTolerance
+    }
     
     var collapsedActions: [String: Bool] = [:]
     
