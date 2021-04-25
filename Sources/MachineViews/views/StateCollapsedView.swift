@@ -20,18 +20,18 @@ struct StateCollapsedView<TitleView: View>: View {
     let titleView: () -> TitleView
     
     
-//    @EnvironmentObject var config: Config
+    @EnvironmentObject var config: Config
     
     var body: some View {
         ZStack {
-            Color.black
+            config.stateColour
             VStack {
                 titleView()
             }.padding(15)
         }.background(Ellipse().stroke()).clipShape(Ellipse())
         .overlay(
             Ellipse()
-                .stroke(Color.black, lineWidth: 2)
+                .stroke(focused ? config.highlightColour : config.borderColour, lineWidth: 2)
         )
     }
     

@@ -33,7 +33,7 @@ struct StateView: View {
         self.focused = focused
     }
     
-//    @EnvironmentObject var config: Config
+    @EnvironmentObject var config: Config
     
     var body: some View {
         Group {

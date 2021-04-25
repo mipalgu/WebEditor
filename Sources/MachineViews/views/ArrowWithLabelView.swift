@@ -27,7 +27,7 @@ struct ArrowWithLabelView<LabelView: View, EditLabelView: View>: View {
     
     let editLabel: () -> EditLabelView
     
-//    @EnvironmentObject public var config: Config
+    @EnvironmentObject public var config: Config
     
     var center: CGPoint {
         let dx = (curve.point2.x - curve.point1.x) / 2.0

@@ -37,7 +37,6 @@ struct CollapsableAttributeGroupsView: View {
     
     @State var startWidth: CGFloat = 200.0
     
-    
     @EnvironmentObject var config: Config
     
     var body: some View {

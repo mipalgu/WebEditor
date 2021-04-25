@@ -73,14 +73,14 @@ struct StateTitleView: View {
     let path: Attributes.Path<Machine, String>
     @Binding var expanded: Bool
     
-//    @EnvironmentObject var config: Config
+    @EnvironmentObject var config: Config
     
     var body: some View {
         HStack {
             Toggle(isOn: $expanded) {
                 LineView<Config>(root: $machine, path: path, label: "State Name")
                     .multilineTextAlignment(.center)
-//                    .font(config.fontBody.bold())
+                    .font(config.fontBody.bold())
             }.toggleStyle(ArrowToggleStyle())
             Spacer()
         }

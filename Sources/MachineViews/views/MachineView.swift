@@ -41,7 +41,7 @@ struct MachineView: View {
     var body: some View {
         HStack {
             CanvasView(machine: $machine, focus: $focus)
-            CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, width: $attributesWidth, minWidth: attributesMinWidth, maxWidth: attributesMaxWidth)
+            CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, width: $attributesWidth, minWidth: attributesMinWidth, maxWidth: attributesMaxWidth, label: "Attributes")
                 .frame(width: !attributesCollapsed ? attributesWidth : 50.0)
         }
     }

@@ -31,7 +31,7 @@ public struct AttributeGroupsView: View {
     
     let temp = Temp()
     
-//    @EnvironmentObject var config: Config
+    @EnvironmentObject var config: Config
     
     @State var selection: AttributeGroup? = nil
     
@@ -51,7 +51,7 @@ public struct AttributeGroupsView: View {
         VStack {
             Text(label.capitalized)
                 .font(.title3)
-//                .foregroundColor(config.textColor)
+                .foregroundColor(config.textColor)
             TabView(selection: Binding($selection)) {
                 ForEach(groups, id: \.self) { row in
                     AttributeGroupView<Config>(root: $machine, path: path[row.index], label: row.data.name)
