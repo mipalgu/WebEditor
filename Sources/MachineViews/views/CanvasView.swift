@@ -57,6 +57,7 @@ public struct CanvasView: View {
                 StateEditView(machine: $machine, path: machine.path.states[editState])
                     .onTapGesture(count: 2) {
                         edittingState = nil
+                        focus = .machine
                     }
                     .contextMenu {
                         Button("Go Back", action: { edittingState = nil }).keyboardShortcut(.escape)
@@ -67,7 +68,7 @@ public struct CanvasView: View {
                         GridView()
                             .frame(width: geometry.size.width, height: geometry.size.height)
                             .onTapGesture(count: 2) { try? machine.newState() }
-                            .onTapGesture { selectedObjects = [] }
+                            .onTapGesture { selectedObjects = []; focus = .machine }
                             .gesture(viewModel.selectionBoxGesture(forView: self))
                             .gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
                         if let curve = creatingCurve {
@@ -116,8 +117,8 @@ public struct CanvasView: View {
                                     )
                                 }.coordinateSpace(name: coordinateSpace)
                                 .position(viewModel.viewModel(for: row.data).location)
-                                .onTapGesture(count: 2) { edittingState = row.index }
-                                .onTapGesture { selectedObjects = [.state(stateIndex: row.index)] }
+                                .onTapGesture(count: 2) { edittingState = row.index; focus = .state(stateIndex: row.index) }
+                                .onTapGesture { selectedObjects = [.state(stateIndex: row.index)]; focus = .state(stateIndex: row.index) }
                                 .gesture(viewModel.createTransitionGesture(forView: self, forState: row.index))
                                 .gesture(viewModel.dragStateGesture(forView: self, forState: row.index, size: geometry.size))
                                 .onChange(of: viewModel.viewModel(for: row.data).expanded) { _ in

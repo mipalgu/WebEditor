@@ -42,7 +42,7 @@ struct StateView: View {
                     StateTitleView(machine: $machine, path: path.name, expanded: $expanded)
                 }
             } else {
-                StateCollapsedView {
+                StateCollapsedView(focused: focused) {
                     StateTitleView(machine: $machine, path: path.name, expanded: $expanded)
                 }
             }

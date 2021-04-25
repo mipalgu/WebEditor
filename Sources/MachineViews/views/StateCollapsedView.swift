@@ -19,7 +19,6 @@ struct StateCollapsedView<TitleView: View>: View {
     
     let titleView: () -> TitleView
     
-    
     @EnvironmentObject var config: Config
     
     var body: some View {
