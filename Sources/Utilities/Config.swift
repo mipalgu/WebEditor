@@ -91,6 +91,17 @@ public final class Config: ObservableObject, AttributeViewConfig {
     #else
     @Published public var highlightColour = Color.blue
     #endif
+    
+    #if canImport(TokamakShim)
+    @Published public var errorColour = Color.red
+    #elseif canImport(AppKit)
+    @Published public var errorColour = Color(NSColor.systemRed)
+    #elseif canImport(UIKit)
+    @Published public var errorColour = Color(.sRGB, red: 1.0, green: 0, blue: 0, opacity: 0.5)
+    #else
+    @Published public var errorColour = Color.red
+    #endif
+    
     @Published public var fontTitle1: Font = Font.system(size: 32.0)
     @Published public var fontTitle2: Font = Font.system(size: 24.0)
     @Published public var fontTitle3: Font = Font.system(size: 20.0)

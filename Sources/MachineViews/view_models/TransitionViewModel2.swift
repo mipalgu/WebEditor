@@ -125,3 +125,14 @@ extension TransitionViewModel2 {
     }
 
 }
+
+extension TransitionViewModel2: Hashable {
+    static func == (lhs: TransitionViewModel2, rhs: TransitionViewModel2) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+}

@@ -22,6 +22,8 @@ final class MachineViewModel2: ObservableObject {
     @Published var data: [StateName: StateViewModel2]
     
     @Published var transitions: [StateName: [TransitionViewModel2]]
+    
+    @Published var unattachedTransitions: [TransitionViewModel2] = []
 //
 //    @Published var transitionOrder: [StateName: [UUID]]
     
@@ -44,6 +46,14 @@ final class MachineViewModel2: ObservableObject {
     private var cache: IDCache<Machines.State> = IDCache()
     
     private var transitionCache: IDCache<Transition> = IDCache()
+    
+    private var transitionViewModelCache: IDCache<TransitionViewModel2> = IDCache()
+    
+    var unattachedTransitionsAsRows: [Row<TransitionViewModel2>] {
+        unattachedTransitions.enumerated().map {
+            Row(id: transitionViewModelCache.id(for: $1), index: $0, data: $1)
+        }
+    }
     
     init(data: [StateName: StateViewModel2] = [:], transitions: [StateName: [TransitionViewModel2]] = [:]) {
         self.data = data
@@ -576,8 +586,12 @@ final class MachineViewModel2: ObservableObject {
             return
         }
         data[name] = nil
-        transitions[name] = []
         view.focus = .machine
+        guard let stateTransitions = transitions[name] else {
+            return
+        }
+        unattachedTransitions.append(contentsOf: stateTransitions)
+        transitions[name] = []
     }
     
     func states(_ machine: Machine) -> [Row<Machines.State>] {
