@@ -38,6 +38,8 @@ struct MachineView: View {
             CanvasView(machine: $machine, focus: $focus)
             CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, label: "Attributes")
                 .frame(width: !attributesCollapsed ? 500 : 50.0)
+                .transition(.move(edge: .trailing))
+                .animation(.linear)
         }
     }
 }

@@ -33,12 +33,13 @@ public struct AttributeGroupsView: View {
     
     @EnvironmentObject var config: Config
     
-    @State var selection: AttributeGroup? = nil
+    @Binding var selection: AttributeGroup?
     
-    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String) {
+    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String, selection: Binding<AttributeGroup?>) {
         self._machine = machine
         self.path = path
         self.label = label
+        self._selection = selection
     }
     
     var groups: [Row<AttributeGroup>] {

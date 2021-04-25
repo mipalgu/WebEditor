@@ -27,6 +27,8 @@ struct CollapsableAttributeGroupsView: View {
     
     let collapseLeft: Bool = false
     
+    @State var selection: AttributeGroup? = nil
+    
     @EnvironmentObject var config: Config
     
     var body: some View {
@@ -55,7 +57,8 @@ struct CollapsableAttributeGroupsView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                AttributeGroupsView(machine: $machine, path: path, label: label)
+                AttributeGroupsView(machine: $machine, path: path, label: label, selection: $selection)
+                    .transition(.move(edge: .trailing))
             } else {
                 HStack {
                     if collapseLeft {
