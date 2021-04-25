@@ -571,11 +571,13 @@ final class MachineViewModel2: ObservableObject {
     
     func deleteState(view: CanvasView, at index: Int) {
         let name = view.machine.states[index].name
-        guard let _ = try? view.machine.deleteState(atIndex: index) else {
+        guard let _ = try? view.$machine.wrappedValue.deleteState(atIndex: index) else {
             print(view.machine.errorBag.errors(includingDescendantsForPath: view.machine.path.states[index]))
             return
         }
         data[name] = nil
+        transitions[name] = []
+        view.focus = .machine
     }
     
     func states(_ machine: Machine) -> [Row<Machines.State>] {
