@@ -20,12 +20,7 @@ struct MachineView: View {
     
     @State var focus: Focus = .machine
     
-    @State var attributesWidth: CGFloat = 500.0
-    
     @State var attributesCollapsed: Bool = false
-    
-    let attributesMinWidth: CGFloat = 500.0
-    let attributesMaxWidth: CGFloat = 750.0
     
     var path: Attributes.Path<Machine, [AttributeGroup]> {
         switch focus {
@@ -41,8 +36,8 @@ struct MachineView: View {
     var body: some View {
         HStack {
             CanvasView(machine: $machine, focus: $focus)
-            CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, width: $attributesWidth, minWidth: attributesMinWidth, maxWidth: attributesMaxWidth, label: "Attributes")
-                .frame(width: !attributesCollapsed ? attributesWidth : 50.0)
+            CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, label: "Attributes")
+                .frame(width: !attributesCollapsed ? 500 : 50.0)
         }
     }
 }
