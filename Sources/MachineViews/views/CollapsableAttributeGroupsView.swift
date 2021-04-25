@@ -29,7 +29,7 @@ struct CollapsableAttributeGroupsView: View {
     
     let maxWidth: CGFloat
     
-    let label: String = ""
+    let label: String
     
     let collapseLeft: Bool = false
     
@@ -38,7 +38,7 @@ struct CollapsableAttributeGroupsView: View {
     @State var startWidth: CGFloat = 200.0
     
     
-//    @EnvironmentObject var config: Config
+    @EnvironmentObject var config: Config
     
     var body: some View {
         HStack {
@@ -72,7 +72,7 @@ struct CollapsableAttributeGroupsView: View {
                         }
                         Spacer()
                         Text(label.capitalized)
-    //                        .font(config.fontTitle3)
+                            .font(config.fontTitle3)
                             .padding(.horizontal, 10)
                             .padding(collapseLeft ? .leading : .trailing, 25.0)
                         Spacer()
@@ -109,15 +109,15 @@ struct CollapsableAttributeGroupsView: View {
                     Spacer()
                     if collapseLeft {
                         Text(label.capitalized)
-    //                        .font(config.fontTitle2)
+                            .font(config.fontTitle2)
                             .rotationEffect(Angle(degrees: -90.0))
-                            .frame(minWidth: 500, maxWidth: .infinity, maxHeight: 300)
+                            .frame(minWidth: 500, maxWidth: .infinity, maxHeight: 50)
                             .scaledToFit()
                     } else {
                         Text(label.capitalized)
-    //                        .font(config.fontTitle2)
+                            .font(config.fontTitle2)
                             .rotationEffect(Angle(degrees: 90.0))
-                            .frame(minWidth: 500, maxWidth: .infinity, maxHeight: 300)
+                            .frame(minWidth: 500, maxWidth: .infinity, maxHeight: 50)
                             .scaledToFit()
                     }
                     Spacer()
