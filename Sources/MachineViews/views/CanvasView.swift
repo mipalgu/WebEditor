@@ -55,6 +55,9 @@ public struct CanvasView: View {
         Group {
             if let editState = edittingState {
                 StateEditView(machine: $machine, path: machine.path.states[editState])
+                    .onTapGesture(count: 2) {
+                        edittingState = nil
+                    }
                     .contextMenu {
                         Button("Go Back", action: { edittingState = nil }).keyboardShortcut(.escape)
                     }

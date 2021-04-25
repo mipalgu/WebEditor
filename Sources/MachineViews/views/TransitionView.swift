@@ -51,7 +51,7 @@ struct TransitionView: View {
                 ) }
             )
             if focused {
-                AnchorPoint()
+                AnchorPoint(width: 20, height: 20)
                     .position(curve.point0)
                     .gesture(DragGesture().onChanged {
                         self.curve.point0 = $0.location
@@ -72,7 +72,7 @@ struct TransitionView: View {
                     }.onEnded {
                         curve.point2 = $0.location
                     })
-                AnchorPoint()
+                AnchorPoint(width: 20, height: 20)
                     .position(curve.point3)
                     .gesture(DragGesture().onChanged {
                         curve.point3 = $0.location
