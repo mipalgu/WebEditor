@@ -113,7 +113,30 @@ final class MachineViewModel2: ObservableObject {
 //                $0.point0 = stateVM.findEdge(point: $0.point0)
 //            }
 //        }
-        self.init(data: stateViewModels, transitions: trans)
+        var rectifiedTransitions: [StateName: [TransitionViewModel2]] = [:]
+        trans.keys.forEach { state in
+            let viewModels = trans[state]!
+            rectifiedTransitions[state] = viewModels.map { transition in
+                guard
+                    let target = stateViewModels.values.first(where: {
+                        transition.curve.point3.x >= $0.location.x - $0.width / 2.0 - 20 &&
+                            transition.curve.point3.x <= $0.location.x + $0.width / 2.0 + 20 &&
+                            transition.curve.point3.y >= $0.location.y - $0.height / 2.0 - 20 &&
+                            transition.curve.point3.y <= $0.location.y + $0.height / 2.0 + 20
+                    }),
+                    stateViewModels[state] != nil
+                else {
+                    return transition
+                }
+                return TransitionViewModel2(
+                    source: stateViewModels[state]!,
+                    sourcePoint: transition.curve.point0,
+                    target: target,
+                    targetPoint: transition.curve.point3
+                )
+            }
+        }
+        self.init(data: stateViewModels, transitions: rectifiedTransitions)
     }
     
     public func toPlist(machine: Machine) -> String {
