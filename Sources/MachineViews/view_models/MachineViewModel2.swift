@@ -588,6 +588,27 @@ final class MachineViewModel2: ObservableObject {
         }
     }
     
+    private func addSelected(view: CanvasView, focus: Focus, selected: ViewType) {
+        view.selectedObjects.insert(selected)
+        if view.selectedObjects.count == 1 {
+            view.focus = focus
+            return
+        }
+        view.focus = .machine
+    }
+    
+    func addSelectedState(view: CanvasView, at index: Int) {
+        addSelected(view: view, focus: .state(stateIndex: index), selected: .state(stateIndex: index))
+    }
+    
+    func addSelectedTransition(view: CanvasView, from state: Int, at index: Int) {
+        addSelected(
+            view: view,
+            focus: .transition(stateIndex: state, transitionIndex: index),
+            selected: .transition(stateIndex: state, transitionIndex: index)
+        )
+    }
+    
     func deleteState(view: CanvasView, at index: Int) {
         let name = view.machine.states[index].name
         guard let _ = try? view.$machine.wrappedValue.deleteState(atIndex: index) else {

@@ -96,6 +96,9 @@ public struct CanvasView: View {
                                     focused: selectedObjects.contains(.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index))
                                 )
                                 .clipped()
+                                .gesture(TapGesture().onEnded {
+                                    viewModel.addSelectedTransition(view: self, from: stateRow.index, at: transitionRow.index)
+                                }.modifiers(.shift))
                                 .onTapGesture {
                                     focus = .transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index)
                                     selectedObjects = [.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index)]
@@ -137,6 +140,7 @@ public struct CanvasView: View {
                                     )
                                 }.coordinateSpace(name: coordinateSpace)
                                 .position(viewModel.viewModel(for: row.data).location)
+                                .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: row.index) }.modifiers(.shift))
                                 .onTapGesture(count: 2) { edittingState = row.index; focus = .state(stateIndex: row.index) }
                                 .onTapGesture { selectedObjects = [.state(stateIndex: row.index)]; focus = .state(stateIndex: row.index) }
                                 .gesture(viewModel.createTransitionGesture(forView: self, forState: row.index))
