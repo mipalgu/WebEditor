@@ -521,11 +521,11 @@ final class MachineViewModel2: ObservableObject {
     
     func selectionBoxGesture(forView view: CanvasView) -> some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
-            .modifiers(.control)
+            .modifiers(.shift)
             .onChanged {
                 view.selectedBox = ($0.startLocation, $0.location)
             }
-            .modifiers(.control)
+            .modifiers(.shift)
             .onEnded {
                 view.selectedObjects = self.findObjectsInSelection(corner0: $0.startLocation, corner1: $0.location, states: view.machine.states)
                 view.selectedBox = nil
@@ -579,6 +579,15 @@ final class MachineViewModel2: ObservableObject {
         updateTransitionsTargets(source: source, states: states)
     }
     
+    private func removeViewFocus(view: CanvasView, focus: Focus, selected: ViewType) {
+        if view.focus == focus {
+            view.focus = .machine
+        }
+        if view.selectedObjects.contains(selected) {
+            view.selectedObjects.remove(selected)
+        }
+    }
+    
     func deleteState(view: CanvasView, at index: Int) {
         let name = view.machine.states[index].name
         guard let _ = try? view.$machine.wrappedValue.deleteState(atIndex: index) else {
@@ -586,7 +595,7 @@ final class MachineViewModel2: ObservableObject {
             return
         }
         data[name] = nil
-        view.focus = .machine
+        removeViewFocus(view: view, focus: .state(stateIndex: index), selected: .state(stateIndex: index))
         guard let stateTransitions = transitions[name] else {
             return
         }
@@ -594,10 +603,77 @@ final class MachineViewModel2: ObservableObject {
         transitions[name] = []
     }
     
+    func deleteTransition(view: CanvasView, for stateIndex: Int, at transitionIndex: Int) {
+        guard view.machine.states.count > stateIndex else {
+            return
+        }
+        let stateName = view.machine.states[stateIndex].name
+        guard
+            let ts = transitions[stateName],
+            ts.count > transitionIndex,
+            let _ = try? view.machine.deleteTransition(atIndex: transitionIndex, attachedTo: stateName)
+        else {
+            return
+        }
+        transitions[stateName]!.remove(at: transitionIndex)
+        removeViewFocus(
+            view: view,
+            focus: .transition(stateIndex: stateIndex, transitionIndex: transitionIndex),
+            selected: .transition(stateIndex: stateIndex, transitionIndex: transitionIndex)
+        )
+    }
+    
+    private func states(from selected: Set<ViewType>) -> IndexSet {
+        IndexSet(selected.compactMap {
+            switch $0 {
+            case .state(let stateIndex):
+                return stateIndex
+            default:
+                return nil
+            }
+        })
+    }
+    
+    private func transitions(from selected: Set<ViewType>, in states: [Machines.State]) -> [StateName: [Int]] {
+        var transitionIndexes: [StateName: [Int]] = [:]
+        selected.forEach {
+            switch $0 {
+            case .transition(let stateIndex, let transitionIndex):
+                let stateName = states[stateIndex].name
+                guard nil != transitionIndexes[stateName] else {
+                    transitionIndexes[stateName] = [transitionIndex]
+                    return
+                }
+                transitionIndexes[stateName]!.append(transitionIndex)
+            default:
+                return
+            }
+        }
+        return transitionIndexes
+    }
+    
+    func deleteSelected(_ view: CanvasView) {
+        let stateIndexes = states(from: view.selectedObjects)
+        let transitionIndexes = transitions(from: view.selectedObjects, in: view.machine.states)
+        transitionIndexes.keys.forEach {
+            guard let _ = try? view.machine.delete(transitions: IndexSet(transitionIndexes[$0]!), attachedTo: $0) else {
+                print(view.machine.errorBag.allErrors.description)
+                return
+            }
+        }
+        guard let _ = try? view.machine.delete(states: stateIndexes) else {
+            print(view.machine.errorBag.allErrors.description)
+            return
+        }
+        view.selectedObjects = []
+        view.focus = .machine
+    }
+    
     func states(_ machine: Machine) -> [Row<Machines.State>] {
-        machine.states.enumerated().map {
+        let x = machine.states.enumerated().map {
             Row(id: cache.id(for: $1), index: $0, data: $1)
         }
+        return x
     }
     
     func transitions(_ row: Row<Machines.State>) -> [Row<Transition>] {
@@ -615,6 +691,19 @@ final class MachineViewModel2: ObservableObject {
         }
         let viewModel = ts[transition]
         transitions[state]![transition] = TransitionViewModel2(source: viewModel.curve.point0, target: viewModel.curve.point3)
+    }
+    
+    func selectAll(_ view: CanvasView) {
+        view.selectedObjects = Set(
+            view.machine.states.indices.map {
+                ViewType.state(stateIndex: $0)
+            } +
+            view.machine.states.indices.flatMap { stateIndex in
+                view.machine.states[stateIndex].transitions.indices.map { transitionIndex in
+                    ViewType.transition(stateIndex: stateIndex, transitionIndex: transitionIndex)
+                }
+            }
+        )
     }
     
 }

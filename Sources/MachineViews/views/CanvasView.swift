@@ -67,10 +67,19 @@ public struct CanvasView: View {
                     ZStack {
                         GridView()
                             .frame(width: geometry.size.width, height: geometry.size.height)
-                            .onTapGesture(count: 2) { try? machine.newState() }
+//                            .onTapGesture(count: 2) { try? machine.newState() }
                             .onTapGesture { selectedObjects = []; focus = .machine }
                             .gesture(viewModel.selectionBoxGesture(forView: self))
                             .gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
+                            .contextMenu {
+                                VStack {
+                                    Button("New State", action: { try? machine.newState() })
+                                    Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))
+                                    if !self.selectedObjects.isEmpty {
+                                        Button("Delete Selected", action: { viewModel.deleteSelected(self) })
+                                    }
+                                }
+                            }
                         if let curve = creatingCurve {
                             ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                         }
@@ -92,11 +101,12 @@ public struct CanvasView: View {
                                     selectedObjects = [.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index)]
                                 }
                                 .contextMenu {
-                                    Button(
-                                        "Straighten",
-                                        action: {
-                                            viewModel.straighten(state: machine.states[stateRow.index].name, transition: transitionRow.index)
-                                        })
+                                    Button("Straighten",action: {
+                                        viewModel.straighten(state: machine.states[stateRow.index].name, transition: transitionRow.index)
+                                    })
+                                    Button("Delete",action: {
+                                        viewModel.deleteTransition(view: self, for: stateRow.index, at: transitionRow.index)
+                                    })
                                 }
                             }
                         }
@@ -135,7 +145,12 @@ public struct CanvasView: View {
                                     self.viewModel.updateTransitionLocations(source: row.data, states: machine.states)
                                 }
                                 .contextMenu {
-                                    Button("Delete", action: { viewModel.deleteState(view: self, at: row.index); selectedObjects = [] }).keyboardShortcut(.delete)
+                                    Button("Delete", action: {
+                                        viewModel.deleteState(view: self, at: row.index)
+                                        if selectedObjects.contains(.state(stateIndex: row.index)) {
+                                            selectedObjects.remove(.state(stateIndex: row.index))
+                                        }
+                                    })
                                 }
                             }
                         }
