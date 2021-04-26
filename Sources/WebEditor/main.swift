@@ -23,6 +23,9 @@ struct WebEditor: App {
 //
         func applicationWillFinishLaunching(_ notification: Notification) {
             NSApp.setActivationPolicy(.regular)
+            if let image = APP_ICON {
+                NSApp.applicationIconImage = image
+            }
         }
         
     }

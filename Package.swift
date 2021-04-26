@@ -26,7 +26,8 @@ let package = Package(
         .target(name: "Transformations", dependencies: products + ["GUUI"]),
         .target(
             name: "MachineViews",
-            dependencies: products + ["Machines", "AttributeViews", "Utilities", "Transformations", "GUUI"]
+            dependencies: products + ["Machines", "AttributeViews", "Utilities", "Transformations", "GUUI"],
+            resources: [.copy("Resources/Assets.xcassets")]
         ),
         .target(
             name: "WebEditor",
