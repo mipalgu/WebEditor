@@ -72,7 +72,12 @@ struct ArrangementView: View {
     @State var selection: AttributeGroup? = nil
     
     var body: some View {
-        EmptyView()
+        AttributeGroupsView(
+            root: $arrangement,
+            path: Arrangement.path.attributes,
+            label: arrangement.name.pretty + " Arrangement",
+            selection: $selection
+        )
     }
     
 }

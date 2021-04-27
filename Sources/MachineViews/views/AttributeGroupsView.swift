@@ -17,7 +17,7 @@ import Utilities
 import AttributeViews
 import GUUI
 
-public struct AttributeGroupsView: View {
+public struct AttributeGroupsView<Root: Modifiable>: View {
     
     class Temp {
         
@@ -25,8 +25,8 @@ public struct AttributeGroupsView: View {
         
     }
     
-    @Binding var machine: Machine
-    let path: Attributes.Path<Machine, [AttributeGroup]>
+    @Binding var root: Root
+    let path: Attributes.Path<Root, [AttributeGroup]>
     let label: String
     
     let temp = Temp()
@@ -35,15 +35,15 @@ public struct AttributeGroupsView: View {
     
     @Binding var selection: AttributeGroup?
     
-    public init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String, selection: Binding<AttributeGroup?>) {
-        self._machine = machine
+    public init(root: Binding<Root>, path: Attributes.Path<Root, [AttributeGroup]>, label: String, selection: Binding<AttributeGroup?>) {
+        self._root = root
         self.path = path
         self.label = label
         self._selection = selection
     }
     
     var groups: [Row<AttributeGroup>] {
-        machine[keyPath: path.path].enumerated().map {
+        root[keyPath: path.path].enumerated().map {
             Row(id: temp.idCache.id(for: $1), index: $0, data: $1)
         }
     }
@@ -55,33 +55,13 @@ public struct AttributeGroupsView: View {
                 .foregroundColor(config.textColor)
             TabView(selection: Binding($selection)) {
                 ForEach(groups, id: \.self) { row in
-                    AttributeGroupView<Config>(root: $machine, path: path[row.index], label: row.data.name)
+                    AttributeGroupView<Config>(root: $root, path: path[row.index], label: row.data.name)
                         .padding(.horizontal, 10)
                         .tabItem {
                             Text(row.data.name.pretty)
                         }
                 }
-                ScrollView(.vertical, showsIndicators: true) {
-                    Form {
-                        HStack {
-                            VStack(alignment: .leading) {
-                                CollectionView<Config>(
-                                    root: $machine,
-                                    path: Machine.path.dependencyAttributes,
-                                    label: "Machine Dependencies",
-                                    type: machine.dependencyAttributeType
-                                )
-                            }
-                            Spacer()
-                        }
-                    }
-                }
-                .padding(.horizontal, 10)
-                .tabItem {
-                    Text("Dependencies")
-                }
             }
-            
         }
     }
 }

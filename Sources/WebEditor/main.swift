@@ -124,7 +124,26 @@ struct DirectoryFileDocument: FileDocument {
 struct WebEditorDefaultMenu: View {
     
     enum FileType: Equatable {
-        case arrangement
+        
+        var isArrangement: Bool {
+            switch self {
+            case .arrangement:
+                return true
+            default:
+                return false
+            }
+        }
+        
+        var isMachine: Bool {
+            switch self {
+            case .machine:
+                return true
+            default:
+                return false
+            }
+        }
+        
+        case arrangement(Arrangement.Semantics)
         case machine(Machine.Semantics)
     }
     
@@ -141,7 +160,7 @@ struct WebEditorDefaultMenu: View {
     
     @State var fileType: FileType
     
-    init(display: Binding<DisplayType>, showing: Sheets? = nil, fileType: FileType = .arrangement) {
+    init(display: Binding<DisplayType>, showing: Sheets? = nil, fileType: FileType = .arrangement(.swiftfsm)) {
         self._display = display
         self._fileType = State(initialValue: fileType)
         guard let showing = showing else {
@@ -157,9 +176,11 @@ struct WebEditorDefaultMenu: View {
     
     var body: some View {
         VStack {
-            Button("New Arrangement") {
-                fileType = .arrangement
-                presentNewFileSheet = true
+            ForEach(Arrangement.supportedSemantics, id: \.self) { semantics in
+                Button("New \(semantics.rawValue) Arrangement") {
+                    fileType = .arrangement(semantics)
+                    presentNewFileSheet = true
+                }
             }
             ForEach(Machine.supportedSemantics, id: \.self) { semantics in
                 Button("New \(semantics.rawValue) Machine") {
@@ -167,9 +188,11 @@ struct WebEditorDefaultMenu: View {
                     presentNewFileSheet = true
                 }
             }
-            Button("Open Arrangement") {
-                fileType = .arrangement
-                presentOpenFileSheet = true
+            ForEach(Arrangement.supportedSemantics, id: \.self) { semantics in
+                Button("Open \(semantics.rawValue) Arrangement") {
+                    fileType = .arrangement(semantics)
+                    presentOpenFileSheet = true
+                }
             }
             ForEach(Machine.supportedSemantics, id: \.self) { semantics in
                 Button("Open \(semantics.rawValue) Machine") {
@@ -182,7 +205,7 @@ struct WebEditorDefaultMenu: View {
         .fileExporter(
             isPresented: $presentNewFileSheet,
             document: DirectoryFileDocument(),
-            contentType: fileType == .arrangement ? .arrangement : .machine,
+            contentType: fileType.isArrangement ? UTType.arrangement : UTType.machine,
             onCompletion: {
                 defer { presentNewFileSheet = false }
                 switch $0 {
@@ -191,8 +214,8 @@ struct WebEditorDefaultMenu: View {
                     return
                 case .success(let url):
                     switch fileType {
-                    case .arrangement:
-                        let arrangement = Arrangement(filePath: url, rootMachines: [])
+                    case .arrangement(let semantics):
+                        let arrangement = Arrangement.initialArrangement(forSemantics: semantics, filePath: url)
                         do {
                             try arrangement.save()
                         } catch let e {
@@ -215,7 +238,7 @@ struct WebEditorDefaultMenu: View {
         )
         .fileImporter(
             isPresented: $presentOpenFileSheet,
-            allowedContentTypes: fileType == .arrangement ? DirectoryFileDocument.arrangementReadableContentTypes : DirectoryFileDocument.machineReadableContentTypes,
+            allowedContentTypes: fileType.isArrangement ? DirectoryFileDocument.arrangementReadableContentTypes : DirectoryFileDocument.machineReadableContentTypes,
             allowsMultipleSelection: false
         ) {
             defer { presentOpenFileSheet = false }
