@@ -17,7 +17,7 @@ import Utilities
 import AttributeViews
 import GUUI
 
-public struct AttributeGroupsView<Root: Modifiable>: View {
+public struct AttributeGroupsView<Root: Modifiable, ExtraTabs: View>: View {
     
     class Temp {
         
@@ -28,6 +28,7 @@ public struct AttributeGroupsView<Root: Modifiable>: View {
     @Binding var root: Root
     let path: Attributes.Path<Root, [AttributeGroup]>
     let label: String
+    let extraTabs: (() -> ExtraTabs)?
     
     let temp = Temp()
     
@@ -35,11 +36,16 @@ public struct AttributeGroupsView<Root: Modifiable>: View {
     
     @Binding var selection: AttributeGroup?
     
-    public init(root: Binding<Root>, path: Attributes.Path<Root, [AttributeGroup]>, label: String, selection: Binding<AttributeGroup?>) {
+    public init(root: Binding<Root>, path: Attributes.Path<Root, [AttributeGroup]>, label: String, selection: Binding<AttributeGroup?>) where ExtraTabs == EmptyView {
+        self.init(root: root, path: path, label: label, selection: selection, extraTabs: nil)
+    }
+    
+    public init(root: Binding<Root>, path: Attributes.Path<Root, [AttributeGroup]>, label: String, selection: Binding<AttributeGroup?>, extraTabs: (() -> ExtraTabs)?) {
         self._root = root
         self.path = path
         self.label = label
         self._selection = selection
+        self.extraTabs = extraTabs
     }
     
     var groups: [Row<AttributeGroup>] {
@@ -60,6 +66,9 @@ public struct AttributeGroupsView<Root: Modifiable>: View {
                         .tabItem {
                             Text(row.data.name.pretty)
                         }
+                }
+                if let extraTabs = extraTabs {
+                    extraTabs()
                 }
             }
         }

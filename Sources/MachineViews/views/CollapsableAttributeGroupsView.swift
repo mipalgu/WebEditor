@@ -15,6 +15,8 @@ import Machines
 import Attributes
 import Utilities
 
+import AttributeViews
+
 struct CollapsableAttributeGroupsView: View {
     
     @Binding var machine: Machine
@@ -57,7 +59,27 @@ struct CollapsableAttributeGroupsView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                AttributeGroupsView(root: $machine, path: path, label: label, selection: $selection)
+                AttributeGroupsView(root: $machine, path: path, label: label, selection: $selection) {
+                    ScrollView(.vertical, showsIndicators: true) {
+                        Form {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    CollectionView<Config>(
+                                        root: $machine,
+                                        path: Machine.path.dependencyAttributes,
+                                        label: "Dependencies",
+                                        type: machine.dependencyAttributeType
+                                    )
+                                }
+                                Spacer()
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    .tabItem {
+                        Text("Dependencies")
+                    }
+                }
                     .transition(.move(edge: .trailing))
             } else {
                 HStack {
