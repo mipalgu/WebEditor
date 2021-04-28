@@ -1,9 +1,9 @@
 import Machines
 import Attributes
 
-#if canImport(TokamakDOM)
-import TokamakDOM
-typealias State = TokamakDOM.State
+#if canImport(TokamakShim)
+import TokamakShim
+typealias State = TokamakShim.State
 #else
 import SwiftUI
 typealias State = SwiftUI.State
@@ -14,7 +14,7 @@ import Utilities
 
 struct WebEditor: App {
     
-    #if !canImport(TokamakDOM) && canImport(SwiftUI)
+    #if canImport(SwiftUI)
     class AppDelegate: NSObject, NSApplicationDelegate {
         
 //        func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

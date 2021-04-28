@@ -5,11 +5,7 @@
 //  Created by Morgan McColl on 27/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
 public final class RigidMoveableViewModel: ObservableObject, MoveFromDrag, Rigidable {
     

@@ -7,11 +7,7 @@
 
 import Foundation
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
 import Machines
 import GUUI

@@ -5,11 +5,7 @@
 //  Created by Morgan McColl on 23/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
 //protocol _DragableCollapsable: class {}
 

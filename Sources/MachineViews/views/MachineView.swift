@@ -5,11 +5,7 @@
 //  Created by Morgan McColl on 24/4/21.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 import Attributes
 import Utilities
 import Machines

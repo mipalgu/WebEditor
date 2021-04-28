@@ -56,11 +56,7 @@
  *
  */
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
 public struct CuttingMessageKey : FocusedValueKey {
     public typealias Value = Binding<Bool>

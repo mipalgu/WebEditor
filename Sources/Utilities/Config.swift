@@ -5,11 +5,7 @@
 //  Created by Morgan McColl on 15/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 import Machines
 import Attributes
 import AttributeViews
@@ -27,7 +23,7 @@ public final class Config: ObservableObject, AttributeViewConfig {
     #endif
     
     #if canImport(TokamakShim)
-    @Published public var backgroundColor = Color.white
+    @Published public var backgroundColor = Color.clear
     #elseif canImport(AppKit)
     @Published public var backgroundColor = Color(NSColor.controlBackgroundColor)
     #elseif canImport(UIKit)
@@ -42,12 +38,12 @@ public final class Config: ObservableObject, AttributeViewConfig {
     
     @Published public var height: CGFloat = 200
     
-    #if canImport(TokamakShim)
-    @Published public var stateColour = Color.white
-    #elseif canImport(AppKit)
+    #if canImport(AppKit)
     @Published public var stateColour = Color(NSColor.windowBackgroundColor)
     #elseif canImport(UIKit)
     @Published public var stateColour = Color(UIColor.systemBackground)
+    #elseif canImport(TokamakShim)
+    @Published public var stateColour = Color.white
     #else
     @Published public var stateColour = Color.white
     #endif
