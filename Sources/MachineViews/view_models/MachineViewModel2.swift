@@ -156,7 +156,7 @@ final class MachineViewModel2: ObservableObject {
     
     public func toPlist(machine: Machine) -> String {
         let helper = StringHelper()
-        let statesPlist = helper.reduceLines(data: data.map { (name, state) in
+        let statesPlist = helper.reduceLines(data: data.sorted(by: { $0.key < $1.key }).map { (name, state) in
             guard
                 let state = machine.states.first(where: { $0.name == name }),
                 let stateViewModel = data[name],
