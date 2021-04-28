@@ -44,9 +44,16 @@ struct WebEditor: App {
 
 struct AppCommands: Commands {
     
+    @FocusedBinding(\.saving) var save: Bool?
+    
     @FocusedBinding(\.cutting) var cutting: Bool?
     
     var body: some Commands {
+        CommandGroup(replacing: .newItem) {
+            Button("Save") {
+                save?.toggle()
+            }.keyboardShortcut(KeyEquivalent("s"), modifiers: .command)
+        }
         CommandGroup(replacing: .pasteboard) {
             Button("Cut") {
                 cutting?.toggle()

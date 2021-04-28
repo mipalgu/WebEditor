@@ -66,9 +66,19 @@ public struct CuttingMessageKey : FocusedValueKey {
     public typealias Value = Binding<Bool>
 }
 
+public struct SaveMessageKey : FocusedValueKey {
+    public typealias Value = Binding<Bool>
+}
+
 extension FocusedValues {
+    
     public var cutting: CuttingMessageKey.Value? {
         get { self[CuttingMessageKey.self] }
         set { self[CuttingMessageKey.self] = newValue }
+    }
+    
+    public var saving: SaveMessageKey.Value? {
+        get { self[SaveMessageKey.self] }
+        set { self[SaveMessageKey.self] = newValue }
     }
 }
