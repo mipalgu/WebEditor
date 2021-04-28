@@ -44,20 +44,20 @@ struct WebEditor: App {
 
 struct AppCommands: Commands {
     
-    @FocusedBinding(\.saving) var save: Bool?
+    @FocusedBinding(\.saving) var saving: Bool?
     
     @FocusedBinding(\.cutting) var cutting: Bool?
     
     var body: some Commands {
-        CommandGroup(replacing: .newItem) {
+        CommandGroup(after: .newItem) {
             Button("Save") {
-                save?.toggle()
-            }.keyboardShortcut(KeyEquivalent("s"), modifiers: .command)
+                saving?.toggle()
+            }.keyboardShortcut(KeyEquivalent("s"), modifiers: .command).disabled(saving == nil)
         }
         CommandGroup(replacing: .pasteboard) {
             Button("Cut") {
                 cutting?.toggle()
-            }.keyboardShortcut("x", modifiers: .command)
+            }.keyboardShortcut("x", modifiers: .command).disabled(cutting == nil)
             Button("Copy") {
                 print("I'm copying")
             }.keyboardShortcut("c", modifiers: .command)
