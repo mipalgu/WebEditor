@@ -6,6 +6,7 @@
 //
 
 import TokamakShim
+import Foundation
 
 public protocol Collapsable: Moveable, BoundedSize  {
     

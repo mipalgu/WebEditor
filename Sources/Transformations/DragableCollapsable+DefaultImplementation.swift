@@ -6,6 +6,7 @@
 //
 
 import TokamakShim
+import Foundation
 
 //protocol _DragableCollapsable: class {}
 

@@ -6,6 +6,7 @@
 //
 
 import TokamakShim
+import Foundation
 
 public extension BoundedSize where Self: _Rigidable & Rigidable {
     
