@@ -51,8 +51,6 @@ struct MachineView: View {
             CanvasView(machine: $machine, focus: $focus)
             CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, label: label)
                 .frame(width: !attributesCollapsed ? 500 : 50.0)
-                .transition(.move(edge: .trailing))
-                .animation(.linear)
         }.focusedValue(\.saving, $saving).onChange(of: saving) { _ in
             guard let _ = try? machine.save() else {
                 print(machine.errorBag.allErrors)

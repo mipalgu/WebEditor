@@ -80,7 +80,7 @@ struct CollapsableAttributeGroupsView: View {
                         Text("Dependencies")
                     }
                 }
-                    .transition(.move(edge: .trailing))
+//                    .transition(.move(edge: .trailing))
             } else {
                 HStack {
                     if collapseLeft {
