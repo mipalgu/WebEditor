@@ -6,6 +6,7 @@
 //
 
 import TokamakShim
+import Foundation
 
 public final class RigidMoveableViewModel: ObservableObject, MoveFromDrag, Rigidable {
     
