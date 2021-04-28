@@ -50,7 +50,7 @@ struct MachineView: View {
             CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, label: label)
                 .frame(width: !attributesCollapsed ? 500 : 50.0)
                 .transition(.move(edge: .trailing))
-                .animation(.linear)
+//                .animation(.linear)
         }
     }
 }
