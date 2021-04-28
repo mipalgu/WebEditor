@@ -37,18 +37,8 @@ struct TransitionView: View {
                 strokeNumber: strokeNumber,
                 editing: focused,
                 color: focused ? config.highlightColour : config.textColor,
-                label: { Text(machine[keyPath: path.keyPath].condition ?? "") } ,
-                editLabel: { LineView<Config>(
-                    value: Binding(
-                        get: { machine[keyPath: path.keyPath].condition ?? "" },
-                        set: { _ = try? machine.modify(attribute: path.condition, value: Optional($0)) }
-                    ),
-                    errors: Binding(
-                        get: { machine.errorBag.errors(includingDescendantsForPath: path.condition).map(\.message) },
-                        set: { _ in }
-                    ),
-                    label: ""
-                ) }
+                label: { Text(path.isNil(machine) ? "" : machine[keyPath: path.keyPath].condition ?? "") } ,
+                editLabel: { LineView<Config>(root: $machine, path: path.condition, label: "") }
             )
             if focused {
                 AnchorPoint(width: 20, height: 20)
