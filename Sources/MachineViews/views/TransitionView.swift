@@ -20,7 +20,9 @@ struct TransitionView: View {
     
     @Binding var machine: Machine
     
-    let path: Attributes.Path<Machine, Transition>
+    var stateIndex: Int
+    
+    var transitionIndex: Int
     
     @Binding var curve: Curve
     
@@ -30,6 +32,24 @@ struct TransitionView: View {
     
     @EnvironmentObject var config: Config
     
+    var transition: Transition? {
+        get {
+            guard stateIndex < machine.states.count && transitionIndex < machine.states[stateIndex].transitions.count else {
+                return nil
+            }
+            return machine.states[stateIndex].transitions[transitionIndex]
+        } set {
+            guard let newValue = newValue, stateIndex < machine.states.count && transitionIndex < machine.states[stateIndex].transitions.count else {
+                return
+            }
+            machine.states[stateIndex].transitions[transitionIndex] = newValue
+        }
+    }
+    
+    var path: Attributes.Path<Machine, Transition> {
+        machine.path.states[stateIndex].transitions[transitionIndex]
+    }
+    
     var body: some View {
         ZStack {
             ArrowWithLabelView(
@@ -37,10 +57,10 @@ struct TransitionView: View {
                 strokeNumber: strokeNumber,
                 editing: focused,
                 color: focused ? config.highlightColour : config.textColor,
-                label: { Text(machine[keyPath: path.keyPath].condition ?? "") } ,
+                label: { Text(transition?.condition ?? "") } ,
                 editLabel: { LineView<Config>(
                     value: Binding(
-                        get: { machine[keyPath: path.keyPath].condition ?? "" },
+                        get: { transition?.condition ?? "" },
                         set: { _ = try? machine.modify(attribute: path.condition, value: Optional($0)) }
                     ),
                     errors: Binding(
