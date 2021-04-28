@@ -22,8 +22,6 @@ struct MachineView: View {
     
     @State var attributesCollapsed: Bool = false
     
-    @State var saving: Bool = false
-    
     var path: Attributes.Path<Machine, [AttributeGroup]> {
         switch focus {
             case .machine:
@@ -51,11 +49,6 @@ struct MachineView: View {
             CanvasView(machine: $machine, focus: $focus)
             CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, label: label)
                 .frame(width: !attributesCollapsed ? 500 : 50.0)
-        }.focusedValue(\.saving, $saving).onChange(of: saving) { _ in
-            guard let _ = try? machine.save() else {
-                print(machine.errorBag.allErrors)
-                return
-            }
         }
     }
 }

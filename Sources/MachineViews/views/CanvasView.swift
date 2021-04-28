@@ -35,6 +35,8 @@ public struct CanvasView: View {
     
     @State var edittingState: Int? = nil
     
+    @State var saving: Bool = false
+    
     let coordinateSpace = "MAIN_VIEW"
     
     let textWidth: CGFloat = 50.0
@@ -168,6 +170,16 @@ public struct CanvasView: View {
                     }.frame(width: geometry.size.width, height: geometry.size.height)
                     .clipped()
                 }
+            }
+        }.focusedValue(\.saving, $saving).onChange(of: saving) { _ in
+            guard let _ = try? machine.save() else {
+                print(machine.errorBag.allErrors)
+                return
+            }
+            let plist = viewModel.toPlist(machine: machine)
+            guard let _ = try? plist.write(toFile: machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
+                print("Failed to write plist")
+                return
             }
         }
     }
