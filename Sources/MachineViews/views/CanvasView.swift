@@ -90,8 +90,7 @@ public struct CanvasView: View {
                             ForEach(viewModel.transitions(stateRow), id: \.self) { transitionRow in
                                 TransitionView(
                                     machine: $machine,
-                                    stateIndex: stateRow.index,
-                                    transitionIndex: transitionRow.index,
+                                    path: machine.path.states[stateRow.index].transitions[transitionRow.index],
                                     curve: viewModel.binding(to: transitionRow.index, originatingFrom: stateRow.data).curve,
                                     strokeNumber: UInt8(transitionRow.index),
                                     focused: selectedObjects.contains(.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index))
