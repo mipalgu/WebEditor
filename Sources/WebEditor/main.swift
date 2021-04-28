@@ -37,25 +37,35 @@ struct WebEditor: App {
         WindowGroup("Web Editor") {
             WebEditorWindow(display: .none)
         }.commands(content: {
-            CommandGroup(replacing: .pasteboard) {
-                Button("Cut") {
-                    print("I'm cutting")
-                }.keyboardShortcut("x", modifiers: .command)
-                Button("Copy") {
-                    print("I'm copying")
-                }.keyboardShortcut("c", modifiers: .command)
-                Button("Paste") {
-                    print("I'm pasting")
-                }.keyboardShortcut("v", modifiers: .command)
-                Button("Delete") {
-                    print("I'm deleting")
-                }.keyboardShortcut(.delete)
-                Button("Select All") {
-                    print("I'm selecting all")
-                }.keyboardShortcut("a", modifiers: .command)
-            }
+            AppCommands()
         })
     }
+}
+
+struct AppCommands: Commands {
+    
+    @FocusedBinding(\.cutting) var cutting: Bool?
+    
+    var body: some Commands {
+        CommandGroup(replacing: .pasteboard) {
+            Button("Cut") {
+                cutting?.toggle()
+            }.keyboardShortcut("x", modifiers: .command)
+            Button("Copy") {
+                print("I'm copying")
+            }.keyboardShortcut("c", modifiers: .command)
+            Button("Paste") {
+                print("I'm pasting")
+            }.keyboardShortcut("v", modifiers: .command)
+            Button("Delete") {
+                print("I'm deleting")
+            }.keyboardShortcut(.delete)
+            Button("Select All") {
+                print("I'm selecting all")
+            }.keyboardShortcut("a", modifiers: .command)
+        }
+    }
+    
 }
 
 enum DisplayType {
