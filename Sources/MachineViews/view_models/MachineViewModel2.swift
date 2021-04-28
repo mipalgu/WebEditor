@@ -17,6 +17,14 @@ import Machines
 import GUUI
 import Utilities
 
+struct CacheContainer<T: Hashable>: Hashable {
+    
+    var index: Int
+    
+    var value: T
+    
+}
+
 final class MachineViewModel2: ObservableObject {
     
     @Published var data: [StateName: StateViewModel2]
@@ -45,7 +53,7 @@ final class MachineViewModel2: ObservableObject {
     
     private var cache: IDCache<Machines.State> = IDCache()
     
-    private var transitionCache: IDCache<Transition> = IDCache()
+    private var transitionCache: IDCache<CacheContainer<Transition>> = IDCache()
     
     private var transitionViewModelCache: IDCache<TransitionViewModel2> = IDCache()
     
@@ -699,7 +707,7 @@ final class MachineViewModel2: ObservableObject {
     
     func transitions(_ row: Row<Machines.State>) -> [Row<Transition>] {
         row.data.transitions.enumerated().map {
-            Row(id: transitionCache.id(for: $1), index: $0, data: $1)
+            Row(id: transitionCache.id(for: CacheContainer(index: $0, value: $1)), index: $0, data: $1)
         }
     }
     

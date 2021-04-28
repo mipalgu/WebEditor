@@ -15,6 +15,7 @@ import Machines
 import Attributes
 import Utilities
 import AttributeViews
+import GUUI
 
 struct StateExpandedView<TitleView: View>: View {
     
@@ -91,14 +92,26 @@ struct StateExpandedView<TitleView: View>: View {
     
     @EnvironmentObject var config: Config
     
+    fileprivate class Cache {
+        var actionCache: IDCache<Action> = IDCache()
+    }
+    
+    fileprivate var cache = Cache()
+    
+    var rows: [Row<Action>] {
+        state.actions.enumerated().map {
+            Row(id: cache.actionCache.id(for: $1), index: $0, data: $1)
+        }
+    }
+    
     var body: some View {
         Group {
             VStack {
                 titleView()
                 ScrollView {
                     VStack(spacing: 0) {
-                        ForEach(state.actions.indices, id: \.self) { index in
-                            codeView(index)
+                        ForEach(rows, id: \.self) { row in
+                            codeView(row.index)
                         }
                     }
                 }
