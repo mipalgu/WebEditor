@@ -56,25 +56,7 @@ struct CollapsableAttributeGroupsView: View {
                     }
                 }
                 AttributeGroupsView(root: $machine, path: path, label: label, selection: $selection) {
-                    ScrollView(.vertical, showsIndicators: true) {
-                        Form {
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    CollectionView<Config>(
-                                        root: $machine,
-                                        path: Machine.path.dependencyAttributes,
-                                        label: "Dependencies",
-                                        type: machine.dependencyAttributeType
-                                    )
-                                }
-                                Spacer()
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .tabItem {
-                        Text("Dependencies")
-                    }
+                    DependenciesAttributesView(root: $machine, path: machine.path)
                 }
 //                    .transition(.move(edge: .trailing))
             } else {

@@ -86,7 +86,7 @@ public struct MainView: View {
                         focus: $focus,
                         name: .constant(root.arrangement.name),
                         url: $root.arrangement.filePath,
-                        dependencies: $root.arrangement.rootMachines,
+                        dependencies: $root.arrangement.dependencies,
                         machines: $machines
                     )
                 case .machine:
