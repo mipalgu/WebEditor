@@ -65,7 +65,7 @@ struct ArrangementView: View {
     
     @Binding var arrangement: Arrangement
     
-    @State var selection: AttributeGroup? = nil
+    @Binding var selection: AttributeGroup?
     
     var body: some View {
         AttributeGroupsView(

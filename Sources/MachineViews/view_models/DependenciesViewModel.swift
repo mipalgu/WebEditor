@@ -7,11 +7,21 @@
 
 import Foundation
 import TokamakShim
+import Attributes
 import Machines
 
-final class DependenciesViewModel {
+final class DependenciesViewModel: ObservableObject {
     
-    var machines: [URL: Machine] = [:]
+    @Published var machines: [URL: Machine] = [:]
+    
+    private var selections: [URL: AttributeGroup] = [:]
+    
+    func selection(for url: URL) -> Binding<AttributeGroup?> {
+        return Binding(
+            get: { self.selections[url] },
+            set: { self.selections[url] = $0 }
+        )
+    }
     
     func binding(for url: URL) -> Binding<Machine>? {
         guard nil != machine(for: url) else {

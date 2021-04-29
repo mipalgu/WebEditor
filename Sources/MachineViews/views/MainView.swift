@@ -66,7 +66,7 @@ public struct MainView: View {
     
     @EnvironmentObject var config: Config
     
-    let viewModel: DependenciesViewModel = DependenciesViewModel()
+    @StateObject var viewModel: DependenciesViewModel = DependenciesViewModel()
     
     public var body: some View {
         VStack(alignment: .leading) {
@@ -92,15 +92,15 @@ public struct MainView: View {
                 switch root {
                 case .arrangement(let arrangement):
                     if focus == arrangement.filePath {
-                        ArrangementView(arrangement: $root.arrangement)
+                        ArrangementView(arrangement: $root.arrangement, selection: viewModel.selection(for: focus))
                     } else if let binding = viewModel.binding(for: focus) {
-                        MachineView(machine: binding)
+                        MachineView(machine: binding, selection: viewModel.selection(for: focus))
                     }
                 case .machine(let rootMachine):
                     if focus == rootMachine.filePath {
-                        MachineView(machine: $root.machine)
+                        MachineView(machine: $root.machine, selection: viewModel.selection(for: focus))
                     } else if let binding = viewModel.binding(for: focus) {
-                        MachineView(machine: binding)
+                        MachineView(machine: binding, selection: viewModel.selection(for: focus))
                     }
                 }
             }

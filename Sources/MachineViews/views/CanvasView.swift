@@ -167,7 +167,7 @@ public struct CanvasView: View {
                     .clipped()
                 }
             }
-        }.focusedValue(\.saving, $saving).onChange(of: saving) { _ in
+        }/*.focusedValue(\.saving, $saving).onChange(of: saving) { _ in
             guard let _ = try? machine.save() else {
                 print(machine.errorBag.allErrors)
                 return
@@ -177,7 +177,7 @@ public struct CanvasView: View {
                 print("Failed to write plist")
                 return
             }
-        }
+        }*/
     }
     
 }

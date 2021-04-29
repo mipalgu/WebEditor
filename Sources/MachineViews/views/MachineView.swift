@@ -18,6 +18,8 @@ struct MachineView: View {
     
     @State var attributesCollapsed: Bool = false
     
+    @Binding var selection: AttributeGroup?
+    
     var path: Attributes.Path<Machine, [AttributeGroup]> {
         switch focus {
             case .machine:
@@ -43,7 +45,7 @@ struct MachineView: View {
     var body: some View {
         HStack {
             CanvasView(machine: $machine, focus: $focus)
-            CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, label: label)
+            CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, label: label, selection: $selection)
                 .frame(width: !attributesCollapsed ? 500 : 50.0)
         }
     }

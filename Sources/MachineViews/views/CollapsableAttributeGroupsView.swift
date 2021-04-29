@@ -25,7 +25,7 @@ struct CollapsableAttributeGroupsView: View {
     
     let collapseLeft: Bool = false
     
-    @State var selection: AttributeGroup? = nil
+    @Binding var selection: AttributeGroup?
     
     @EnvironmentObject var config: Config
     
