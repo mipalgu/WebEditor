@@ -17,9 +17,7 @@ struct DependenciesAttributesView<Root: Modifiable, Value: DependenciesContainer
     
     let path: Attributes.Path<Root, Value>
     
-    var attributes: Attributes.Path<Root, [Attribute]> {
-        path.dependencyAttributes
-    }
+    let label: String
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
@@ -28,8 +26,8 @@ struct DependenciesAttributesView<Root: Modifiable, Value: DependenciesContainer
                     VStack(alignment: .leading) {
                         CollectionView<Config>(
                             root: $root,
-                            path: attributes,
-                            label: "",
+                            path: path.dependencyAttributes,
+                            label: label,
                             type: root[keyPath: path.path].dependencyAttributeType
                         )
                     }

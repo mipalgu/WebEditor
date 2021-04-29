@@ -39,6 +39,9 @@ struct DependenciesView: View {
                         Text(name.pretty)
                     }
                     .toggleStyle(ArrowToggleStyle())
+                    .onTapGesture {
+                        focus = url
+                    }
                 }.padding(.leading, padding)
             }.background(focus == url ? config.highlightColour : Color.clear)
             if expanded {

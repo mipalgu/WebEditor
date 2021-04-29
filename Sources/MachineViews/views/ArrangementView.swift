@@ -73,7 +73,9 @@ struct ArrangementView: View {
             path: Arrangement.path.attributes,
             label: arrangement.name.pretty + " Arrangement",
             selection: $selection
-        )
+        ) {
+            DependenciesAttributesView(root: $arrangement, path: arrangement.path, label: "Dependencies")
+        }
     }
     
 }

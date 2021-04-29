@@ -56,7 +56,7 @@ struct CollapsableAttributeGroupsView: View {
                     }
                 }
                 AttributeGroupsView(root: $machine, path: path, label: label, selection: $selection) {
-                    DependenciesAttributesView(root: $machine, path: machine.path)
+                    DependenciesAttributesView(root: $machine, path: machine.path, label: "Dependencies")
                 }
 //                    .transition(.move(edge: .trailing))
             } else {

@@ -66,16 +66,7 @@ public struct MainView: View {
     
     @EnvironmentObject var config: Config
     
-    func machine(for url: URL) -> Machine? {
-        if let machine = machines[url] {
-            return machine
-        }
-        guard let loadedMachine = try? Machine(filePath: url) else {
-            return nil
-        }
-        machines[url] = loadedMachine
-        return loadedMachine
-    }
+    let viewModel: DependenciesViewModel = DependenciesViewModel()
     
     public var body: some View {
         VStack(alignment: .leading) {
@@ -102,14 +93,14 @@ public struct MainView: View {
                 case .arrangement(let arrangement):
                     if focus == arrangement.filePath {
                         ArrangementView(arrangement: $root.arrangement)
-                    } else if machines[focus] != nil {
-                        MachineView(machine: Binding(get: { machines[focus]!}, set: { machines[focus] = $0}))
+                    } else if let binding = viewModel.binding(for: focus) {
+                        MachineView(machine: binding)
                     }
                 case .machine(let rootMachine):
                     if focus == rootMachine.filePath {
                         MachineView(machine: $root.machine)
-                    } else if machine(for: focus) != nil {
-                        MachineView(machine: Binding(get: { machines[focus]!}, set: { machines[focus] = $0}))
+                    } else if let binding = viewModel.binding(for: focus) {
+                        MachineView(machine: binding)
                     }
                 }
             }
