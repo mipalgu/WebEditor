@@ -65,8 +65,7 @@ import Utilities
 
 struct StateTitleView: View {
     
-    @Binding var machine: Machine
-    let path: Attributes.Path<Machine, String>
+    @Binding var name: String
     @Binding var expanded: Bool
     
     @EnvironmentObject var config: Config
@@ -74,7 +73,7 @@ struct StateTitleView: View {
     var body: some View {
         HStack {
             Toggle(isOn: $expanded) {
-                LineView<Config>(root: $machine, path: path, label: "State Name")
+                LineView<Config>(value: $name, label: "State Name")
                     .multilineTextAlignment(.center)
                     .font(config.fontBody.bold())
             }.toggleStyle(ArrowToggleStyle())
@@ -94,7 +93,7 @@ struct StateTitleView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateTitleView(machine: $machine, path: Machine.path.states[0].name, expanded: $expanded).environmentObject(config)
+            StateTitleView(name: $machine.states[0].name, expanded: $expanded).environmentObject(config)
         }
         
     }

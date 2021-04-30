@@ -14,17 +14,13 @@ import Utilities
 
 struct StateView: View {
     
-    @Binding var machine: Machine
-    let path: Attributes.Path<Machine, Machines.State>
-    
-    @Binding var expanded: Bool
+    @ObservedObject var state: StateViewModel2
+
     @Binding var collapsedActions: [String: Bool]
     var focused: Bool
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, expanded: Binding<Bool> = .constant(false), collapsedActions: Binding<[String: Bool]> = .constant([:]), focused: Bool = false) {
-        self._machine = machine
-        self.path = path
-        self._expanded = expanded
+    init(state: StateViewModel2, collapsedActions: Binding<[String: Bool]> = .constant([:]), focused: Bool = false) {
+        self.state = state
         self._collapsedActions = collapsedActions
         self.focused = focused
     }
@@ -33,13 +29,13 @@ struct StateView: View {
     
     var body: some View {
         Group {
-            if expanded {
-                StateExpandedView(root: $machine, path: path, collapsedActions: $collapsedActions, focused: focused) {
-                    StateTitleView(machine: $machine, path: path.name, expanded: $expanded)
+            if state.expanded {
+                StateExpandedView(state: state.state, collapsedActions: $collapsedActions, focused: focused) {
+                    StateTitleView(name: state.state.name, expanded: state.expandedBinding)
                 }
             } else {
                 StateCollapsedView(focused: focused) {
-                    StateTitleView(machine: $machine, path: path.name, expanded: $expanded)
+                    StateTitleView(name: state.state.name, expanded: state.expandedBinding)
                 }
             }
         }
@@ -59,7 +55,7 @@ struct StateView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateView(machine: $machine, path: Machine.path.states[0], expanded: $expanded, collapsedActions: $collapsedActions).environmentObject(config)
+            StateView(state: StateViewModel2(state: $machine.states[0]),collapsedActions: $collapsedActions).environmentObject(config)
         }
         
     }
@@ -75,7 +71,7 @@ struct StateView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateView(machine: $machine, path: Machine.path.states[0], expanded: $expanded, collapsedActions: $collapsedActions).environmentObject(config)
+            StateView(state: StateViewModel2(state: $machine.states[0]),collapsedActions: $collapsedActions).environmentObject(config)
         }
         
     }
