@@ -29,7 +29,7 @@ struct TransitionView: View {
                 strokeNumber: strokeNumber,
                 editing: focused,
                 color: focused ? config.highlightColour : config.textColor,
-                label: { LineView<Config>(value: viewModel.condition, label: "<condition>") },
+                label: { LineView<Config>(value: $viewModel.condition, label: "<condition>") },
                 editLabel: { LineView<Config>(value: .constant(""), label: "") }
             )
             if focused {

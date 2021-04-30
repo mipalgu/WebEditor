@@ -350,7 +350,7 @@ extension StateViewModel2 {
         let transitionViewModels = transitions.indices.map { (priority: Int) -> TransitionViewModel2 in
             let transitionPlist = transitionsPlist.components(separatedBy: "</dict>")[priority]
                 .components(separatedBy: "<dict>")[1]
-            return TransitionViewModel2(transitionBinding: state.transitions[priority], plist: transitionPlist)
+            return TransitionViewModel2(machine: machine, path: path.transitions[priority], transitionBinding: state.transitions[priority], plist: transitionPlist)
         }
         self.init(
             location: CGPoint(x: x, y: y),

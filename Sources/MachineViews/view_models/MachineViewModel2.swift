@@ -138,7 +138,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
             let transitionViewModels = machine.wrappedValue.states[stateIndex].transitions.indices.map { (priority: Int) -> TransitionViewModel2 in
                 let transitionPlist = transitionsPlist.components(separatedBy: "</dict>")[priority]
                     .components(separatedBy: "<dict>")[1]
-                return TransitionViewModel2(transitionBinding: machine.states[stateIndex].transitions[priority], plist: transitionPlist)
+                return TransitionViewModel2(machine: machine, path: machine.wrappedValue.path.states[stateIndex].transitions[priority], transitionBinding: machine.states[stateIndex].transitions[priority], plist: transitionPlist)
             }
             trans[stateName] = transitionViewModels
             stateViewModels[stateName] = StateViewModel2(machine: machine, path: machine.wrappedValue.path.states[stateIndex], state: machine.states[stateIndex], plist: statePlist)
@@ -167,6 +167,8 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
                     return transition
                 }
                 return TransitionViewModel2(
+                    machine: machine,
+                    path: transition.path,
                     transitionBinding: transition.transitionBinding,
                     source: stateViewModels[state]!,
                     sourcePoint: transition.curve.point0,
@@ -211,7 +213,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
                 guard let target = data[machine.states[stateIndex].transitions[$0].target] else {
                     fatalError("Trying to create transition for target state that doesn't exist")
                 }
-                return TransitionViewModel2(transitionBinding: machineBinding.states[stateIndex].transitions[$0], source: CGPoint(x: 150, y: 150), target: target.left)
+                return TransitionViewModel2(machine: machineBinding, path: machine.path.states[stateIndex].transitions[$0], transitionBinding: machineBinding.states[stateIndex].transitions[$0], source: CGPoint(x: 150, y: 150), target: target.left)
             }
             let newViewModel = StateViewModel2(machine: machineBinding, path: machine.path.states[stateIndex], state: machineBinding.states[stateIndex])
             data[stateName] = newViewModel
@@ -234,7 +236,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
         }
         let source = viewModel(for: stateName)
         let target = viewModel(for: targetState)
-        return TransitionViewModel2(transitionBinding: machineBinding.states[stateIndex].transitions[transition], source: source, target: target)
+        return TransitionViewModel2(machine: machineBinding, path: machine.path.states[stateIndex].transitions[transition], transitionBinding: machineBinding.states[stateIndex].transitions[transition], source: source, target: target)
     }
     
     func viewModel(for transition: Int, originatingFrom state: Machines.State) -> TransitionViewModel2 {
@@ -395,10 +397,10 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
             return nil
         }
         guard let _ = transitions[sourceState] else {
-            transitions[sourceState] = [TransitionViewModel2(transitionBinding: machineBinding.states[stateIndex].transitions[lastIndex], source: sourceModel, sourcePoint: source, target: targetState, targetPoint: target)]
+            transitions[sourceState] = [TransitionViewModel2(machine: machineBinding, path: machine.path.states[stateIndex].transitions[lastIndex], transitionBinding: machineBinding.states[stateIndex].transitions[lastIndex], source: sourceModel, sourcePoint: source, target: targetState, targetPoint: target)]
             return targetName
         }
-        transitions[sourceState]!.append(TransitionViewModel2(transitionBinding: machineBinding.states[stateIndex].transitions[lastIndex], source: sourceModel, sourcePoint: source, target: targetState, targetPoint: target))
+        transitions[sourceState]!.append(TransitionViewModel2(machine: machineBinding, path: machine.path.states[stateIndex].transitions[lastIndex], transitionBinding: machineBinding.states[stateIndex].transitions[lastIndex], source: sourceModel, sourcePoint: source, target: targetState, targetPoint: target))
         return targetName
     }
     
@@ -606,6 +608,8 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
         }
         let newViewModels = source.transitions.indices.map {
             TransitionViewModel2(
+                machine: machineBinding,
+                path: machine.path.states[stateIndex].transitions[$0],
                 transitionBinding: machineBinding.states[stateIndex].transitions[$0],
                 source: sourceViewModel,
                 sourcePoint: transitions[source.name]![$0].curve.point0,
@@ -624,6 +628,8 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
         targets.keys.forEach { name in
             targets[name]!.forEach { (index, _) in
                 transitions[name]![index] = TransitionViewModel2(
+                    machine: machineBinding,
+                    path: machine.path.states[sourceIndex].transitions[index],
                     transitionBinding: machineBinding.states[sourceIndex].transitions[index],
                     source: viewModel(for: name),
                     sourcePoint: transitions[name]![index].curve.point0,
@@ -773,6 +779,8 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
         }
         let viewModel = ts[transition]
         transitions[state]![transition] = TransitionViewModel2(
+            machine: machineBinding,
+            path: machine.path.states[stateIndex].transitions[transition],
             transitionBinding: machineBinding.states[stateIndex].transitions[transition],
             source: viewModel.curve.point0,
             target: viewModel.curve.point3
