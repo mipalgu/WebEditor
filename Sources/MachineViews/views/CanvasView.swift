@@ -73,7 +73,7 @@ public struct CanvasView: View {
                             .gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
                             .contextMenu {
                                 VStack {
-                                    Button("New State", action: { try? viewModel.machineBinding.wrappedValue.newState() })
+                                    Button("New State", action: { let _ = viewModel.machineBinding.wrappedValue.newState() })
                                     Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))
                                     if !self.selectedObjects.isEmpty {
                                         Button("Delete Selected", action: { viewModel.deleteSelected(self) })

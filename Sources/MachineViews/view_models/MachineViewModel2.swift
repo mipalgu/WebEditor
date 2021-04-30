@@ -216,6 +216,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
                 return TransitionViewModel2(machine: machineBinding, path: machine.path.states[stateIndex].transitions[$0], transitionBinding: machineBinding.states[stateIndex].transitions[$0], source: CGPoint(x: 150, y: 150), target: target.left)
             }
             let newViewModel = StateViewModel2(machine: machineBinding, path: machine.path.states[stateIndex], state: machineBinding.states[stateIndex])
+            newViewModel.transitions = transitions
             data[stateName] = newViewModel
             return newViewModel
         }
@@ -546,7 +547,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
                 guard let targetName = self.data.values.first(where: { $0.isWithin(point: gesture.location, padding: 20.0) })?.state.wrappedValue.name else {
                     return
                 }
-                guard let _ = try? self.machineBinding.wrappedValue.newTransition(source: self.machine.states[index].name, target: targetName) else {
+                guard let _ = try? self.machineBinding.wrappedValue.newTransition(source: self.machine.states[index].name, target: targetName).get() else {
                     return
                 }
                 guard let _ = self.createNewTransition(sourceState: self.machine.states[index].name, source: gesture.startLocation, target: gesture.location) else {
@@ -556,7 +557,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
                 guard lastIndex >= 0 else {
                     return
                 }
-                try? self.machineBinding.wrappedValue.modify(attribute: Machine.path.states[index].transitions[lastIndex].condition, value: "true")
+                let _ = self.machineBinding.wrappedValue.modify(attribute: Machine.path.states[index].transitions[lastIndex].condition, value: "true")
             }
     }
     
@@ -677,7 +678,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
     
     func deleteState(view: CanvasView, at index: Int) {
         let name = machine.states[index].name
-        guard let _ = try? machineBinding.wrappedValue.deleteState(atIndex: index) else {
+        guard let _ = try? machineBinding.wrappedValue.deleteState(atIndex: index).get() else {
             print(machine.errorBag.errors(includingDescendantsForPath: machine.path.states[index]))
             return
         }
@@ -698,7 +699,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
         guard
             let ts = transitions[stateName],
             ts.count > transitionIndex,
-            let _ = try? machineBinding.wrappedValue.deleteTransition(atIndex: transitionIndex, attachedTo: stateName)
+            let _ = try? machineBinding.wrappedValue.deleteTransition(atIndex: transitionIndex, attachedTo: stateName).get()
         else {
             return
         }
@@ -743,12 +744,12 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
         let stateIndexes = states(from: view.selectedObjects)
         let transitionIndexes = transitions(from: view.selectedObjects, in: machine.states)
         transitionIndexes.keys.forEach {
-            guard let _ = try? self.machineBinding.wrappedValue.delete(transitions: IndexSet(transitionIndexes[$0]!), attachedTo: $0) else {
+            guard let _ = try? self.machineBinding.wrappedValue.delete(transitions: IndexSet(transitionIndexes[$0]!), attachedTo: $0).get() else {
                 print(self.machine.errorBag.allErrors.description)
                 return
             }
         }
-        guard let _ = try? machineBinding.wrappedValue.delete(states: stateIndexes) else {
+        guard let _ = try? machineBinding.wrappedValue.delete(states: stateIndexes).get() else {
             print(machine.errorBag.allErrors.description)
             return
         }

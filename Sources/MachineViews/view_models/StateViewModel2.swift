@@ -130,6 +130,8 @@ final class StateViewModel2: ObservableObject {
     
     var actions: [ActionViewModel]
     
+    var transitions: [TransitionViewModel2]
+    
     var title: StateTitleViewModel {
         StateTitleViewModel(machine: machine, path: path.name, notifier: notifier)
     }
@@ -203,6 +205,7 @@ final class StateViewModel2: ObservableObject {
         self.actions = state.wrappedValue.actions.indices.map {
             ActionViewModel(machine: machine, path: path.actions[$0], action: state.actions[$0], notifier: notifier, collapsed: false)
         }
+        self.transitions = []
     }
     
     init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false, machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, state: Binding<Machines.State>, notifier: GlobalChangeNotifier? = nil) {
@@ -214,6 +217,7 @@ final class StateViewModel2: ObservableObject {
         self.actions = state.wrappedValue.actions.indices.map {
             ActionViewModel(machine: machine, path: path.actions[$0], action: state.actions[$0], notifier: notifier, collapsed: false)
         }
+        self.transitions = []
     }
     
     func findEdge(degrees: CGFloat) -> CGPoint {
@@ -365,6 +369,7 @@ extension StateViewModel2 {
             state: state,
             notifier: notifier
         )
+        self.transitions = transitionViewModels
     }
 
     fileprivate func colourPList() -> String {

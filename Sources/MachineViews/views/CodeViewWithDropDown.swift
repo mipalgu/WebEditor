@@ -30,7 +30,7 @@ struct CodeViewWithDropDown<Label: View>: View {
             value: Binding(
                 get: { root.wrappedValue[keyPath: path.keyPath] },
                 set: {
-                    _ = try? root.wrappedValue.modify(attribute: path, value: $0)
+                    _ = try? root.wrappedValue.modify(attribute: path, value: $0).get()
                 }
             ),
             errors: Binding(
