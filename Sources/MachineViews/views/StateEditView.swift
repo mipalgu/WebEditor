@@ -14,8 +14,8 @@ import AttributeViews
 
 struct StateEditView: View {
     
-    @Binding var machine: Machine
-    let path: Attributes.Path<Machine, Machines.State>
+    var titleViewModel: StateTitleViewModel
+    var actionViewModels: [ActionViewModel]
     
     @EnvironmentObject var config: Config
     
@@ -23,20 +23,9 @@ struct StateEditView: View {
         GeometryReader { geometry in
             ScrollView {
                 VStack(alignment: .leading) {
-                    LineView<Config>(root: $machine, path: path.name, label: "State Name")
-                        .multilineTextAlignment(.center)
-                        .font(config.fontTitle2)
-                        .background(config.fieldColor)
-                        .foregroundColor(config.textColor)
-                    ForEach(Array(machine[keyPath: path.keyPath].actions.enumerated()), id: \.1) { (index, action) in
-                        CodeView<Config, Text>(root: $machine, path: path.actions[index].implementation, language: .swift) {
-                            let view = Text(action.name + ":").font(config.fontHeading).underline().foregroundColor(config.stateTextColour)
-                            if action.implementation.isEmpty {
-                                return view.italic()
-                            } else {
-                                return view
-                            }
-                        }
+                    StateEditTitleView(viewModel: titleViewModel)
+                    ForEach(actionViewModels, id: \.self) {
+                        StateEditActionView(viewModel: $0)
                         .frame(minHeight: max(geometry.size.height / 3 - 25, 50))
                     }
                 }.padding(10)
@@ -56,7 +45,9 @@ struct StateEditView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateEditView(machine: $machine, path: path).environmentObject(config)
+            StateEditView(titleViewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name), actionViewModels: machine.states[0].actions.indices.map {
+                ActionViewModel(machine: $machine, path: machine.path.states[0].actions[$0], action: $machine.states[0].actions[$0])
+            }).environmentObject(config)
         }
         
     }

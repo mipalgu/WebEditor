@@ -384,7 +384,21 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
         guard lastIndex >= 0 else {
             return nil
         }
-        sourceModel.transitions.append(TransitionViewModel2(machine: machineBinding, path: machine.path.states[stateIndex].transitions[lastIndex], transitionBinding: machineBinding.states[stateIndex].transitions[lastIndex], source: sourceModel, sourcePoint: source, target: targetState, targetPoint: target, notifier: self))
+        print("Transition count: \(machineBinding.wrappedValue.states[stateIndex].transitions.count)")
+        print("Last Transition: \(machineBinding.wrappedValue.states[stateIndex].transitions[lastIndex])")
+        print("Last Transition Binding: \(machineBinding.states[stateIndex].transitions[lastIndex])")
+        sourceModel.transitions.append(
+            TransitionViewModel2(
+                machine: machineBinding,
+                path: machine.path.states[stateIndex].transitions[lastIndex],
+                transitionBinding: machineBinding.states[stateIndex].transitions[lastIndex],
+                source: sourceModel,
+                sourcePoint: source,
+                target: targetState,
+                targetPoint: target,
+                notifier: self
+            )
+        )
         return targetName
     }
     
@@ -562,6 +576,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
                 } else {
                     self.stretchTransitions(state: self.machine.states[index].name, states: self.machine.states)
                 }
+                self.objectWillChange.send()
             }.onEnded {
                 self.finishMovingTransitions()
                 self.finishDrag(state: self.machine.states[index], gesture: $0, frameWidth: size.width, frameHeight: size.height)

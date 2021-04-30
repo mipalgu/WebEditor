@@ -12,7 +12,16 @@ import Attributes
 import Transformations
 import Utilities
 
-final class ActionViewModel: ObservableObject {
+final class ActionViewModel: ObservableObject, Hashable {
+    
+    static func == (lhs: ActionViewModel, rhs: ActionViewModel) -> Bool {
+        lhs === rhs
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(path)
+    }
+    
     
     private var machine: Binding<Machine>
     

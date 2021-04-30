@@ -54,7 +54,10 @@ public struct CanvasView: View {
     public var body: some View {
         Group {
             if let editState = edittingState {
-                StateEditView(machine: viewModel.machineBinding, path: viewModel.machine.path.states[editState])
+                StateEditView(
+                    titleViewModel: viewModel.viewModel(for: viewModel.machine.states[editState]).title,
+                    actionViewModels: viewModel.viewModel(for: viewModel.machine.states[editState]).actions
+                )
                     .onTapGesture(count: 2) {
                         edittingState = nil
                         focus = .machine
