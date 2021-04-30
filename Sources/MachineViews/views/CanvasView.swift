@@ -40,7 +40,7 @@ public struct CanvasView: View {
     public init(machine: Binding<Machine>, focus: Binding<Focus>) {
         self._focus = focus
         guard let plist = try? String(contentsOf: machine.wrappedValue.filePath.appendingPathComponent("Layout.plist")) else {
-            self.viewModel = MachineViewModel2(machine: machine, data: [:], transitions: [:])
+            self.viewModel = MachineViewModel2(machine: machine, data: [:])
             return
         }
         self.viewModel = MachineViewModel2(machine: machine, plist: plist)
@@ -83,9 +83,9 @@ public struct CanvasView: View {
                         if let curve = creatingCurve {
                             ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                         }
-                        ForEach(viewModel.unattachedTransitionsAsRows, id: \.self) { row in
-                            ArrowView(curve: .constant(row.data.curve), strokeNumber: 0, colour: config.errorColour)
-                        }
+//                        ForEach(viewModel.unattachedTransitionsAsRows, id: \.self) { row in
+//                            ArrowView(curve: .constant(row.data.curve), strokeNumber: 0, colour: config.errorColour)
+//                        }
                         ForEach(viewModel.states(viewModel.machine), id: \.self) { stateRow in
                             ForEach(viewModel.transitions(stateRow), id: \.self) { transitionRow in
                                 TransitionView(
@@ -93,13 +93,6 @@ public struct CanvasView: View {
                                     strokeNumber: UInt8(transitionRow.index),
                                     focused: selectedObjects.contains(.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index))
                                 )
-//                                TransitionView(
-//                                    machine: viewModel.machineBinding,
-//                                    path: viewModel.machine.path.states[stateRow.index].transitions[transitionRow.index],
-//                                    curve: viewModel.binding(to: transitionRow.index, originatingFrom: stateRow.data).curve,
-//                                    strokeNumber: UInt8(transitionRow.index),
-//                                    focused: selectedObjects.contains(.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index))
-//                                )
                                 .clipped()
                                 .gesture(TapGesture().onEnded {
                                     viewModel.addSelectedTransition(view: self, from: stateRow.index, at: transitionRow.index)
