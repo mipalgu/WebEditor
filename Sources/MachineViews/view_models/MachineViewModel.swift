@@ -14,7 +14,11 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     var isMoving: Bool = false
     
+    var isStateMoving: Bool = false
+    
     var machineBinding: Binding<Machine>
+    
+    var movingState: StateName = ""
     
     var startLocations: [StateName: CGPoint] = [:]
     
@@ -227,6 +231,23 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             }
     }
     
+    func dragStateGesture(forView view: CanvasView, forState index: Int, size: CGSize) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
+            .onChanged {
+                self.handleDrag(state: self.machine.states[index], gesture: $0, frameWidth: size.width, frameHeight: size.height)
+                if !self.tracker(for: self.machine.states[index].name).isStretchingX && !self.tracker(for: self.machine.states[index].name).isStretchingY {
+                    self.moveTransitions(state: self.machine.states[index].name, gesture: $0, frame: size)
+                } else {
+                    self.stretchTransitions(state: self.machine.states[index].name, states: self.machine.states)
+                }
+                self.objectWillChange.send()
+            }.onEnded {
+                self.finishMovingTransitions()
+                self.finishDrag(state: self.machine.states[index], gesture: $0, frameWidth: size.width, frameHeight: size.height)
+                self.objectWillChange.send()
+            }
+    }
+    
     func finishMoveElements(gesture: DragGesture.Value, frame: CGSize) {
         moveElements(gesture: gesture, frame: frame)
         isMoving = false
@@ -416,6 +437,25 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         transitionTrackers[from]!.remove(atOffsets: set)
     }
     
+    private func findMovingTransitions(state: StateName) -> ([CGPoint], [StateName: [Int: CGPoint]]) {
+        movingState = state
+        let movingSources = transitionTrackers(for: state).map(\.curve.point0)
+        var targetTransitions: [StateName: [Int: CGPoint]] = [:]
+        machine.states.forEach { stateObj in
+            let name = stateObj.name
+            let stateTransitions = stateObj.transitions
+            var targetsDictionary: [Int: CGPoint] = [:]
+            stateTransitions.indices.forEach({ index in
+                if stateTransitions[index].target == state {
+                    targetsDictionary[index] = self.viewModel(for: index, originatingFrom: name, goingTo: state).curve.point3
+                }
+            })
+            targetTransitions[name] = targetsDictionary
+
+        }
+        return (movingSources, targetTransitions)
+    }
+    
     
     /// Finds all the views within the selection box.
     /// - Parameters:
@@ -468,6 +508,13 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             })
         }
         return Set(focusedTransitions)
+    }
+    
+    private func handleDrag(state: Machines.State, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        guard let _ = stateTrackers[state.name] else {
+            return
+        }
+        stateTrackers[state.name]!.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
     }
     
     private func isWithinBound(corner0: CGPoint, corner1: CGPoint, position: CGPoint) -> Bool {
@@ -525,6 +572,31 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         var tracker = self.tracker(for: transitionIndex, originating: name)
         tracker.curve = curve
         transitionTrackers[name]![transitionIndex] = tracker
+    }
+    
+    func moveTransitions(state: StateName, gesture: DragGesture.Value, frame: CGSize) {
+        if !isStateMoving {
+            isStateMoving = true
+            let effected = findMovingTransitions(state: state, states: machine.states)
+            movingSourceTransitions = effected.0
+            movingTargetTransitions = effected.1
+            return
+        }
+        displaceTransitions(sourceTransitions: movingSourceTransitions, targetTransitions: movingTargetTransitions, dS: gesture.translation, frame: frame, source: movingState)
+//        movingSourceTransitions.indices.forEach {
+//            let newX = min(max(0, movingSourceTransitions[$0].x + gesture.translation.width), frameWidth)
+//            let newY = min(max(0, movingSourceTransitions[$0].y + gesture.translation.height), frameHeight)
+//            let point = CGPoint(x: newX, y: newY)
+//            transitions[movingState]![$0].curve.point0 = point
+//        }
+//        movingTargetTransitions.keys.forEach { name in
+//            movingTargetTransitions[name]!.keys.forEach { index in
+//                let newX = min(max(0, movingTargetTransitions[name]![index]!.x + gesture.translation.width), frameWidth)
+//                let newY = min(max(0, movingTargetTransitions[name]![index]!.y + gesture.translation.height), frameHeight)
+//                let point = CGPoint(x: newX, y: newY)
+//                transitions[name]![index].curve.point3 = point
+//            }
+//        }
     }
     
     private func newStateViewModel(stateIndex: Int) -> StateViewModel {
