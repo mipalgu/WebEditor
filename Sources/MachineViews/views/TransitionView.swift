@@ -30,7 +30,7 @@ struct TransitionView: View {
                 editing: focused,
                 color: focused ? config.highlightColour : config.textColor,
                 label: { LineView<Config>(value: $viewModel.condition, label: "<condition>") },
-                editLabel: { LineView<Config>(value: .constant(""), label: "") }
+                editLabel: { LineView<Config>(value: $viewModel.condition, label: "") }
             )
             if focused {
                 AnchorPoint(width: 20, height: 20)
