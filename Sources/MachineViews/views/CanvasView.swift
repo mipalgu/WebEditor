@@ -139,9 +139,9 @@ public struct CanvasView: View {
                                 .onTapGesture(count: 2) { edittingState = stateIndex; focus = .state(stateIndex: stateIndex) }
                                 .onTapGesture { selectedObjects = [.state(stateIndex: stateIndex)]; focus = .state(stateIndex: stateIndex) }
                                 .gesture(viewModel.createTransitionGesture(forView: self, forState: stateIndex))
-                                .gesture(viewModel.dragStateGesture(forView: self, forState: row.index, size: geometry.size))
-                                .onChange(of: viewModel.viewModel(for: row.data).expanded) { _ in
-                                    self.viewModel.updateTransitionLocations(source: row.data, states: viewModel.machine.states)
+                                .gesture(viewModel.dragStateGesture(forView: self, forState: stateIndex, size: geometry.size))
+                                .onChange(of: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).expanded) { _ in
+                                    self.viewModel.updateTransitionLocations(source: viewModel.machine.states[stateIndex])
                                 }
                                 .contextMenu {
                                     Button("Delete", action: {
