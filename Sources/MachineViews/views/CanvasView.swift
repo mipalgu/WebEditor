@@ -92,7 +92,8 @@ public struct CanvasView: View {
                         ForEach(Array(viewModel.machine.states.indices), id: \.self) { stateIndex in
                             ForEach(Array(viewModel.machine.states[stateIndex].transitions.indices), id: \.self) { transitionIndex in
                                 TransitionView(
-                                    viewModel: viewModel.viewModel(for: transitionIndex, in: viewModel.machine.states[stateIndex].name),
+                                    viewModel: viewModel.transition(for: transitionIndex, in: viewModel.machine.states[stateIndex].name),
+                                    tracker: viewModel.tracker(for: transitionIndex, originating: viewModel.machine.states[stateIndex].name),
                                     strokeNumber: UInt8(transitionIndex),
                                     focused: selectedObjects.contains(.transition(stateIndex: stateIndex, transitionIndex: transitionIndex))
                                 )
@@ -114,13 +115,13 @@ public struct CanvasView: View {
                                 }
                             }
                         }
-                        ForEach(Array(viewModel.machine.state.indices), id: \.self) { stateIndex in
-                            if viewModel.viewModel(for: viewModel.machine.states[stateIndex]).isText {
+                        ForEach(Array(viewModel.machine.states.indices), id: \.self) { stateIndex in
+                            if viewModel.tracker(for: viewModel.machine.states[stateIndex].name).isText {
                                 VStack {
                                     Text(viewModel.machine.states[stateIndex].name)
                                         .font(config.fontBody)
                                         .frame(width: textWidth, height: textHeight)
-                                    //.foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
+//                                    .foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
                                 }
                                 .coordinateSpace(name: coordinateSpace)
                                 .position(viewModel.clampPosition(point: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).location, frame: geometry.size, dx: textWidth / 2.0, dy: textHeight / 2.0))
@@ -128,6 +129,7 @@ public struct CanvasView: View {
                                 VStack {
                                     StateView(
                                         state: viewModel.viewModel(for: viewModel.machine.states[stateIndex]),
+                                        tracker: viewModel.tracker(for: viewModel.machine.states[stateIndex].name),
                                         focused: selectedObjects.contains(.state(stateIndex: stateIndex))
                                     )
                                     .frame(
