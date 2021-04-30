@@ -173,6 +173,12 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
             stateViewModels[state]!.transitions = rectifiedTransitions
         }
         self.init(machine: machine, data: stateViewModels)
+        self.data.values.forEach { s in
+            s.notifier = self
+            s.transitions.forEach { t in
+                t.notifier = self
+            }
+        }
     }
     
     public func toPlist(machine: Machine) -> String {
