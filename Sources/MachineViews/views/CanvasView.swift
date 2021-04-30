@@ -132,7 +132,6 @@ public struct CanvasView: View {
                                 VStack {
                                     StateView(
                                         state: viewModel.viewModel(for: row.data),
-                                        collapsedActions: viewModel.binding(to: row.data).collapsedActions,
                                         focused: selectedObjects.contains(.state(stateIndex: row.index))
                                     )
                                     .frame(

@@ -15,72 +15,41 @@ import GUUI
 
 struct StateExpandedView<TitleView: View>: View {
     
-    @Binding var state: Machines.State
-    @Binding var collapsedActions: [String: Bool]
+    var actions: [ActionViewModel]
     let titleView: () -> TitleView
-    let codeView: (Int) -> CodeViewWithDropDown<Text>
+    let codeView: (Int) -> ActionView
     var focused: Bool = false
     
-    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Machines.State>, collapsedActions: Binding<[String: Bool]>, focused: Bool = false, titleView: @escaping () -> TitleView) {
+//    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Machines.State>, collapsedActions: Binding<[String: Bool]>, focused: Bool = false, titleView: @escaping () -> TitleView) {
+//        self.init(
+//            state: Binding(
+//                get: { root.wrappedValue[keyPath: path.keyPath] },
+//                set: {
+//                    _ = try? root.wrappedValue.modify(attribute: path, value: $0)
+//                }
+//            ),
+//            collapsedActions: collapsedActions,
+//            titleView: titleView,
+//            focused: focused,
+//            codeView: {
+//                ActionView(action: actions[$0], collapsed: <#T##Binding<Bool>#>)
+//            }
+//        )
+//    }
+    
+    init(actions: [ActionViewModel], focused: Bool = false, titleView: @escaping () -> TitleView) {
         self.init(
-            state: Binding(
-                get: { root.wrappedValue[keyPath: path.keyPath] },
-                set: {
-                    _ = try? root.wrappedValue.modify(attribute: path, value: $0)
-                }
-            ),
-            collapsedActions: collapsedActions,
+            actions: actions,
             titleView: titleView,
             focused: focused,
             codeView: {
-                let name = root.wrappedValue[keyPath: path.keyPath].actions[$0].name
-                return CodeViewWithDropDown(
-                    root: root,
-                    path: path.actions[$0].implementation,
-                    label: name,
-                    language: root.wrappedValue[keyPath: path.keyPath].actions[$0].language,
-                    collapsed: Binding(
-                        get: {
-                            collapsedActions.wrappedValue[name] ?? false
-                        },
-                        set: {
-                            collapsedActions.wrappedValue[name] = $0
-                        }
-                    )
-                )
+                ActionView(action: actions[$0])
             }
         )
     }
     
-    init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, actionErrors: Binding<[[String]]> = .constant([]),  focused: Bool = false, titleView: @escaping () -> TitleView) {
-        self.init(
-            state: state,
-            collapsedActions: collapsedActions,
-            titleView: titleView,
-            focused: focused,
-            codeView: {
-                let name = state.wrappedValue.actions[$0].name
-                return CodeViewWithDropDown(
-                    value: state.actions[$0].implementation,
-                    errors: actionErrors[$0],
-                    label: name,
-                    language: state.actions[$0].language.wrappedValue,
-                    collapsed: Binding(
-                        get: {
-                            collapsedActions.wrappedValue[name] ?? false
-                        },
-                        set: {
-                            collapsedActions.wrappedValue[name] = $0
-                        }
-                    )
-                )
-            }
-        )
-    }
-    
-    private init(state: Binding<Machines.State>, collapsedActions: Binding<[String: Bool]>, titleView: @escaping () -> TitleView, focused: Bool = false, codeView: @escaping (Int) -> CodeViewWithDropDown<Text>) {
-        self._state = state
-        self._collapsedActions = collapsedActions
+    private init(actions: [ActionViewModel], titleView: @escaping () -> TitleView, focused: Bool = false, codeView: @escaping (Int) -> ActionView) {
+        self.actions = actions
         self.titleView = titleView
         self.codeView = codeView
         self.focused = focused
@@ -94,20 +63,14 @@ struct StateExpandedView<TitleView: View>: View {
     
     fileprivate var cache = Cache()
     
-    var rows: [Row<Action>] {
-        state.actions.enumerated().map {
-            Row(id: cache.actionCache.id(for: $1), index: $0, data: $1)
-        }
-    }
-    
     var body: some View {
         Group {
             VStack {
                 titleView()
                 ScrollView {
                     VStack(spacing: 0) {
-                        ForEach(rows, id: \.self) { row in
-                            codeView(row.index)
+                        ForEach(Array(actions.indices), id: \.self) {
+                            codeView($0)
                         }
                     }
                 }
@@ -147,17 +110,19 @@ struct StateExpandedView_Previews: PreviewProvider {
     
     struct Binding_Preview: View {
         
-        @State var value: Machines.State = Machines.State(
-            name: "Initial",
-            actions: [
-                Action(name: "OnEntry", implementation: "let a = 2", language: .swift),
-                Action(name: "OnExit", implementation: "let b = 3", language: .swift),
-                Action(name: "Main", implementation: "let c = 4", language: .swift),
-                Action(name: "OnSuspend", implementation: "let d = 5", language: .swift),
-                Action(name: "OnResume", implementation: "let e = 6", language: .swift)
-            ],
-            transitions: []
-        )
+        @State var machine: Machine = Machine.initialSwiftMachine()
+//
+//        @State var value: Machines.State = Machines.State(
+//            name: "Initial",
+//            actions: [
+//                Action(name: "OnEntry", implementation: "let a = 2", language: .swift),
+//                Action(name: "OnExit", implementation: "let b = 3", language: .swift),
+//                Action(name: "Main", implementation: "let c = 4", language: .swift),
+//                Action(name: "OnSuspend", implementation: "let d = 5", language: .swift),
+//                Action(name: "OnResume", implementation: "let e = 6", language: .swift)
+//            ],
+//            transitions: []
+//        )
         
         @State var titleErrors: [String] = ["An error", "A second error"]
         
@@ -168,12 +133,21 @@ struct StateExpandedView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateExpandedView<LineView<Config>>(
-                state: $value,
-                collapsedActions: $collapsedActions,
-                actionErrors: $actionErrors
+            StateExpandedView(
+                actions: machine.states[0].actions.indices.map {
+                    ActionViewModel(
+                        machine: $machine,
+                        path: machine.path.states[0].actions[$0],
+                        action: $machine.states[0].actions[$0]
+                    )
+                },
+                focused: false
             ) {
-                LineView<Config>(value: $value.name, errors: $titleErrors, label: "State Name")
+                LineView<Config>(
+                    value: $machine.states[0].name,
+                    errors: $titleErrors,
+                    label: "State Name"
+                )
             }.environmentObject(config)
         }
         

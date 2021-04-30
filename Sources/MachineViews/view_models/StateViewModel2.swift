@@ -12,11 +12,131 @@ import Attributes
 import Transformations
 import Utilities
 
+final class ActionViewModel: ObservableObject {
+    
+    private var machine: Binding<Machine>
+    
+    let path: Attributes.Path<Machine, Action>
+    
+    var action: Binding<Action>
+    
+    weak var notifier: GlobalChangeNotifier?
+    
+    @Published var collapsed: Bool
+    
+    var errors: [String] {
+        get {
+            machine.wrappedValue.errorBag.errors(forPath: path).map(\.message)
+        } set {}
+    }
+    
+    var name: String {
+        get {
+            action.wrappedValue.name
+        }
+        set {
+            let result = machine.wrappedValue.modify(attribute: path.name, value: newValue)
+            guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
+                self.objectWillChange.send()
+                return
+            }
+            notifier.send()
+        }
+    }
+    
+    var implementation: Code {
+        get {
+            action.wrappedValue.implementation
+        }
+        set {
+            let result = machine.wrappedValue.modify(attribute: path.implementation, value: newValue)
+            guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
+                self.objectWillChange.send()
+                return
+            }
+            notifier.send()
+        }
+    }
+    
+    var language: Language {
+        get {
+            action.wrappedValue.language
+        } set {
+            let result = machine.wrappedValue.modify(attribute: path.language, value: newValue)
+            guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
+                self.objectWillChange.send()
+                return
+            }
+            notifier.send()
+        }
+    }
+    
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Action>, action: Binding<Action>, notifier: GlobalChangeNotifier? = nil, collapsed: Bool = false) {
+        self.machine = machine
+        self.path = path
+        self.action = action
+        self.notifier = notifier
+        self.collapsed = collapsed
+    }
+    
+}
+
+final class StateTitleViewModel: ObservableObject {
+    
+    private var machine: Binding<Machine>
+    
+    let path: Attributes.Path<Machine, StateName>
+    
+    weak var notifier: GlobalChangeNotifier?
+    
+    var name: String {
+        get {
+            machine.wrappedValue[keyPath: path.path]
+        } set {
+            let result = machine.wrappedValue.modify(attribute: path, value: newValue)
+            guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
+                self.objectWillChange.send()
+                return
+            }
+            notifier.send()
+        }
+    }
+    
+    var errors: [String] {
+        get {
+            machine.wrappedValue.errorBag.errors(forPath: path).map(\.message)
+        } set {}
+    }
+    
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, StateName>, notifier: GlobalChangeNotifier? = nil) {
+        self.machine = machine
+        self.path = path
+        self.notifier = notifier
+    }
+    
+}
+
 final class StateViewModel2: ObservableObject {
+    
+    private var machine: Binding<Machine>
+    
+    let path: Attributes.Path<Machine, Machines.State>
     
     var state: Binding<Machines.State>
     
     @Published var tracker: StateTracker
+    
+    weak var notifier: GlobalChangeNotifier?
+    
+    var actions: [ActionViewModel] {
+        state.wrappedValue.actions.indices.map {
+            ActionViewModel(machine: machine, path: path.actions[$0], action: state.actions[$0], notifier: notifier, collapsed: false)
+        }
+    }
+    
+    var title: StateTitleViewModel {
+        StateTitleViewModel(machine: machine, path: path.name, notifier: notifier)
+    }
     
     var location: CGPoint {
         get {
@@ -87,14 +207,18 @@ final class StateViewModel2: ObservableObject {
         tracker.width
     }
     
-    init(state: Binding<Machines.State>) {
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, state: Binding<Machines.State>, notifier: GlobalChangeNotifier? = nil) {
+        self.machine = machine
+        self.path = path
         self.state = state
         self.tracker = StateTracker()
+        self.notifier = notifier
     }
     
-    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false, state: Binding<Machines.State>) {
+    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false, state: Binding<Machines.State>, notifier: GlobalChangeNotifier? = nil) {
         self.tracker = StateTracker(location: location, expandedWidth: expandedWidth, expandedHeight: expandedHeight, expanded: expanded, collapsedWidth: collapsedWidth, collapsedHeight: collapsedHeight, isText: isText)
         self.state = state
+        self.notifier = notifier
     }
     
     func findEdge(degrees: CGFloat) -> CGPoint {
@@ -220,7 +344,7 @@ struct StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDete
 
 extension StateViewModel2 {
 
-    convenience init(state: Binding<Machines.State>, plist data: String) {
+    convenience init(state: Binding<Machines.State>, plist data: String, notifier: GlobalChangeNotifier? = nil) {
         let transitions = state.wrappedValue.transitions
         let helper = StringHelper()
         let x = helper.getValueFromFloat(plist: data, label: "x")
@@ -243,7 +367,8 @@ extension StateViewModel2 {
             collapsedWidth: 150.0,
             collapsedHeight: 100.0,
             isText: false,
-            state: state
+            state: state,
+            notifier: notifier
         )
     }
 

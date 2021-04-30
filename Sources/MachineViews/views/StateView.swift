@@ -16,12 +16,10 @@ struct StateView: View {
     
     @ObservedObject var state: StateViewModel2
 
-    @Binding var collapsedActions: [String: Bool]
     var focused: Bool
     
-    init(state: StateViewModel2, collapsedActions: Binding<[String: Bool]> = .constant([:]), focused: Bool = false) {
+    init(state: StateViewModel2, focused: Bool = false) {
         self.state = state
-        self._collapsedActions = collapsedActions
         self.focused = focused
     }
     
@@ -30,12 +28,12 @@ struct StateView: View {
     var body: some View {
         Group {
             if state.expanded {
-                StateExpandedView(state: state.state, collapsedActions: $collapsedActions, focused: focused) {
-                    StateTitleView(name: state.state.name, expanded: state.expandedBinding)
+                StateExpandedView(actions: state.actions, focused: focused) {
+                    StateTitleView(viewModel: state.title, expanded: state.expandedBinding)
                 }
             } else {
                 StateCollapsedView(focused: focused) {
-                    StateTitleView(name: state.state.name, expanded: state.expandedBinding)
+                    StateTitleView(viewModel: state.title, expanded: state.expandedBinding)
                 }
             }
         }
@@ -50,12 +48,10 @@ struct StateView_Previews: PreviewProvider {
         
         @State var expanded: Bool = true
         
-        @State var collapsedActions: [String: Bool] = [:]
-        
         let config = Config()
         
         var body: some View {
-            StateView(state: StateViewModel2(state: $machine.states[0]),collapsedActions: $collapsedActions).environmentObject(config)
+            StateView(state: StateViewModel2(state: $machine.states[0])).environmentObject(config)
         }
         
     }
@@ -71,7 +67,7 @@ struct StateView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateView(state: StateViewModel2(state: $machine.states[0]),collapsedActions: $collapsedActions).environmentObject(config)
+            StateView(state: StateViewModel2(state: $machine.states[0])).environmentObject(config)
         }
         
     }

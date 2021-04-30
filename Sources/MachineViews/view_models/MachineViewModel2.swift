@@ -21,7 +21,11 @@ struct CacheContainer<T: Hashable>: Hashable {
     
 }
 
-final class MachineViewModel2: ObservableObject {
+final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
+    
+    func send() {
+        self.objectWillChange.send()
+    }
     
     var machineBinding: Binding<Machine>
     

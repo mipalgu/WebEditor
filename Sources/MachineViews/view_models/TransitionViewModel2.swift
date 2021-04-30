@@ -18,6 +18,8 @@ final class TransitionViewModel2: ObservableObject {
     
     @Published var tracker: TransitionTracker
     
+    weak var notifier: GlobalChangeNotifier?
+    
     var curve: Curve {
         get {
             tracker.curve
@@ -40,29 +42,34 @@ final class TransitionViewModel2: ObservableObject {
         Binding(get: { self.transitionBinding.wrappedValue.condition ?? "" }, set: { self.transitionBinding.wrappedValue.condition = $0 })
     }
     
-    init(transitionBinding: Binding<Transition>, curve: Curve) {
+    init(transitionBinding: Binding<Transition>, curve: Curve, notifier: GlobalChangeNotifier? = nil) {
         self.transitionBinding = transitionBinding
         self.tracker = TransitionTracker(curve: curve)
+        self.notifier = notifier
     }
     
-    init(transitionBinding: Binding<Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint) {
+    init(transitionBinding: Binding<Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint, notifier: GlobalChangeNotifier? = nil) {
         self.transitionBinding = transitionBinding
         self.tracker = TransitionTracker(point0: point0, point1: point1, point2: point2, point3: point3)
+        self.notifier = notifier
     }
     
-    init(transitionBinding: Binding<Transition>, source: CGPoint, target: CGPoint) {
+    init(transitionBinding: Binding<Transition>, source: CGPoint, target: CGPoint, notifier: GlobalChangeNotifier? = nil) {
         self.transitionBinding = transitionBinding
         self.tracker = TransitionTracker(source: source, target: target)
+        self.notifier = notifier
     }
     
-    init(transitionBinding: Binding<Transition>, source: StateViewModel2, target: StateViewModel2) {
+    init(transitionBinding: Binding<Transition>, source: StateViewModel2, target: StateViewModel2, notifier: GlobalChangeNotifier? = nil) {
         self.transitionBinding = transitionBinding
         self.tracker = TransitionTracker(source: source, target: target)
+        self.notifier = notifier
     }
     
-    init(transitionBinding: Binding<Transition>, source: StateViewModel2, sourcePoint: CGPoint, target: StateViewModel2, targetPoint: CGPoint) {
+    init(transitionBinding: Binding<Transition>, source: StateViewModel2, sourcePoint: CGPoint, target: StateViewModel2, targetPoint: CGPoint, notifier: GlobalChangeNotifier? = nil) {
         self.transitionBinding = transitionBinding
         self.tracker = TransitionTracker(source: source, sourcePoint: sourcePoint, target: target, targetPoint: targetPoint)
+        self.notifier = notifier
     }
 }
 
@@ -153,7 +160,7 @@ struct TransitionTracker: Positionable, Hashable   {
 
 extension TransitionViewModel2 {
 
-    convenience init(transitionBinding: Binding<Transition>, plist data: String) {
+    convenience init(transitionBinding: Binding<Transition>, plist data: String, notifier: GlobalChangeNotifier? = nil) {
         let helper = StringHelper()
         let point0X = helper.getValueFromFloat(plist: data, label: "srcPointX")
         let point0Y = helper.getValueFromFloat(plist: data, label: "srcPointY")
@@ -168,7 +175,8 @@ extension TransitionViewModel2 {
             point0: CGPoint(x: point0X, y: point0Y),
             point1: CGPoint(x: point1X, y: point1Y),
             point2: CGPoint(x: point2X, y: point2Y),
-            point3: CGPoint(x: point3X, y: point3Y)
+            point3: CGPoint(x: point3X, y: point3Y),
+            notifier: notifier
         )
     }
 

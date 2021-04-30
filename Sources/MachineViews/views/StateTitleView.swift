@@ -65,7 +65,7 @@ import Utilities
 
 struct StateTitleView: View {
     
-    @Binding var name: String
+    @ObservedObject var viewModel: StateTitleViewModel
     @Binding var expanded: Bool
     
     @EnvironmentObject var config: Config
@@ -73,7 +73,7 @@ struct StateTitleView: View {
     var body: some View {
         HStack {
             Toggle(isOn: $expanded) {
-                LineView<Config>(value: $name, label: "State Name")
+                LineView<Config>(value: $viewModel.name, errors: $viewModel.errors, label: "Enter State Name...")
                     .multilineTextAlignment(.center)
                     .font(config.fontBody.bold())
             }.toggleStyle(ArrowToggleStyle())
@@ -93,7 +93,7 @@ struct StateTitleView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateTitleView(name: $machine.states[0].name, expanded: $expanded).environmentObject(config)
+            StateTitleView(viewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name), expanded: $expanded)
         }
         
     }
