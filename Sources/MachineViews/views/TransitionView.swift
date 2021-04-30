@@ -14,7 +14,7 @@ import AttributeViews
 
 struct TransitionView: View {
     
-    @ObservedObject var viewModel: TransitionViewModel2
+    @ObservedObject var viewModel: TransitionViewModel
     
     let strokeNumber: UInt8
     

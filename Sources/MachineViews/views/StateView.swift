@@ -14,11 +14,11 @@ import Utilities
 
 struct StateView: View {
     
-    @ObservedObject var state: StateViewModel2
+    @ObservedObject var state: StateViewModel
 
     var focused: Bool
     
-    init(state: StateViewModel2, focused: Bool = false) {
+    init(state: StateViewModel, focused: Bool = false) {
         self.state = state
         self.focused = focused
     }
@@ -51,7 +51,7 @@ struct StateView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateView(state: StateViewModel2(machine: $machine, path: machine.path.states[0], state: $machine.states[0], notifier: nil)).environmentObject(config)
+            StateView(state: StateViewModel(machine: $machine, path: machine.path.states[0], state: $machine.states[0], notifier: nil)).environmentObject(config)
         }
         
     }
@@ -67,7 +67,7 @@ struct StateView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateView(state: StateViewModel2(machine: $machine, path: machine.path.states[0], state: $machine.states[0], notifier: nil)).environmentObject(config)
+            StateView(state: StateViewModel(machine: $machine, path: machine.path.states[0], state: $machine.states[0], notifier: nil)).environmentObject(config)
         }
         
     }

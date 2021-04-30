@@ -12,119 +12,7 @@ import Attributes
 import Transformations
 import Utilities
 
-final class ActionViewModel: ObservableObject, Hashable {
-    
-    static func == (lhs: ActionViewModel, rhs: ActionViewModel) -> Bool {
-        lhs === rhs
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(path)
-    }
-    
-    private var machine: Binding<Machine>
-    
-    let path: Attributes.Path<Machine, Action>
-    
-    var action: Binding<Action>
-    
-    weak var notifier: GlobalChangeNotifier?
-    
-    @Published var collapsed: Bool
-    
-    var errors: [String] {
-        get {
-            machine.wrappedValue.errorBag.errors(forPath: path).map(\.message)
-        } set {}
-    }
-    
-    var name: String {
-        get {
-            action.wrappedValue.name
-        }
-        set {
-            let result = machine.wrappedValue.modify(attribute: path.name, value: newValue)
-            guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
-                self.objectWillChange.send()
-                return
-            }
-            notifier.send()
-        }
-    }
-    
-    var implementation: Code {
-        get {
-            action.wrappedValue.implementation
-        }
-        set {
-            let result = machine.wrappedValue.modify(attribute: path.implementation, value: newValue)
-            guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
-                self.objectWillChange.send()
-                return
-            }
-            notifier.send()
-        }
-    }
-    
-    var language: Language {
-        get {
-            action.wrappedValue.language
-        } set {
-            let result = machine.wrappedValue.modify(attribute: path.language, value: newValue)
-            guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
-                self.objectWillChange.send()
-                return
-            }
-            notifier.send()
-        }
-    }
-    
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Action>, action: Binding<Action>, notifier: GlobalChangeNotifier? = nil, collapsed: Bool = false) {
-        self.machine = machine
-        self.path = path
-        self.action = action
-        self.notifier = notifier
-        self.collapsed = collapsed
-    }
-    
-}
-
-final class StateTitleViewModel: ObservableObject {
-    
-    private var machine: Binding<Machine>
-    
-    let path: Attributes.Path<Machine, StateName>
-    
-    weak var notifier: GlobalChangeNotifier?
-    
-    var name: String {
-        get {
-            machine.wrappedValue[keyPath: path.path]
-        } set {
-            let result = machine.wrappedValue.modify(attribute: path, value: newValue)
-            guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
-                self.objectWillChange.send()
-                return
-            }
-            notifier.send()
-        }
-    }
-    
-    var errors: [String] {
-        get {
-            machine.wrappedValue.errorBag.errors(forPath: path).map(\.message)
-        } set {}
-    }
-    
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, StateName>, notifier: GlobalChangeNotifier? = nil) {
-        self.machine = machine
-        self.path = path
-        self.notifier = notifier
-    }
-    
-}
-
-final class StateViewModel2: ObservableObject {
+final class StateViewModel: ObservableObject {
     
     private var machine: Binding<Machine>
     
@@ -138,7 +26,7 @@ final class StateViewModel2: ObservableObject {
     
     var actions: [ActionViewModel]
     
-    var transitions: [TransitionViewModel2]
+    var transitions: [TransitionViewModel]
     
     var title: StateTitleViewModel {
         StateTitleViewModel(machine: machine, path: path.name, notifier: notifier)
@@ -266,88 +154,7 @@ final class StateViewModel2: ObservableObject {
     
 }
 
-struct StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable {
-    
-    var isText: Bool
-    
-    var isDragging: Bool = false
-    
-    var _collapsedWidth: CGFloat
-    
-    var _collapsedHeight: CGFloat
-    
-    var expanded: Bool
-    
-    var location: CGPoint
-
-    let collapsedMinWidth: CGFloat = 150.0
-    
-    let collapsedMaxWidth: CGFloat = 250.0
-    
-    let collapsedMinHeight: CGFloat = 100.0
-    
-    let collapsedMaxHeight: CGFloat = 125.0
-    
-    var _expandedWidth: CGFloat
-    
-    var _expandedHeight: CGFloat
-    
-    var offset: CGPoint = CGPoint.zero
-    
-    let expandedMinWidth: CGFloat = 200.0
-    
-    let expandedMaxWidth: CGFloat = 600.0
-    
-    let expandedMinHeight: CGFloat = 150.0
-    
-    var expandedMaxHeight: CGFloat = 300.0
-    
-    var isStretchingX: Bool = false
-    
-    var isStretchingY: Bool = false
-    
-    let _collapsedTolerance: CGFloat = 0
-    
-    let _expandedTolerance: CGFloat = 20.0
-    
-    var horizontalEdgeTolerance: CGFloat {
-        expanded ? _expandedTolerance : _collapsedTolerance
-    }
-    
-    var verticalEdgeTolerance: CGFloat {
-        horizontalEdgeTolerance
-    }
-    
-    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false) {
-        self.location = location
-        self._expandedWidth = expandedWidth
-        self._expandedHeight = expandedHeight
-        self.expanded = expanded
-        self._collapsedWidth = collapsedWidth
-        self._collapsedHeight = collapsedHeight
-        self.isText = isText
-    }
-    
-    mutating func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
-        self.expanded = !self.expanded
-        let newLocation: CGPoint
-        if self.expanded {
-            newLocation = CGPoint(
-                x: self.location.x,
-                y: self.location.y + collapsedHeight / 2.0
-            )
-        } else {
-            newLocation = CGPoint(
-                x: self.location.x,
-                y: self.location.y - expandedHeight / 2.0
-            )
-        }
-        self.setLocation(width: frameWidth, height: frameHeight, newLocation: newLocation)
-    }
-
-}
-
-extension StateViewModel2 {
+extension StateViewModel {
 
     convenience init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, state: Binding<Machines.State>, plist data: String, notifier: GlobalChangeNotifier? = nil) {
         let transitions = state.wrappedValue.transitions
@@ -359,10 +166,10 @@ extension StateViewModel2 {
         let expanded = helper.getValueFromBool(plist: data, label: "expanded")
 //        let highlighted = helper.getValueFromBool(plist: data, label: "stateSelected")
         let transitionsPlist: String = data.components(separatedBy: "<key>Transitions</key>")[1].components(separatedBy: "<key>bgColour</key>")[0]
-        let transitionViewModels = transitions.indices.map { (priority: Int) -> TransitionViewModel2 in
+        let transitionViewModels = transitions.indices.map { (priority: Int) -> TransitionViewModel in
             let transitionPlist = transitionsPlist.components(separatedBy: "</dict>")[priority]
                 .components(separatedBy: "<dict>")[1]
-            return TransitionViewModel2(machine: machine, path: path.transitions[priority], transitionBinding: state.transitions[priority], plist: transitionPlist)
+            return TransitionViewModel(machine: machine, path: path.transitions[priority], transitionBinding: state.transitions[priority], plist: transitionPlist)
         }
         self.init(
             location: CGPoint(x: x, y: y),
