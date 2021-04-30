@@ -15,11 +15,9 @@ import GUUI
 
 public struct CanvasView: View {
     
-    @Binding var machine: Machine
-    
     @EnvironmentObject var config: Config
     
-    @StateObject var viewModel: MachineViewModel2
+    @ObservedObject var viewModel: MachineViewModel2
     
     @Binding var focus: Focus
     
@@ -40,19 +38,23 @@ public struct CanvasView: View {
     let textHeight: CGFloat = 20.0
     
     public init(machine: Binding<Machine>, focus: Binding<Focus>) {
-        self._machine = machine
         self._focus = focus
-        guard let plist = try? String(contentsOf: machine.filePath.wrappedValue.appendingPathComponent("Layout.plist")) else {
-            self._viewModel = StateObject(wrappedValue: MachineViewModel2(states: machine.states.wrappedValue))
+        guard let plist = try? String(contentsOf: machine.wrappedValue.filePath.appendingPathComponent("Layout.plist")) else {
+            self.viewModel = MachineViewModel2(machine: machine, data: [:], transitions: [:])
             return
         }
-        self._viewModel = StateObject(wrappedValue: MachineViewModel2(machine: machine.wrappedValue, plist: plist))
+        self.viewModel = MachineViewModel2(machine: machine, plist: plist)
+    }
+    
+    init(viewModel: MachineViewModel2, focus: Binding<Focus>) {
+        self.viewModel = viewModel
+        self._focus = focus
     }
     
     public var body: some View {
         Group {
             if let editState = edittingState {
-                StateEditView(machine: $machine, path: machine.path.states[editState])
+                StateEditView(machine: viewModel.machineBinding, path: viewModel.machine.path.states[editState])
                     .onTapGesture(count: 2) {
                         edittingState = nil
                         focus = .machine
@@ -71,7 +73,7 @@ public struct CanvasView: View {
                             .gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
                             .contextMenu {
                                 VStack {
-                                    Button("New State", action: { try? machine.newState() })
+                                    Button("New State", action: { try? viewModel.machineBinding.wrappedValue.newState() })
                                     Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))
                                     if !self.selectedObjects.isEmpty {
                                         Button("Delete Selected", action: { viewModel.deleteSelected(self) })
@@ -84,15 +86,20 @@ public struct CanvasView: View {
                         ForEach(viewModel.unattachedTransitionsAsRows, id: \.self) { row in
                             ArrowView(curve: .constant(row.data.curve), strokeNumber: 0, colour: config.errorColour)
                         }
-                        ForEach(viewModel.states(machine), id: \.self) { stateRow in
+                        ForEach(viewModel.states(viewModel.machine), id: \.self) { stateRow in
                             ForEach(viewModel.transitions(stateRow), id: \.self) { transitionRow in
                                 TransitionView(
-                                    machine: $machine,
-                                    path: machine.path.states[stateRow.index].transitions[transitionRow.index],
-                                    curve: viewModel.binding(to: transitionRow.index, originatingFrom: stateRow.data).curve,
+                                    viewModel: viewModel.viewModel(for: transitionRow.index, originatingFrom: stateRow.data.name, goingTo: transitionRow.data.target),
                                     strokeNumber: UInt8(transitionRow.index),
                                     focused: selectedObjects.contains(.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index))
                                 )
+//                                TransitionView(
+//                                    machine: viewModel.machineBinding,
+//                                    path: viewModel.machine.path.states[stateRow.index].transitions[transitionRow.index],
+//                                    curve: viewModel.binding(to: transitionRow.index, originatingFrom: stateRow.data).curve,
+//                                    strokeNumber: UInt8(transitionRow.index),
+//                                    focused: selectedObjects.contains(.transition(stateIndex: stateRow.index, transitionIndex: transitionRow.index))
+//                                )
                                 .clipped()
                                 .gesture(TapGesture().onEnded {
                                     viewModel.addSelectedTransition(view: self, from: stateRow.index, at: transitionRow.index)
@@ -103,7 +110,7 @@ public struct CanvasView: View {
                                 }
                                 .contextMenu {
                                     Button("Straighten",action: {
-                                        viewModel.straighten(state: machine.states[stateRow.index].name, transition: transitionRow.index)
+                                        viewModel.straighten(state: viewModel.machine.states[stateRow.index].name, transition: transitionRow.index)
                                     })
                                     Button("Delete",action: {
                                         viewModel.deleteTransition(view: self, for: stateRow.index, at: transitionRow.index)
@@ -111,7 +118,7 @@ public struct CanvasView: View {
                                 }
                             }
                         }
-                        ForEach(viewModel.states(machine), id: \.self) { row in
+                        ForEach(viewModel.states(viewModel.machine), id: \.self) { row in
                             if viewModel.viewModel(for: row.data).isText {
                                 VStack {
                                     Text(row.data.name)
@@ -124,15 +131,11 @@ public struct CanvasView: View {
                             } else {
                                 VStack {
                                     StateView(
-                                        machine: $machine,
-                                        path: machine.path.states[row.index],
-                                        expanded: Binding(
-                                            get: { viewModel.viewModel(for: row.data).expanded },
-                                            set: { viewModel.assignExpanded(for: row.data, newValue: $0, frameWidth: geometry.size.width, frameHeight: geometry.size.height) }
-                                        ),
+                                        state: viewModel.viewModel(for: row.data),
                                         collapsedActions: viewModel.binding(to: row.data).collapsedActions,
                                         focused: selectedObjects.contains(.state(stateIndex: row.index))
-                                    ).frame(
+                                    )
+                                    .frame(
                                         width: viewModel.viewModel(for: row.data).width,
                                         height: viewModel.viewModel(for: row.data).height
                                     )
@@ -144,7 +147,7 @@ public struct CanvasView: View {
                                 .gesture(viewModel.createTransitionGesture(forView: self, forState: row.index))
                                 .gesture(viewModel.dragStateGesture(forView: self, forState: row.index, size: geometry.size))
                                 .onChange(of: viewModel.viewModel(for: row.data).expanded) { _ in
-                                    self.viewModel.updateTransitionLocations(source: row.data, states: machine.states)
+                                    self.viewModel.updateTransitionLocations(source: row.data, states: viewModel.machine.states)
                                 }
                                 .contextMenu {
                                     Button("Delete", action: {

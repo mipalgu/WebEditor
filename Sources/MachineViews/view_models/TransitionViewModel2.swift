@@ -6,11 +6,76 @@
 //
 
 import Foundation
+import TokamakShim
 import Transformations
 import Utilities
 import GUUI
+import Machines
 
-struct TransitionViewModel2: Identifiable, Positionable   {
+final class TransitionViewModel2: ObservableObject {
+    
+    var transitionBinding: Binding<Transition>
+    
+    @Published var tracker: TransitionTracker
+    
+    var curve: Curve {
+        get {
+            tracker.curve
+        }
+        set {
+            tracker.curve = newValue
+        }
+    }
+    
+    var location: CGPoint {
+        get {
+            tracker.location
+        }
+        set {
+            tracker.location = newValue
+        }
+    }
+    
+    var condition: Binding<String> {
+        Binding(get: { self.transitionBinding.wrappedValue.condition ?? "" }, set: { self.transitionBinding.wrappedValue.condition = $0 })
+    }
+    
+    init(transitionBinding: Binding<Transition>, curve: Curve) {
+        self.transitionBinding = transitionBinding
+        self.tracker = TransitionTracker(curve: curve)
+    }
+    
+    init(transitionBinding: Binding<Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint) {
+        self.transitionBinding = transitionBinding
+        self.tracker = TransitionTracker(point0: point0, point1: point1, point2: point2, point3: point3)
+    }
+    
+    init(transitionBinding: Binding<Transition>, source: CGPoint, target: CGPoint) {
+        self.transitionBinding = transitionBinding
+        self.tracker = TransitionTracker(source: source, target: target)
+    }
+    
+    init(transitionBinding: Binding<Transition>, source: StateViewModel2, target: StateViewModel2) {
+        self.transitionBinding = transitionBinding
+        self.tracker = TransitionTracker(source: source, target: target)
+    }
+    
+    init(transitionBinding: Binding<Transition>, source: StateViewModel2, sourcePoint: CGPoint, target: StateViewModel2, targetPoint: CGPoint) {
+        self.transitionBinding = transitionBinding
+        self.tracker = TransitionTracker(source: source, sourcePoint: sourcePoint, target: target, targetPoint: targetPoint)
+    }
+}
+
+struct TransitionTracker: Positionable, Hashable   {
+    
+    static func == (lhs: TransitionTracker, rhs: TransitionTracker) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
     
     var id: UUID = UUID()
     
@@ -88,7 +153,7 @@ struct TransitionViewModel2: Identifiable, Positionable   {
 
 extension TransitionViewModel2 {
 
-    init(plist data: String) {
+    convenience init(transitionBinding: Binding<Transition>, plist data: String) {
         let helper = StringHelper()
         let point0X = helper.getValueFromFloat(plist: data, label: "srcPointX")
         let point0Y = helper.getValueFromFloat(plist: data, label: "srcPointY")
@@ -99,6 +164,7 @@ extension TransitionViewModel2 {
         let point3X = helper.getValueFromFloat(plist: data, label: "dstPointX")
         let point3Y = helper.getValueFromFloat(plist: data, label: "dstPointY")
         self.init(
+            transitionBinding: transitionBinding,
             point0: CGPoint(x: point0X, y: point0Y),
             point1: CGPoint(x: point1X, y: point1Y),
             point2: CGPoint(x: point2X, y: point2Y),
@@ -128,11 +194,11 @@ extension TransitionViewModel2 {
 
 extension TransitionViewModel2: Hashable {
     static func == (lhs: TransitionViewModel2, rhs: TransitionViewModel2) -> Bool {
-        lhs.id == rhs.id
+        lhs === rhs
     }
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        hasher.combine(tracker)
     }
     
 }

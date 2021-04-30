@@ -12,7 +12,130 @@ import Attributes
 import Transformations
 import Utilities
 
-struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable {
+final class StateViewModel2: ObservableObject {
+    
+    var state: Binding<Machines.State>
+    
+    @Published var tracker: StateTracker
+    
+    var location: CGPoint {
+        get {
+            tracker.location
+        } set {
+            tracker.location = newValue
+        }
+    }
+    
+    var collapsedActions: [String: Bool] {
+        get {
+            tracker.collapsedActions
+        }
+        set {
+            tracker.collapsedActions = newValue
+        }
+    }
+    
+    var expanded: Bool {
+        get {
+            tracker.expanded
+        }
+        set {
+            tracker.expanded = newValue
+        }
+    }
+    
+    var expandedBinding: Binding<Bool> {
+        Binding(get: { self.expanded }, set: { self.expanded = $0 })
+    }
+    
+    var height: CGFloat {
+        tracker.height
+    }
+    
+    var isText: Bool {
+        get {
+            tracker.isText
+        }
+        set {
+            tracker.isText = newValue
+        }
+    }
+    
+    var isStretchingX: Bool {
+        get {
+            tracker.isStretchingX
+        }
+        set {
+            tracker.isStretchingX = newValue
+        }
+    }
+    
+    var isStretchingY: Bool {
+        get {
+            tracker.isStretchingY
+        }
+        set {
+            tracker.isStretchingY = newValue
+        }
+    }
+    
+    var left: CGPoint {
+        tracker.left
+    }
+    
+    var width: CGFloat {
+        tracker.width
+    }
+    
+    init(state: Binding<Machines.State>) {
+        self.state = state
+        self.tracker = StateTracker()
+    }
+    
+    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false, state: Binding<Machines.State>) {
+        self.tracker = StateTracker(location: location, expandedWidth: expandedWidth, expandedHeight: expandedHeight, expanded: expanded, collapsedWidth: collapsedWidth, collapsedHeight: collapsedHeight, isText: isText)
+        self.state = state
+    }
+    
+    func findEdge(degrees: CGFloat) -> CGPoint {
+        tracker.findEdge(degrees: degrees)
+    }
+    
+    func findEdge(point: CGPoint) -> CGPoint {
+        tracker.findEdge(point: point)
+    }
+    
+    func findEdgeCenter(degrees: CGFloat) -> CGPoint {
+        tracker.findEdgeCenter(degrees: degrees)
+    }
+    
+    func moveToEdge(point: CGPoint, edge: CGPoint) -> CGPoint {
+        tracker.moveToEdge(point: point, edge: edge)
+    }
+    
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        tracker.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+    }
+    
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        tracker.finishDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+    }
+    
+    func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
+        tracker.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight)
+    }
+    
+    func isWithin(point: CGPoint) -> Bool {
+        tracker.isWithin(point: point)
+    }
+    
+    func isWithin(point: CGPoint, padding: CGFloat) -> Bool {
+        tracker.isWithin(point: point, padding: padding)
+    }
+    
+}
+
+struct StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable {
     
     var isText: Bool
     
@@ -66,7 +189,7 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeD
     
     var collapsedActions: [String: Bool] = [:]
     
-    public init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false) {
+    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false) {
         self.location = location
         self._expandedWidth = expandedWidth
         self._expandedHeight = expandedHeight
@@ -97,7 +220,8 @@ struct StateViewModel2: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeD
 
 extension StateViewModel2 {
 
-    init(plist data: String) {
+    convenience init(state: Binding<Machines.State>, plist data: String) {
+        let transitions = state.wrappedValue.transitions
         let helper = StringHelper()
         let x = helper.getValueFromFloat(plist: data, label: "x")
         let y = helper.getValueFromFloat(plist: data, label: "y")
@@ -105,12 +229,12 @@ extension StateViewModel2 {
         let h = helper.getValueFromFloat(plist: data, label: "h")
         let expanded = helper.getValueFromBool(plist: data, label: "expanded")
 //        let highlighted = helper.getValueFromBool(plist: data, label: "stateSelected")
-//        let transitionsPlist: String = data.components(separatedBy: "<key>Transitions</key>")[1].components(separatedBy: "<key>bgColour</key>")[0]
-//        let transitionViewModels = transitions.indices.map { (priority: Int) -> TransitionViewModel2 in
-//            let transitionPlist = transitionsPlist.components(separatedBy: "</dict>")[priority]
-//                .components(separatedBy: "<dict>")[1]
-//            return TransitionViewModel2(plist: transitionPlist)
-//        }
+        let transitionsPlist: String = data.components(separatedBy: "<key>Transitions</key>")[1].components(separatedBy: "<key>bgColour</key>")[0]
+        let transitionViewModels = transitions.indices.map { (priority: Int) -> TransitionViewModel2 in
+            let transitionPlist = transitionsPlist.components(separatedBy: "</dict>")[priority]
+                .components(separatedBy: "<dict>")[1]
+            return TransitionViewModel2(transitionBinding: state.transitions[priority], plist: transitionPlist)
+        }
         self.init(
             location: CGPoint(x: x, y: y),
             expandedWidth: CGFloat(w),
@@ -118,7 +242,8 @@ extension StateViewModel2 {
             expanded: expanded,
             collapsedWidth: 150.0,
             collapsedHeight: 100.0,
-            isText: false
+            isText: false,
+            state: state
         )
     }
 

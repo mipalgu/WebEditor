@@ -47,7 +47,7 @@ struct StateCollapsedView_Previews: PreviewProvider {
         
         var body: some View {
             StateCollapsedView {
-                StateTitleView(machine: $machine, path: Machine.path.states[0].name, expanded: $expanded)
+                StateTitleView(name: $machine.states[0].name, expanded: $expanded)
             }.environmentObject(config)
         }
         
