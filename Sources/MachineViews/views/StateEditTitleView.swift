@@ -24,8 +24,25 @@ struct StateEditTitleView: View {
     }
 }
 
-//struct SwiftUIView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SwiftUIView()
-//    }
-//}
+import Machines
+
+struct SwiftEditTitleView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+    
+        @State var machine: Machine = Machine.initialSwiftMachine()
+        
+        let config = Config()
+        
+        var body: some View {
+            StateEditTitleView(viewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name)).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
+        }
+    }
+}

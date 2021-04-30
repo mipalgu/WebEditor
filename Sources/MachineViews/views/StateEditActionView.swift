@@ -25,8 +25,36 @@ struct StateEditActionView: View {
     }
 }
 
-//struct SwiftUIView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SwiftUIView()
-//    }
-//}
+import Machines
+
+struct StateEditActionView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        @State var machine: Machine = Machine.initialSwiftMachine()
+        
+        let config: Config = Config()
+        
+        var collapsed: Bool
+        
+        var body: some View {
+            StateEditActionView(
+                viewModel: ActionViewModel(
+                    machine: $machine,
+                    path: machine.path.states[0].actions[0],
+                    action: $machine.states[0].actions[0],
+                    notifier: nil,
+                    collapsed: collapsed
+                )
+            ).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview(collapsed: true)
+            Preview(collapsed: false)
+        }
+    }
+}
