@@ -51,7 +51,7 @@ struct StateView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateView(state: StateViewModel2(state: $machine.states[0])).environmentObject(config)
+            StateView(state: StateViewModel2(machine: $machine, path: machine.path.states[0], state: $machine.states[0], notifier: nil)).environmentObject(config)
         }
         
     }
@@ -67,7 +67,7 @@ struct StateView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateView(state: StateViewModel2(state: $machine.states[0])).environmentObject(config)
+            StateView(state: StateViewModel2(machine: $machine, path: machine.path.states[0], state: $machine.states[0], notifier: nil)).environmentObject(config)
         }
         
     }

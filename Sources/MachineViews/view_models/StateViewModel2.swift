@@ -128,11 +128,7 @@ final class StateViewModel2: ObservableObject {
     
     weak var notifier: GlobalChangeNotifier?
     
-    var actions: [ActionViewModel] {
-        state.wrappedValue.actions.indices.map {
-            ActionViewModel(machine: machine, path: path.actions[$0], action: state.actions[$0], notifier: notifier, collapsed: false)
-        }
-    }
+    var actions: [ActionViewModel]
     
     var title: StateTitleViewModel {
         StateTitleViewModel(machine: machine, path: path.name, notifier: notifier)
@@ -143,15 +139,6 @@ final class StateViewModel2: ObservableObject {
             tracker.location
         } set {
             tracker.location = newValue
-        }
-    }
-    
-    var collapsedActions: [String: Bool] {
-        get {
-            tracker.collapsedActions
-        }
-        set {
-            tracker.collapsedActions = newValue
         }
     }
     
@@ -213,12 +200,20 @@ final class StateViewModel2: ObservableObject {
         self.state = state
         self.tracker = StateTracker()
         self.notifier = notifier
+        self.actions = state.wrappedValue.actions.indices.map {
+            ActionViewModel(machine: machine, path: path.actions[$0], action: state.actions[$0], notifier: notifier, collapsed: false)
+        }
     }
     
-    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false, state: Binding<Machines.State>, notifier: GlobalChangeNotifier? = nil) {
+    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false, machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, state: Binding<Machines.State>, notifier: GlobalChangeNotifier? = nil) {
         self.tracker = StateTracker(location: location, expandedWidth: expandedWidth, expandedHeight: expandedHeight, expanded: expanded, collapsedWidth: collapsedWidth, collapsedHeight: collapsedHeight, isText: isText)
         self.state = state
         self.notifier = notifier
+        self.machine = machine
+        self.path = path
+        self.actions = state.wrappedValue.actions.indices.map {
+            ActionViewModel(machine: machine, path: path.actions[$0], action: state.actions[$0], notifier: notifier, collapsed: false)
+        }
     }
     
     func findEdge(degrees: CGFloat) -> CGPoint {
@@ -311,8 +306,6 @@ struct StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDete
         horizontalEdgeTolerance
     }
     
-    var collapsedActions: [String: Bool] = [:]
-    
     init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false) {
         self.location = location
         self._expandedWidth = expandedWidth
@@ -344,7 +337,7 @@ struct StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDete
 
 extension StateViewModel2 {
 
-    convenience init(state: Binding<Machines.State>, plist data: String, notifier: GlobalChangeNotifier? = nil) {
+    convenience init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, state: Binding<Machines.State>, plist data: String, notifier: GlobalChangeNotifier? = nil) {
         let transitions = state.wrappedValue.transitions
         let helper = StringHelper()
         let x = helper.getValueFromFloat(plist: data, label: "x")
@@ -367,6 +360,8 @@ extension StateViewModel2 {
             collapsedWidth: 150.0,
             collapsedHeight: 100.0,
             isText: false,
+            machine: machine,
+            path: path,
             state: state,
             notifier: notifier
         )

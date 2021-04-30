@@ -141,7 +141,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
                 return TransitionViewModel2(transitionBinding: machine.states[stateIndex].transitions[priority], plist: transitionPlist)
             }
             trans[stateName] = transitionViewModels
-            stateViewModels[stateName] = StateViewModel2(state: machine.states[stateIndex], plist: statePlist)
+            stateViewModels[stateName] = StateViewModel2(machine: machine, path: machine.wrappedValue.path.states[stateIndex], state: machine.states[stateIndex], plist: statePlist)
         }
 //        stateViewModels.forEach { stateVM in
 //            let externalTransitions: [TransitionViewModel2] = stateViewModels.flatMap {
@@ -213,7 +213,7 @@ final class MachineViewModel2: ObservableObject, GlobalChangeNotifier {
                 }
                 return TransitionViewModel2(transitionBinding: machineBinding.states[stateIndex].transitions[$0], source: CGPoint(x: 150, y: 150), target: target.left)
             }
-            let newViewModel = StateViewModel2(state: machineBinding.states[stateIndex])
+            let newViewModel = StateViewModel2(machine: machineBinding, path: machine.path.states[stateIndex], state: machineBinding.states[stateIndex])
             data[stateName] = newViewModel
             return newViewModel
         }
