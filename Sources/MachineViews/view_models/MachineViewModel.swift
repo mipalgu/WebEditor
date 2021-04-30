@@ -210,6 +210,18 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         self.objectWillChange.send()
     }
     
+    func deleteState(view: CanvasView, at index: Int) {
+        let name = machine.states[index].name
+        let result = machineBinding.wrappedValue.deleteState(atIndex: index)
+        guard let _ = try? result.get() else {
+            print(machine.errorBag.errors(includingDescendantsForPath: machine.path.states[index]))
+            return
+        }
+        clearDictionaries(with: [name])
+        removeViewFocus(view: view, focus: .state(stateIndex: index), selected: .state(stateIndex: index))
+        self.objectWillChange.send()
+    }
+    
     func deleteTransition(view: CanvasView, for stateIndex: Int, at transitionIndex: Int) {
         guard machine.states.count > stateIndex else {
             return
@@ -551,7 +563,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         return Set(focusedTransitions)
     }
     
-    func finishDrag(state: Machines.State, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    private func finishDrag(state: Machines.State, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         guard let _ = stateTrackers[state.name] else {
             return
         }
@@ -743,28 +755,48 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     }
     
     private func updateTransitionsSources(source: Machines.State) {
-        let sourceViewModel = self.viewModel(for: source)
+        let sourceTracker = self.tracker(for: source.name)
         guard
             let ts = transitions[source.name],
             ts.count == source.transitions.count,
-            let stateIndex = machine.states.firstIndex(where: { $0 == source })
+            let _ = machine.states.firstIndex(where: { $0 == source })
         else {
             fatalError("No view models for some \(source.name) transitions")
         }
-        let newViewModels: [TransitionViewModel] = source.transitions.indices.map {
-            let existingViewModel = self.transition(for: $0, in: source.name)
-            return TransitionViewModel(
-                machine: machineBinding,
-                path: machine.path.states[stateIndex].transitions[$0],
-                transitionBinding: machineBinding.states[stateIndex].transitions[$0],
-                source: sourceViewModel,
+        source.transitions.indices.forEach {
+            let existingViewModel = self.tracker(for: $0, originating: source.name)
+            let targetTracker = self.tracker(for: source.transitions[$0].target)
+            transitionTrackers[source.name]![$0] = TransitionTracker(
+                source: sourceTracker,
                 sourcePoint: existingViewModel.curve.point0,
-                target: viewModel(for: source.transitions[$0].target),
-                targetPoint: existingViewModel.curve.point3,
-                notifier: self
+                target: targetTracker,
+                targetPoint: existingViewModel.curve.point3
             )
         }
-        sourceViewModel.transitions = newViewModels
+    }
+    
+    private func updateTransitionsTargets(source: Machines.State) {
+        guard let _ = machine.states.firstIndex(where: { $0 == source }) else {
+            return
+        }
+        let targets = findMovingTransitions(state: source.name).1
+        targets.keys.forEach { name in
+            guard let state = machine.states.first(where: { $0.name == name }) else {
+                return
+            }
+            targets[name]!.forEach { (index, _) in
+                let existingViewModel = self.tracker(for: index, originating: state.name)
+                let targetName = state.transitions[index].target
+                let sourceTracker = self.tracker(for: state.name)
+                let targetTracker = self.tracker(for: targetName)
+                transitionTrackers[name]![index] = TransitionTracker(
+                    source: sourceTracker,
+                    sourcePoint: existingViewModel.curve.point0,
+                    target: targetTracker,
+                    targetPoint: existingViewModel.curve.point3
+                )
+            }
+        }
     }
     
 }

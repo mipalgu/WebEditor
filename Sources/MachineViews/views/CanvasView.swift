@@ -109,7 +109,7 @@ public struct CanvasView: View {
                                         viewModel.straighten(state: viewModel.machine.states[stateIndex].name, transitionIndex: transitionIndex)
                                     })
                                     Button("Delete",action: {
-                                        viewModel.deleteTransition(view: self, for: stateRow.index, at: transitionRow.index)
+                                        viewModel.deleteTransition(view: self, for: stateIndex, at: transitionIndex)
                                     })
                                 }
                             }
@@ -145,9 +145,9 @@ public struct CanvasView: View {
                                 }
                                 .contextMenu {
                                     Button("Delete", action: {
-                                        viewModel.deleteState(view: self, at: row.index)
-                                        if selectedObjects.contains(.state(stateIndex: row.index)) {
-                                            selectedObjects.remove(.state(stateIndex: row.index))
+                                        viewModel.deleteState(view: self, at: stateIndex)
+                                        if selectedObjects.contains(.state(stateIndex: stateIndex)) {
+                                            selectedObjects.remove(.state(stateIndex: stateIndex))
                                         }
                                     })
                                 }
