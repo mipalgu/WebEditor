@@ -7,6 +7,8 @@
 
 import Foundation
 import Transformations
+import Machines
+import Utilities
 
 struct StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable {
     
@@ -86,5 +88,80 @@ struct StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDete
         }
         self.setLocation(width: frameWidth, height: frameHeight, newLocation: newLocation)
     }
+
+}
+
+extension StateTracker {
+
+    init(plist data: String) {
+//        let transitions = state.transitions
+        let helper = StringHelper()
+        let x = helper.getValueFromFloat(plist: data, label: "x")
+        let y = helper.getValueFromFloat(plist: data, label: "y")
+        let w = helper.getValueFromFloat(plist: data, label: "w")
+        let h = helper.getValueFromFloat(plist: data, label: "h")
+        let expanded = helper.getValueFromBool(plist: data, label: "expanded")
+//        let highlighted = helper.getValueFromBool(plist: data, label: "stateSelected")
+//        let transitionsPlist: String = data.components(separatedBy: "<key>Transitions</key>")[1].components(separatedBy: "<key>bgColour</key>")[0]
+//        let transitionViewModels = transitions.indices.map { (priority: Int) -> TransitionViewModel in
+//            let transitionPlist = transitionsPlist.components(separatedBy: "</dict>")[priority]
+//                .components(separatedBy: "<dict>")[1]
+//            return TransitionViewModel(machine: machine, path: path.transitions[priority], transitionBinding: state.transitions[priority], plist: transitionPlist)
+//        }
+        self.init(
+            location: CGPoint(x: x, y: y),
+            expandedWidth: expanded ? w : 75.0,
+            expandedHeight: expanded ? h : 100.0,
+            expanded: expanded,
+            collapsedWidth: expanded ? 150.0 : w,
+            collapsedHeight: expanded ? 100.0 : h,
+            isText: false
+        )
+    }
+
+    fileprivate func colourPList() -> String {
+        let helper = StringHelper()
+        return "<dict>\n" +
+            helper.tab(data: "<key>alpha</key>\n<real>1</real>\n<key>blue</key>\n<real>0.92000000000000004</real>" +
+        "\n<key>green</key>\n<real>0.92000000000000004</real>\n<key>red</key>\n<real>0.92000000000000004</real>"
+            )
+            + "\n</dict>"
+    }
+
+    fileprivate func strokePlist() -> String {
+        let helper = StringHelper()
+        return "<dict>\n" +
+            helper.tab(data: "<key>alpha</key>\n<real>1</real>\n<key>blue</key>\n<real>0.0</real>" +
+        "\n<key>green</key>\n<real>0.0</real>\n<key>red</key>\n<real>0.0</real>"
+            )
+            + "\n</dict>"
+    }
+
+    fileprivate func boolToPlist(value: Bool) -> String {
+        value ? "<true/>" : "<false/>"
+    }
+
+    fileprivate func actionHeightstoPList(state: Machines.State) -> String {
+        let helper = StringHelper()
+        return helper.reduceLines(data: state.actions.map {
+            "<key>\($0.name)Height</key>\n<real>\(100.0)</real>"
+        })
+    }
+//
+//    func plist(state: Machines.State) -> String {
+//        let helper = StringHelper()
+//        let transitionPList = helper.reduceLines(data: transitions.map { $0.toPlist() })
+//        return "<key>\(state.wrappedValue.name)</key>\n<dict>\n"
+//            + helper.tab(data: "<key>Transitions</key>\n\(transitions.count == 0 ? "<array/>" : "<array>")\n" +
+//                            helper.tab(data: transitionPList) + "\(transitions.count == 0 ? "" : "\n</array>")" +
+//                "\n<key>bgColour</key>\n" + colourPList() + "\n<key>editingMode</key>\n<false/>\n" +
+//                            "<key>expanded</key>\n\(boolToPlist(value: tracker.expanded))\n" +
+//                            "<key>h</key>\n<real>\(tracker.height)</real>\n" + actionHeightstoPList(state: state.wrappedValue) +
+//                "\n<key>stateSelected</key>\n\(boolToPlist(value: false))\n<key>strokeColour</key>\n" +
+//                            strokePlist() + "\n<key>w</key>\n<real>\(tracker.width)</real>\n<key>x</key>\n<real>\(tracker.location.x)</real>\n" +
+//                            "<key>y</key>\n<real>\(tracker.location.y)</real>\n<key>zoomedInternalHeight</key>\n<real>0.0</real>\n" +
+//                "<key>zoomedOnEntryHeight</key>\n<real>0.0</real>\n<key>zoomedOnExitHeight</key>\n<real>0.0</real>"
+//            ) + "\n</dict>"
+//    }
 
 }

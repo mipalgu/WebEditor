@@ -14,12 +14,14 @@ import Utilities
 
 struct StateView: View {
     
-    @ObservedObject var state: StateViewModel
+    var state: StateViewModel
+    @State var tracker: StateTracker
 
     var focused: Bool
     
-    init(state: StateViewModel, focused: Bool = false) {
+    init(state: StateViewModel, tracker: StateTracker, focused: Bool = false) {
         self.state = state
+        self.tracker = tracker
         self.focused = focused
     }
     
@@ -27,16 +29,18 @@ struct StateView: View {
     
     var body: some View {
         Group {
-            if state.expanded {
+            if tracker.expanded {
                 StateExpandedView(actions: state.actions, focused: focused) {
-                    StateTitleView(viewModel: state.title, expanded: state.expandedBinding)
+                    StateTitleView(viewModel: state.title, expanded: $tracker.expanded)
                 }
             } else {
                 StateCollapsedView(focused: focused) {
-                    StateTitleView(viewModel: state.title, expanded: state.expandedBinding)
+                    StateTitleView(viewModel: state.title, expanded: $tracker.expanded)
                 }
             }
         }
+        .coordinateSpace(name: "MAIN_VIEW")
+        .position(tracker.location)
     }
 }
 
@@ -46,12 +50,21 @@ struct StateView_Previews: PreviewProvider {
         
         @State var machine: Machine = Machine.initialSwiftMachine()
         
+        
         @State var expanded: Bool = true
         
         let config = Config()
         
         var body: some View {
-            StateView(state: StateViewModel(machine: $machine, path: machine.path.states[0], state: $machine.states[0], notifier: nil)).environmentObject(config)
+            StateView(
+                state: StateViewModel(
+                    machine: $machine,
+                    path: machine.path.states[0],
+                    state: $machine.states[0],
+                    notifier: nil
+                ),
+                tracker: StateTracker(expanded: expanded)
+            ).environmentObject(config)
         }
         
     }
@@ -67,7 +80,15 @@ struct StateView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateView(state: StateViewModel(machine: $machine, path: machine.path.states[0], state: $machine.states[0], notifier: nil)).environmentObject(config)
+            StateView(
+                state: StateViewModel(
+                    machine: $machine,
+                    path: machine.path.states[0],
+                    state: $machine.states[0],
+                    notifier: nil
+                ),
+                tracker: StateTracker(expanded: expanded)
+            ).environmentObject(config)
         }
         
     }
