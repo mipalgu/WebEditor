@@ -55,8 +55,8 @@ public struct CanvasView: View {
         Group {
             if let editState = edittingState {
                 StateEditView(
-                    titleViewModel: viewModel.viewModel(for: viewModel.machine.states[editState]).title,
-                    actionViewModels: viewModel.viewModel(for: viewModel.machine.states[editState]).actions
+                    titleViewModel: viewModel.viewModel(for: viewModel.machine.states[editState].name).title,
+                    actionViewModels: viewModel.viewModel(for: viewModel.machine.states[editState].name).actions
                 )
                     .onTapGesture(count: 2) {
                         edittingState = nil
@@ -128,7 +128,7 @@ public struct CanvasView: View {
                             } else {
                                 VStack {
                                     StateView(
-                                        state: viewModel.viewModel(for: viewModel.machine.states[stateIndex]),
+                                        state: viewModel.viewModel(for: viewModel.machine.states[stateIndex].name),
                                         tracker: viewModel.tracker(for: viewModel.machine.states[stateIndex].name),
                                         focused: selectedObjects.contains(.state(stateIndex: stateIndex))
                                     )

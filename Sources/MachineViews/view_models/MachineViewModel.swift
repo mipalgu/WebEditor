@@ -256,10 +256,26 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         self.objectWillChange.send()
     }
     
+    func tracker(for state: StateName) -> StateTracker {
+        self.cache.tracker(for: state)
+    }
+    
+    func tracker(for transition: Int, originating from: StateName) -> TransitionTracker {
+        self.cache.tracker(for: transition, originating: from)
+    }
+    
+    func transition(for transition: Int, in state: StateName) -> TransitionViewModel {
+        self.cache.viewModel(for: transition, originating: state)
+    }
+    
     func updateTransitionLocations(source: Machines.State) {
         updateTransitionsSources(source: source)
         updateTransitionsTargets(source: source)
         self.objectWillChange.send()
+    }
+    
+    func viewModel(for stateName: StateName) -> StateViewModel {
+        self.cache.viewModel(for: stateName)
     }
     
     private func addSelected(view: CanvasView, focus: Focus, selected: ViewType) {
