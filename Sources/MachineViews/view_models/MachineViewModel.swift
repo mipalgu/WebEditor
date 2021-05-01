@@ -12,6 +12,8 @@ import Utilities
 
 class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
+    var cache: ViewCache
+    
     var isMoving: Bool = false
     
     var isStateMoving: Bool = false
@@ -22,23 +24,13 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     var movingState: StateName = ""
     
-    var movingTargetTransitions: [StateName: [Int: CGPoint]] = [:]
+    var movingTargetTransitions: [StateName: IndexSet] = [:]
     
     var originalDimensions: (CGFloat, CGFloat) = (0.0, 0.0)
     
     var startLocations: [StateName: CGPoint] = [:]
     
-    var states: [StateName: StateViewModel]
-    
-    var stateTrackers: [StateName: StateTracker]
-    
-    var transitions: [StateName: [TransitionViewModel]]
-    
     var transitionStartLocations: [StateName: [Curve]] = [:]
-    
-    var transitionTrackers: [StateName: [TransitionTracker]]
-    
-    var targetTransitions: [StateName: [TransitionViewModel]]
     
     var machine: Machine {
         machineBinding.wrappedValue
@@ -46,71 +38,15 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     fileprivate init() {
         self.machineBinding = .constant(Machine.initialSwiftMachine())
-        self.states = [:]
-        self.stateTrackers = [:]
-        self.transitions = [:]
-        self.transitionTrackers = [:]
-        self.targetTransitions = [:]
+        cache = ViewCache(empty: self.machineBinding)
+        cache = ViewCache(machine: self.machineBinding, notifier: self)
+        
     }
     
     init(machine: Binding<Machine>) {
         self.machineBinding = machine
-        var tempStates: [StateName: StateViewModel] = [:]
-        var tempStateTrackers: [StateName: StateTracker] = [:]
-        var tempTransitions: [StateName: [TransitionViewModel]] = [:]
-        var tempTransitionTrackers: [StateName: [TransitionTracker]] = [:]
-        var tempTargetTransitions: [StateName: [TransitionViewModel]] = [:]
-        machine.wrappedValue.states.indices.forEach { stateIndex in
-            let stateName = machine.wrappedValue.states[stateIndex].name
-            tempStates[stateName] = StateViewModel(
-                machine: machine,
-                path: machine.wrappedValue.path.states[stateIndex],
-                state: machine.states[stateIndex]
-            )
-            tempStateTrackers[stateName] = StateTracker()
-        }
-        machine.wrappedValue.states.indices.forEach { stateIndex in
-            let stateName = machine.wrappedValue.states[stateIndex].name
-            var tempTransitionArray: [TransitionViewModel] = []
-            var tempTransitionTrackerArray: [TransitionTracker] = []
-            machine.wrappedValue.states[stateIndex].transitions.indices.forEach { transitionIndex in
-                let transition = machine.wrappedValue.states[stateIndex].transitions[transitionIndex]
-                let transitionViewModel = TransitionViewModel(
-                    machine: machine,
-                    path: machine.wrappedValue.path.states[stateIndex].transitions[transitionIndex],
-                    transitionBinding: machine.states[stateIndex].transitions[transitionIndex],
-                    notifier: nil
-                )
-                guard
-                    let sourceTracker = tempStateTrackers[stateName],
-                    let targetTracker = tempStateTrackers[transition.target]
-                else {
-                    return
-                }
-                tempTransitionArray.append(transitionViewModel)
-                tempTransitionTrackerArray.append(TransitionTracker(source: sourceTracker, target: targetTracker))
-                guard let _ = tempTargetTransitions[transition.target] else {
-                    tempTargetTransitions[transition.target] = [transitionViewModel]
-                    return
-                }
-                tempTargetTransitions[transition.target]!.append(transitionViewModel)
-            }
-            tempTransitions[stateName] = tempTransitionArray
-            tempTransitionTrackers[stateName] = tempTransitionTrackerArray
-        }
-        self.states = tempStates
-        self.stateTrackers = tempStateTrackers
-        self.transitions = tempTransitions
-        self.transitionTrackers = tempTransitionTrackers
-        self.targetTransitions = tempTargetTransitions
-        self.states.values.forEach { s in
-            s.notifier = self
-        }
-        self.transitions.values.forEach {
-            $0.forEach { transition in
-                transition.notifier = self
-            }
-        }
+        self.cache = ViewCache(empty: machine)
+        self.cache = ViewCache(machine: machine, notifier: self)
     }
     
     func addSelectedState(view: CanvasView, at index: Int) {
@@ -147,12 +83,9 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             return
         }
         let newStateIndex = machine.states.count - 1
-        let stateName = machine.states[newStateIndex].name
-        states[stateName] = newStateViewModel(stateIndex: newStateIndex)
-        stateTrackers[stateName] = StateTracker()
-        transitions[stateName] = []
-        transitionTrackers[stateName] = []
-        targetTransitions[stateName] = []
+        if !cache.addNewState(state: machineBinding.states[newStateIndex]) {
+            fatalError("Created state but failed to create view models")
+        }
         self.objectWillChange.send()
     }
     
@@ -169,7 +102,10 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                 guard let targetName = self.findOverlappingState(point: gesture.location) else {
                     return
                 }
-                let result = self.machineBinding.wrappedValue.newTransition(source: self.machine.states[index].name, target: targetName)
+                let result = self.machineBinding.wrappedValue.newTransition(
+                    source: self.machine.states[index].name,
+                    target: targetName
+                )
                 guard let _ = try? result.get() else {
                     return
                 }
@@ -177,8 +113,21 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                 guard lastIndex >= 0 else {
                     return
                 }
-                self.addTransition(source: stateName, at: lastIndex, sourcePoint: gesture.startLocation, target: gesture.location)
-                self.transition(for: lastIndex, in: stateName).condition.wrappedValue = "true"
+                let result2 = self.machineBinding.wrappedValue.modify(
+                    attribute: self.machine.path.states[index].transitions[lastIndex].condition,
+                    value: "true"
+                )
+                guard let _ = try? result2.get() else {
+                    return
+                }
+                if !self.cache.addNewTransition(
+                    for: stateName,
+                    transition: self.machineBinding.states[index].transitions[lastIndex],
+                    startLocation: gesture.startLocation,
+                    endLocation: gesture.location
+                ) {
+                    fatalError("Created transition but couldn't create view models.")
+                }
                 self.objectWillChange.send()
             }
     }
@@ -191,20 +140,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             return
         }
         let stateNames = states(from: view.selectedObjects).map(\.name)
-        clearDictionaries(with: stateNames)
-        let stateNameSet = Set(stateNames)
-        let transitionIndexes = transitionIndexes(from: view.selectedObjects)
-        transitionIndexes.keys.forEach {
-            if stateNameSet.contains($0) {
-                return
-            }
-            let result = self.machineBinding.wrappedValue.delete(transitions: transitionIndexes[$0]!, attachedTo: $0)
-            guard let _ = try? result.get() else {
-                print(self.machine.errorBag.allErrors.description)
-                return
-            }
-            clearTransitions(originating: $0, in: transitionIndexes[$0]!)
-        }
+        let _ = cache.deleteStates(names: stateNames)
         view.selectedObjects = []
         view.focus = .machine
         self.objectWillChange.send()
@@ -217,7 +153,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             print(machine.errorBag.errors(includingDescendantsForPath: machine.path.states[index]))
             return
         }
-        clearDictionaries(with: [name])
+        let _ = cache.deleteState(name: name)
         removeViewFocus(view: view, focus: .state(stateIndex: index), selected: .state(stateIndex: index))
         self.objectWillChange.send()
     }
@@ -231,7 +167,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         guard let _ = try? result.get() else {
             return
         }
-        clearTransition(originating: stateName, at: transitionIndex)
+        let _ = cache.deleteTransition(from: stateName, at: transitionIndex)
         removeViewFocus(
             view: view,
             focus: .transition(stateIndex: stateIndex, transitionIndex: transitionIndex),
@@ -244,16 +180,19 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
             .onChanged {
                 self.moveElements(gesture: $0, frame: size)
+                self.objectWillChange.send()
             }.onEnded {
                 self.finishMoveElements(gesture: $0, frame: size)
+                self.objectWillChange.send()
             }
     }
     
     func dragStateGesture(forView view: CanvasView, forState index: Int, size: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
             .onChanged {
-                self.handleDrag(state: self.machine.states[index], gesture: $0, frameWidth: size.width, frameHeight: size.height)
-                if !self.tracker(for: self.machine.states[index].name).isStretchingX && !self.tracker(for: self.machine.states[index].name).isStretchingY {
+                self.cache.handleDrag(for: self.machine.states[index], gesture: $0, frame: size)
+                let tracker = self.cache.tracker(for: self.machine.states[index])
+                if !tracker.isStretchingX && !tracker.isStretchingY {
                     self.moveTransitions(state: self.machine.states[index].name, gesture: $0, frame: size)
                 } else {
                     self.stretchTransitions(state: self.machine.states[index].name)
@@ -261,7 +200,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                 self.objectWillChange.send()
             }.onEnded {
                 self.finishMovingTransitions()
-                self.finishDrag(state: self.machine.states[index], gesture: $0, frameWidth: size.width, frameHeight: size.height)
+                self.cache.finishDrag(for: self.machine.states[index], gesture: $0, frame: size)
                 self.objectWillChange.send()
             }
     }
@@ -305,75 +244,22 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     }
     
     func straighten(state: StateName, transitionIndex: Int) {
-        let viewModel = tracker(for: transitionIndex, originating: state)
-        transitionTrackers[state]![transitionIndex] = TransitionTracker(source: viewModel.curve.point0, target: viewModel.curve.point3)
-    }
-    
-    /// Returns a tracker for the State specified.
-    /// - Parameter stateName: The name fo the state.
-    /// - Returns: The state tracker for the state.
-    func tracker(for stateName: StateName) -> StateTracker {
-        guard let tracker = stateTrackers[stateName] else {
-            let newTracker = StateTracker()
-            stateTrackers[stateName] = newTracker
-            return newTracker
-        }
-        return tracker
-    }
-    
-    func tracker(for transition: Int, originating from: StateName) -> TransitionTracker {
-        guard
-            let trackers = transitionTrackers[from],
-            trackers.count > transition
-        else {
-            fatalError("No Tracker for Transition")
-        }
-        return trackers[transition]
-    }
-    
-    func transition(for transition: Int, in state: StateName) -> TransitionViewModel {
-        guard
-            let ts = transitions[state],
-            ts.count > transition
-        else {
-            fatalError("Failed to get transition view model")
-        }
-        return ts[transition]
-    }
-    
-    func transitionTrackers(for stateName: StateName) -> [TransitionTracker] {
-        let _ = viewModel(for: stateName)
-        guard let trackers = transitionTrackers[stateName] else {
-            transitions[stateName] = []
-            transitionTrackers[stateName] = []
-            return []
-        }
-        return trackers
+        let tracker = cache.tracker(for: transitionIndex, originating: state)
+        if !cache.updateTracker(
+            for: transitionIndex,
+            in: state,
+            newTracker: TransitionTracker(
+                source: tracker.curve.point0,
+                target: tracker.curve.point3
+            )
+        ) { return }
+        self.objectWillChange.send()
     }
     
     func updateTransitionLocations(source: Machines.State) {
         updateTransitionsSources(source: source)
         updateTransitionsTargets(source: source)
-    }
-    
-    func viewModel(for state: Machines.State) -> StateViewModel {
-        if let viewModel = states[state.name] {
-            return viewModel
-        }
-        guard let stateIndex = machine.states.firstIndex(where: { $0 == state }) else {
-            fatalError("Trying to create view model for state that doesn't exist!")
-        }
-        let newViewModel = newStateViewModel(stateIndex: stateIndex)
-        states[state.name] = newViewModel
-        let _ = tracker(for: state.name)
-        return newViewModel
-    }
-    
-    func viewModel(for stateName: StateName) -> StateViewModel {
-        guard let state = machine.states.first(where: { $0.name == stateName }) else {
-            fatalError("Trying to create view model for state that doesn't exist!")
-        }
-        return viewModel(for: state)
+        self.objectWillChange.send()
     }
     
     private func addSelected(view: CanvasView, focus: Focus, selected: ViewType) {
@@ -385,82 +271,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         view.focus = .machine
     }
     
-    private func addTarget(target name: StateName, transition: TransitionViewModel) {
-        guard let _ = targetTransitions[name] else {
-            targetTransitions[name] = [transition]
-            return
-        }
-        targetTransitions[name]!.append(transition)
-    }
-    
-    private func addTransition(source: StateName, at index: Int, sourcePoint: CGPoint, target: CGPoint) {
-        guard let stateIndex = machine.states.firstIndex(where: { $0.name == source }) else {
-            return
-        }
-        let transition = machine.states[stateIndex].transitions[index]
-        let sourceTracker = tracker(for: source)
-        let targetTracker = tracker(for: transition.target)
-        let newViewModel = TransitionViewModel(
-            machine: machineBinding,
-            path: machine.path.states[stateIndex].transitions[index],
-            transitionBinding: machineBinding.states[stateIndex].transitions[index],
-            notifier: self
-        )
-        let newTracker = TransitionTracker(source: sourceTracker, sourcePoint: sourcePoint, target: targetTracker, targetPoint: target)
-        guard let _ = transitions[source] else {
-            transitions[source] = [newViewModel]
-            transitionTrackers[source] = [newTracker]
-            addTarget(target: transition.target, transition: newViewModel)
-            return
-        }
-        transitions[source]!.append(newViewModel)
-        transitionTrackers[source]!.append(newTracker)
-        addTarget(target: transition.target, transition: newViewModel)
-    }
-    
-    private func clearDictionaries(with names: [StateName]) {
-        names.forEach {
-            clearTargetTransitions(with: $0)
-            states[$0] = nil
-            stateTrackers[$0] = nil
-            transitions[$0] = nil
-            transitionTrackers[$0] = nil
-        }
-    }
-    
-    private func clearTargetTransitions(with source: StateName) {
-        let tempTransitions = Set(transitions[source]!)
-        targetTransitions.keys.forEach { target in
-            targetTransitions[target]!.removeAll(where: { t in tempTransitions.contains(t) })
-        }
-    }
-    
-    private func clearTransition(originating from: StateName, at index: Int) {
-        let tempTransition = transitions[from]![index]
-        targetTransitions.keys.forEach {
-            targetTransitions[$0]!.removeAll(where: { t in t == tempTransition })
-        }
-        transitions[from]?.remove(at: index)
-        transitionTrackers[from]?.remove(at: index)
-    }
-    
-    private func clearTransitions(originating from: StateName, in set: IndexSet) {
-        let tempTransitions: Set<TransitionViewModel> = Set(transitions[from]!.indices.compactMap {
-            if set.contains($0) {
-                return transitions[from]![$0]
-            }
-            return nil
-        })
-        targetTransitions.keys.forEach {
-            targetTransitions[$0]!.removeAll(where: { trans in
-                tempTransitions.contains(trans)
-            })
-        }
-        transitions[from]!.remove(atOffsets: set)
-        transitionTrackers[from]!.remove(atOffsets: set)
-    }
-    
-    private func displaceTransitions(sourceTransitions: [CGPoint], targetTransitions: [StateName: [Int: CGPoint]], dS: CGSize, frame: CGSize, source: StateName) {
+    private func displaceTransitions(sourceTransitions: [CGPoint], targetTransitions: [StateName: IndexSet], dS: CGSize, frame: CGSize, source: StateName) {
         guard let state = machine.states.first(where: { $0.name == source }) else {
             return
         }
@@ -468,45 +279,44 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             let newX = min(max(0, sourceTransitions[$0].x + dS.width), frame.width)
             let newY = min(max(0, sourceTransitions[$0].y + dS.height), frame.height)
             let point = CGPoint(x: newX, y: newY)
-            var tracker = self.tracker(for: $0, originating: state.name)
-            tracker.curve.point0 = point
-            transitionTrackers[state.name]![$0] = tracker
+            if !self.cache.updateTracker(for: $0, in: state, point0: point) {
+                fatalError("Cannot move transition")
+            }
         }
         targetTransitions.keys.forEach { name in
-            targetTransitions[name]!.keys.forEach { index in
-                guard let sourceState = machine.states.first(where: { $0.name == name }) else {
+            let validIndexes = targetTransitions[name]!
+            guard let stateIndex = machine.states.firstIndex(where: { $0.name == name }) else {
+                return
+            }
+            machine.states[stateIndex].transitions.indices.forEach {
+                if !validIndexes.contains($0) {
                     return
                 }
-                let newX = min(max(0, targetTransitions[name]![index]!.x + dS.width), frame.width)
-                let newY = min(max(0, targetTransitions[name]![index]!.y + dS.height), frame.height)
+                let sourceState = machine.states[stateIndex]
+                let tracker = self.cache.tracker(for: $0, originating: name)
+                let newX = min(max(0, tracker.curve.point3.x + dS.width), frame.width)
+                let newY = min(max(0, tracker.curve.point3.y + dS.height), frame.height)
                 let point = CGPoint(x: newX, y: newY)
-                var tracker = self.tracker(for: index, originating: sourceState.name)
-                tracker.curve.point3 = point
-                transitionTrackers[sourceState.name]![index] = tracker
+                if !self.cache.updateTracker(for: $0, in: sourceState, point3: point) {
+                    fatalError("Cannot move transition")
+                }
             }
         }
     }
     
-    private func findMovingTransitions(state: StateName) -> ([CGPoint], [StateName: [Int: CGPoint]]) {
+    private func findMovingTransitions(state: StateName) -> ([CGPoint], [StateName: IndexSet]) {
         movingState = state
-        let movingSources = transitionTrackers(for: state).map(\.curve.point0)
-        var tempTargetTransitions: [StateName: [Int: CGPoint]] = [:]
-        guard let movingTargets = targetTransitions[state] else {
-            return (movingSources, [:])
+        let movingSources = self.cache.trackers(for: state).map(\.curve.point0)
+        let movingTargets = self.cache.transitions(target: state)
+        var movingIndices: [StateName: IndexSet] = [:]
+        movingTargets.keys.forEach { sourceName in
+            let candidates = movingTargets[sourceName]!
+            let transitions = self.cache.transitions(source: sourceName)
+            movingIndices[sourceName] = IndexSet(transitions.indices.filter { index in
+                candidates.contains(transitions[index])
+            })
         }
-        movingTargets.forEach { viewModel in
-            transitions.keys.forEach { source in
-                guard let index = transitions[source]!.firstIndex(where: { $0 == viewModel }) else {
-                    return
-                }
-                guard let _ = tempTargetTransitions[source] else {
-                    tempTargetTransitions[source] = [index: transitionTrackers(for: source)[index].curve.point3]
-                    return
-                }
-                tempTargetTransitions[source]![index] = transitionTrackers(for: source)[index].curve.point3
-            }
-        }
-        return (movingSources, tempTargetTransitions)
+        return (movingSources, movingIndices)
     }
     
     
@@ -520,12 +330,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     }
         
     private func findOverlappingState(point: CGPoint) -> StateName? {
-        for key in stateTrackers.keys {
-            if stateTrackers[key]!.isWithin(point: point) {
-                return key
-            }
-        }
-        return nil
+        self.cache.overlappingState(point: point)
     }
     
     
@@ -537,7 +342,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     private func findSelectedStates(corner0: CGPoint, corner1: CGPoint) -> Set<ViewType> {
         let allStates = machine.states
         let focusedStates = allStates.indices.filter {
-            let position = tracker(for: allStates[$0].name).location
+            let position =  self.cache.tracker(for: allStates[$0]).location
             return isWithinBound(corner0: corner0, corner1: corner1, position: position)
         }.map { ViewType.state(stateIndex: $0) }
         return Set(focusedStates)
@@ -553,32 +358,21 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         let allStates = machine.states
         var focusedTransitions: [ViewType] = []
         allStates.indices.forEach { stateIndex in
-            focusedTransitions.append(contentsOf: transitionTrackers(for: allStates[stateIndex].name).indices.filter { index in
-                let position = transitionTrackers(for: allStates[stateIndex].name)[index].location
-                return isWithinBound(corner0: corner0, corner1: corner1, position: position)
-            }.map {
-                ViewType.transition(stateIndex: stateIndex, transitionIndex: $0)
-            })
+            let trackers = self.cache.trackers(for: allStates[stateIndex])
+            focusedTransitions.append(
+                contentsOf: trackers.indices.filter { index in
+                    let position = trackers[index].location
+                    return isWithinBound(corner0: corner0, corner1: corner1, position: position)
+                }.map {
+                    ViewType.transition(stateIndex: stateIndex, transitionIndex: $0)
+                }
+            )
         }
         return Set(focusedTransitions)
     }
     
-    private func finishDrag(state: Machines.State, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
-        guard let _ = stateTrackers[state.name] else {
-            return
-        }
-        stateTrackers[state.name]!.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
-    }
-    
     private func finishMovingTransitions() {
         isStateMoving = false
-    }
-    
-    private func handleDrag(state: Machines.State, gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
-        guard let _ = stateTrackers[state.name] else {
-            return
-        }
-        stateTrackers[state.name]!.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
     }
     
     private func isWithinBound(corner0: CGPoint, corner1: CGPoint, position: CGPoint) -> Bool {
@@ -590,11 +384,13 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     private func moveElements(gesture: DragGesture.Value, frame: CGSize) {
         if isMoving {
-            stateTrackers.keys.forEach {
+            let stateNames = machine.states.map(\.name)
+            stateNames.forEach {
                 moveState(stateName: $0, gesture: gesture, frame: frame)
             }
             transitionStartLocations.keys.forEach { name in
-                self.transitionTrackers(for: name).indices.forEach {
+                let trackers = self.cache.trackers(for: name)
+                trackers.indices.forEach {
                     moveTransition(state: name, transitionIndex: $0, gesture: gesture)
                 }
             }
@@ -606,16 +402,8 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     private func moveState(stateName: StateName, gesture: DragGesture.Value, frame: CGSize) {
         let newX = startLocations[stateName]!.x - gesture.translation.width
         let newY = startLocations[stateName]!.y - gesture.translation.height
-        let _ = tracker(for: stateName)
-        stateTrackers[stateName]!.location = CGPoint(
-            x: newX,
-            y: newY
-        )
-        if newX > frame.width || newY > frame.height || newX < 0.0 || newY < 0.0 {
-            stateTrackers[stateName]!.isText = true
-        } else {
-            stateTrackers[stateName]!.isText = false
-        }
+        let _ = self.cache.updateTracker(for: stateName, newLocation: CGPoint(x: newX, y: newY))
+        let _ = self.cache.updateTracker(for: stateName, isText: newX > frame.width || newY > frame.height || newX < 0.0 || newY < 0.0)
     }
     
     private func moveTransition(state name: StateName, transitionIndex: Int, gesture: DragGesture.Value) {
@@ -633,9 +421,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             point2: CGPoint(x: x2, y: y2),
             point3: CGPoint(x: x3, y: y3)
         )
-        var tracker = self.tracker(for: transitionIndex, originating: name)
-        tracker.curve = curve
-        transitionTrackers[name]![transitionIndex] = tracker
+        let _ = self.cache.updateTracker(for: transitionIndex, in: name, curve: curve)
     }
     
     private func moveTransitions(state: StateName, gesture: DragGesture.Value, frame: CGSize) {
@@ -668,9 +454,9 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     }
     
     private func startMoving() {
-        states.keys.forEach {
-            startLocations[$0] = self.tracker(for: $0).location
-            transitionStartLocations[$0] = self.transitionTrackers(for: $0).map(\.curve)
+        machine.states.map(\.name).forEach {
+            startLocations[$0] = self.cache.tracker(for: $0).location
+            transitionStartLocations[$0] = self.cache.trackers(for: $0).map(\.curve)
         }
         isMoving = true
     }
@@ -694,7 +480,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     }
     
     private func stretchTransitions(state: StateName) {
-        let model = tracker(for: state)
+        let model = self.cache.tracker(for: state)
         if !isStateMoving {
             isStateMoving = true
             let effected = findMovingTransitions(state: state)
@@ -716,17 +502,21 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             let newX = relativeX < 0 ? x - dx : x + dx
             let newY = relativeY < 0 ? y - dy : y + dy
             let point = CGPoint(x: newX, y: newY)
-            var tracker = self.tracker(for: $0, originating: movingStateObj.name)
-            tracker.curve.point0 = point
-            transitionTrackers[movingStateObj.name]![$0] = tracker
+            let _ = self.cache.updateTracker(for: $0, in: movingStateObj, point0: point)
         }
-        movingTargetTransitions.keys.forEach { name in
-            movingTargetTransitions[name]!.keys.forEach { index in
-                guard let stateObj = machine.states.first(where: { $0.name == name }) else {
+        movingTargetTransitions.keys.forEach { source in
+            guard let stateIndex = machine.states.firstIndex(where: { $0.name == source }) else {
+                return
+            }
+            let candidates = movingTargetTransitions[source]!
+            self.machine.states[stateIndex].transitions.indices.forEach {
+                if !candidates.contains($0) {
                     return
                 }
-                let x = movingTargetTransitions[name]![index]!.x
-                let y = movingTargetTransitions[name]![index]!.y
+                let stateObj = self.machine.states[stateIndex]
+                let tracker = self.cache.tracker(for: $0, originating: stateObj)
+                let x = tracker.curve.point3.x
+                let y = tracker.curve.point3.y
                 let relativeX = x - model.location.x
                 let relativeY = y - model.location.y
                 let dx = (model.width - originalDimensions.0) / 2.0
@@ -734,9 +524,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                 let newX = relativeX < 0 ? x - dx : x + dx
                 let newY = relativeY < 0 ? y - dy : y + dy
                 let point = CGPoint(x: newX, y: newY)
-                var tracker = self.tracker(for: index, originating: stateObj.name)
-                tracker.curve.point3 = point
-                transitionTrackers[stateObj.name]![index] = tracker
+                let _ = self.cache.updateTracker(for: $0, in: stateObj, point3: point)
             }
         }
     }
@@ -755,22 +543,19 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     }
     
     private func updateTransitionsSources(source: Machines.State) {
-        let sourceTracker = self.tracker(for: source.name)
-        guard
-            let ts = transitions[source.name],
-            ts.count == source.transitions.count,
-            let _ = machine.states.firstIndex(where: { $0 == source })
-        else {
-            fatalError("No view models for some \(source.name) transitions")
-        }
+        let sourceTracker = self.cache.tracker(for: source.name)
         source.transitions.indices.forEach {
-            let existingViewModel = self.tracker(for: $0, originating: source.name)
-            let targetTracker = self.tracker(for: source.transitions[$0].target)
-            transitionTrackers[source.name]![$0] = TransitionTracker(
-                source: sourceTracker,
-                sourcePoint: existingViewModel.curve.point0,
-                target: targetTracker,
-                targetPoint: existingViewModel.curve.point3
+            let existingViewModel = self.cache.tracker(for: $0, originating: source)
+            let targetTracker = self.cache.tracker(for: source.transitions[$0].target)
+            let _ = self.cache.updateTracker(
+                for: $0,
+                in: source,
+                newTracker: TransitionTracker(
+                    source: sourceTracker,
+                    sourcePoint: existingViewModel.curve.point0,
+                    target: targetTracker,
+                    targetPoint: existingViewModel.curve.point3
+                )
             )
         }
     }
@@ -781,19 +566,28 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         }
         let targets = findMovingTransitions(state: source.name).1
         targets.keys.forEach { name in
-            guard let state = machine.states.first(where: { $0.name == name }) else {
+            guard let stateIndex = machine.states.firstIndex(where: { $0.name == name }) else {
                 return
             }
-            targets[name]!.forEach { (index, _) in
-                let existingViewModel = self.tracker(for: index, originating: state.name)
-                let targetName = state.transitions[index].target
-                let sourceTracker = self.tracker(for: state.name)
-                let targetTracker = self.tracker(for: targetName)
-                transitionTrackers[name]![index] = TransitionTracker(
-                    source: sourceTracker,
-                    sourcePoint: existingViewModel.curve.point0,
-                    target: targetTracker,
-                    targetPoint: existingViewModel.curve.point3
+            let state = machine.states[stateIndex]
+            let candidates = targets[name]!
+            machine.states[stateIndex].transitions.indices.forEach {
+                if !candidates.contains($0) {
+                    return
+                }
+                let existingTracker = self.cache.tracker(for: $0, originating: state.name)
+                let targetName = state.transitions[$0].target
+                let sourceTracker = self.cache.tracker(for: state.name)
+                let targetTracker = self.cache.tracker(for: targetName)
+                let _ = self.cache.updateTracker(
+                    for: $0,
+                    in: state.name,
+                    newTracker: TransitionTracker(
+                        source: sourceTracker,
+                        sourcePoint: existingTracker.curve.point0,
+                        target: targetTracker,
+                        targetPoint: existingTracker.curve.point3
+                    )
                 )
             }
         }
@@ -805,96 +599,9 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
 extension MachineViewModel {
     
     convenience init(machine: Binding<Machine>, plist data: String) {
-        var tempStates: [StateName: StateViewModel] = [:]
-        var tempStateTrackers: [StateName: StateTracker] = [:]
-        var tempTransitions: [StateName: [TransitionViewModel]] = [:]
-        var tempTransitionTrackers: [StateName: [TransitionTracker]] = [:]
-        var tempTargetTransitions: [StateName: [TransitionViewModel]] = [:]
-        // Create models from plist
-        machine.wrappedValue.states.indices.forEach { (stateIndex: Int) in
-            let stateName = machine.wrappedValue.states[stateIndex].name
-            let statePlist: String = data.components(separatedBy: "<key>\(stateName)</key>")[1]
-                .components(separatedBy: "<key>zoomedOnExitHeight</key>")[0]
-            let transitionsPlist: String = statePlist.components(separatedBy: "<key>Transitions</key>")[1].components(separatedBy: "<key>bgColour</key>")[0]
-            let transitionTrackers = machine.wrappedValue.states[stateIndex].transitions.indices.map { (priority: Int) -> TransitionTracker in
-                let transitionPlist = transitionsPlist.components(separatedBy: "</dict>")[priority]
-                    .components(separatedBy: "<dict>")[1]
-                return TransitionTracker(plist: transitionPlist)
-            }
-            let transitionViewModels = machine.wrappedValue.states[stateIndex].transitions.indices.map { (priority: Int) -> TransitionViewModel in
-                let transition = machine.wrappedValue.states[stateIndex].transitions[priority]
-                let viewModel = TransitionViewModel(
-                    machine: machine,
-                    path: machine.wrappedValue.path.states[stateIndex].transitions[priority],
-                    transitionBinding: machine.states[stateIndex].transitions[priority]
-                )
-                guard let _ = tempTargetTransitions[transition.target] else {
-                    tempTargetTransitions[transition.target] = [viewModel]
-                    return viewModel
-                }
-                tempTargetTransitions[transition.target]!.append(viewModel)
-                return viewModel
-            }
-            tempTransitions[stateName] = transitionViewModels
-            tempTransitionTrackers[stateName] = transitionTrackers
-            tempStateTrackers[stateName] = StateTracker(plist: statePlist)
-            tempStates[stateName] = StateViewModel(
-                machine: machine,
-                path: machine.wrappedValue.path.states[stateIndex],
-                state: machine.states[stateIndex]
-            )
-        }
-        // Correct for invalid plist transition snap points
-        tempTransitions.keys.forEach { state in
-            guard let trackers = tempTransitionTrackers[state] else {
-                return
-            }
-            trackers.indices.forEach { trackerIndex in
-                guard let stateIndex = machine.wrappedValue.states.firstIndex(where: { $0.name == state }) else {
-                    return
-                }
-                let stateObj = machine.wrappedValue.states[stateIndex]
-                guard stateObj.transitions.count > trackerIndex else {
-                    return
-                }
-                let transition = stateObj.transitions[trackerIndex]
-                guard
-                    let tracker = tempTransitionTrackers[state]?[trackerIndex],
-                    tempStates[state] != nil,
-                    tempStates[transition.target] != nil,
-                    let sourceTracker = tempStateTrackers[state],
-                    let targetTracker = tempStateTrackers[transition.target]
-                else {
-                    return
-                }
-                guard
-                    !tempStateTrackers[transition.target]!.isWithin(point: tracker.curve.point3),
-                    tempStateTrackers[transition.target]!.onEdge(point: tracker.curve.point3)
-                else {
-                    tempTransitionTrackers[state]![trackerIndex] = TransitionTracker(
-                        source: sourceTracker,
-                        target: targetTracker
-                    )
-                    return
-                }
-                
-            }
-        }
         self.init()
         self.machineBinding = machine
-        self.states = tempStates
-        self.stateTrackers = tempStateTrackers
-        self.transitions = tempTransitions
-        self.transitionTrackers = tempTransitionTrackers
-        self.targetTransitions = tempTargetTransitions
-        self.states.values.forEach { s in
-            s.notifier = self
-        }
-        self.transitions.values.forEach {
-            $0.forEach { t in
-                t.notifier = self
-            }
-        }
+        self.cache = ViewCache(machine: machine, plist: data, notifier: self)
     }
     
 }
