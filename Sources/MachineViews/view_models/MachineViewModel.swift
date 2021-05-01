@@ -208,6 +208,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     func finishMoveElements(gesture: DragGesture.Value, frame: CGSize) {
         moveElements(gesture: gesture, frame: frame)
         isMoving = false
+        self.objectWillChange.send()
     }
     
     func selectAll(_ view: CanvasView) {
