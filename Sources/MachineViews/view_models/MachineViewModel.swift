@@ -187,24 +187,6 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             }
     }
     
-    func dragStateGesture(forView view: CanvasView, forState index: Int, size: CGSize) -> some Gesture {
-        DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
-            .onChanged {
-                self.cache.handleDrag(for: self.machine.states[index], gesture: $0, frame: size)
-                let tracker = self.cache.tracker(for: self.machine.states[index])
-                if !tracker.isStretchingX && !tracker.isStretchingY {
-                    self.moveTransitions(state: self.machine.states[index].name, gesture: $0, frame: size)
-                } else {
-                    self.stretchTransitions(state: self.machine.states[index].name)
-                }
-                self.objectWillChange.send()
-            }.onEnded {
-                self.finishMovingTransitions()
-                self.cache.finishDrag(for: self.machine.states[index], gesture: $0, frame: size)
-                self.objectWillChange.send()
-            }
-    }
-    
     func finishMoveElements(gesture: DragGesture.Value, frame: CGSize) {
         moveElements(gesture: gesture, frame: frame)
         isMoving = false

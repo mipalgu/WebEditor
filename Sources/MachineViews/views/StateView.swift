@@ -15,13 +15,17 @@ import Utilities
 struct StateView: View {
     
     var state: StateViewModel
+    
     @State var tracker: StateTracker
+    
+    var coordinateSpace: String
 
     var focused: Bool
     
-    init(state: StateViewModel, tracker: StateTracker, focused: Bool = false) {
+    init(state: StateViewModel, tracker: StateTracker, coordinateSpace: String, focused: Bool = false) {
         self.state = state
         self.tracker = tracker
+        self.coordinateSpace = coordinateSpace
         self.focused = focused
     }
     
@@ -39,7 +43,8 @@ struct StateView: View {
                 }
             }
         }
-        .coordinateSpace(name: "MAIN_VIEW")
+        .coordinateSpace(name: coordinateSpace)
+        .gesture(state.dragStateGesture(forView: self, forState: stateIndex, size: geometry.size))
         .position(tracker.location)
     }
 }
@@ -63,7 +68,8 @@ struct StateView_Previews: PreviewProvider {
                     state: $machine.states[0],
                     notifier: nil
                 ),
-                tracker: StateTracker(expanded: expanded)
+                tracker: StateTracker(expanded: expanded),
+                coordinateSpace: "MAIN_VIEW"
             ).environmentObject(config)
         }
         
@@ -87,7 +93,8 @@ struct StateView_Previews: PreviewProvider {
                     state: $machine.states[0],
                     notifier: nil
                 ),
-                tracker: StateTracker(expanded: expanded)
+                tracker: StateTracker(expanded: expanded),
+                coordinateSpace: "MAIN_VIEW"
             ).environmentObject(config)
         }
         

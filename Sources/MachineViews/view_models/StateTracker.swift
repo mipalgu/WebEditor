@@ -6,11 +6,12 @@
 //
 
 import Foundation
+import TokamakShim
 import Transformations
 import Machines
 import Utilities
 
-struct StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable {
+class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable {
     
     var isText: Bool
     
@@ -72,7 +73,7 @@ struct StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDete
         self.isText = isText
     }
     
-    mutating func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
+    func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
         self.expanded = !self.expanded
         let newLocation: CGPoint
         if self.expanded {
@@ -88,12 +89,27 @@ struct StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDete
         }
         self.setLocation(width: frameWidth, height: frameHeight, newLocation: newLocation)
     }
+    
+    mutating func dragStateGesture(coordinateSpace: String, size: CGSize) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+            .onChanged {
+                self.handleDrag(gesture: $0, frameWidth: size.width, frameHeight: size.height)
+                if !self.isStretchingX && !tracker.isStretchingY {
+                    self.moveTransitions(state: self.machine.states[index].name, gesture: $0, frame: size)
+                } else {
+                    self.stretchTransitions(state: self.machine.states[index].name)
+                }
+            }.onEnded {
+                self.finishMovingTransitions()
+                self.finishDrag(gesture: $0, frameWidth: size.width, frameHeight: size.height)
+            }
+    }
 
 }
 
 extension StateTracker {
 
-    init(plist data: String) {
+    convenience init(plist data: String) {
 //        let transitions = state.transitions
         let helper = StringHelper()
         let x = helper.getValueFromFloat(plist: data, label: "x")
