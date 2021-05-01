@@ -18,7 +18,7 @@ public protocol NoMoveOnTextRepresentable: MoveAndStretchFromDrag, RigidCollapsa
 
 public extension Dragable where Self: MoveFromDrag {
     
-    mutating func moveFromDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func moveFromDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isDragging {
             updateLocationWithOffset(frameWidth: frameWidth, frameHeight: frameHeight, newLocation: gesture.location)
             return
@@ -27,11 +27,11 @@ public extension Dragable where Self: MoveFromDrag {
         isDragging = true
     }
     
-    mutating func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         moveFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
     }
     
-    mutating func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         self.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         self.isDragging = false
     }
@@ -40,7 +40,7 @@ public extension Dragable where Self: MoveFromDrag {
 
 public extension Dragable where Self: StretchFromDrag {
     
-    mutating func stretchFromDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func stretchFromDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isStretchingX && isStretchingY {
             stretchCorner(gesture: gesture)
             return
@@ -68,11 +68,11 @@ public extension Dragable where Self: StretchFromDrag {
         }
     }
     
-    mutating func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         stretchFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
     }
     
-    mutating func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         self.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         self.isStretchingY = false
         self.isStretchingX = false
@@ -81,7 +81,7 @@ public extension Dragable where Self: StretchFromDrag {
 
 public extension Dragable where Self: MoveAndStretchFromDrag {
     
-    mutating func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isStretchingY || isStretchingX {
             stretchFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
             return
@@ -97,7 +97,7 @@ public extension Dragable where Self: MoveAndStretchFromDrag {
         moveFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
     }
     
-    mutating func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         self.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
         self.isDragging = false
         self.isStretchingY = false
@@ -108,7 +108,7 @@ public extension Dragable where Self: MoveAndStretchFromDrag {
 
 public extension NoMoveOnTextRepresentable {
     
-    mutating func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
         if isText {
             return
         }

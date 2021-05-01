@@ -36,6 +36,6 @@ public protocol Collapsable: Moveable, BoundedSize  {
     
     var collapsedMaxHeight: CGFloat {get}
     
-    mutating func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat)
+    func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat)
     
 }

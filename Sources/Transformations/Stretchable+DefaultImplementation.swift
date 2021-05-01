@@ -18,12 +18,12 @@ public extension Stretchable where Self: EdgeDetector {
         (gesture.location.y - location.y) * 2.0
     }
     
-    mutating func stretchCorner(gesture: DragGesture.Value) {
+    func stretchCorner(gesture: DragGesture.Value) {
         stretchVertical(gesture: gesture)
         stretchHorizontal(gesture: gesture)
     }
     
-    mutating func stretchHorizontal(gesture: DragGesture.Value) {
+    func stretchHorizontal(gesture: DragGesture.Value) {
         if gesture.location.x >= self.location.x {
             self.width = stretchWidth(gesture: gesture)
         } else {
@@ -32,7 +32,7 @@ public extension Stretchable where Self: EdgeDetector {
         self.location = CGPoint(x: max(self.location.x, self.width / 2.0), y: self.location.y)
     }
     
-    mutating func stretchVertical(gesture: DragGesture.Value) {
+    func stretchVertical(gesture: DragGesture.Value) {
         if gesture.location.y >= self.location.y {
             self.height = stretchHeight(gesture: gesture)
         } else {
@@ -52,12 +52,12 @@ public extension Stretchable where Self: EdgeDetector & Collapsable & BoundedSiz
         (gesture.location.y - location.y) * 2.0
     }
     
-    mutating func stretchCorner(gesture: DragGesture.Value) {
+    func stretchCorner(gesture: DragGesture.Value) {
         stretchVertical(gesture: gesture)
         stretchHorizontal(gesture: gesture)
     }
     
-    mutating func stretchHorizontal(gesture: DragGesture.Value) {
+    func stretchHorizontal(gesture: DragGesture.Value) {
         if gesture.startLocation.x > location.x && gesture.location.x < location.x + minWidth / 2.0 {
             return
         }
@@ -74,7 +74,7 @@ public extension Stretchable where Self: EdgeDetector & Collapsable & BoundedSiz
         self.location = CGPoint(x: max(self.location.x, self.collapsedWidth / 2.0), y: self.location.y)
     }
     
-    mutating func stretchVertical(gesture: DragGesture.Value) {
+    func stretchVertical(gesture: DragGesture.Value) {
         if gesture.startLocation.y > location.y && gesture.location.y < location.y + minHeight / 2.0 {
             return
         }

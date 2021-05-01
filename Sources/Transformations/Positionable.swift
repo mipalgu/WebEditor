@@ -8,12 +8,12 @@
 import TokamakShim
 import Foundation
 
-public protocol Positionable {
+public protocol Positionable: AnyObject {
     
     var location: CGPoint {get set}
     
     func getLocation(width: CGFloat, height: CGFloat) -> CGPoint
     
-    mutating func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint)
+    func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint)
     
 }

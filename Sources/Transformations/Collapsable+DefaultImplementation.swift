@@ -10,7 +10,7 @@ import Foundation
 
 import GUUI
 
-public protocol _Collapsable {
+public protocol _Collapsable: AnyObject {
     
     var _collapsedWidth: CGFloat {get set}
     
@@ -140,7 +140,7 @@ public extension Collapsable where Self: _Collapsable {
         }
     }
     
-    mutating func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
+    func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
         self.expanded = !self.expanded
         self.setLocation(width: frameWidth, height: frameHeight, newLocation: self.location)
     }
@@ -154,7 +154,7 @@ public extension Collapsable where Self: _Collapsable {
         )
     }
     
-    mutating func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint) {
+    func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint) {
         let x = newLocation.x
         let y = newLocation.y
         self.location = CGPoint(

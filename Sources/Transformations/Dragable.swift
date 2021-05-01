@@ -8,12 +8,12 @@
 import TokamakShim
 import Foundation
 
-public protocol Dragable {
+public protocol Dragable: AnyObject {
     
     var isDragging: Bool {get set}
     
-    mutating func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat)
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat)
     
-    mutating func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat)
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat)
     
 }

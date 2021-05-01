@@ -10,7 +10,7 @@ import Foundation
 
 import GUUI
 
-public protocol _Rigidable {
+public protocol _Rigidable: AnyObject {
     
     var _width: CGFloat { get set }
     
@@ -45,7 +45,7 @@ public extension Rigidable where Self: Positionable {
         )
     }
     
-    mutating func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint) {
+    func setLocation(width: CGFloat, height: CGFloat, newLocation: CGPoint) {
         let x = newLocation.x
         let y = newLocation.y
         self.location = CGPoint(
