@@ -12,7 +12,7 @@ import Machines
 
 struct MachineView: View {
     
-    @Binding var machine: Machine
+    var viewModel: MachineViewModel
     
     @State var focus: Focus = .machine
     
@@ -23,29 +23,29 @@ struct MachineView: View {
     var path: Attributes.Path<Machine, [AttributeGroup]> {
         switch focus {
             case .machine:
-                return machine.path.attributes
+                return viewModel.machine.path.attributes
             case .state(let stateIndex):
-                return machine.path.states[stateIndex].attributes
+                return viewModel.machine.path.states[stateIndex].attributes
             case .transition(let stateIndex, let transitionIndex):
-                return machine.path.states[stateIndex].transitions[transitionIndex].attributes
+                return viewModel.machine.path.states[stateIndex].transitions[transitionIndex].attributes
         }
     }
     
     var label: String {
         switch focus {
         case .machine:
-            return "Machine: \(machine.name)"
+            return "Machine: \(viewModel.machine.name)"
         case .state(let stateIndex):
-            return "State: \(machine.states[stateIndex].name)"
+            return "State: \(viewModel.machine.states[stateIndex].name)"
         case .transition(let stateIndex, let transitionIndex):
-            return "State \(machine.states[stateIndex].name) Transition \(transitionIndex)"
+            return "State \(viewModel.machine.states[stateIndex].name) Transition \(transitionIndex)"
         }
     }
     
     var body: some View {
         HStack {
-            CanvasView(machine: $machine, focus: $focus)
-            CollapsableAttributeGroupsView(machine: $machine, path: path, collapsed: $attributesCollapsed, label: label, selection: $selection)
+            CanvasView(viewModel: viewModel, focus: $focus)
+            CollapsableAttributeGroupsView(machine: viewModel.machineBinding, path: path, collapsed: $attributesCollapsed, label: label, selection: $selection)
                 .frame(width: !attributesCollapsed ? 500 : 50.0)
         }
     }

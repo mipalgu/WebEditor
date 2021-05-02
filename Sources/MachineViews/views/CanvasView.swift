@@ -134,7 +134,8 @@ public struct CanvasView: View {
                                         frame: geometry.size,
                                         focused: selectedObjects.contains(.state(stateIndex: stateIndex))
                                     )
-                                }.coordinateSpace(name: coordinateSpace)
+                                }
+                                .coordinateSpace(name: coordinateSpace)
                                 .position(viewModel.tracker(for: viewModel.machine.states[stateIndex].name).location)
                                 .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: stateIndex) }.modifiers(.shift))
                                 .onTapGesture(count: 2) { edittingState = stateIndex; focus = .state(stateIndex: stateIndex) }

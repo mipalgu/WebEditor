@@ -46,7 +46,9 @@ struct StateView: View {
                 }
             }
         }
-        .coordinateSpace(name: coordinateSpace)
+//        .position(tracker.location)
+//        .coordinateSpace(name: coordinateSpace)
+//        .position(tracker.location)
         .frame(
             width: tracker.width,
             height: tracker.height

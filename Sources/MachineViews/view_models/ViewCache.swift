@@ -55,6 +55,17 @@ class ViewCache {
             )
             tempStateTrackers[stateName] = StateTracker()
         }
+        tempStates.keys.forEach { target in
+            tempStates.keys.forEach { source in
+                guard let _ = tempTargetTransitions[target] else {
+                    var newDict: [StateName: Set<TransitionViewModel>] = [:]
+                    newDict[source] = []
+                    tempTargetTransitions[target] = newDict
+                    return
+                }
+                tempTargetTransitions[target]![source] = []
+            }
+        }
         machine.wrappedValue.states.indices.forEach { stateIndex in
             let stateName = machine.wrappedValue.states[stateIndex].name
             var tempTransitionArray: [TransitionViewModel] = []
@@ -488,6 +499,17 @@ extension ViewCache {
         var tempTransitions: [StateName: [TransitionViewModel]] = [:]
         var tempTransitionTrackers: [StateName: [TransitionTracker]] = [:]
         var tempTargetTransitions: [StateName: [StateName: Set<TransitionViewModel>]] = [:]
+        machine.wrappedValue.states.forEach { target in
+            machine.wrappedValue.states.forEach { source in
+                guard let _ = tempTargetTransitions[target.name] else {
+                    var newDict: [StateName: Set<TransitionViewModel>] = [:]
+                    newDict[source.name] = []
+                    tempTargetTransitions[target.name] = newDict
+                    return
+                }
+                tempTargetTransitions[target.name]![source.name] = []
+            }
+        }
         // Create models from plist
         machine.wrappedValue.states.indices.forEach { (stateIndex: Int) in
             let stateName = machine.wrappedValue.states[stateIndex].name

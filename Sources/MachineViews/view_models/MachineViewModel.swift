@@ -86,7 +86,22 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
 //        var updatedMachine = machine
 //        machineBinding = Binding(get: { updatedMachine }, set: { updatedMachine = $0 })
 //        print(machineBinding.states)
-        if !cache.addNewState(state: machineBinding.states[newStateIndex]) {
+        machineBinding.update()
+        let stateBinding = Binding<Machines.State>(
+            get: {
+                guard self.machineBinding.wrappedValue.states.count > newStateIndex else {
+                    return Machines.State(name: "", actions: [], transitions: [])
+                }
+                return self.machineBinding.wrappedValue.states[newStateIndex]
+            },
+            set: {
+                guard self.machineBinding.wrappedValue.states.count > newStateIndex else {
+                    return
+                }
+                self.machineBinding.wrappedValue.states[newStateIndex] = $0
+            }
+        )
+        if !cache.addNewState(state: stateBinding) {
             fatalError("Created state but failed to create view models")
         }
         self.objectWillChange.send()
