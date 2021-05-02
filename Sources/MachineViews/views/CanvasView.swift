@@ -134,6 +134,13 @@ public struct CanvasView: View {
                                         frame: geometry.size,
                                         focused: selectedObjects.contains(.state(stateIndex: stateIndex))
                                     )
+                                    .onChange(of: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).expanded) { _ in
+                                        self.viewModel.correctTransitionLocations(for: viewModel.machine.states[stateIndex])
+                                    }
+//                                    .frame(
+//                                        width: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).width,
+//                                        height: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).height
+//                                    )
                                 }
                                 .coordinateSpace(name: coordinateSpace)
                                 .position(viewModel.tracker(for: viewModel.machine.states[stateIndex].name).location)

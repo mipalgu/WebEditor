@@ -9,6 +9,7 @@ import Foundation
 import TokamakShim
 import Machines
 import Utilities
+import GUUI
 
 class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
@@ -75,6 +76,45 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             newY = frame.height - dy
         }
         return CGPoint(x: newX, y: newY)
+    }
+    
+    func correctTransitionLocations(for state: Machines.State) {
+        let sources = self.cache.trackers(for: state)
+        let sourceTracker = self.cache.tracker(for: state)
+        let targets = self.cache.transitions(target: state.name).filter {
+            $0.value.count > 0
+        }
+        let targetTrackers = targets.keys.compactMap { (source: StateName) -> (StateName, IndexSet)? in
+            let allViewModels: [TransitionViewModel] = self.cache.transitions(source: source)
+            let candidates = targets[source]!
+            let targetTransitions = IndexSet(allViewModels.indices.filter { candidates.contains(allViewModels[$0]) })
+            if targetTransitions.count == 0 {
+                return nil
+            }
+            return (source, targetTransitions)
+        }
+        sources.indices.forEach {
+            let _ = self.cache.updateTracker(
+                for: $0,
+                in: state,
+                point0: sourceTracker.findEdge(point: sources[$0].curve.point0)
+            )
+        }
+        targetTrackers.forEach { tuple in
+            let source = tuple.0
+            let trackers = self.cache.trackers(for: source)
+            trackers.indices.forEach { i in
+                if !tuple.1.contains(i) {
+                    return
+                }
+                let _ = self.cache.updateTracker(
+                    for: i,
+                    in: source,
+                    point3: sourceTracker.findEdge(point: trackers[i].curve.point3)
+                )
+            }
+        }
+        self.objectWillChange.send()
     }
     
     func createState() {
@@ -321,19 +361,25 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                 fatalError("Cannot move transition")
             }
         }
-        targetTransitions.keys.forEach { name in
-            let validIndexes = targetTransitions[name]!
-            guard let stateIndex = machine.states.firstIndex(where: { $0.name == name }) else {
+        targetTransitions.keys.forEach { target in
+            let validIndexes = targetTransitions[target]!
+            guard let stateIndex = machine.states.firstIndex(where: { $0.name == target }) else {
                 return
             }
-            machine.states[stateIndex].transitions.indices.forEach {
+            let transitions = machine.states[stateIndex].transitions
+            guard
+                let trackers = transitionStartLocations[target],
+                trackers.count >= transitions.count
+            else {
+                fatalError("No trackers for moving transitions")
+            }
+            transitions.indices.forEach {
                 if !validIndexes.contains($0) {
                     return
                 }
                 let sourceState = machine.states[stateIndex]
-                let tracker = self.cache.tracker(for: $0, originating: name)
-                let newX = min(max(0, tracker.curve.point3.x + dS.width), frame.width)
-                let newY = min(max(0, tracker.curve.point3.y + dS.height), frame.height)
+                let newX = min(max(0, trackers[$0].point3.x + dS.width), frame.width)
+                let newY = min(max(0, trackers[$0].point3.y + dS.height), frame.height)
                 let point = CGPoint(x: newX, y: newY)
                 if !self.cache.updateTracker(for: $0, in: sourceState, point3: point) {
                     fatalError("Cannot move transition")
@@ -344,12 +390,17 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     private func findMovingTransitions(state: StateName) -> ([CGPoint], [StateName: IndexSet]) {
         movingState = state
+        transitionStartLocations = [:]
         let movingSources = self.cache.trackers(for: state).map(\.curve.point0)
-        let movingTargets = self.cache.transitions(target: state)
+        let movingTargets = self.cache.transitions(target: state).filter {
+            $0.value.count > 0
+        }
         var movingIndices: [StateName: IndexSet] = [:]
         movingTargets.keys.forEach { sourceName in
             let candidates = movingTargets[sourceName]!
             let transitions = self.cache.transitions(source: sourceName)
+            let trackers = self.cache.trackers(for: sourceName)
+            transitionStartLocations[sourceName] = trackers.map(\.curve)
             movingIndices[sourceName] = IndexSet(transitions.indices.filter { index in
                 candidates.contains(transitions[index])
             })
