@@ -131,17 +131,16 @@ public struct CanvasView: View {
                                         state: viewModel.viewModel(for: viewModel.machine.states[stateIndex].name),
                                         tracker: viewModel.tracker(for: viewModel.machine.states[stateIndex].name),
                                         coordinateSpace: coordinateSpace,
+                                        frame: geometry.size,
                                         focused: selectedObjects.contains(.state(stateIndex: stateIndex))
                                     )
-                                    .frame(
-                                        width: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).width,
-                                        height: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).height
-                                    )
                                 }.coordinateSpace(name: coordinateSpace)
+                                .position(viewModel.tracker(for: viewModel.machine.states[stateIndex].name).location)
                                 .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: stateIndex) }.modifiers(.shift))
                                 .onTapGesture(count: 2) { edittingState = stateIndex; focus = .state(stateIndex: stateIndex) }
                                 .onTapGesture { selectedObjects = [.state(stateIndex: stateIndex)]; focus = .state(stateIndex: stateIndex) }
                                 .gesture(viewModel.createTransitionGesture(forView: self, forState: stateIndex))
+                                .gesture(viewModel.dragStateGesture(forView: self, forState: stateIndex, size: geometry.size))
                                 .onChange(of: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).expanded) { _ in
                                     self.viewModel.updateTransitionLocations(source: viewModel.machine.states[stateIndex])
                                 }

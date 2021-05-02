@@ -14,9 +14,9 @@ import AttributeViews
 
 struct TransitionView: View {
     
-    @ObservedObject var viewModel: TransitionViewModel
+    var viewModel: TransitionViewModel
     
-    @State var tracker: TransitionTracker
+    @ObservedObject var tracker: TransitionTracker
     
     let strokeNumber: UInt8
     
@@ -28,7 +28,7 @@ struct TransitionView: View {
         self.viewModel = viewModel
         self.strokeNumber = strokeNumber
         self.focused = focused
-        self._tracker = State(wrappedValue: tracker)
+        self.tracker = tracker
     }
     
     var body: some View {

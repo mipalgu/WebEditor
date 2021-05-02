@@ -28,6 +28,17 @@ final class StateViewModel: ObservableObject {
         StateTitleViewModel(machine: machine, path: path.name, notifier: notifier)
     }
     
+    var transitions: [TransitionViewModel] {
+        state.wrappedValue.transitions.indices.map {
+            TransitionViewModel(
+                machine: machine,
+                path: path.transitions[$0],
+                transitionBinding: state.transitions[$0],
+                notifier: notifier
+            )
+        }
+    }
+    
     init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, state: Binding<Machines.State>, notifier: GlobalChangeNotifier? = nil, actions: [ActionViewModel]) {
         self.machine = machine
         self.path = path

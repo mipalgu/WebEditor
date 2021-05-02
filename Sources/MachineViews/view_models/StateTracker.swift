@@ -11,19 +11,19 @@ import Transformations
 import Machines
 import Utilities
 
-class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable {
+class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable, ObservableObject {
     
-    var isText: Bool
+    @Published var isText: Bool
     
     var isDragging: Bool = false
     
-    var _collapsedWidth: CGFloat
+    @Published var _collapsedWidth: CGFloat
     
-    var _collapsedHeight: CGFloat
+    @Published var _collapsedHeight: CGFloat
     
-    var expanded: Bool
+    @Published var expanded: Bool
     
-    var location: CGPoint
+    @Published var location: CGPoint
 
     let collapsedMinWidth: CGFloat = 150.0
     
@@ -33,9 +33,9 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
     
     let collapsedMaxHeight: CGFloat = 125.0
     
-    var _expandedWidth: CGFloat
+    @Published var _expandedWidth: CGFloat
     
-    var _expandedHeight: CGFloat
+    @Published var _expandedHeight: CGFloat
     
     var offset: CGPoint = CGPoint.zero
     
@@ -88,21 +88,6 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
             )
         }
         self.setLocation(width: frameWidth, height: frameHeight, newLocation: newLocation)
-    }
-    
-    mutating func dragStateGesture(coordinateSpace: String, size: CGSize) -> some Gesture {
-        DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
-            .onChanged {
-                self.handleDrag(gesture: $0, frameWidth: size.width, frameHeight: size.height)
-                if !self.isStretchingX && !tracker.isStretchingY {
-                    self.moveTransitions(state: self.machine.states[index].name, gesture: $0, frame: size)
-                } else {
-                    self.stretchTransitions(state: self.machine.states[index].name)
-                }
-            }.onEnded {
-                self.finishMovingTransitions()
-                self.finishDrag(gesture: $0, frameWidth: size.width, frameHeight: size.height)
-            }
     }
 
 }

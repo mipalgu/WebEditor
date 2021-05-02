@@ -10,7 +10,7 @@ import GUUI
 import Transformations
 import Utilities
 
-struct TransitionTracker: Positionable, Hashable {
+class TransitionTracker: Positionable, Hashable, ObservableObject {
     
     static func == (lhs: TransitionTracker, rhs: TransitionTracker) -> Bool {
         lhs.id == rhs.id
@@ -22,7 +22,7 @@ struct TransitionTracker: Positionable, Hashable {
     
     var id: UUID = UUID()
     
-    var curve: Curve
+    @Published var curve: Curve
     
     var location: CGPoint {
         get {
@@ -37,7 +37,7 @@ struct TransitionTracker: Positionable, Hashable {
         self.curve = curve
     }
     
-    init(point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint) {
+    convenience init(point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint) {
         self.init(curve: Curve(point0: point0, point1: point1, point2: point2, point3: point3))
     }
     
@@ -45,7 +45,7 @@ struct TransitionTracker: Positionable, Hashable {
         self.curve = Curve(source: source, target: target)
     }
     
-    init(source: StateTracker, target: StateTracker) {
+    convenience init(source: StateTracker, target: StateTracker) {
         let dx = target.location.x - source.location.x
         let dy = target.location.y - source.location.y
         let angle = atan2(Double(dy), Double(dx)) / Double.pi * 180.0
@@ -55,7 +55,7 @@ struct TransitionTracker: Positionable, Hashable {
         self.init(source: sourceEdge, target: targetEdge)
     }
     
-    init(source: StateTracker, sourcePoint: CGPoint, target: StateTracker, targetPoint: CGPoint) {
+    convenience init(source: StateTracker, sourcePoint: CGPoint, target: StateTracker, targetPoint: CGPoint) {
         var sourceEdge = source.findEdge(point: sourcePoint)
         var targetEdge = target.findEdge(point: targetPoint)
         let targetSourceEdge = source.findEdgeCenter(degrees: (targetEdge - source.location)<)
@@ -95,7 +95,7 @@ struct TransitionTracker: Positionable, Hashable {
 
 extension TransitionTracker {
 
-    init(plist data: String) {
+    convenience init(plist data: String) {
         let helper = StringHelper()
         let point0X = helper.getValueFromFloat(plist: data, label: "srcPointX")
         let point0Y = helper.getValueFromFloat(plist: data, label: "srcPointY")

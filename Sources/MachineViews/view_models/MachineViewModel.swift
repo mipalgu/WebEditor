@@ -83,6 +83,9 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             return
         }
         let newStateIndex = machine.states.count - 1
+//        var updatedMachine = machine
+//        machineBinding = Binding(get: { updatedMachine }, set: { updatedMachine = $0 })
+//        print(machineBinding.states)
         if !cache.addNewState(state: machineBinding.states[newStateIndex]) {
             fatalError("Created state but failed to create view models")
         }
@@ -102,6 +105,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                 guard let targetName = self.findOverlappingState(point: gesture.location) else {
                     return
                 }
+                let transitionCount = self.machine.states[index].transitions.count
                 let result = self.machineBinding.wrappedValue.newTransition(
                     source: self.machine.states[index].name,
                     target: targetName
@@ -109,20 +113,22 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                 guard let _ = try? result.get() else {
                     return
                 }
-                let lastIndex = self.machine.states[index].transitions.count - 1
-                guard lastIndex >= 0 else {
-                    return
-                }
                 let result2 = self.machineBinding.wrappedValue.modify(
-                    attribute: self.machine.path.states[index].transitions[lastIndex].condition,
+                    attribute: self.machine.path.states[index].transitions[transitionCount].condition,
                     value: "true"
                 )
                 guard let _ = try? result2.get() else {
                     return
                 }
+                guard
+                    self.machineBinding.wrappedValue.states[index].transitions.count == transitionCount + 1,
+                    self.machine.states.count > index
+                else {
+                    fatalError("Successfully created transition but it is not available in the state.")
+                }
                 if !self.cache.addNewTransition(
                     for: stateName,
-                    transition: self.machineBinding.states[index].transitions[lastIndex],
+                    transition: self.machineBinding.states[index].transitions[transitionCount],
                     startLocation: gesture.startLocation,
                     endLocation: gesture.location
                 ) {
@@ -183,6 +189,24 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                 self.objectWillChange.send()
             }.onEnded {
                 self.finishMoveElements(gesture: $0, frame: size)
+                self.objectWillChange.send()
+            }
+    }
+    
+    func dragStateGesture(forView view: CanvasView, forState index: Int, size: CGSize) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
+            .onChanged {
+                self.cache.handleDrag(for: self.machine.states[index], gesture: $0, frame: size)
+                let tracker = self.cache.tracker(for: self.machine.states[index])
+                if !tracker.isStretchingX && !tracker.isStretchingY {
+                    self.moveTransitions(state: self.machine.states[index].name, gesture: $0, frame: size)
+                } else {
+                    self.stretchTransitions(state: self.machine.states[index].name)
+                }
+                self.objectWillChange.send()
+            }.onEnded {
+                self.finishMovingTransitions()
+                self.cache.finishDrag(for: self.machine.states[index], gesture: $0, frame: size)
                 self.objectWillChange.send()
             }
     }
@@ -420,7 +444,9 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             point2: CGPoint(x: x2, y: y2),
             point3: CGPoint(x: x3, y: y3)
         )
-        let _ = self.cache.updateTracker(for: transitionIndex, in: name, curve: curve)
+        guard self.cache.updateTracker(for: transitionIndex, in: name, curve: curve) else {
+            fatalError("Can't update transition \(transitionIndex) in state \(name)")
+        }
     }
     
     private func moveTransitions(state: StateName, gesture: DragGesture.Value, frame: CGSize) {

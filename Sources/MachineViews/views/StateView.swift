@@ -16,16 +16,19 @@ struct StateView: View {
     
     var state: StateViewModel
     
-    @State var tracker: StateTracker
+    @ObservedObject var tracker: StateTracker
     
     var coordinateSpace: String
+    
+    var frame: CGSize
 
     var focused: Bool
     
-    init(state: StateViewModel, tracker: StateTracker, coordinateSpace: String, focused: Bool = false) {
+    init(state: StateViewModel, tracker: StateTracker, coordinateSpace: String, frame: CGSize, focused: Bool = false) {
         self.state = state
         self.tracker = tracker
         self.coordinateSpace = coordinateSpace
+        self.frame = frame
         self.focused = focused
     }
     
@@ -44,8 +47,10 @@ struct StateView: View {
             }
         }
         .coordinateSpace(name: coordinateSpace)
-        .gesture(state.dragStateGesture(forView: self, forState: stateIndex, size: geometry.size))
-        .position(tracker.location)
+        .frame(
+            width: tracker.width,
+            height: tracker.height
+        )
     }
 }
 
@@ -69,7 +74,8 @@ struct StateView_Previews: PreviewProvider {
                     notifier: nil
                 ),
                 tracker: StateTracker(expanded: expanded),
-                coordinateSpace: "MAIN_VIEW"
+                coordinateSpace: "MAIN_VIEW",
+                frame: CGSize(width: 1000.0, height: 1000.0)
             ).environmentObject(config)
         }
         
@@ -94,7 +100,8 @@ struct StateView_Previews: PreviewProvider {
                     notifier: nil
                 ),
                 tracker: StateTracker(expanded: expanded),
-                coordinateSpace: "MAIN_VIEW"
+                coordinateSpace: "MAIN_VIEW",
+                frame: CGSize(width: 1000.0, height: 1000.0)
             ).environmentObject(config)
         }
         
