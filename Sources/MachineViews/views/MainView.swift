@@ -48,7 +48,7 @@ public struct MainView: View {
     
     @State var focus: URL
     
-    @State var viewModels: [URL: MachineViewModel] = [:]
+    var viewModels: [URL: MachineViewModel] = [:]
     
     @State var machines: [URL: Machine] = [:]
     
@@ -62,29 +62,12 @@ public struct MainView: View {
     public init(machine: Machine) {
         self._focus = State(initialValue: machine.filePath)
         self._root = State(initialValue: .machine(machine))
-        guard let plist = try? String(contentsOf: machine.filePath.appendingPathComponent("Layout.plist")) else {
-            viewModels[machine.filePath] = MachineViewModel(machine: $root.machine)
-            return
-        }
-        viewModels[machine.filePath] = MachineViewModel(machine: $root.machine, plist: plist)
     }
     
     @EnvironmentObject var config: Config
     
     @StateObject var viewModel: DependenciesViewModel = DependenciesViewModel()
-    
-    private func viewModel(from plist: String, with binding: Binding<Machine>) -> MachineViewModel {
-        let newViewModel = MachineViewModel(machine: binding, plist: plist)
-        viewModels[binding.wrappedValue.filePath] = newViewModel
-        return newViewModel
-    }
-    
-    private func viewModel(with binding: Binding<Machine>) -> MachineViewModel {
-        let newViewModel = MachineViewModel(machine: binding)
-        viewModels[binding.wrappedValue.filePath] = newViewModel
-        return newViewModel
-    }
-    
+
     public var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -110,34 +93,11 @@ public struct MainView: View {
                 case .arrangement(let arrangement):
                     if focus == arrangement.filePath {
                         ArrangementView(arrangement: $root.arrangement, selection: viewModel.selection(for: focus))
-                    } else if let binding = viewModel.binding(for: focus) {
-                        if let machineViewModel = viewModels[binding.wrappedValue.filePath] {
-                            MachineView(viewModel: machineViewModel, selection: viewModel.selection(for: focus))
-                        } else if let plist = try? String(contentsOf: binding.wrappedValue.filePath.appendingPathComponent("Layout.plist")) {
-                            MachineView(viewModel: viewModel(from: plist, with: binding), selection: viewModel.selection(for: focus))
-                        } else {
-                            MachineView(viewModel: viewModel(with: binding), selection: viewModel.selection(for: focus))
-                        }
-                        
+                    } else {
+                        MachineView(viewModel: viewModel.viewModel(for: focus)!, selection: viewModel.selection(for: focus))
                     }
-                case .machine(let rootMachine):
-                    if focus == rootMachine.filePath {
-                        if let machineViewModel = viewModels[rootMachine.filePath] {
-                            MachineView(viewModel: machineViewModel, selection: viewModel.selection(for: focus))
-                        } else if let plist = try? String(contentsOf: rootMachine.filePath.appendingPathComponent("Layout.plist")) {
-                            MachineView(viewModel: viewModel(from: plist, with: $root.machine), selection: viewModel.selection(for: focus))
-                        } else {
-                            MachineView(viewModel: viewModel(with: $root.machine), selection: viewModel.selection(for: focus))
-                        }
-                    } else if let binding = viewModel.binding(for: focus) {
-                        if let machineViewModel = viewModels[binding.wrappedValue.filePath] {
-                            MachineView(viewModel: machineViewModel, selection: viewModel.selection(for: focus))
-                        } else if let plist = try? String(contentsOf: binding.wrappedValue.filePath.appendingPathComponent("Layout.plist")) {
-                            MachineView(viewModel: viewModel(from: plist, with: binding), selection: viewModel.selection(for: focus))
-                        } else {
-                            MachineView(viewModel: viewModel(with: binding), selection: viewModel.selection(for: focus))
-                        }
-                    }
+                case .machine(_):
+                    MachineView(viewModel: viewModel.viewModel(for: focus)!, selection: viewModel.selection(for: focus))
                 }
             }
         }
