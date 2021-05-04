@@ -181,9 +181,23 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                 else {
                     fatalError("Successfully created transition but it is not available in the state.")
                 }
+                let transitionBinding: Binding<Transition> = Binding(
+                    get: {
+                        guard self.machineBinding.wrappedValue.states[index].transitions.count > transitionCount else {
+                            return Transition(target: targetName)
+                        }
+                        return self.machineBinding.wrappedValue.states[index].transitions[transitionCount]
+                    },
+                    set: {
+                        guard self.machineBinding.wrappedValue.states[index].transitions.count > transitionCount else {
+                            return
+                        }
+                        self.machineBinding.wrappedValue.states[index].transitions[transitionCount] = $0
+                    }
+                )
                 if !self.cache.addNewTransition(
                     for: stateName,
-                    transition: self.machineBinding.states[index].transitions[transitionCount],
+                    transition: transitionBinding,
                     startLocation: gesture.startLocation,
                     endLocation: gesture.location
                 ) {
