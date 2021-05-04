@@ -44,6 +44,9 @@ final class DependenciesViewModel: ObservableObject {
     }
     
     func viewModel(for url: URL) -> MachineViewModel? {
+        if let viewModel = viewModels[url] {
+            return viewModel
+        }
         guard let binding = binding(for: url) else {
             return nil
         }
