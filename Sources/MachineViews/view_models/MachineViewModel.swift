@@ -643,8 +643,12 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                     return
                 }
                 let stateObj = self.machine.states[stateIndex]
-                let x = movingTargetPositions[source]![$0]!.x
-                let y = movingTargetPositions[source]![$0]!.y
+                guard
+                    let x = movingTargetPositions[source]?[$0]?.x,
+                    let y = movingTargetPositions[source]?[$0]?.y
+                else {
+                    return
+                }
                 let relativeX = x - model.location.x
                 let relativeY = y - model.location.y
                 let dx = (model.width - originalDimensions.0) / 2.0
