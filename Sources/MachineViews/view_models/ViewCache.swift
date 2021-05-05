@@ -130,22 +130,24 @@ class ViewCache {
         return true
     }
     
-    func addNewTransition(for state: StateName, transition: Binding<Transition>, startLocation: CGPoint, endLocation: CGPoint) -> Bool {
+    func addNewTransition(for state: StateName, transition: Binding<Transition>, startLocation: CGPoint, endLocation: CGPoint, machine: Binding<Machine>) -> Bool {
+        print(machine.wrappedValue.states[1].transitions)
+        print(self.machineBinding.wrappedValue.states[1].transitions)
         guard
-            let stateIndex = machine.states.firstIndex(where: { $0.name == state }),
-            let transitionIndex = machine.states[stateIndex].transitions.firstIndex(
-                where: { $0 == transition.wrappedValue }
+            let stateIndex = machine.wrappedValue.states.firstIndex(where: { $0.name == state }),
+            let transitionIndex = machine.wrappedValue.states[stateIndex].transitions.firstIndex(
+                where: { $0 == transition.wrappedValue } // stupid
             ),
             transitions[state] != nil,
-            transitions[state]!.count == transitionIndex,
+            transitions[state]!.count == transitionIndex, //fails here
             let sourceTracker = stateTrackers[state],
             let targetTracker = stateTrackers[transition.wrappedValue.target]
         else {
             return false
         }
         let newViewModel = TransitionViewModel(
-            machine: machineBinding,
-            path: machine.path.states[stateIndex].transitions[transitionIndex],
+            machine: machine,
+            path: machine.wrappedValue.path.states[stateIndex].transitions[transitionIndex],
             transitionBinding: transition,
             notifier: notifier
         )

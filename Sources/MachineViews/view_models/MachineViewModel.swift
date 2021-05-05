@@ -225,7 +225,8 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                     for: stateName,
                     transition: transitionBinding,
                     startLocation: gesture.startLocation,
-                    endLocation: gesture.location
+                    endLocation: gesture.location,
+                    machine: self.machineBinding
                 ) {
                     fatalError("Created transition but couldn't create view models.")
                 }
