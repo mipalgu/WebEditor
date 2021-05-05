@@ -531,27 +531,6 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         }
     }
     
-    private func setTargetPositions() {
-        movingTargetPositions = [:]
-        movingTargetTransitions.keys.forEach { source in
-            guard
-                let candidates = movingTargetTransitions[source],
-                let stateIndex = machine.states.firstIndex(where: { $0.name == source })
-            else {
-                return
-            }
-            let transitions = machine.states[stateIndex].transitions
-            var tempDict: [Int: CGPoint] = [:]
-            transitions.indices.forEach {
-                if !candidates.contains($0) {
-                    return
-                }
-                tempDict[$0] = self.cache.tracker(for: $0, originating: source).curve.point3
-            }
-            movingTargetPositions[source] = tempDict
-        }
-    }
-    
     private func moveTransitions(state: StateName, gesture: DragGesture.Value, frame: CGSize) {
         if !isStateMoving {
             isStateMoving = true
@@ -578,6 +557,27 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         }
         if view.selectedObjects.contains(selected) {
             view.selectedObjects.remove(selected)
+        }
+    }
+    
+    private func setTargetPositions() {
+        movingTargetPositions = [:]
+        movingTargetTransitions.keys.forEach { source in
+            guard
+                let candidates = movingTargetTransitions[source],
+                let stateIndex = machine.states.firstIndex(where: { $0.name == source })
+            else {
+                return
+            }
+            let transitions = machine.states[stateIndex].transitions
+            var tempDict: [Int: CGPoint] = [:]
+            transitions.indices.forEach {
+                if !candidates.contains($0) {
+                    return
+                }
+                tempDict[$0] = self.cache.tracker(for: $0, originating: source).curve.point3
+            }
+            movingTargetPositions[source] = tempDict
         }
     }
     
