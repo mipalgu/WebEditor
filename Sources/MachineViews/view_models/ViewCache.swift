@@ -8,6 +8,7 @@
 import Foundation
 import TokamakShim
 import Machines
+import Utilities
 
 class ViewCache {
     
@@ -53,7 +54,7 @@ class ViewCache {
                 state: machine.states[stateIndex],
                 notifier: notifier
             )
-            tempStateTrackers[stateName] = StateTracker()
+            tempStateTrackers[stateName] = StateTracker(notifier: notifier)
         }
         tempStates.keys.forEach { target in
             tempStates.keys.forEach { source in
@@ -123,28 +124,30 @@ class ViewCache {
         let name = state.wrappedValue.name
         createNewTargetEntry(target: name)
         self.states[name] = newViewModel
-        self.stateTrackers[name] = StateTracker()
+        self.stateTrackers[name] = StateTracker(notifier: self.notifier)
         self.transitions[name] = []
         self.transitionTrackers[name] = []
         return true
     }
     
-    func addNewTransition(for state: StateName, transition: Binding<Transition>, startLocation: CGPoint, endLocation: CGPoint) -> Bool {
+    func addNewTransition(for state: StateName, transition: Binding<Transition>, startLocation: CGPoint, endLocation: CGPoint, machine: Binding<Machine>) -> Bool {
+        print(machine.wrappedValue.states[1].transitions)
+        print(self.machineBinding.wrappedValue.states[1].transitions)
         guard
-            let stateIndex = machine.states.firstIndex(where: { $0.name == state }),
-            let transitionIndex = machine.states[stateIndex].transitions.firstIndex(
-                where: { $0 == transition.wrappedValue }
+            let stateIndex = machine.wrappedValue.states.firstIndex(where: { $0.name == state }),
+            let transitionIndex = machine.wrappedValue.states[stateIndex].transitions.firstIndex(
+                where: { $0 == transition.wrappedValue } // stupid
             ),
             transitions[state] != nil,
-            transitions[state]!.count == transitionIndex,
+            transitions[state]!.count == transitionIndex, //fails here
             let sourceTracker = stateTrackers[state],
             let targetTracker = stateTrackers[transition.wrappedValue.target]
         else {
             return false
         }
         let newViewModel = TransitionViewModel(
-            machine: machineBinding,
-            path: machine.path.states[stateIndex].transitions[transitionIndex],
+            machine: machine,
+            path: machine.wrappedValue.path.states[stateIndex].transitions[transitionIndex],
             transitionBinding: transition,
             notifier: notifier
         )
@@ -290,7 +293,8 @@ class ViewCache {
                 expanded: expanded,
                 collapsedWidth: tracker.collapsedWidth,
                 collapsedHeight: tracker.collapsedHeight,
-                isText: tracker.isText
+                isText: tracker.isText,
+                notifier: self.notifier
             )
         )
     }
@@ -315,7 +319,8 @@ class ViewCache {
                 expanded: tracker.expanded,
                 collapsedWidth: tracker.collapsedWidth,
                 collapsedHeight: tracker.collapsedHeight,
-                isText: isText
+                isText: isText,
+                notifier: self.notifier
             )
         )
     }
@@ -337,7 +342,8 @@ class ViewCache {
                 expanded: tracker.expanded,
                 collapsedWidth: tracker.collapsedWidth,
                 collapsedHeight: tracker.collapsedHeight,
-                isText: tracker.isText
+                isText: tracker.isText,
+                notifier: notifier
             )
         )
     }
@@ -359,7 +365,8 @@ class ViewCache {
                 expanded: tracker.expanded,
                 collapsedWidth: tracker.expanded ? tracker.collapsedWidth : newSize.width,
                 collapsedHeight: tracker.expanded ? tracker.collapsedHeight : newSize.height,
-                isText: tracker.isText
+                isText: tracker.isText,
+                notifier: notifier
             )
         )
     }
@@ -544,7 +551,7 @@ extension ViewCache {
             }
             tempTransitions[stateName] = transitionViewModels
             tempTransitionTrackers[stateName] = transitionTrackers
-            tempStateTrackers[stateName] = StateTracker(plist: statePlist)
+            tempStateTrackers[stateName] = StateTracker(plist: statePlist, notifier: notifier)
             tempStates[stateName] = StateViewModel(
                 machine: machine,
                 path: machine.wrappedValue.path.states[stateIndex],
@@ -596,6 +603,23 @@ extension ViewCache {
         self.transitionTrackers = tempTransitionTrackers
         self.targetTransitions = tempTargetTransitions
         self.notifier = notifier
+    }
+    
+    var plist: String {
+        let helper = StringHelper()
+        let statesPlist = helper.reduceLines(data: machine.states.sorted(by: { $0.name < $1.name }).map { state in
+            guard let stateTracker = stateTrackers[state.name] else {
+                return ""
+            }
+            let transitions = self.trackers(for: state)
+            return stateTracker.plist(state: state, transitions: transitions)
+        })
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" +
+            "<plist version=\"1.0\">\n<dict>\n" + helper.tab(
+                data: "<key>States</key>\n<dict>\n" + helper.tab(data: statesPlist) + "\n</dict>\n<key>Version</key>\n<string>1.3</string>"
+            ) +
+        "\n</dict>\n</plist>\n"
     }
     
 }

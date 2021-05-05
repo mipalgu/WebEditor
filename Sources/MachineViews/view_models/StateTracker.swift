@@ -13,15 +13,43 @@ import Utilities
 
 class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable, ObservableObject {
     
-    @Published var isText: Bool
+    @Published var isText: Bool {
+        didSet {
+            guard let notifier = notifier else {
+                return
+            }
+            notifier.send()
+        }
+    }
     
     var isDragging: Bool = false
     
-    @Published var _collapsedWidth: CGFloat
+    @Published var _collapsedWidth: CGFloat {
+        didSet {
+            guard let notifier = notifier else {
+                return
+            }
+            notifier.send()
+        }
+    }
     
-    @Published var _collapsedHeight: CGFloat
+    @Published var _collapsedHeight: CGFloat {
+        didSet {
+            guard let notifier = notifier else {
+                return
+            }
+            notifier.send()
+        }
+    }
     
-    @Published var expanded: Bool
+    @Published var expanded: Bool {
+        didSet {
+            guard let notifier = notifier else {
+                return
+            }
+            notifier.send()
+        }
+    }
     
     @Published var location: CGPoint
 
@@ -33,9 +61,23 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
     
     let collapsedMaxHeight: CGFloat = 125.0
     
-    @Published var _expandedWidth: CGFloat
+    @Published var _expandedWidth: CGFloat {
+        didSet {
+            guard let notifier = notifier else {
+                return
+            }
+            notifier.send()
+        }
+    }
     
-    @Published var _expandedHeight: CGFloat
+    @Published var _expandedHeight: CGFloat {
+        didSet {
+            guard let notifier = notifier else {
+                return
+            }
+            notifier.send()
+        }
+    }
     
     var offset: CGPoint = CGPoint.zero
     
@@ -55,6 +97,8 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
     
     let _expandedTolerance: CGFloat = 20.0
     
+    weak var notifier: GlobalChangeNotifier?
+    
     var horizontalEdgeTolerance: CGFloat {
         expanded ? _expandedTolerance : _collapsedTolerance
     }
@@ -63,7 +107,7 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
         horizontalEdgeTolerance
     }
     
-    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false) {
+    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false, notifier: GlobalChangeNotifier? = nil) {
         self.location = location
         self._expandedWidth = expandedWidth
         self._expandedHeight = expandedHeight
@@ -71,6 +115,7 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
         self._collapsedWidth = collapsedWidth
         self._collapsedHeight = collapsedHeight
         self.isText = isText
+        self.notifier = notifier
     }
     
     func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
@@ -94,7 +139,7 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
 
 extension StateTracker {
 
-    convenience init(plist data: String) {
+    convenience init(plist data: String, notifier: GlobalChangeNotifier? = nil) {
 //        let transitions = state.transitions
         let helper = StringHelper()
         let x = helper.getValueFromFloat(plist: data, label: "x")
@@ -116,7 +161,8 @@ extension StateTracker {
             expanded: expanded,
             collapsedWidth: expanded ? 150.0 : w,
             collapsedHeight: expanded ? 100.0 : h,
-            isText: false
+            isText: false,
+            notifier: notifier
         )
     }
 
@@ -144,25 +190,25 @@ extension StateTracker {
 
     fileprivate func actionHeightstoPList(state: Machines.State) -> String {
         let helper = StringHelper()
-        return helper.reduceLines(data: state.actions.map {
+        return helper.reduceLines(data: state.actions.sorted(by: { $0.name < $1.name }).map {
             "<key>\($0.name)Height</key>\n<real>\(100.0)</real>"
         })
     }
 //
-//    func plist(state: Machines.State) -> String {
-//        let helper = StringHelper()
-//        let transitionPList = helper.reduceLines(data: transitions.map { $0.toPlist() })
-//        return "<key>\(state.wrappedValue.name)</key>\n<dict>\n"
-//            + helper.tab(data: "<key>Transitions</key>\n\(transitions.count == 0 ? "<array/>" : "<array>")\n" +
-//                            helper.tab(data: transitionPList) + "\(transitions.count == 0 ? "" : "\n</array>")" +
-//                "\n<key>bgColour</key>\n" + colourPList() + "\n<key>editingMode</key>\n<false/>\n" +
-//                            "<key>expanded</key>\n\(boolToPlist(value: tracker.expanded))\n" +
-//                            "<key>h</key>\n<real>\(tracker.height)</real>\n" + actionHeightstoPList(state: state.wrappedValue) +
-//                "\n<key>stateSelected</key>\n\(boolToPlist(value: false))\n<key>strokeColour</key>\n" +
-//                            strokePlist() + "\n<key>w</key>\n<real>\(tracker.width)</real>\n<key>x</key>\n<real>\(tracker.location.x)</real>\n" +
-//                            "<key>y</key>\n<real>\(tracker.location.y)</real>\n<key>zoomedInternalHeight</key>\n<real>0.0</real>\n" +
-//                "<key>zoomedOnEntryHeight</key>\n<real>0.0</real>\n<key>zoomedOnExitHeight</key>\n<real>0.0</real>"
-//            ) + "\n</dict>"
-//    }
+    func plist(state: Machines.State, transitions: [TransitionTracker]) -> String {
+        let helper = StringHelper()
+        let transitionPList = helper.reduceLines(data: transitions.map(\.plist))
+        return "<key>\(state.name)</key>\n<dict>\n"
+            + helper.tab(data: "<key>Transitions</key>\n\(transitions.count == 0 ? "<array/>" : "<array>")\n" +
+                            helper.tab(data: transitionPList) + "\(transitions.count == 0 ? "" : "\n</array>")" +
+                "\n<key>bgColour</key>\n" + colourPList() + "\n<key>editingMode</key>\n<false/>\n" +
+                            "<key>expanded</key>\n\(boolToPlist(value: expanded))\n" +
+                            "<key>h</key>\n<real>\(height)</real>\n" + actionHeightstoPList(state: state) +
+                "\n<key>stateSelected</key>\n\(boolToPlist(value: false))\n<key>strokeColour</key>\n" +
+                            strokePlist() + "\n<key>w</key>\n<real>\(width)</real>\n<key>x</key>\n<real>\(location.x)</real>\n" +
+                            "<key>y</key>\n<real>\(location.y)</real>\n<key>zoomedInternalHeight</key>\n<real>0.0</real>\n" +
+                "<key>zoomedOnEntryHeight</key>\n<real>0.0</real>\n<key>zoomedOnExitHeight</key>\n<real>0.0</real>"
+            ) + "\n</dict>"
+    }
 
 }

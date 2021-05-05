@@ -37,14 +37,14 @@ public struct CanvasView: View {
     
     let textHeight: CGFloat = 20.0
     
-    public init(machine: Binding<Machine>, focus: Binding<Focus>) {
-        self._focus = focus
-        guard let plist = try? String(contentsOf: machine.wrappedValue.filePath.appendingPathComponent("Layout.plist")) else {
-            self.viewModel = MachineViewModel(machine: machine)
-            return
-        }
-        self.viewModel = MachineViewModel(machine: machine, plist: plist)
-    }
+//    public init(machine: Binding<Machine>, focus: Binding<Focus>) {
+//        self._focus = focus
+//        guard let plist = try? String(contentsOf: machine.wrappedValue.filePath.appendingPathComponent("Layout.plist")) else {
+//            self.viewModel = MachineViewModel(machine: machine)
+//            return
+//        }
+//        self.viewModel = MachineViewModel(machine: machine, plist: plist)
+//    }
     
     init(viewModel: MachineViewModel, focus: Binding<Focus>) {
         self.viewModel = viewModel
@@ -81,6 +81,17 @@ public struct CanvasView: View {
                                     if !self.selectedObjects.isEmpty {
                                         Button("Delete Selected", action: { viewModel.deleteSelected(self) })
                                     }
+                                    Button("Save", action: {
+                                        guard let _ = try? viewModel.machine.save() else {
+                                            print(viewModel.machine.errorBag.allErrors)
+                                            return
+                                        }
+                                        let plist = viewModel.plist
+                                        guard let _ = try? plist.write(toFile: viewModel.machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
+                                            print("Failed to write plist")
+                                            return
+                                        }
+                                    })
                                 }
                             }
                         if let curve = creatingCurve {
@@ -174,12 +185,12 @@ public struct CanvasView: View {
                 }
             }
         }/*.focusedValue(\.saving, $saving).onChange(of: saving) { _ in
-            guard let _ = try? machine.save() else {
-                print(machine.errorBag.allErrors)
+            guard let _ = try? viewModel.machine.save() else {
+                print(viewModel.machine.errorBag.allErrors)
                 return
             }
-            let plist = viewModel.toPlist(machine: machine)
-            guard let _ = try? plist.write(toFile: machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
+            let plist = viewModel.plist
+            guard let _ = try? plist.write(toFile: viewModel.machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
                 print("Failed to write plist")
                 return
             }
@@ -190,23 +201,34 @@ public struct CanvasView: View {
 
 struct CanvasView_Previews: PreviewProvider {
     
-    struct Preview: View {
+    struct Parent: View {
+        
         
         @State var machine: Machine = Machine.initialSwiftMachine()
+        
+        var body: some View {
+            Preview(viewModel: MachineViewModel(machine: $machine))
+        }
+        
+    }
+    
+    struct Preview: View {
+        
+        @StateObject var viewModel: MachineViewModel
         
         @State var focus: Focus = .machine
         
         let config = Config()
         
         var body: some View {
-            CanvasView(machine: $machine, focus: $focus).environmentObject(config)
+            CanvasView(viewModel: viewModel, focus: $focus).environmentObject(config)
         }
         
     }
     
     static var previews: some View {
         VStack {
-            Preview()
+            Parent()
         }
     }
 }

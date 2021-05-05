@@ -117,7 +117,7 @@ extension TransitionTracker {
         return "<key>\(key)</key>\n<real>\(point)</real>\n"
     }
 
-    func toPlist() -> String {
+    var plist: String {
         let helper = StringHelper()
         return "<dict>\n" + helper.tab(
             data: floatToPList(key: "controlPoint1X", point: self.curve.point1.x) +
@@ -128,7 +128,7 @@ extension TransitionTracker {
                 floatToPList(key: "dstPointY", point: self.curve.point3.y) +
                 floatToPList(key: "srcPointX", point: self.curve.point0.x) +
                 floatToPList(key: "srcPointY", point: self.curve.point0.y)
-        ) + "</dict>"
+        ) + "\n</dict>"
     }
 
 }

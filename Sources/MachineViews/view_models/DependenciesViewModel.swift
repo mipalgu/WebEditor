@@ -14,6 +14,8 @@ final class DependenciesViewModel: ObservableObject {
     
     @Published var machines: [URL: Machine] = [:]
     
+    var viewModels: [URL: MachineViewModel] = [:]
+    
     private var selections: [URL: AttributeGroup] = [:]
     
     func selection(for url: URL) -> Binding<AttributeGroup?> {
@@ -39,6 +41,23 @@ final class DependenciesViewModel: ObservableObject {
         }
         machines[url] = loadedMachine
         return loadedMachine
+    }
+    
+    func viewModel(for url: URL) -> MachineViewModel? {
+        if let viewModel = viewModels[url] {
+            return viewModel
+        }
+        guard let binding = binding(for: url) else {
+            return nil
+        }
+        guard let plist = try? String(contentsOf: binding.wrappedValue.filePath.appendingPathComponent("Layout.plist")) else {
+            let newViewModel = MachineViewModel(machine: binding)
+            viewModels[binding.wrappedValue.filePath] = newViewModel
+            return newViewModel
+        }
+        let newViewModel = MachineViewModel(machine: binding, plist: plist)
+        viewModels[binding.wrappedValue.filePath] = newViewModel
+        return newViewModel
     }
     
 }

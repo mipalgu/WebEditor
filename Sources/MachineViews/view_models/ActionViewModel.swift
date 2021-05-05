@@ -20,7 +20,7 @@ final class ActionViewModel: ObservableObject, Hashable {
         hasher.combine(path)
     }
     
-    private var machine: Binding<Machine>
+    var machine: Binding<Machine>
     
     let path: Attributes.Path<Machine, Action>
     
