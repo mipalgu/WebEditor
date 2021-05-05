@@ -48,8 +48,6 @@ public struct MainView: View {
     
     @State var focus: URL
     
-    var viewModels: [URL: MachineViewModel] = [:]
-    
     @State var machines: [URL: Machine] = [:]
     
     @State var root: Root

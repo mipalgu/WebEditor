@@ -53,7 +53,7 @@ class ViewCache {
                 state: machine.states[stateIndex],
                 notifier: notifier
             )
-            tempStateTrackers[stateName] = StateTracker()
+            tempStateTrackers[stateName] = StateTracker(notifier: notifier)
         }
         tempStates.keys.forEach { target in
             tempStates.keys.forEach { source in
@@ -123,7 +123,7 @@ class ViewCache {
         let name = state.wrappedValue.name
         createNewTargetEntry(target: name)
         self.states[name] = newViewModel
-        self.stateTrackers[name] = StateTracker()
+        self.stateTrackers[name] = StateTracker(notifier: self.notifier)
         self.transitions[name] = []
         self.transitionTrackers[name] = []
         return true
@@ -290,7 +290,8 @@ class ViewCache {
                 expanded: expanded,
                 collapsedWidth: tracker.collapsedWidth,
                 collapsedHeight: tracker.collapsedHeight,
-                isText: tracker.isText
+                isText: tracker.isText,
+                notifier: self.notifier
             )
         )
     }
@@ -315,7 +316,8 @@ class ViewCache {
                 expanded: tracker.expanded,
                 collapsedWidth: tracker.collapsedWidth,
                 collapsedHeight: tracker.collapsedHeight,
-                isText: isText
+                isText: isText,
+                notifier: self.notifier
             )
         )
     }
@@ -337,7 +339,8 @@ class ViewCache {
                 expanded: tracker.expanded,
                 collapsedWidth: tracker.collapsedWidth,
                 collapsedHeight: tracker.collapsedHeight,
-                isText: tracker.isText
+                isText: tracker.isText,
+                notifier: notifier
             )
         )
     }
@@ -359,7 +362,8 @@ class ViewCache {
                 expanded: tracker.expanded,
                 collapsedWidth: tracker.expanded ? tracker.collapsedWidth : newSize.width,
                 collapsedHeight: tracker.expanded ? tracker.collapsedHeight : newSize.height,
-                isText: tracker.isText
+                isText: tracker.isText,
+                notifier: notifier
             )
         )
     }
@@ -544,7 +548,7 @@ extension ViewCache {
             }
             tempTransitions[stateName] = transitionViewModels
             tempTransitionTrackers[stateName] = transitionTrackers
-            tempStateTrackers[stateName] = StateTracker(plist: statePlist)
+            tempStateTrackers[stateName] = StateTracker(plist: statePlist, notifier: notifier)
             tempStates[stateName] = StateViewModel(
                 machine: machine,
                 path: machine.wrappedValue.path.states[stateIndex],
