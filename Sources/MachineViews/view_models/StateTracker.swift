@@ -190,7 +190,7 @@ extension StateTracker {
 
     fileprivate func actionHeightstoPList(state: Machines.State) -> String {
         let helper = StringHelper()
-        return helper.reduceLines(data: state.actions.map {
+        return helper.reduceLines(data: state.actions.sorted(by: { $0.name < $1.name }).map {
             "<key>\($0.name)Height</key>\n<real>\(100.0)</real>"
         })
     }

@@ -128,7 +128,7 @@ extension TransitionTracker {
                 floatToPList(key: "dstPointY", point: self.curve.point3.y) +
                 floatToPList(key: "srcPointX", point: self.curve.point0.x) +
                 floatToPList(key: "srcPointY", point: self.curve.point0.y)
-        ) + "</dict>"
+        ) + "\n</dict>"
     }
 
 }

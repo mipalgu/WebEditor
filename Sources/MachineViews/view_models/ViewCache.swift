@@ -617,7 +617,7 @@ extension ViewCache {
             "<plist version=\"1.0\">\n<dict>\n" + helper.tab(
                 data: "<key>States</key>\n<dict>\n" + helper.tab(data: statesPlist) + "\n</dict>\n<key>Version</key>\n<string>1.3</string>"
             ) +
-        "\n</dict>\n</plist>"
+        "\n</dict>\n</plist>\n"
     }
     
 }

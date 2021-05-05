@@ -81,6 +81,17 @@ public struct CanvasView: View {
                                     if !self.selectedObjects.isEmpty {
                                         Button("Delete Selected", action: { viewModel.deleteSelected(self) })
                                     }
+                                    Button("Save", action: {
+                                        guard let _ = try? viewModel.machine.save() else {
+                                            print(viewModel.machine.errorBag.allErrors)
+                                            return
+                                        }
+                                        let plist = viewModel.plist
+                                        guard let _ = try? plist.write(toFile: viewModel.machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
+                                            print("Failed to write plist")
+                                            return
+                                        }
+                                    })
                                 }
                             }
                         if let curve = creatingCurve {
