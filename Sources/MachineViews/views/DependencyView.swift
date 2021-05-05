@@ -45,20 +45,26 @@ struct DependencyView: View {
     var body: some View {
         VStack {
             HStack {
-                if let machineBinding = machineBinding, !machineBinding.wrappedValue.dependencies.isEmpty {
-                    Toggle(isOn: $expanded) {
-                        Text(dependency.name.pretty).foregroundColor(config.textColor)
+                Group {
+                    if let machineBinding = machineBinding, machineBinding.wrappedValue.dependencies.isEmpty {
+                        Text(dependency.name.pretty)
+                            .foregroundColor(config.textColor)
+                            .padding(.leading, 25)
+                            .frame(height: 28)
+                    } else if let machineBinding = machineBinding, !machineBinding.wrappedValue.dependencies.isEmpty {
+                        Toggle(isOn: $expanded) {
+                            Text(dependency.name.pretty)
+                                .foregroundColor(config.textColor)
+                                .frame(height: 28)
+                        }.toggleStyle(ArrowToggleStyle(side: .left))
+                    } else {
+                        Text(dependency.name.pretty)
+                            .foregroundColor(.red)
+                            .padding(.leading, 25)
+                            .frame(height: 28)
                     }
-                    .toggleStyle(ArrowToggleStyle(side: .left))
-                    .onTapGesture {
-                        focus = dependency.filePath
-                    }
-                } else {
-                    Text(dependency.name.pretty)
-                        .foregroundColor(.red)
-                        .onTapGesture {
-                            focus = dependency.filePath
-                        }
+                }.onTapGesture {
+                    focus = dependency.filePath
                 }
                 Spacer()
             }.padding(.leading, 10)
