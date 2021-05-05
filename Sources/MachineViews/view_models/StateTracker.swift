@@ -195,20 +195,20 @@ extension StateTracker {
         })
     }
 //
-//    func plist(state: Machines.State) -> String {
-//        let helper = StringHelper()
-//        let transitionPList = helper.reduceLines(data: transitions.map { $0.toPlist() })
-//        return "<key>\(state.wrappedValue.name)</key>\n<dict>\n"
-//            + helper.tab(data: "<key>Transitions</key>\n\(transitions.count == 0 ? "<array/>" : "<array>")\n" +
-//                            helper.tab(data: transitionPList) + "\(transitions.count == 0 ? "" : "\n</array>")" +
-//                "\n<key>bgColour</key>\n" + colourPList() + "\n<key>editingMode</key>\n<false/>\n" +
-//                            "<key>expanded</key>\n\(boolToPlist(value: tracker.expanded))\n" +
-//                            "<key>h</key>\n<real>\(tracker.height)</real>\n" + actionHeightstoPList(state: state.wrappedValue) +
-//                "\n<key>stateSelected</key>\n\(boolToPlist(value: false))\n<key>strokeColour</key>\n" +
-//                            strokePlist() + "\n<key>w</key>\n<real>\(tracker.width)</real>\n<key>x</key>\n<real>\(tracker.location.x)</real>\n" +
-//                            "<key>y</key>\n<real>\(tracker.location.y)</real>\n<key>zoomedInternalHeight</key>\n<real>0.0</real>\n" +
-//                "<key>zoomedOnEntryHeight</key>\n<real>0.0</real>\n<key>zoomedOnExitHeight</key>\n<real>0.0</real>"
-//            ) + "\n</dict>"
-//    }
+    func plist(state: Machines.State, transitions: [TransitionTracker]) -> String {
+        let helper = StringHelper()
+        let transitionPList = helper.reduceLines(data: transitions.map(\.plist))
+        return "<key>\(state.name)</key>\n<dict>\n"
+            + helper.tab(data: "<key>Transitions</key>\n\(transitions.count == 0 ? "<array/>" : "<array>")\n" +
+                            helper.tab(data: transitionPList) + "\(transitions.count == 0 ? "" : "\n</array>")" +
+                "\n<key>bgColour</key>\n" + colourPList() + "\n<key>editingMode</key>\n<false/>\n" +
+                            "<key>expanded</key>\n\(boolToPlist(value: expanded))\n" +
+                            "<key>h</key>\n<real>\(height)</real>\n" + actionHeightstoPList(state: state) +
+                "\n<key>stateSelected</key>\n\(boolToPlist(value: false))\n<key>strokeColour</key>\n" +
+                            strokePlist() + "\n<key>w</key>\n<real>\(width)</real>\n<key>x</key>\n<real>\(location.x)</real>\n" +
+                            "<key>y</key>\n<real>\(location.y)</real>\n<key>zoomedInternalHeight</key>\n<real>0.0</real>\n" +
+                "<key>zoomedOnEntryHeight</key>\n<real>0.0</real>\n<key>zoomedOnExitHeight</key>\n<real>0.0</real>"
+            ) + "\n</dict>"
+    }
 
 }

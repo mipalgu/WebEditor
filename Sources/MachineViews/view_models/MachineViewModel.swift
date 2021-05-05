@@ -760,6 +760,10 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
 //PLIST EXTENSION
 extension MachineViewModel {
     
+    var plist: String {
+        self.cache.plist
+    }
+    
     convenience init(machine: Binding<Machine>, plist data: String) {
         self.init()
         self.machineBinding = machine

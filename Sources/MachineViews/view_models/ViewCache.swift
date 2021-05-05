@@ -8,6 +8,7 @@
 import Foundation
 import TokamakShim
 import Machines
+import Utilities
 
 class ViewCache {
     
@@ -600,6 +601,23 @@ extension ViewCache {
         self.transitionTrackers = tempTransitionTrackers
         self.targetTransitions = tempTargetTransitions
         self.notifier = notifier
+    }
+    
+    var plist: String {
+        let helper = StringHelper()
+        let statesPlist = helper.reduceLines(data: machine.states.sorted(by: { $0.name < $1.name }).map { state in
+            guard let stateTracker = stateTrackers[state.name] else {
+                return ""
+            }
+            let transitions = self.trackers(for: state)
+            return stateTracker.plist(state: state, transitions: transitions)
+        })
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" +
+            "<plist version=\"1.0\">\n<dict>\n" + helper.tab(
+                data: "<key>States</key>\n<dict>\n" + helper.tab(data: statesPlist) + "\n</dict>\n<key>Version</key>\n<string>1.3</string>"
+            ) +
+        "\n</dict>\n</plist>"
     }
     
 }

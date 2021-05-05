@@ -174,12 +174,12 @@ public struct CanvasView: View {
                 }
             }
         }/*.focusedValue(\.saving, $saving).onChange(of: saving) { _ in
-            guard let _ = try? machine.save() else {
-                print(machine.errorBag.allErrors)
+            guard let _ = try? viewModel.machine.save() else {
+                print(viewModel.machine.errorBag.allErrors)
                 return
             }
-            let plist = viewModel.toPlist(machine: machine)
-            guard let _ = try? plist.write(toFile: machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
+            let plist = viewModel.plist
+            guard let _ = try? plist.write(toFile: viewModel.machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
                 print("Failed to write plist")
                 return
             }
