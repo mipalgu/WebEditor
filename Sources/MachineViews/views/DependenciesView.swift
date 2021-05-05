@@ -21,7 +21,9 @@ struct DependenciesView: View {
     
     @Binding var dependencies: [MachineDependency]
     
-    @Binding var machines: [URL: Machine]
+    let machines: Binding<[URL: Machine]>
+    
+    @Binding var width: CGFloat
     
     @EnvironmentObject var config: Config
     
@@ -34,29 +36,32 @@ struct DependenciesView: View {
     var body: some View {
         VStack {
             VStack {
-                VStack {
+                HStack {
                     Toggle(isOn: $expanded) {
                         Text(name.pretty)
                     }
-                    .toggleStyle(ArrowToggleStyle())
+                    .toggleStyle(ArrowToggleStyle(side: .left))
                     .onTapGesture {
                         focus = url
                     }
+                    Spacer()
                 }.padding(.leading, padding)
             }.background(focus == url ? config.highlightColour : Color.clear)
             if expanded {
-                ForEach(Array(dependencies.enumerated()), id: \.1) { (index, dep) in
-                    DependencyView(
-                        expanded: Binding(get: { expandedDependencies[dep.filePath] ?? false }, set: { expandedDependencies[dep.filePath] = $0 }),
-                        focus: $focus,
-                        dependency: $dependencies[index],
-                        machines: $machines,
-                        padding: padding + padding
-                    )
-                }
+                VStack {
+                    ForEach(Array(dependencies.enumerated()), id: \.1) { (index, dep) in
+                        DependencyView(
+                            expanded: Binding(get: { expandedDependencies[dep.filePath] ?? false }, set: { expandedDependencies[dep.filePath] = $0 }),
+                            focus: $focus,
+                            dependency: $dependencies[index],
+                            machines: machines,
+                            padding: padding + padding
+                        )
+                    }
+                }.padding(.leading, padding)
             }
             Spacer()
-        }
+        }.frame(width: width, alignment: .leading)
     }
     
 }
@@ -83,7 +88,8 @@ struct Dependencies_Previews: PreviewProvider {
                 name: $name,
                 url: $url,
                 dependencies: $dependencies,
-                machines: $machines
+                machines: $machines,
+                width: .constant(200)
             ).environmentObject(config)
         }
         

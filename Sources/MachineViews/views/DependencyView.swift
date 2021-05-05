@@ -19,7 +19,7 @@ struct DependencyView: View {
     
     @Binding var dependency: MachineDependency
     
-    @Binding var machines: [URL: Machine]
+    let machines: Binding<[URL: Machine]>
     
     @State var expandedDependencies: [URL: Bool] = [:]
     
@@ -28,44 +28,53 @@ struct DependencyView: View {
     @EnvironmentObject var config: Config
     
     func machine(for url: URL) -> Machine? {
-        if let machine = machines[url] {
+        if let machine = machines.wrappedValue[url] {
             return machine
         }
         guard let loadedMachine = try? Machine(filePath: url) else {
             return nil
         }
-        machines[url] = loadedMachine
+        machines.wrappedValue[url] = loadedMachine
         return loadedMachine
     }
     
     var machineBinding: Binding<Machine>? {
-        Binding(Binding(get: { machine(for: dependency.filePath) }, set: { machines[dependency.filePath] = $0 }))
+        Binding(Binding(get: { machine(for: dependency.filePath) }, set: { machines.wrappedValue[dependency.filePath] = $0 }))
     }
     
     var body: some View {
         VStack {
-            VStack {
-                Toggle(isOn: $expanded) {
+            HStack {
+                if let machineBinding = machineBinding, !machineBinding.wrappedValue.dependencies.isEmpty {
+                    Toggle(isOn: $expanded) {
+                        Text(dependency.name.pretty).foregroundColor(config.textColor)
+                    }
+                    .toggleStyle(ArrowToggleStyle(side: .left))
+                    .onTapGesture {
+                        focus = dependency.filePath
+                    }
+                } else {
                     Text(dependency.name.pretty)
-                        .foregroundColor(machineBinding == nil ? .red : config.textColor)
+                        .foregroundColor(.red)
+                        .onTapGesture {
+                            focus = dependency.filePath
+                        }
                 }
-                .toggleStyle(ArrowToggleStyle())
-                .onTapGesture {
-                    focus = dependency.filePath
-                }
-                
+                Spacer()
             }.padding(.leading, 10)
             .background(focus == dependency.filePath ? config.highlightColour : Color.clear)
             if expanded, let binding = machineBinding {
-                ForEach(Array(binding.wrappedValue.dependencies.enumerated()), id: \.1.filePath) { (index, dep) in
-                    DependencyView(
-                        expanded: Binding(get: { expandedDependencies[dep.filePath] ?? false }, set: { expandedDependencies[dep.filePath] = $0 }),
-                        focus: $focus,
-                        dependency: binding.dependencies[index],
-                        machines: $machines,
-                        padding: padding + padding
-                    )
-                }
+                VStack {
+                    ForEach(Array(binding.wrappedValue.dependencies.enumerated()), id: \.1.filePath) { (index, dep) in
+                        DependencyView(
+                            expanded: Binding(get: { expandedDependencies[dep.filePath] ?? false }, set: { expandedDependencies[dep.filePath] = $0 }),
+                            focus: $focus,
+                            dependency: binding.dependencies[index],
+                            machines: machines,
+                            padding: padding + padding
+                        )
+                    }
+                }.padding(.leading, 10)
             }
         }
     }

@@ -54,6 +54,8 @@ public struct MainView: View {
     
     @State var root: Root
     
+    @State var dependenciesWidth: CGFloat = 200
+    
     public init(arrangement: Arrangement) {
         self._focus = State(initialValue: arrangement.filePath)
         self._root = State(initialValue: .arrangement(arrangement))
@@ -95,7 +97,8 @@ public struct MainView: View {
                         name: .constant(root.arrangement.name),
                         url: $root.arrangement.filePath,
                         dependencies: $root.arrangement.dependencies,
-                        machines: $machines
+                        machines: $machines,
+                        width: $dependenciesWidth
                     )
                 case .machine:
                     DependenciesView(
@@ -103,7 +106,8 @@ public struct MainView: View {
                         name: .constant(root.machine.name),
                         url: $root.machine.filePath,
                         dependencies: $root.machine.dependencies,
-                        machines: $machines
+                        machines: $machines,
+                        width: $dependenciesWidth
                     )
                 }
                 switch root {
