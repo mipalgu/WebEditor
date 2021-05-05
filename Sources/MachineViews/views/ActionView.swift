@@ -17,8 +17,8 @@ struct ActionView: View {
     
     var body: some View {
         CodeViewWithDropDown(
-            value: $viewModel.implementation,
-            errors: $viewModel.errors,
+            root: viewModel.machine,
+            path: viewModel.path.implementation,
             label: viewModel.name,
             language: viewModel.language,
             collapsed: $viewModel.collapsed

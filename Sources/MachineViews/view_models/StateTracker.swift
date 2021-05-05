@@ -97,7 +97,7 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
     
     let _expandedTolerance: CGFloat = 20.0
     
-    var notifier: GlobalChangeNotifier?
+    weak var notifier: GlobalChangeNotifier?
     
     var horizontalEdgeTolerance: CGFloat {
         expanded ? _expandedTolerance : _collapsedTolerance
