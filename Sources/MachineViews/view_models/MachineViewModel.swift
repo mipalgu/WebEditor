@@ -52,10 +52,19 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         self.cache = ViewCache(machine: machine, notifier: self)
     }
     
+    /// Adds a state to the view selected property. This state will show up as highlighted in the view.
+    /// - Parameters:
+    ///   - view: The view containing the selected property.
+    ///   - index: The state index in the machine.
     func addSelectedState(view: CanvasView, at index: Int) {
         addSelected(view: view, focus: .state(stateIndex: index), selected: .state(stateIndex: index))
     }
     
+    /// Adds a transition to a views selected property. This transitions will show up as highlighted in the view.
+    /// - Parameters:
+    ///   - view: The view containing the selected property.
+    ///   - state: The source states index  in the machine.
+    ///   - index: The transitions index in the machine.
     func addSelectedTransition(view: CanvasView, from state: Int, at index: Int) {
         addSelected(
             view: view,
@@ -64,6 +73,13 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         )
     }
     
+    /// Clamps a point within a frame boundary with some padding.
+    /// - Parameters:
+    ///   - point: The point being displaced.
+    ///   - frame: The frame dimensions.
+    ///   - dx: The x padding.
+    ///   - dy: The y padding.
+    /// - Returns: The clamped point.
     func clampPosition(point: CGPoint, frame: CGSize, dx: CGFloat = 0.0, dy: CGFloat = 0.0) -> CGPoint {
         var newX: CGFloat = point.x
         var newY: CGFloat = point.y
@@ -80,6 +96,8 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         return CGPoint(x: newX, y: newY)
     }
     
+    /// This function moves transitions if their start and end points exist within the state width and height.
+    /// - Parameter state: The state that is overlapping with the transitions
     func correctTransitionLocations(for state: Machines.State) {
         let sources = self.cache.trackers(for: state)
         let sourceTracker = self.cache.tracker(for: state)
@@ -119,6 +137,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         self.objectWillChange.send()
     }
     
+    /// Creates a new state in the machine and updates the view cache.
     func createState() {
         let result = machineBinding.wrappedValue.newState()
         guard let _ = try? result.get() else {
@@ -149,6 +168,11 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         self.objectWillChange.send()
     }
     
+    /// Creates a drag gesture for creating a transition.
+    /// - Parameters:
+    ///   - view: The view which contains the gesture.
+    ///   - index: The source states index.
+    /// - Returns: The drag gesture containing the behaviour for creating new transitions. The user drags a state while holding the command key.
     func createTransitionGesture(forView view: CanvasView, forState index: Int) -> some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .named(view.coordinateSpace))
             .modifiers(.command)
@@ -209,6 +233,8 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             }
     }
     
+    /// Deletes views in the selected property of a parent view. This change also mutates the view cache to remove the view model and tracker for that view.
+    /// - Parameter view: The view containing the selected property.
     func deleteSelected(_ view: CanvasView) {
         let stateIndexes = stateIndexes(from: view.selectedObjects)
         let result = machineBinding.wrappedValue.delete(states: stateIndexes)
@@ -223,6 +249,10 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         self.objectWillChange.send()
     }
     
+    /// Safely deletes a state from a machine while updating the view cache. Also updates the focused property of the view.
+    /// - Parameters:
+    ///   - view: The view containing the current selected items.
+    ///   - index: The index of the state in the machine.
     func deleteState(view: CanvasView, at index: Int) {
         let name = machine.states[index].name
         let result = machineBinding.wrappedValue.deleteState(atIndex: index)
