@@ -100,28 +100,28 @@ public struct CanvasView: View {
 //                        ForEach(viewModel.unattachedTransitionsAsRows, id: \.self) { row in
 //                            ArrowView(curve: .constant(row.data.curve), strokeNumber: 0, colour: config.errorColour)
 //                        }
-                        ForEach(Array(viewModel.machine.states.indices), id: \.self) { stateIndex in
-                            ForEach(Array(viewModel.machine.states[stateIndex].transitions.indices), id: \.self) { transitionIndex in
+                        ForEach(viewModel.cache.viewModels(), id: \.self) { stateViewModel in
+                            ForEach(viewModel.cache.transitions(source: stateViewModel.name), id: \.self) { transitionViewModel in
                                 TransitionView(
-                                    viewModel: viewModel.transition(for: transitionIndex, in: viewModel.machine.states[stateIndex].name),
-                                    tracker: viewModel.tracker(for: transitionIndex, originating: viewModel.machine.states[stateIndex].name),
-                                    strokeNumber: UInt8(transitionIndex),
-                                    focused: selectedObjects.contains(.transition(stateIndex: stateIndex, transitionIndex: transitionIndex))
+                                    viewModel: transitionViewModel,
+                                    tracker: viewModel.tracker(for: transitionViewModel.transitionIndex, originating: stateViewModel.name),
+                                    strokeNumber: UInt8(transitionViewModel.transitionIndex),
+                                    focused: selectedObjects.contains(.transition(stateIndex: stateViewModel.stateIndex, transitionIndex: transitionViewModel.transitionIndex))
                                 )
                                 .clipped()
                                 .gesture(TapGesture().onEnded {
-                                    viewModel.addSelectedTransition(view: self, from: stateIndex, at: transitionIndex)
+                                    viewModel.addSelectedTransition(view: self, from: stateViewModel.stateIndex, at: transitionViewModel.transitionIndex)
                                 }.modifiers(.shift))
                                 .onTapGesture {
-                                    focus = .transition(stateIndex: stateIndex, transitionIndex: transitionIndex)
-                                    selectedObjects = [.transition(stateIndex: stateIndex, transitionIndex: transitionIndex)]
+                                    focus = .transition(stateIndex: stateViewModel.stateIndex, transitionIndex: transitionViewModel.transitionIndex)
+                                    selectedObjects = [.transition(stateIndex: stateViewModel.stateIndex, transitionIndex: transitionViewModel.transitionIndex)]
                                 }
                                 .contextMenu {
                                     Button("Straighten",action: {
-                                        viewModel.straighten(state: viewModel.machine.states[stateIndex].name, transitionIndex: transitionIndex)
+                                        viewModel.straighten(state: stateViewModel.name, transitionIndex: transitionViewModel.transitionIndex)
                                     })
                                     Button("Delete",action: {
-                                        viewModel.deleteTransition(view: self, for: stateIndex, at: transitionIndex)
+                                        viewModel.deleteTransition(view: self, for: stateViewModel.stateIndex, at: transitionViewModel.transitionIndex)
                                     })
                                 }
                             }

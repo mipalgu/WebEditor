@@ -182,7 +182,6 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             .modifiers(.command)
             .onEnded { gesture in
                 view.creatingCurve = nil
-                let stateName = self.machine.states[index].name
                 guard let targetName = self.findOverlappingState(point: gesture.location) else {
                     return
                 }
@@ -579,6 +578,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             machine: machineBinding,
             path: machine.path.states[stateIndex],
             state: machineBinding.states[stateIndex],
+            stateIndex: stateIndex,
             notifier: self
         )
     }

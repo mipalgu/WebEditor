@@ -52,6 +52,7 @@ class ViewCache {
                 machine: machine,
                 path: machine.wrappedValue.path.states[stateIndex],
                 state: machine.states[stateIndex],
+                stateIndex: stateIndex,
                 notifier: notifier
             )
             tempStateTrackers[stateName] = StateTracker(notifier: notifier)
@@ -77,6 +78,8 @@ class ViewCache {
                     machine: machine,
                     path: machine.wrappedValue.path.states[stateIndex].transitions[transitionIndex],
                     transitionBinding: machine.states[stateIndex].transitions[transitionIndex],
+                    stateIndex: stateIndex,
+                    transitionIndex: transitionIndex,
                     notifier: notifier
                 )
                 guard
@@ -119,6 +122,7 @@ class ViewCache {
             machine: machineBinding,
             path: machine.path.states[stateIndex],
             state: state,
+            stateIndex: stateIndex,
             notifier: notifier
         )
         let name = state.wrappedValue.name
@@ -144,6 +148,8 @@ class ViewCache {
             machine: machineBinding,
             path: machineBinding.wrappedValue.path.states[stateIndex].transitions[transitionIndex],
             transitionBinding: transitionBinding,
+            stateIndex: stateIndex,
+            transitionIndex: transitionIndex,
             notifier: notifier
         )
         transitions[state]!.append(newViewModel)
@@ -475,6 +481,10 @@ class ViewCache {
         return transitions[from]![transition]
     }
     
+    func viewModels() -> [StateViewModel] {
+        Array(states.values)
+    }
+    
     fileprivate func createNewTargetEntry(target name: StateName) {
         let names = self.states.keys
         var targetDictionary: [StateName: Set<TransitionViewModel>] = [:]
@@ -529,6 +539,8 @@ extension ViewCache {
                     machine: machine,
                     path: machine.wrappedValue.path.states[stateIndex].transitions[priority],
                     transitionBinding: machine.states[stateIndex].transitions[priority],
+                    stateIndex: stateIndex,
+                    transitionIndex: priority,
                     notifier: notifier
                 )
                 guard let _ = tempTargetTransitions[transition.target] else {
@@ -551,6 +563,7 @@ extension ViewCache {
                 machine: machine,
                 path: machine.wrappedValue.path.states[stateIndex],
                 state: machine.states[stateIndex],
+                stateIndex: stateIndex,
                 notifier: notifier
             )
         }
