@@ -9,6 +9,7 @@ import Foundation
 import TokamakShim
 import Machines
 import Utilities
+import AttributeViews
 
 class ViewCache {
     

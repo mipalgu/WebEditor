@@ -7,6 +7,7 @@
 
 import TokamakShim
 import Foundation
+import AttributeViews
 import Attributes
 import Machines
 

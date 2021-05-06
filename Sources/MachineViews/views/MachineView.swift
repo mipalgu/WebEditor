@@ -25,7 +25,8 @@ struct MachineView: View {
                         path: viewModel.path,
                         collapsed: $viewModel.attributesCollapsed,
                         label: viewModel.label,
-                        selection: $viewModel.selection
+                        selection: $viewModel.selection,
+                        notifier: viewModel.notifier
                     ) {
                         DependenciesAttributesView(root: $viewModel.machine, path: viewModel.machine.path, label: "Dependencies")
                     }
@@ -35,7 +36,8 @@ struct MachineView: View {
                         path: viewModel.path,
                         collapsed: $viewModel.attributesCollapsed,
                         label: viewModel.label,
-                        selection: $viewModel.selection
+                        selection: $viewModel.selection,
+                        notifier: viewModel.notifier
                     )
                 }
             }

@@ -70,7 +70,8 @@ struct ArrangementView: View {
             root: $viewModel.arrangement,
             path: Arrangement.path.attributes,
             label: viewModel.arrangement.name.pretty + " Arrangement",
-            selection: $viewModel.selection
+            selection: $viewModel.selection,
+            notifier: viewModel.notifier
         ) {
             DependenciesAttributesView(root: $viewModel.arrangement, path: viewModel.arrangement.path, label: "Dependencies")
         }

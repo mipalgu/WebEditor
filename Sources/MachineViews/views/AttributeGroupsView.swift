@@ -24,6 +24,7 @@ public struct AttributeGroupsView<Root: Modifiable, ExtraTabs: View>: View {
     @Binding var root: Root
     let path: Attributes.Path<Root, [AttributeGroup]>
     let label: String
+    let notifier: GlobalChangeNotifier?
     let extraTabs: (() -> ExtraTabs)?
     
     let temp = Temp()
@@ -32,15 +33,16 @@ public struct AttributeGroupsView<Root: Modifiable, ExtraTabs: View>: View {
     
     @Binding var selection: Int?
     
-    public init(root: Binding<Root>, path: Attributes.Path<Root, [AttributeGroup]>, label: String, selection: Binding<Int?>) where ExtraTabs == EmptyView {
-        self.init(root: root, path: path, label: label, selection: selection, extraTabs: nil)
+    public init(root: Binding<Root>, path: Attributes.Path<Root, [AttributeGroup]>, label: String, selection: Binding<Int?>, notifier: GlobalChangeNotifier? = nil) where ExtraTabs == EmptyView {
+        self.init(root: root, path: path, label: label, selection: selection, notifier: notifier, extraTabs: nil)
     }
     
-    public init(root: Binding<Root>, path: Attributes.Path<Root, [AttributeGroup]>, label: String, selection: Binding<Int?>, extraTabs: (() -> ExtraTabs)?) {
+    public init(root: Binding<Root>, path: Attributes.Path<Root, [AttributeGroup]>, label: String, selection: Binding<Int?>, notifier: GlobalChangeNotifier? = nil, extraTabs: (() -> ExtraTabs)?) {
         self._root = root
         self.path = path
         self.label = label
         self._selection = selection
+        self.notifier = notifier
         self.extraTabs = extraTabs
     }
     
@@ -57,7 +59,7 @@ public struct AttributeGroupsView<Root: Modifiable, ExtraTabs: View>: View {
                 .foregroundColor(config.textColor)
             TabView(selection: Binding($selection)) {
                 ForEach(groups.indices, id: \.self) { index in
-                    AttributeGroupView<Config>(root: $root, path: path[index], label: root[keyPath: path.keyPath][index].name)
+                    AttributeGroupView<Config>(root: $root, path: path[index], label: root[keyPath: path.keyPath][index].name, notifier: notifier)
                         .padding(.horizontal, 10)
                         .tabItem {
                             Text(root[keyPath: path.keyPath][index].name.pretty)

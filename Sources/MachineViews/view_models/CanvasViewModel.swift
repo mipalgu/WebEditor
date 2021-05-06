@@ -58,6 +58,7 @@
 
 import Foundation
 import TokamakShim
+import AttributeViews
 import Machines
 import Utilities
 import GUUI

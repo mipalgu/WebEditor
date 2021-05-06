@@ -12,6 +12,7 @@ import Utilities
 import GUUI
 import Machines
 import Attributes
+import AttributeViews
 
 final class TransitionViewModel: ObservableObject, Identifiable {
     

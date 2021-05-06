@@ -8,6 +8,7 @@
 import Foundation
 import TokamakShim
 import Transformations
+import AttributeViews
 import Machines
 import Utilities
 

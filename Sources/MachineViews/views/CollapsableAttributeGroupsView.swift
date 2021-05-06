@@ -27,11 +27,13 @@ struct CollapsableAttributeGroupsView<ExtraTabs: View>: View {
     
     @Binding var selection: Int?
     
+    let notifier: GlobalChangeNotifier?
+    
     let extraTabs: (() -> ExtraTabs)?
     
     @EnvironmentObject var config: Config
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, collapsed: Binding<Bool>, label: String, collapseLeft: Bool = false, selection: Binding<Int?>) where ExtraTabs == EmptyView {
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, collapsed: Binding<Bool>, label: String, collapseLeft: Bool = false, selection: Binding<Int?>, notifier: GlobalChangeNotifier? = nil) where ExtraTabs == EmptyView {
         self.init(
             machine: machine,
             path: path,
@@ -39,17 +41,19 @@ struct CollapsableAttributeGroupsView<ExtraTabs: View>: View {
             label: label,
             collapseLeft: collapseLeft,
             selection: selection,
+            notifier: notifier,
             extraTabs: nil
         )
     }
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, collapsed: Binding<Bool>, label: String, collapseLeft: Bool = false, selection: Binding<Int?>, extraTabs: (() -> ExtraTabs)?) {
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, collapsed: Binding<Bool>, label: String, collapseLeft: Bool = false, selection: Binding<Int?>, notifier: GlobalChangeNotifier? = nil, extraTabs: (() -> ExtraTabs)?) {
         self._machine = machine
         self.path = path
         self._collapsed = collapsed
         self.label = label
         self.collapseLeft = collapseLeft
         self._selection = selection
+        self.notifier = notifier
         self.extraTabs = extraTabs
     }
     
@@ -78,7 +82,7 @@ struct CollapsableAttributeGroupsView<ExtraTabs: View>: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                AttributeGroupsView(root: $machine, path: path, label: label, selection: $selection, extraTabs: extraTabs)
+                AttributeGroupsView(root: $machine, path: path, label: label, selection: $selection, notifier: notifier, extraTabs: extraTabs)
 //                    .transition(.move(edge: .trailing))
             } else {
                 HStack {

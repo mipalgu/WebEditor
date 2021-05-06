@@ -7,6 +7,7 @@
 
 import Foundation
 import TokamakShim
+import AttributeViews
 import Attributes
 import Machines
 
@@ -57,9 +58,11 @@ final class MainViewModel: ObservableObject, GlobalChangeNotifier {
         case .arrangement(let viewModel):
             focus = viewModel.arrangement.filePath
             viewModels = [:]
+            viewModel.notifier = self
         case .machine(let viewModel):
             focus = viewModel.machine.filePath
             self.viewModels = [viewModel.machine.filePath: viewModel]
+            viewModel.notifier = self
         }
     }
     
@@ -71,7 +74,7 @@ final class MainViewModel: ObservableObject, GlobalChangeNotifier {
         return viewModels[url]
     }
     
-    func send() {
+    public func send() {
         self.objectWillChange.send()
     }
     
