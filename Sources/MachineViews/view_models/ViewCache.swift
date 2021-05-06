@@ -130,25 +130,20 @@ class ViewCache {
         return true
     }
     
-    func addNewTransition(for state: StateName, transition: Binding<Transition>, startLocation: CGPoint, endLocation: CGPoint, machine: Binding<Machine>) -> Bool {
-        print(machine.wrappedValue.states[1].transitions)
-        print(self.machineBinding.wrappedValue.states[1].transitions)
+    func addNewTransition(stateIndex: Int, transitionIndex: Int, target: StateName, startLocation: CGPoint, endLocation: CGPoint, transitionBinding: Binding<Transition>) -> Bool {
+        let state = machineBinding.wrappedValue.states[stateIndex].name
         guard
-            let stateIndex = machine.wrappedValue.states.firstIndex(where: { $0.name == state }),
-            let transitionIndex = machine.wrappedValue.states[stateIndex].transitions.firstIndex(
-                where: { $0 == transition.wrappedValue } // stupid
-            ),
             transitions[state] != nil,
             transitions[state]!.count == transitionIndex, //fails here
             let sourceTracker = stateTrackers[state],
-            let targetTracker = stateTrackers[transition.wrappedValue.target]
+            let targetTracker = stateTrackers[target]
         else {
             return false
         }
         let newViewModel = TransitionViewModel(
-            machine: machine,
-            path: machine.wrappedValue.path.states[stateIndex].transitions[transitionIndex],
-            transitionBinding: transition,
+            machine: machineBinding,
+            path: machineBinding.wrappedValue.path.states[stateIndex].transitions[transitionIndex],
+            transitionBinding: transitionBinding,
             notifier: notifier
         )
         transitions[state]!.append(newViewModel)
@@ -160,7 +155,7 @@ class ViewCache {
                 targetPoint: endLocation
             )
         )
-        targetTransitions[transition.wrappedValue.target]![state]!.insert(newViewModel)
+        targetTransitions[target]![state]!.insert(newViewModel)
         return true
     }
     
