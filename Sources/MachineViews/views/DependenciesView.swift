@@ -11,52 +11,6 @@ import Machines
 import Attributes
 import Utilities
 
-final class DependenciesViewModel: ObservableObject {
-    
-    private let focusBinding: Binding<URL>
-    
-    private let _machineViewModel: (URL) -> MachineViewModel?
-    
-    private var dependencyViewModels: [URL: DependencyViewModel] = [:]
-    
-    @Published var expanded: Bool = false
-    
-    var focus: URL {
-        get {
-            focusBinding.wrappedValue
-        } set {
-            focusBinding.wrappedValue = newValue
-            self.objectWillChange.send()
-        }
-    }
-    
-    init(focus: Binding<URL>, machineViewModel: @escaping (URL) -> MachineViewModel?) {
-        self.focusBinding = focus
-        self._machineViewModel = machineViewModel
-    }
-    
-    func machineViewModel(forURL url: URL) -> MachineViewModel? {
-        self._machineViewModel(url)
-    }
-    
-    func viewModel(forDependency dependency: MachineDependency) -> DependencyViewModel {
-        if let viewModel = dependencyViewModels[dependency.filePath] {
-            return viewModel
-        }
-        let newViewModel = DependencyViewModel(
-            url: dependency.filePath,
-            focus: focusBinding,
-            machineViewModel: _machineViewModel,
-            dependencyViewModel: { [unowned self] in
-                self.viewModel(forDependency: $0)
-            }
-        )
-        dependencyViewModels[dependency.filePath] = newViewModel
-        return newViewModel
-    }
-    
-}
-
 struct DependenciesView: View {
     
     let root: Root
