@@ -76,6 +76,16 @@ final class MainViewModel: ObservableObject, GlobalChangeNotifier {
     
     public func send() {
         self.objectWillChange.send()
+        switch root {
+        case .arrangement(let viewModel):
+            if viewModel.arrangement.filePath == focus {
+                viewModel.objectWillChange.send()
+            } else {
+                fallthrough
+            }
+        default:
+            viewModel(for: focus)?.objectWillChange.send()
+        }
     }
     
 }
