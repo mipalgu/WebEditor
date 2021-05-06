@@ -13,93 +13,56 @@ import Utilities
 
 public struct MainView: View {
     
-    enum Root: Equatable {
-        
-        var arrangement: Arrangement {
-            get {
-                switch self {
-                case .arrangement(let arrangement):
-                    return arrangement
-                default:
-                    fatalError("Attempting to fetch arrangment from \(self)")
-                }
-            } set {
-                self = .arrangement(newValue)
-            }
-        }
-        
-        var machine: Machine {
-            get {
-                switch self {
-                case .machine(let machine):
-                    return machine
-                default:
-                    fatalError("Attempting to fetch machine from \(self)")
-                }
-            } set {
-                self = .machine(newValue)
-            }
-        }
-        
-        case arrangement(Arrangement)
-        case machine(Machine)
-        
-    }
-    
-    @State var focus: URL
-    
-    @State var machines: [URL: Machine] = [:]
-    
-    @State var root: Root
-    
     @State var dependenciesWidth: CGFloat = 200
     
     public init(arrangement: Arrangement) {
-        self._focus = State(initialValue: arrangement.filePath)
-        self._root = State(initialValue: .arrangement(arrangement))
+        self.init(viewModel: MainViewModel(root: .arrangement(arrangement)))
     }
     
     public init(machine: Machine) {
-        self._focus = State(initialValue: machine.filePath)
-        self._root = State(initialValue: .machine(machine))
+        self.init(viewModel: MainViewModel(root: .machine(machine)))
+    }
+    
+    private init(viewModel: MainViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
     @EnvironmentObject var config: Config
     
-    @StateObject var viewModel: DependenciesViewModel = DependenciesViewModel()
+    @StateObject var viewModel: MainViewModel
 
     public var body: some View {
         VStack(alignment: .leading) {
             HStack {
-                switch root {
-                case .arrangement:
-                    DependenciesView(
-                        focus: $focus,
-                        name: .constant(root.arrangement.name),
-                        url: $root.arrangement.filePath,
-                        dependencies: $root.arrangement.dependencies,
-                        machines: $machines,
-                        width: $dependenciesWidth
-                    )
-                case .machine:
-                    DependenciesView(
-                        focus: $focus,
-                        name: .constant(root.machine.name),
-                        url: $root.machine.filePath,
-                        dependencies: $root.machine.dependencies,
-                        machines: $machines,
-                        width: $dependenciesWidth
-                    )
-                }
-                switch root {
+//                switch viewModel.root {
+//                case .arrangement:
+//                    DependenciesView(
+//                        focus: $viewModel.focus,
+//                        name: .constant(viewModel.root.arrangement.name),
+//                        url: $viewModel.root.arrangement.filePath,
+//                        dependencies: $viewModel.root.arrangement.dependencies,
+//                        machines: $machines,
+//                        width: $dependenciesWidth
+//                    )
+//                case .machine:
+//                    DependenciesView(
+//                        focus: $viewModel.focus,
+//                        name: .constant(viewModel.root.machine.name),
+//                        url: $viewModel.root.machine.filePath,
+//                        dependencies: $viewModel.root.machine.dependencies,
+//                        machines: $machines,
+//                        width: $dependenciesWidth
+//                    )
+//                }
+                switch viewModel.root {
                 case .arrangement(let arrangement):
-                    if focus == arrangement.filePath {
-                        ArrangementView(arrangement: $root.arrangement, selection: viewModel.selection(for: focus))
+                    if viewModel.focus == arrangement.filePath {
+                        ArrangementView(arrangement: $viewModel.root.arrangement, selection: viewModel.selection(for: viewModel.focus))
                     } else {
-                        MachineView(viewModel: viewModel.viewModel(for: focus)!, selection: viewModel.selection(for: focus))
+                        MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!, selection: viewModel.selection(for: viewModel.focus))
                     }
                 case .machine(_):
-                    MachineView(viewModel: viewModel.viewModel(for: focus)!, selection: viewModel.selection(for: focus))
+                    MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!, selection: viewModel.selection(for: viewModel.focus))
                 }
             }
         }

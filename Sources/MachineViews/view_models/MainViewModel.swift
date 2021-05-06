@@ -10,9 +10,46 @@ import TokamakShim
 import Attributes
 import Machines
 
-final class DependenciesViewModel: ObservableObject {
+final class MainViewModel: ObservableObject {
     
-    var viewModels: [URL: MachineViewModel] = [:]
+    enum Root: Equatable {
+        
+        var arrangement: Arrangement {
+            get {
+                switch self {
+                case .arrangement(let arrangement):
+                    return arrangement
+                default:
+                    fatalError("Attempting to fetch arrangment from \(self)")
+                }
+            } set {
+                self = .arrangement(newValue)
+            }
+        }
+        
+        var machine: Machine {
+            get {
+                switch self {
+                case .machine(let machine):
+                    return machine
+                default:
+                    fatalError("Attempting to fetch machine from \(self)")
+                }
+            } set {
+                self = .machine(newValue)
+            }
+        }
+        
+        case arrangement(Arrangement)
+        case machine(Machine)
+        
+    }
+    
+    @Published var focus: URL
+    
+    @Published var root: Root
+    
+    var viewModels: [URL: MachineViewModel]
     
     private var selections: [URL: Int] = [:]
     
@@ -56,6 +93,18 @@ final class DependenciesViewModel: ObservableObject {
         let newViewModel = MachineViewModel(machine: binding.wrappedValue, plist: plist)
         viewModels[binding.wrappedValue.filePath] = newViewModel
         return newViewModel
+    }
+    
+    init(root: Root) {
+        self.root = root
+        switch root {
+        case .arrangement(let arrangement):
+            focus = arrangement.filePath
+            viewModels = [:]
+        case .machine(let machine):
+            focus = machine.filePath
+            self.viewModels = [machine.filePath: MachineViewModel(machine: machine)]
+        }
     }
     
 }
