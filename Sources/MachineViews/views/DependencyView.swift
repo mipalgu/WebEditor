@@ -28,6 +28,7 @@ final class DependencyViewModel: ObservableObject {
             focusBinding.wrappedValue
         } set {
             focusBinding.wrappedValue = newValue
+            self.objectWillChange.send()
         }
     }
     
