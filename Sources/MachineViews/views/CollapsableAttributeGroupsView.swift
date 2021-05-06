@@ -13,7 +13,7 @@ import Utilities
 
 import AttributeViews
 
-struct CollapsableAttributeGroupsView: View {
+struct CollapsableAttributeGroupsView<ExtraTabs: View>: View {
     
     @Binding var machine: Machine
     
@@ -23,11 +23,35 @@ struct CollapsableAttributeGroupsView: View {
     
     let label: String
     
-    let collapseLeft: Bool = false
+    let collapseLeft: Bool
     
     @Binding var selection: Int?
     
+    let extraTabs: (() -> ExtraTabs)?
+    
     @EnvironmentObject var config: Config
+    
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, collapsed: Binding<Bool>, label: String, collapseLeft: Bool = false, selection: Binding<Int?>) where ExtraTabs == EmptyView {
+        self.init(
+            machine: machine,
+            path: path,
+            collapsed: collapsed,
+            label: label,
+            collapseLeft: collapseLeft,
+            selection: selection,
+            extraTabs: nil
+        )
+    }
+    
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, collapsed: Binding<Bool>, label: String, collapseLeft: Bool = false, selection: Binding<Int?>, extraTabs: (() -> ExtraTabs)?) {
+        self._machine = machine
+        self.path = path
+        self._collapsed = collapsed
+        self.label = label
+        self.collapseLeft = collapseLeft
+        self._selection = selection
+        self.extraTabs = extraTabs
+    }
     
     var body: some View {
             VStack {
@@ -47,7 +71,6 @@ struct CollapsableAttributeGroupsView: View {
                         .padding(collapseLeft ? .leading : .trailing, 25.0)
                     Spacer()
                     if collapseLeft {
-                        
                         Button(action: { collapsed = true }) {
                             Image(systemName: "arrow.left.to.line.alt")
                                 .font(.system(size: 20, weight: .regular))
@@ -55,9 +78,7 @@ struct CollapsableAttributeGroupsView: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                AttributeGroupsView(root: $machine, path: path, label: label, selection: $selection) {
-                    DependenciesAttributesView(root: $machine, path: machine.path, label: "Dependencies")
-                }
+                AttributeGroupsView(root: $machine, path: path, label: label, selection: $selection, extraTabs: extraTabs)
 //                    .transition(.move(edge: .trailing))
             } else {
                 HStack {

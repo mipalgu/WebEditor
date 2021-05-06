@@ -63,11 +63,17 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         get {
             switch focus {
             case .machine:
-                return machineSelection
-            case .state:
-                return stateSelection
-            case .transition:
-                return transitionSelection
+                return machineSelection.map { $0 >= machine.attributes.count } == true ? nil : machineSelection
+            case .state(let index):
+                if index >= machine.states.count {
+                    return nil
+                }
+                return stateSelection.map { $0 >= machine.states[index].attributes.count } == true ? nil : stateSelection
+            case .transition(let stateIndex, let transitionIndex):
+                if stateIndex >= machine.states.count || transitionIndex >= machine.states[stateIndex].transitions.count {
+                    return nil
+                }
+                return transitionSelection.map { $0 >= machine.states[stateIndex].transitions[transitionIndex].attributes.count } == true ? nil : transitionSelection
             }
         } set {
             switch focus {
@@ -86,9 +92,21 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             case .machine:
                 return machine.path.attributes
             case .state(let stateIndex):
-                return machine.path.states[stateIndex].attributes
+                let path = machine.path.states[stateIndex].attributes
+                if !path.isNil(machine) {
+                    return path
+                }
+                return machine.path.attributes
             case .transition(let stateIndex, let transitionIndex):
-                return machine.path.states[stateIndex].transitions[transitionIndex].attributes
+                let path = machine.path.states[stateIndex].transitions[transitionIndex].attributes
+                if !path.isNil(machine) && !machine.states[stateIndex].transitions[transitionIndex].attributes.isEmpty {
+                    return path
+                }
+                let statePath = machine.path.states[stateIndex].attributes
+                if !statePath.isNil(machine) && !machine.states[stateIndex].attributes.isEmpty {
+                    return statePath
+                }
+                return machine.path.attributes
         }
     }
     
