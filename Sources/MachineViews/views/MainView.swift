@@ -57,7 +57,7 @@ public struct MainView: View {
                 switch viewModel.root {
                 case .arrangement(let arrangementViewModel):
                     if viewModel.focus == arrangementViewModel.arrangement.filePath {
-                        ArrangementView(viewModel: arrangementViewModel, selection: viewModel.selection(for: viewModel.focus))
+                        ArrangementView(viewModel: arrangementViewModel)
                     } else {
                         MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!, selection: viewModel.selection(for: viewModel.focus))
                     }

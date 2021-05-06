@@ -13,6 +13,8 @@ final class ArrangementViewModel: ObservableObject {
     
     var arrangement: Arrangement
     
+    @Published var selection: Int?
+    
     init(arrangement: Arrangement) {
         self.arrangement = arrangement
     }

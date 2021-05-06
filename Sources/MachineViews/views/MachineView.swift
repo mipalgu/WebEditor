@@ -14,8 +14,6 @@ struct MachineView: View {
     
     var viewModel: MachineViewModel
     
-    @State var focus: Focus = .machine
-    
     @State var attributesCollapsed: Bool = false
     
     @Binding var selection: Int?

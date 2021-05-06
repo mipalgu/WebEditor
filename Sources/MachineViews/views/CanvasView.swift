@@ -19,7 +19,7 @@ public struct CanvasView: View {
     
     @ObservedObject var viewModel: MachineViewModel
     
-    @Binding var focus: Focus
+//    @Binding var focus: Focus
     
     @State var selectedBox: (CGPoint, CGPoint)?
     

@@ -39,6 +39,14 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     var machine: Machine
     
+    @Published var machineSelection: Int?
+    
+    @Published var stateSelection: Int?
+    
+    @Published var transitionSelection: Int?
+    
+    @Published var focus: Focus = .machine
+    
     fileprivate init() {
         let machine = Machine.initialSwiftMachine()
         self.machine = machine
