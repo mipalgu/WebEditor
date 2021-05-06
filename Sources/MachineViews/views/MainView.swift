@@ -34,26 +34,7 @@ public struct MainView: View {
     public var body: some View {
         VStack(alignment: .leading) {
             HStack {
-//                switch viewModel.root {
-//                case .arrangement:
-//                    DependenciesView(
-//                        focus: $viewModel.focus,
-//                        name: .constant(viewModel.root.arrangement.name),
-//                        url: $viewModel.root.arrangement.filePath,
-//                        dependencies: $viewModel.root.arrangement.dependencies,
-//                        machines: $machines,
-//                        width: $dependenciesWidth
-//                    )
-//                case .machine:
-//                    DependenciesView(
-//                        focus: $viewModel.focus,
-//                        name: .constant(viewModel.root.machine.name),
-//                        url: $viewModel.root.machine.filePath,
-//                        dependencies: $viewModel.root.machine.dependencies,
-//                        machines: $machines,
-//                        width: $dependenciesWidth
-//                    )
-//                }
+                DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel)
                 switch viewModel.root {
                 case .arrangement(let arrangementViewModel):
                     if viewModel.focus == arrangementViewModel.arrangement.filePath {

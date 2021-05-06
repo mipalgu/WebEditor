@@ -13,44 +13,24 @@ import Machines
 
 final class MainViewModel: ObservableObject, GlobalChangeNotifier {
     
-    enum Root {
-        
-        var arrangement: ArrangementViewModel {
-            get {
-                switch self {
-                case .arrangement(let arrangement):
-                    return arrangement
-                default:
-                    fatalError("Attempting to fetch arrangment from \(self)")
-                }
-            } set {
-                self = .arrangement(newValue)
-            }
-        }
-        
-        var machine: MachineViewModel {
-            get {
-                switch self {
-                case .machine(let machine):
-                    return machine
-                default:
-                    fatalError("Attempting to fetch machine from \(self)")
-                }
-            } set {
-                self = .machine(newValue)
-            }
-        }
-        
-        case arrangement(ArrangementViewModel)
-        case machine(MachineViewModel)
-        
-    }
-    
     @Published var focus: URL
     
-    var root: Root
+    let root: Root
     
     private var viewModels: [URL: MachineViewModel]
+    
+    lazy var dependenciesViewModel: DependenciesViewModel = {
+        DependenciesViewModel(focus: self.focusBinding, machineViewModel: { [unowned self] in
+            self.viewModel(for: $0)
+        })
+    }()
+    
+    var focusBinding: Binding<URL> {
+        return Binding(
+            get: { self.focus },
+            set: { self.focus = $0 }
+        )
+    }
     
     init(root: Root) {
         self.root = root
