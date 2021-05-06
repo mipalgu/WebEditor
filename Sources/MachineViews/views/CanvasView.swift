@@ -207,7 +207,7 @@ struct CanvasView_Previews: PreviewProvider {
         @State var machine: Machine = Machine.initialSwiftMachine()
         
         var body: some View {
-            Preview(viewModel: MachineViewModel(machine: $machine))
+            Preview(viewModel: MachineViewModel(machine: machine))
         }
         
     }

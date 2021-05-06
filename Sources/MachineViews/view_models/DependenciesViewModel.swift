@@ -12,8 +12,6 @@ import Machines
 
 final class DependenciesViewModel: ObservableObject {
     
-    @Published var machines: [URL: Machine] = [:]
-    
     var viewModels: [URL: MachineViewModel] = [:]
     
     private var selections: [URL: Int] = [:]
@@ -29,17 +27,17 @@ final class DependenciesViewModel: ObservableObject {
         guard nil != machine(for: url) else {
             return nil
         }
-        return Binding(get: { self.machines[url]! }, set: { self.machines[url] = $0 })
+        return Binding(get: { self.viewModels[url]!.machine }, set: { self.viewModels[url]!.machine = $0 })
     }
     
     func machine(for url: URL) -> Machine? {
-        if let machine = machines[url] {
+        if let machine = viewModels[url]?.machine {
             return machine
         }
         guard let loadedMachine = try? Machine(filePath: url) else {
             return nil
         }
-        machines[url] = loadedMachine
+        viewModels[url] = MachineViewModel(machine: loadedMachine)
         return loadedMachine
     }
     
@@ -51,11 +49,11 @@ final class DependenciesViewModel: ObservableObject {
             return nil
         }
         guard let plist = try? String(contentsOf: binding.wrappedValue.filePath.appendingPathComponent("Layout.plist")) else {
-            let newViewModel = MachineViewModel(machine: binding)
+            let newViewModel = MachineViewModel(machine: binding.wrappedValue)
             viewModels[binding.wrappedValue.filePath] = newViewModel
             return newViewModel
         }
-        let newViewModel = MachineViewModel(machine: binding, plist: plist)
+        let newViewModel = MachineViewModel(machine: binding.wrappedValue, plist: plist)
         viewModels[binding.wrappedValue.filePath] = newViewModel
         return newViewModel
     }

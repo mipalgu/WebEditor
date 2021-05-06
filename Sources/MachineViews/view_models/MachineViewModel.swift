@@ -19,7 +19,9 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     var isStateMoving: Bool = false
     
-    var machineBinding: Binding<Machine>
+    var machineBinding: Binding<Machine> {
+        Binding(get: { self.machine }, set: { self.machine = $0 })
+    }
     
     var movingSourceTransitions: [CGPoint] = []
     
@@ -35,21 +37,22 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     var transitionStartLocations: [StateName: [Curve]] = [:]
     
-    var machine: Machine {
-        machineBinding.wrappedValue
-    }
+    var machine: Machine
     
     fileprivate init() {
-        self.machineBinding = .constant(Machine.initialSwiftMachine())
-        cache = ViewCache(empty: self.machineBinding)
-        cache = ViewCache(machine: self.machineBinding, notifier: self)
+        let machine = Machine.initialSwiftMachine()
+        self.machine = machine
+        let binding = Binding.constant(machine)
+        cache = ViewCache(empty: binding)
+        cache = ViewCache(machine: binding, notifier: self)
         
     }
     
-    init(machine: Binding<Machine>) {
-        self.machineBinding = machine
-        self.cache = ViewCache(empty: machine)
-        self.cache = ViewCache(machine: machine, notifier: self)
+    convenience init(machine: Machine) {
+        self.init()
+        self.machine = machine
+        self.cache = ViewCache(empty: self.machineBinding)
+        self.cache = ViewCache(machine: self.machineBinding, notifier: self)
     }
     
     /// Adds a state to the view selected property. This state will show up as highlighted in the view.
@@ -147,7 +150,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
 //        var updatedMachine = machine
 //        machineBinding = Binding(get: { updatedMachine }, set: { updatedMachine = $0 })
 //        print(machineBinding.states)
-        machineBinding.update()
+//        machineBinding.update()
 //        let stateBinding = Binding<Machines.State>(
 //            get: {
 //                guard self.machineBinding.wrappedValue.states.count > newStateIndex else {
@@ -766,10 +769,10 @@ extension MachineViewModel {
         self.cache.plist
     }
     
-    convenience init(machine: Binding<Machine>, plist data: String) {
+    convenience init(machine: Machine, plist data: String) {
         self.init()
-        self.machineBinding = machine
-        self.cache = ViewCache(machine: machine, plist: data, notifier: self)
+        self.machine = machine
+        self.cache = ViewCache(machine: self.machineBinding, plist: data, notifier: self)
     }
     
 }
