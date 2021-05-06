@@ -40,11 +40,10 @@ final class DependenciesViewModel: ObservableObject {
     
     func viewModel(forDependency dependency: MachineDependency) -> DependencyViewModel {
         if let viewModel = dependencyViewModels[dependency.filePath] {
-            viewModel.dependency = dependency
             return viewModel
         }
         let newViewModel = DependencyViewModel(
-            dependency: dependency,
+            url: dependency.filePath,
             focus: focusBinding,
             machineViewModel: _machineViewModel,
             dependencyViewModel: { [unowned self] in
@@ -93,6 +92,7 @@ struct DependenciesView: View {
                 VStack {
                     ForEach(root.dependencies, id: \.filePath) { dependency in
                         DependencyView(
+                            dependency: dependency,
                             viewModel: viewModel.viewModel(forDependency: dependency),
                             padding: padding + padding
                         )
