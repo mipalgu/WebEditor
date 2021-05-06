@@ -56,6 +56,8 @@ struct DependencyView: View {
     
     let padding: CGFloat
     
+    let parents: Set<URL>
+    
     @EnvironmentObject var config: Config
     
     var body: some View {
@@ -88,11 +90,14 @@ struct DependencyView: View {
             if viewModel.expanded, let machineViewModel = viewModel.viewModel {
                 VStack {
                     ForEach(machineViewModel.machine.dependencies, id: \.filePath) { dependency in
-                        DependencyView(
-                            dependency: dependency,
-                            viewModel: viewModel.viewModel(forDependency: dependency),
-                            padding: padding + padding
-                        )
+                        if !parents.contains(dependency.filePath) {
+                            DependencyView(
+                                dependency: dependency,
+                                viewModel: viewModel.viewModel(forDependency: dependency),
+                                padding: padding + padding,
+                                parents: parents.union([dependency.filePath])
+                            )
+                        }
                     }
                 }.padding(.leading, 10)
             }

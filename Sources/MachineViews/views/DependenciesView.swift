@@ -94,7 +94,8 @@ struct DependenciesView: View {
                         DependencyView(
                             dependency: dependency,
                             viewModel: viewModel.viewModel(forDependency: dependency),
-                            padding: padding + padding
+                            padding: padding + padding,
+                            parents: [root.filePath]
                         )
                     }
                 }.padding(.leading, padding)
