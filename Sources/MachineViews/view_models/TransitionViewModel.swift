@@ -13,13 +13,17 @@ import GUUI
 import Machines
 import Attributes
 
-final class TransitionViewModel: ObservableObject {
+final class TransitionViewModel: ObservableObject, Identifiable {
     
     private var machine: Binding<Machine>
     
     let path: Attributes.Path<Machine, Transition>
     
     var transitionBinding: Binding<Transition>
+    
+    let stateIndex: Int
+    
+    let transitionIndex: Int
     
     weak var notifier: GlobalChangeNotifier?
     
@@ -39,10 +43,12 @@ final class TransitionViewModel: ObservableObject {
         )
     }
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Transition>, transitionBinding: Binding<Transition>, notifier: GlobalChangeNotifier? = nil) {
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Transition>, transitionBinding: Binding<Transition>, stateIndex: Int, transitionIndex: Int, notifier: GlobalChangeNotifier? = nil) {
         self.machine = machine
         self.path = path
         self.transitionBinding = transitionBinding
+        self.stateIndex = stateIndex
+        self.transitionIndex = transitionIndex
         self.notifier = notifier
     }
     
@@ -55,6 +61,8 @@ extension TransitionViewModel: Hashable {
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(path)
+        hasher.combine(stateIndex)
+        hasher.combine(transitionIndex)
     }
     
 }

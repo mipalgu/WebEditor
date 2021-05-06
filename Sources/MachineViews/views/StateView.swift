@@ -73,6 +73,7 @@ struct StateView_Previews: PreviewProvider {
                     machine: $machine,
                     path: machine.path.states[0],
                     state: $machine.states[0],
+                    stateIndex: 0,
                     notifier: nil
                 ),
                 tracker: StateTracker(expanded: expanded),
@@ -99,6 +100,7 @@ struct StateView_Previews: PreviewProvider {
                     machine: $machine,
                     path: machine.path.states[0],
                     state: $machine.states[0],
+                    stateIndex: 0,
                     notifier: nil
                 ),
                 tracker: StateTracker(expanded: expanded),

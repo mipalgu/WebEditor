@@ -182,7 +182,6 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             .modifiers(.command)
             .onEnded { gesture in
                 view.creatingCurve = nil
-                let stateName = self.machine.states[index].name
                 guard let targetName = self.findOverlappingState(point: gesture.location) else {
                     return
                 }
@@ -222,11 +221,12 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
                     }
                 )
                 if !self.cache.addNewTransition(
-                    for: stateName,
-                    transition: transitionBinding,
+                    stateIndex: index,
+                    transitionIndex: transitionCount,
+                    target: targetName,
                     startLocation: gesture.startLocation,
                     endLocation: gesture.location,
-                    machine: self.machineBinding
+                    transitionBinding: transitionBinding
                 ) {
                     fatalError("Created transition but couldn't create view models.")
                 }
@@ -578,6 +578,7 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
             machine: machineBinding,
             path: machine.path.states[stateIndex],
             state: machineBinding.states[stateIndex],
+            stateIndex: stateIndex,
             notifier: self
         )
     }
