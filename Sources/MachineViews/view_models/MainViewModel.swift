@@ -10,11 +10,11 @@ import TokamakShim
 import Attributes
 import Machines
 
-final class MainViewModel: ObservableObject {
+final class MainViewModel: ObservableObject, GlobalChangeNotifier {
     
-    enum Root: Equatable {
+    enum Root {
         
-        var arrangement: Arrangement {
+        var arrangement: ArrangementViewModel {
             get {
                 switch self {
                 case .arrangement(let arrangement):
@@ -27,7 +27,7 @@ final class MainViewModel: ObservableObject {
             }
         }
         
-        var machine: Machine {
+        var machine: MachineViewModel {
             get {
                 switch self {
                 case .machine(let machine):
@@ -40,18 +40,30 @@ final class MainViewModel: ObservableObject {
             }
         }
         
-        case arrangement(Arrangement)
-        case machine(Machine)
+        case arrangement(ArrangementViewModel)
+        case machine(MachineViewModel)
         
     }
     
     @Published var focus: URL
     
-    @Published var root: Root
+    var root: Root
     
     var viewModels: [URL: MachineViewModel]
     
     private var selections: [URL: Int] = [:]
+    
+    init(root: Root) {
+        self.root = root
+        switch root {
+        case .arrangement(let arrangement):
+            focus = arrangement.arrangement.filePath
+            viewModels = [:]
+        case .machine(let machine):
+            focus = machine.machine.filePath
+            self.viewModels = [machine.machine.filePath: machine]
+        }
+    }
     
     func selection(for url: URL) -> Binding<Int?> {
         return Binding(
@@ -95,16 +107,8 @@ final class MainViewModel: ObservableObject {
         return newViewModel
     }
     
-    init(root: Root) {
-        self.root = root
-        switch root {
-        case .arrangement(let arrangement):
-            focus = arrangement.filePath
-            viewModels = [:]
-        case .machine(let machine):
-            focus = machine.filePath
-            self.viewModels = [machine.filePath: MachineViewModel(machine: machine)]
-        }
+    func send() {
+        self.objectWillChange.send()
     }
     
 }

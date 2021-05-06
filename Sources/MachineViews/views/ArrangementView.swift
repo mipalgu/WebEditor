@@ -63,18 +63,18 @@ import Machines
 
 struct ArrangementView: View {
     
-    @Binding var arrangement: Arrangement
+    @ObservedObject var viewModel: ArrangementViewModel
     
     @Binding var selection: Int?
     
     var body: some View {
         AttributeGroupsView(
-            root: $arrangement,
+            root: $viewModel.arrangement,
             path: Arrangement.path.attributes,
-            label: arrangement.name.pretty + " Arrangement",
+            label: viewModel.arrangement.name.pretty + " Arrangement",
             selection: $selection
         ) {
-            DependenciesAttributesView(root: $arrangement, path: arrangement.path, label: "Dependencies")
+            DependenciesAttributesView(root: $viewModel.arrangement, path: viewModel.arrangement.path, label: "Dependencies")
         }
     }
     

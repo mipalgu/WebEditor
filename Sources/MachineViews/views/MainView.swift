@@ -16,11 +16,11 @@ public struct MainView: View {
     @State var dependenciesWidth: CGFloat = 200
     
     public init(arrangement: Arrangement) {
-        self.init(viewModel: MainViewModel(root: .arrangement(arrangement)))
+        self.init(viewModel: MainViewModel(root: .arrangement(ArrangementViewModel(arrangement: arrangement))))
     }
     
     public init(machine: Machine) {
-        self.init(viewModel: MainViewModel(root: .machine(machine)))
+        self.init(viewModel: MainViewModel(root: .machine(MachineViewModel(machine: machine))))
     }
     
     private init(viewModel: MainViewModel) {
@@ -55,13 +55,13 @@ public struct MainView: View {
 //                    )
 //                }
                 switch viewModel.root {
-                case .arrangement(let arrangement):
-                    if viewModel.focus == arrangement.filePath {
-                        ArrangementView(arrangement: $viewModel.root.arrangement, selection: viewModel.selection(for: viewModel.focus))
+                case .arrangement(let arrangementViewModel):
+                    if viewModel.focus == arrangementViewModel.arrangement.filePath {
+                        ArrangementView(viewModel: arrangementViewModel, selection: viewModel.selection(for: viewModel.focus))
                     } else {
                         MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!, selection: viewModel.selection(for: viewModel.focus))
                     }
-                case .machine(_):
+                case .machine:
                     MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!, selection: viewModel.selection(for: viewModel.focus))
                 }
             }
