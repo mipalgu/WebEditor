@@ -67,7 +67,7 @@ final class MainViewModel: ObservableObject, GlobalChangeNotifier {
         if let viewModel = viewModels[url] {
             return viewModel
         }
-        viewModels[url] = MachineViewModel(filePath: url)
+        viewModels[url] = MachineViewModel(filePath: url, notifier: self)
         return viewModels[url]
     }
     

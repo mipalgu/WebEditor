@@ -12,16 +12,11 @@ import Machines
 import Utilities
 import GUUI
 
-final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
+final class MachineViewModel: ObservableObject {
     
     var machine: Machine
     
-    var machineBinding: Binding<Machine> {
-        Binding(
-            get: { self.machine },
-            set: { self.machine = $0 }
-        )
-    }
+    weak var notifier: GlobalChangeNotifier?
     
     @Published var machineSelection: Int?
     
@@ -52,12 +47,19 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     lazy var canvasViewModel: CanvasViewModel = {
         let plistURL = machine.filePath.appendingPathComponent("Layout.plist")
-        return CanvasViewModel(machine: machineBinding, plist: try? String(contentsOf: plistURL), notifier: self)
+        return CanvasViewModel(machine: machineBinding, plist: try? String(contentsOf: plistURL), notifier: notifier)
     }()
     
     private var stateIndex: Int = -1
     
     private var transitionIndex: Int = -1
+    
+    var machineBinding: Binding<Machine> {
+        Binding(
+            get: { self.machine },
+            set: { self.machine = $0 }
+        )
+    }
     
     var selection: Int? {
         get {
@@ -121,19 +123,16 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         }
     }
     
-    convenience init?(filePath url: URL) {
+    convenience init?(filePath url: URL, notifier: GlobalChangeNotifier? = nil) {
         guard let machine = try? Machine(filePath: url) else {
             return nil
         }
-        self.init(machine: machine)
+        self.init(machine: machine, notifier: notifier)
     }
     
-    init(machine: Machine) {
+    init(machine: Machine, notifier: GlobalChangeNotifier? = nil) {
         self.machine = machine
-    }
-    
-    func send() {
-        self.objectWillChange.send()
+        self.notifier = notifier
     }
     
 }
