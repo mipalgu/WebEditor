@@ -82,7 +82,7 @@ struct CollapsableAttributeGroupsView<ExtraTabs: View>: View {
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
-                AttributeGroupsView(root: $machine, path: path, label: label, selection: $selection, notifier: notifier, extraTabs: extraTabs)
+                AttributeGroupsView(root: $machine, path: path, label: "", selection: $selection, notifier: notifier, extraTabs: extraTabs)
 //                    .transition(.move(edge: .trailing))
             } else {
                 HStack {
