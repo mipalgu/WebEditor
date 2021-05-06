@@ -59,10 +59,10 @@ public struct MainView: View {
                     if viewModel.focus == arrangementViewModel.arrangement.filePath {
                         ArrangementView(viewModel: arrangementViewModel)
                     } else {
-                        MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!, selection: viewModel.selection(for: viewModel.focus))
+                        MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!)
                     }
                 case .machine:
-                    MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!, selection: viewModel.selection(for: viewModel.focus))
+                    MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!)
                 }
             }
         }

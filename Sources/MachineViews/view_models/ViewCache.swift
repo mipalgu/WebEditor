@@ -30,17 +30,17 @@ class ViewCache {
         machineBinding.wrappedValue
     }
     
-    init(empty machine: Binding<Machine>) {
-        machineBinding = machine
-        notifier = nil
-        states = [:]
-        stateTrackers = [:]
-        transitions = [:]
-        transitionTrackers = [:]
-        targetTransitions = [:]
+    private init(machineBinding: Binding<Machine>, states: [StateName: StateViewModel], stateTrackers: [StateName: StateTracker], transitions: [StateName: [TransitionViewModel]], transitionTrackers: [StateName: [TransitionTracker]], targetTransitions: [StateName: [StateName: Set<TransitionViewModel>]], notifier: GlobalChangeNotifier? = nil) {
+        self.machineBinding = machineBinding
+        self.states = states
+        self.stateTrackers = stateTrackers
+        self.transitions = transitions
+        self.transitionTrackers = transitionTrackers
+        self.targetTransitions = targetTransitions
+        self.notifier = notifier
     }
     
-    init(machine: Binding<Machine>, notifier: GlobalChangeNotifier?) {
+    convenience init(machine: Binding<Machine>, notifier: GlobalChangeNotifier? = nil) {
         var tempStates: [StateName: StateViewModel] = [:]
         var tempStateTrackers: [StateName: StateTracker] = [:]
         var tempTransitions: [StateName: [TransitionViewModel]] = [:]
@@ -105,13 +105,15 @@ class ViewCache {
             tempTransitions[stateName] = tempTransitionArray
             tempTransitionTrackers[stateName] = tempTransitionTrackerArray
         }
-        self.machineBinding = machine
-        self.states = tempStates
-        self.stateTrackers = tempStateTrackers
-        self.transitions = tempTransitions
-        self.transitionTrackers = tempTransitionTrackers
-        self.targetTransitions = tempTargetTransitions
-        self.notifier = notifier
+        self.init(
+            machineBinding: machine,
+            states: tempStates,
+            stateTrackers: tempStateTrackers,
+            transitions: tempTransitions,
+            transitionTrackers: tempTransitionTrackers,
+            targetTransitions: tempTargetTransitions,
+            notifier: notifier
+        )
     }
     
     func addNewState(stateIndex: Int, stateName: StateName, state: Binding<Machines.State>) -> Bool {
@@ -501,7 +503,7 @@ class ViewCache {
 
 extension ViewCache {
     
-    convenience init(machine: Binding<Machine>, plist data: String, notifier: GlobalChangeNotifier?) {
+    convenience init(machine: Binding<Machine>, plist data: String, notifier: GlobalChangeNotifier? = nil) {
         var tempStates: [StateName: StateViewModel] = [:]
         var tempStateTrackers: [StateName: StateTracker] = [:]
         var tempTransitions: [StateName: [TransitionViewModel]] = [:]
@@ -599,14 +601,15 @@ extension ViewCache {
                 
             }
         }
-        self.init(empty: machine)
-        self.machineBinding = machine
-        self.states = tempStates
-        self.stateTrackers = tempStateTrackers
-        self.transitions = tempTransitions
-        self.transitionTrackers = tempTransitionTrackers
-        self.targetTransitions = tempTargetTransitions
-        self.notifier = notifier
+        self.init(
+            machineBinding: machine,
+            states: tempStates,
+            stateTrackers: tempStateTrackers,
+            transitions: tempTransitions,
+            transitionTrackers: tempTransitionTrackers,
+            targetTransitions: tempTargetTransitions,
+            notifier: notifier
+        )
     }
     
     var plist: String {

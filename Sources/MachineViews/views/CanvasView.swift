@@ -17,9 +17,9 @@ public struct CanvasView: View {
     
     @EnvironmentObject var config: Config
     
-    @ObservedObject var viewModel: MachineViewModel
+    @ObservedObject var viewModel: CanvasViewModel
     
-//    @Binding var focus: Focus
+    @Binding var focus: Focus
     
     @State var selectedBox: (CGPoint, CGPoint)?
     
@@ -46,7 +46,7 @@ public struct CanvasView: View {
 //        self.viewModel = MachineViewModel(machine: machine, plist: plist)
 //    }
     
-    init(viewModel: MachineViewModel, focus: Binding<Focus>) {
+    init(viewModel: CanvasViewModel, focus: Binding<Focus>) {
         self.viewModel = viewModel
         self._focus = focus
     }
@@ -207,14 +207,14 @@ struct CanvasView_Previews: PreviewProvider {
         @State var machine: Machine = Machine.initialSwiftMachine()
         
         var body: some View {
-            Preview(viewModel: MachineViewModel(machine: machine))
+            Preview(viewModel: CanvasViewModel(machine: $machine))
         }
         
     }
     
     struct Preview: View {
         
-        @StateObject var viewModel: MachineViewModel
+        @StateObject var viewModel: CanvasViewModel
         
         @State var focus: Focus = .machine
         
