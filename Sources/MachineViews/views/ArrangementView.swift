@@ -65,7 +65,7 @@ struct ArrangementView: View {
     
     @Binding var arrangement: Arrangement
     
-    @Binding var selection: AttributeGroup?
+    @Binding var selection: Int?
     
     var body: some View {
         AttributeGroupsView(

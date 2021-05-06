@@ -16,9 +16,9 @@ final class DependenciesViewModel: ObservableObject {
     
     var viewModels: [URL: MachineViewModel] = [:]
     
-    private var selections: [URL: AttributeGroup] = [:]
+    private var selections: [URL: Int] = [:]
     
-    func selection(for url: URL) -> Binding<AttributeGroup?> {
+    func selection(for url: URL) -> Binding<Int?> {
         return Binding(
             get: { self.selections[url] },
             set: { self.selections[url] = $0 }

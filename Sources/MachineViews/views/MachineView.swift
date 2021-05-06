@@ -18,7 +18,7 @@ struct MachineView: View {
     
     @State var attributesCollapsed: Bool = false
     
-    @Binding var selection: AttributeGroup?
+    @Binding var selection: Int?
     
     var path: Attributes.Path<Machine, [AttributeGroup]> {
         switch focus {
