@@ -139,30 +139,30 @@ class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     /// Creates a new state in the machine and updates the view cache.
     func createState() {
+        let newStateIndex = machine.states.count
         let result = machineBinding.wrappedValue.newState()
         guard let _ = try? result.get() else {
             return
         }
-        let newStateIndex = machine.states.count - 1
 //        var updatedMachine = machine
 //        machineBinding = Binding(get: { updatedMachine }, set: { updatedMachine = $0 })
 //        print(machineBinding.states)
         machineBinding.update()
-        let stateBinding = Binding<Machines.State>(
-            get: {
-                guard self.machineBinding.wrappedValue.states.count > newStateIndex else {
-                    return Machines.State(name: "", actions: [], transitions: [])
-                }
-                return self.machineBinding.wrappedValue.states[newStateIndex]
-            },
-            set: {
-                guard self.machineBinding.wrappedValue.states.count > newStateIndex else {
-                    return
-                }
-                self.machineBinding.wrappedValue.states[newStateIndex] = $0
-            }
-        )
-        if !cache.addNewState(state: stateBinding) {
+//        let stateBinding = Binding<Machines.State>(
+//            get: {
+//                guard self.machineBinding.wrappedValue.states.count > newStateIndex else {
+//                    return Machines.State(name: "", actions: [], transitions: [])
+//                }
+//                return self.machineBinding.wrappedValue.states[newStateIndex]
+//            },
+//            set: {
+//                guard self.machineBinding.wrappedValue.states.count > newStateIndex else {
+//                    return
+//                }
+//                self.machineBinding.wrappedValue.states[newStateIndex] = $0
+//            }
+//        )
+        if !cache.addNewState(stateIndex: newStateIndex, stateName: machineBinding.wrappedValue.states[newStateIndex].name, state: machineBinding.states[newStateIndex]) {
             fatalError("Created state but failed to create view models")
         }
         self.objectWillChange.send()

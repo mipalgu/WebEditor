@@ -20,7 +20,7 @@ final class StateTitleViewModel: ObservableObject {
     
     var name: String {
         get {
-            machine.wrappedValue[keyPath: path.path]
+            path.isNil(machine.wrappedValue) ? "" : machine.wrappedValue[keyPath: path.path]
         } set {
             let result = machine.wrappedValue.modify(attribute: path, value: newValue)
             guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {

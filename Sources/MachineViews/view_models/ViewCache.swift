@@ -114,10 +114,7 @@ class ViewCache {
         self.notifier = notifier
     }
     
-    func addNewState(state: Binding<Machines.State>) -> Bool {
-        guard let stateIndex = machine.states.firstIndex(where: { $0 == state.wrappedValue }) else {
-            return false
-        }
+    func addNewState(stateIndex: Int, stateName: StateName, state: Binding<Machines.State>) -> Bool {
         let newViewModel = StateViewModel(
             machine: machineBinding,
             path: machine.path.states[stateIndex],
@@ -125,12 +122,11 @@ class ViewCache {
             stateIndex: stateIndex,
             notifier: notifier
         )
-        let name = state.wrappedValue.name
-        createNewTargetEntry(target: name)
-        self.states[name] = newViewModel
-        self.stateTrackers[name] = StateTracker(notifier: self.notifier)
-        self.transitions[name] = []
-        self.transitionTrackers[name] = []
+        createNewTargetEntry(target: stateName)
+        self.states[stateName] = newViewModel
+        self.stateTrackers[stateName] = StateTracker(notifier: self.notifier)
+        self.transitions[stateName] = []
+        self.transitionTrackers[stateName] = []
         return true
     }
     
@@ -460,7 +456,7 @@ class ViewCache {
     }
     
     func viewModel(for state: Machines.State) -> StateViewModel {
-        states[state.name]!
+        viewModel(for: state.name)
     }
     
     func viewModel(for stateName: StateName) -> StateViewModel {
