@@ -27,6 +27,10 @@ final class ViewCache {
     
     fileprivate var targetTransitions: [StateName: [StateName: Set<TransitionViewModel>]]
     
+    var keys: [StateName] {
+        Array(states.keys)
+    }
+    
     fileprivate var machine: Machine {
         machineBinding.wrappedValue
     }

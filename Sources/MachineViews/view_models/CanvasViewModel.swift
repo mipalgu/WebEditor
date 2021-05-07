@@ -87,6 +87,10 @@ final class CanvasViewModel: ObservableObject {
     
     var startLocations: [StateName: CGPoint] = [:]
     
+    var stateNames: [StateName] {
+        self.cache.keys.sorted()
+    }
+    
     var transitionStartLocations: [StateName: [Curve]] = [:]
     
     var machine: Machine {
