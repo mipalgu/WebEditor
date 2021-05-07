@@ -17,15 +17,18 @@ struct DependenciesView: View {
     
     @ObservedObject var viewModel: DependenciesViewModel
     
+    @Binding var focus: URL
+    
     @Binding var width: CGFloat
     
     @EnvironmentObject var config: Config
     
     let padding: CGFloat = 10
     
-    init(root: Root, viewModel: DependenciesViewModel, width: Binding<CGFloat> = .constant(200)) {
+    init(root: Root, viewModel: DependenciesViewModel, focus: Binding<URL>, width: Binding<CGFloat> = .constant(200)) {
         self.root = root
         self.viewModel = viewModel
+        self._focus = focus
         self._width = width
     }
     
@@ -38,17 +41,18 @@ struct DependenciesView: View {
                     }
                     .toggleStyle(ArrowToggleStyle(side: .left))
                     .onTapGesture {
-                        viewModel.focus = root.filePath
+                        focus = root.filePath
                     }
                     Spacer()
                 }.padding(.leading, padding)
-            }.background(viewModel.focus == root.filePath ? config.highlightColour : Color.clear)
+            }.background(focus == root.filePath ? config.highlightColour : Color.clear)
             if viewModel.expanded {
                 VStack {
                     ForEach(root.dependencies, id: \.filePath) { dependency in
                         DependencyView(
                             dependency: dependency,
                             viewModel: viewModel.viewModel(forDependency: dependency),
+                            focus: $focus,
                             padding: padding + padding,
                             parents: [root.filePath]
                         )

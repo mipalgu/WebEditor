@@ -64,8 +64,6 @@ import Utilities
 
 final class DependencyViewModel: ObservableObject {
     
-    private let focusBinding: Binding<URL>
-    
     private let url: URL
     
     private let _machineViewModel: (URL) -> MachineViewModel?
@@ -74,22 +72,12 @@ final class DependencyViewModel: ObservableObject {
     
     @Published var expanded: Bool = false
     
-    var focus: URL {
-        get {
-            focusBinding.wrappedValue
-        } set {
-            focusBinding.wrappedValue = newValue
-            self.objectWillChange.send()
-        }
-    }
-    
     var viewModel: MachineViewModel? {
         _machineViewModel(url)
     }
     
-    init(url: URL, focus: Binding<URL>, machineViewModel: @escaping (URL) -> MachineViewModel?, dependencyViewModel: @escaping (MachineDependency) -> DependencyViewModel) {
+    init(url: URL, machineViewModel: @escaping (URL) -> MachineViewModel?, dependencyViewModel: @escaping (MachineDependency) -> DependencyViewModel) {
         self.url = url
-        self.focusBinding = focus
         self._machineViewModel = machineViewModel
         self._dependencyViewModel = dependencyViewModel
     }

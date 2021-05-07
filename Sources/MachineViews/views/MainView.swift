@@ -34,7 +34,7 @@ public struct MainView: View {
     public var body: some View {
         VStack(alignment: .leading) {
             HStack {
-                DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel)
+                DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
                 switch viewModel.root {
                 case .arrangement(let arrangementViewModel):
                     if viewModel.focus == arrangementViewModel.arrangement.filePath {

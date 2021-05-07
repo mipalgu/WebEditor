@@ -20,17 +20,10 @@ final class MainViewModel: ObservableObject, GlobalChangeNotifier {
     private var viewModels: [URL: MachineViewModel]
     
     lazy var dependenciesViewModel: DependenciesViewModel = {
-        DependenciesViewModel(focus: self.focusBinding, machineViewModel: { [unowned self] in
+        DependenciesViewModel(machineViewModel: { [unowned self] in
             self.viewModel(for: $0)
         })
     }()
-    
-    var focusBinding: Binding<URL> {
-        return Binding(
-            get: { self.focus },
-            set: { self.focus = $0 }
-        )
-    }
     
     init(root: Root) {
         self.root = root
@@ -56,6 +49,7 @@ final class MainViewModel: ObservableObject, GlobalChangeNotifier {
     
     public func send() {
         self.objectWillChange.send()
+        self.dependenciesViewModel.objectWillChange.send()
         switch root {
         case .arrangement(let viewModel):
             if viewModel.arrangement.filePath == focus {

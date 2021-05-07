@@ -17,6 +17,8 @@ struct DependencyView: View {
     
     @ObservedObject var viewModel: DependencyViewModel
     
+    @Binding var focus: URL
+    
     let padding: CGFloat
     
     let parents: Set<URL>
@@ -45,11 +47,11 @@ struct DependencyView: View {
                             .frame(height: 28)
                     }
                 }.onTapGesture {
-                    viewModel.focus = dependency.filePath
+                    focus = dependency.filePath
                 }
                 Spacer()
             }.padding(.leading, 10)
-            .background(viewModel.focus == dependency.filePath ? config.highlightColour : Color.clear)
+            .background(focus == dependency.filePath ? config.highlightColour : Color.clear)
             if viewModel.expanded, let machineViewModel = viewModel.viewModel {
                 VStack {
                     ForEach(machineViewModel.machine.dependencies, id: \.filePath) { dependency in
@@ -57,6 +59,7 @@ struct DependencyView: View {
                             DependencyView(
                                 dependency: dependency,
                                 viewModel: viewModel.viewModel(forDependency: dependency),
+                                focus: $focus,
                                 padding: padding + padding,
                                 parents: parents.union([dependency.filePath])
                             )
