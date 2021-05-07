@@ -45,7 +45,7 @@ struct DependenciesView: View {
                     }
                     Spacer()
                 }.padding(.leading, padding)
-            }.background(focus == root.filePath ? config.highlightColour : Color.clear)
+            }.background(focus == root.filePath ? AnyView(config.highlightColour.clipShape(RoundedRectangle(cornerRadius: 5))) : AnyView(Color.clear))
             if viewModel.expanded {
                 VStack {
                     ForEach(root.dependencies, id: \.filePath) { dependency in
