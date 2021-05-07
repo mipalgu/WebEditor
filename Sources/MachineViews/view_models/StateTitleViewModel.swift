@@ -19,12 +19,20 @@ final class StateTitleViewModel: ObservableObject {
     
     weak var notifier: GlobalChangeNotifier?
     
+    var cache: ViewCache
+    
     var name: String {
         get {
             path.isNil(machine.wrappedValue) ? "" : machine.wrappedValue[keyPath: path.path]
         } set {
+            let oldName = self.name
             let result = machine.wrappedValue.modify(attribute: path, value: newValue)
-            guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
+            guard let hasTrigger = try? result.get() else {
+                self.objectWillChange.send()
+                return
+            }
+            self.cache.renameState(oldName: oldName, newName: StateName(name))
+            guard let notifier = notifier, hasTrigger == true else {
                 self.objectWillChange.send()
                 return
             }
@@ -38,10 +46,11 @@ final class StateTitleViewModel: ObservableObject {
         } set {}
     }
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, StateName>, notifier: GlobalChangeNotifier? = nil) {
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, StateName>, cache: ViewCache, notifier: GlobalChangeNotifier? = nil) {
         self.machine = machine
         self.path = path
         self.notifier = notifier
+        self.cache = cache
     }
     
 }

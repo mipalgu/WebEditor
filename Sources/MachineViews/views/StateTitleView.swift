@@ -93,7 +93,7 @@ struct StateTitleView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateTitleView(viewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name), expanded: $expanded)
+            StateTitleView(viewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name, cache: ViewCache(machine: $machine)), expanded: $expanded)
         }
         
     }

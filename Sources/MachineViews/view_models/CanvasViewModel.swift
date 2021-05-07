@@ -103,16 +103,6 @@ final class CanvasViewModel: ObservableObject {
         self.notifier = notifier
     }
     
-    convenience init(machine: Binding<Machine>, plist data: String? = nil, notifier: GlobalChangeNotifier? = nil) {
-        let cache: ViewCache
-        if let data = data {
-            cache = ViewCache(machine: machine, plist: data, notifier: notifier)
-        } else {
-            cache = ViewCache(machine: machine, notifier: notifier)
-        }
-        self.init(machineBinding: machine, cache: cache, notifier: notifier)
-    }
-    
     /// Adds a state to the view selected property. This state will show up as highlighted in the view.
     /// - Parameters:
     ///   - view: The view containing the selected property.
@@ -636,6 +626,7 @@ final class CanvasViewModel: ObservableObject {
             path: machine.path.states[stateIndex],
             state: machineBinding.states[stateIndex],
             stateIndex: stateIndex,
+            cache: cache,
             notifier: notifier
         )
     }
@@ -818,6 +809,16 @@ final class CanvasViewModel: ObservableObject {
 
 //PLIST EXTENSION
 extension CanvasViewModel {
+    
+    convenience init(machine: Binding<Machine>, plist data: String? = nil, notifier: GlobalChangeNotifier? = nil) {
+        let cache: ViewCache
+        if let data = data {
+            cache = ViewCache(machine: machine, plist: data, notifier: notifier)
+        } else {
+            cache = ViewCache(machine: machine, notifier: notifier)
+        }
+        self.init(machineBinding: machine, cache: cache, notifier: notifier)
+    }
     
     var plist: String {
         self.cache.plist

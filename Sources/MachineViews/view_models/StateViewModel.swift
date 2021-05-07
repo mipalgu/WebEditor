@@ -24,6 +24,7 @@ final class StateViewModel: ObservableObject, Identifiable, Hashable {
         hasher.combine(stateIndex)
     }
     
+    var cache: ViewCache
     
     private var machine: Binding<Machine>
     
@@ -37,42 +38,35 @@ final class StateViewModel: ObservableObject, Identifiable, Hashable {
     
     var actions: [ActionViewModel]
     
-    var name: String {
+    var name: StateName {
         state.wrappedValue.name
     }
     
     var title: StateTitleViewModel {
-        StateTitleViewModel(machine: machine, path: path.name, notifier: notifier)
+        StateTitleViewModel(machine: machine, path: path.name, cache: cache, notifier: notifier)
     }
     
     var transitions: [TransitionViewModel] {
-        state.wrappedValue.transitions.indices.map {
-            TransitionViewModel(
-                machine: machine,
-                path: path.transitions[$0],
-                transitionBinding: state.transitions[$0],
-                stateIndex: stateIndex,
-                transitionIndex: $0,
-                notifier: notifier
-            )
-        }
+        self.cache.transitions(source: name)
     }
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, state: Binding<Machines.State>, stateIndex: Int, notifier: GlobalChangeNotifier? = nil, actions: [ActionViewModel]) {
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, state: Binding<Machines.State>, stateIndex: Int,  cache: ViewCache, notifier: GlobalChangeNotifier? = nil, actions: [ActionViewModel]) {
         self.machine = machine
         self.path = path
         self.state = state
         self.stateIndex = stateIndex
         self.notifier = notifier
         self.actions = actions
+        self.cache = cache
     }
     
-    convenience init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, state: Binding<Machines.State>, stateIndex: Int, notifier: GlobalChangeNotifier? = nil) {
+    convenience init(machine: Binding<Machine>, path: Attributes.Path<Machine, Machines.State>, state: Binding<Machines.State>, stateIndex: Int,  cache: ViewCache, notifier: GlobalChangeNotifier? = nil) {
         self.init(
             machine: machine,
             path: path,
             state: state,
             stateIndex: stateIndex,
+            cache: cache,
             notifier: notifier,
             actions: state.wrappedValue.actions.indices.map {
                 ActionViewModel(machine: machine, path: path.actions[$0], action: state.actions[$0], notifier: notifier, collapsed: false)

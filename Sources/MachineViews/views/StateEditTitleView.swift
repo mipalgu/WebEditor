@@ -35,7 +35,7 @@ struct SwiftEditTitleView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateEditTitleView(viewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name)).environmentObject(config)
+            StateEditTitleView(viewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name, cache: ViewCache(machine: $machine))).environmentObject(config)
         }
         
     }

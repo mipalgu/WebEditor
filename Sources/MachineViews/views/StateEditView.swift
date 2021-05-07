@@ -45,7 +45,7 @@ struct StateEditView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            StateEditView(titleViewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name), actionViewModels: machine.states[0].actions.indices.map {
+            StateEditView(titleViewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name, cache: ViewCache(machine: $machine)), actionViewModels: machine.states[0].actions.indices.map {
                 ActionViewModel(machine: $machine, path: machine.path.states[0].actions[$0], action: $machine.states[0].actions[$0])
             }).environmentObject(config)
         }
