@@ -137,8 +137,7 @@ struct StateExpandedView_Previews: PreviewProvider {
                 actions: machine.states[0].actions.indices.map {
                     ActionViewModel(
                         machine: $machine,
-                        path: machine.path.states[0].actions[$0],
-                        action: $machine.states[0].actions[$0]
+                        path: machine.path.states[0].actions[$0]
                     )
                 },
                 focused: false

@@ -63,9 +63,9 @@ import Machines
 import Utilities
 import GUUI
 
-final class CanvasViewModel: ObservableObject {
+final class CanvasViewModel: ObservableObject, GlobalChangeNotifierDelegator {
     
-    let notifier: GlobalChangeNotifier?
+    weak var notifier: GlobalChangeNotifier?
     
     var cache: ViewCache
     
@@ -105,6 +105,7 @@ final class CanvasViewModel: ObservableObject {
         self.machineBinding = machineBinding
         self.cache = cache
         self.notifier = notifier
+        self.cache.notifier = self
     }
     
     /// Adds a state to the view selected property. This state will show up as highlighted in the view.

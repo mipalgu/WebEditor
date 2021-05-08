@@ -11,7 +11,7 @@ import AttributeViews
 import Attributes
 import Machines
 
-final class ActionViewModel: ObservableObject, Hashable {
+final class ActionViewModel: ObservableObject, Hashable, GlobalChangeNotifierDelegator {
     
     static func == (lhs: ActionViewModel, rhs: ActionViewModel) -> Bool {
         lhs === rhs
@@ -21,11 +21,30 @@ final class ActionViewModel: ObservableObject, Hashable {
         hasher.combine(path)
     }
     
-    var machine: Binding<Machine>
+    private var machineBinding: Binding<Machine>
+    
+    var machine: Machine {
+        get {
+            machineBinding.wrappedValue
+        } set {
+            machineBinding.wrappedValue = newValue
+            self.objectWillChange.send()
+        }
+    }
     
     let path: Attributes.Path<Machine, Action>
     
-    var action: Binding<Action>
+    var action: Action {
+        get {
+            path.isNil(machine) ? Action(name: "", implementation: "", language: .swift) : machine[keyPath: path.keyPath]
+        } set {
+            defer { objectWillChange.send() }
+            if path.isNil(machine) {
+                return
+            }
+            machine[keyPath: path.path] = newValue
+        }
+    }
     
     weak var notifier: GlobalChangeNotifier?
     
@@ -33,16 +52,16 @@ final class ActionViewModel: ObservableObject, Hashable {
     
     var errors: [String] {
         get {
-            machine.wrappedValue.errorBag.errors(forPath: path).map(\.message)
+            machine.errorBag.errors(forPath: path).map(\.message)
         } set {}
     }
     
     var name: String {
         get {
-            action.wrappedValue.name
+            action.name
         }
         set {
-            let result = machine.wrappedValue.modify(attribute: path.name, value: newValue)
+            let result = machine.modify(attribute: path.name, value: newValue)
             guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
                 self.objectWillChange.send()
                 return
@@ -53,10 +72,10 @@ final class ActionViewModel: ObservableObject, Hashable {
     
     var implementation: Code {
         get {
-            action.wrappedValue.implementation
+            action.implementation
         }
         set {
-            let result = machine.wrappedValue.modify(attribute: path.implementation, value: newValue)
+            let result = machine.modify(attribute: path.implementation, value: newValue)
             guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
                 self.objectWillChange.send()
                 return
@@ -67,9 +86,9 @@ final class ActionViewModel: ObservableObject, Hashable {
     
     var language: Language {
         get {
-            action.wrappedValue.language
+            action.language
         } set {
-            let result = machine.wrappedValue.modify(attribute: path.language, value: newValue)
+            let result = machine.modify(attribute: path.language, value: newValue)
             guard let notifier = notifier, let hasTrigger = try? result.get(), hasTrigger == true else {
                 self.objectWillChange.send()
                 return
@@ -78,10 +97,9 @@ final class ActionViewModel: ObservableObject, Hashable {
         }
     }
     
-    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Action>, action: Binding<Action>, notifier: GlobalChangeNotifier? = nil, collapsed: Bool = false) {
-        self.machine = machine
+    init(machine: Binding<Machine>, path: Attributes.Path<Machine, Action>, notifier: GlobalChangeNotifier? = nil, collapsed: Bool = false) {
+        self.machineBinding = machine
         self.path = path
-        self.action = action
         self.notifier = notifier
         self.collapsed = collapsed
     }

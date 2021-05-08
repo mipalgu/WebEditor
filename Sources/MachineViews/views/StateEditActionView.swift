@@ -42,7 +42,6 @@ struct StateEditActionView_Previews: PreviewProvider {
                 viewModel: ActionViewModel(
                     machine: $machine,
                     path: machine.path.states[0].actions[0],
-                    action: $machine.states[0].actions[0],
                     notifier: nil,
                     collapsed: collapsed
                 )

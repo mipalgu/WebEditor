@@ -15,7 +15,7 @@ final class ViewCache {
     
     fileprivate var machineBinding: Binding<Machine>
     
-    fileprivate var notifier: GlobalChangeNotifier?
+    weak var notifier: GlobalChangeNotifier?
     
     fileprivate var states: [StateName: StateViewModel]
     

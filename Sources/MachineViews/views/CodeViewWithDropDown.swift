@@ -83,19 +83,7 @@ struct CodeViewWithDropDown<Label: View>: View {
                 Spacer()
             }
             if !collapsed {
-                ForEach(errors, id: \.self) { error in
-                    Text(error).foregroundColor(.red)
-                }
-                TextEditor(text: $value)
-                    .font(config.fontBody)
-                    .foregroundColor(config.textColor)
-                    .disableAutocorrection(true)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 2)
-                    )
-                    .frame(minHeight: 80)
-                    .shadow(radius: 10)
+                codeView()
             }
         }
     }
