@@ -73,7 +73,7 @@ struct StateTitleView: View {
     var body: some View {
         HStack {
             Toggle(isOn: $expanded) {
-                LineView<Config>(value: $viewModel.name, errors: $viewModel.errors, label: "Enter State Name...")
+                LineView<Config>(value: $viewModel.name, errors: $viewModel.errors, label: "Enter State Name...", delayEdits: true)
                     .multilineTextAlignment(.center)
                     .font(config.fontBody.bold())
             }.toggleStyle(ArrowToggleStyle())

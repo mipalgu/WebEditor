@@ -13,7 +13,7 @@ import Machines
 import Utilities
 import GUUI
 
-final class MachineViewModel: ObservableObject {
+final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     var machine: Machine
     
@@ -48,7 +48,7 @@ final class MachineViewModel: ObservableObject {
     
     lazy var canvasViewModel: CanvasViewModel = {
         let plistURL = machine.filePath.appendingPathComponent("Layout.plist")
-        return CanvasViewModel(machine: machineBinding, plist: try? String(contentsOf: plistURL), notifier: notifier)
+        return CanvasViewModel(machine: machineBinding, plist: try? String(contentsOf: plistURL), notifier: self)
     }()
     
     private var stateIndex: Int = -1
@@ -134,6 +134,12 @@ final class MachineViewModel: ObservableObject {
     init(machine: Machine, notifier: GlobalChangeNotifier? = nil) {
         self.machine = machine
         self.notifier = notifier
+    }
+    
+    func send() {
+        canvasViewModel.objectWillChange.send()
+        self.objectWillChange.send()
+        notifier?.send()
     }
     
 }
