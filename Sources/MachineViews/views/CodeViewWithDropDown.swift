@@ -7,6 +7,7 @@
 
 import TokamakShim
 
+import AttributeViews
 import Attributes
 import Utilities
 
@@ -16,49 +17,55 @@ struct CodeViewWithDropDown<Label: View>: View {
     @Binding var errors: [String]
     let language: Language
     let label: () -> Label
+    let codeView: () -> CodeView<Config, Text>
     
     @Binding var collapsed: Bool
     
     @EnvironmentObject var config: Config
     
-    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, label: String, language: Language, collapsed: Binding<Bool>) where Label == Text {
-        self.init(root: root, path: path, language: language, collapsed: collapsed) { Text(label.capitalized) }
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, label: String, language: Language, collapsed: Binding<Bool>, notifier: GlobalChangeNotifier? = nil) where Label == Text {
+        self.init(root: root, path: path, language: language, collapsed: collapsed, notifier: notifier) { Text(label.capitalized) }
     }
     
-    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, language: Language, collapsed: Binding<Bool>, label: @escaping () -> Label) {
-        self.init(
-            value: Binding(
-                get: { root.wrappedValue[keyPath: path.keyPath] },
-                set: {
-                    _ = try? root.wrappedValue.modify(attribute: path, value: $0).get()
-                }
-            ),
-            errors: Binding(
-                get: { root.wrappedValue.errorBag.errors(forPath: path).map(\.message) },
-                set: { _ in }
-            ),
-            language: language,
-            collapsed: collapsed,
-            label: label
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, language: Language, collapsed: Binding<Bool>, notifier: GlobalChangeNotifier? = nil, label: @escaping () -> Label) {
+        self._value = Binding(
+            get: { root.wrappedValue[keyPath: path.keyPath] },
+            set: {
+                _ = try? root.wrappedValue.modify(attribute: path, value: $0).get()
+            }
         )
+        self._errors = Binding(
+            get: { root.wrappedValue.errorBag.errors(forPath: path).map(\.message) },
+            set: { _ in }
+        )
+        self.language = language
+        self._collapsed = collapsed
+        self.label = label
+        self.codeView = {
+            CodeView<Config, Text>(root: root, path: path, label: "", language: language, notifier: notifier)
+        }
     }
     
-    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), label: String, language: Language, collapsed: Binding<Bool>) where Label == Text {
+    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), label: String, language: Language, collapsed: Binding<Bool>, delayEdits: Bool = false) where Label == Text {
         self.init(
             value: value,
             errors: errors,
             language: language,
             collapsed: collapsed,
+            delayEdits: delayEdits,
             label: { Text(label.pretty) }
         )
     }
     
-    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), language: Language, collapsed: Binding<Bool>, label: @escaping () -> Label) {
+    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), language: Language, collapsed: Binding<Bool>, delayEdits: Bool = false, label: @escaping () -> Label) {
         self._value = value
         self._errors = errors
         self.language = language
         self._collapsed = collapsed
         self.label = label
+        self.codeView = {
+            CodeView<Config, Text>(value: value, errors: errors, label: "", language: language, delayEdits: delayEdits)
+        }
     }
     
     var body: some View {
