@@ -31,15 +31,7 @@ final class ActionViewModel: ObservableObject, GlobalChangeNotifierDelegator, Id
     }
     
     private var action: Action {
-        get {
-            path.isNil(machine) ? Action(name: "", implementation: "", language: .swift) : machine[keyPath: path.keyPath]
-        } set {
-            defer { objectWillChange.send() }
-            if path.isNil(machine) {
-                return
-            }
-            machine[keyPath: path.path] = newValue
-        }
+        path.isNil(machine) ? Action(name: "", implementation: "", language: .swift) : machine[keyPath: path.keyPath]
     }
     
     var name: String {
