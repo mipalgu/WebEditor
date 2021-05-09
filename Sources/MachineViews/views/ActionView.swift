@@ -11,9 +11,12 @@ import Utilities
 
 struct ActionView: View {
     
+    @Binding var machine: Machine
+    
     @ObservedObject var viewModel: ActionViewModel
     
     init(action: ActionViewModel) {
+        self._machine = action.machineBinding
         self.viewModel = action
     }
     
@@ -31,7 +34,7 @@ struct ActionView: View {
             path: viewModel.path.implementation,
             label: viewModel.name,
             language: viewModel.language,
-            collapsed: $viewModel.collapsed,
+            expanded: $viewModel.expanded,
             notifier: viewModel
         )
     }

@@ -69,7 +69,7 @@ struct StateExpandedView<TitleView: View>: View {
                 titleView()
                 ScrollView {
                     VStack(spacing: 0) {
-                        ForEach(Array(actions.indices), id: \.self) {
+                        ForEach(actions.indices, id: \.self) {
                             codeView($0)
                         }
                     }

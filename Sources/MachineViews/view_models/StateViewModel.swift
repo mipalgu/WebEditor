@@ -72,7 +72,7 @@ final class StateViewModel: ObservableObject, Identifiable, Hashable, GlobalChan
             cache: cache,
             notifier: notifier,
             actions: state.wrappedValue.actions.indices.map {
-                ActionViewModel(machine: machine, path: path.actions[$0], notifier: notifier, collapsed: false)
+                ActionViewModel(machine: machine, path: path.actions[$0], notifier: notifier, expanded: true)
             }
         )
     }

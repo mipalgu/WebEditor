@@ -35,7 +35,7 @@ struct StateEditActionView_Previews: PreviewProvider {
         
         let config: Config = Config()
         
-        var collapsed: Bool
+        var expanded: Bool
         
         var body: some View {
             StateEditActionView(
@@ -43,7 +43,7 @@ struct StateEditActionView_Previews: PreviewProvider {
                     machine: $machine,
                     path: machine.path.states[0].actions[0],
                     notifier: nil,
-                    collapsed: collapsed
+                    expanded: expanded
                 )
             ).environmentObject(config)
         }
@@ -52,8 +52,8 @@ struct StateEditActionView_Previews: PreviewProvider {
     
     static var previews: some View {
         VStack {
-            Preview(collapsed: true)
-            Preview(collapsed: false)
+            Preview(expanded: false)
+            Preview(expanded: true)
         }
     }
 }
