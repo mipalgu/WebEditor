@@ -6,6 +6,8 @@
 //
 
 import TokamakShim
+import AttributeViews
+import Utilities
 
 struct ActionView: View {
     
@@ -65,7 +67,13 @@ struct ActionView_Previews: PreviewProvider {
         }
         
         var body: some View {
-            ActionView(action: viewModel)
+            VStack {
+                TextField("Something", text: .constant(""))
+                Button("redraw") {
+                    viewModel.objectWillChange.send()
+                }
+                ActionView(action: viewModel)
+            }
         }
         
     }

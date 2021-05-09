@@ -17,8 +17,8 @@ struct StateEditActionView: View {
     
     var body: some View {
         CodeView<Config, Text>(
-            value: $viewModel.implementation,
-            errors: $viewModel.errors,
+            root: $viewModel.machine,
+            path: viewModel.path.implementation,
             label: viewModel.name,
             language: viewModel.language
         )

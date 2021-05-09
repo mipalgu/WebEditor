@@ -13,13 +13,11 @@ import Utilities
 
 struct CodeViewWithDropDown<Label: View>: View {
     
-    @Binding var value: Code
-    @Binding var errors: [String]
-    let language: Language
+    @Binding var collapsed: Bool
+    @Binding var hasErrors: Bool
+    
     let label: () -> Label
     let codeView: () -> CodeView<Config, Text>
-    
-    @Binding var collapsed: Bool
     
     @EnvironmentObject var config: Config
     
@@ -28,20 +26,14 @@ struct CodeViewWithDropDown<Label: View>: View {
     }
     
     init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, language: Language, collapsed: Binding<Bool>, notifier: GlobalChangeNotifier? = nil, label: @escaping () -> Label) {
-        self._value = Binding(
-            get: { root.wrappedValue[keyPath: path.keyPath] },
-            set: {
-                _ = try? root.wrappedValue.modify(attribute: path, value: $0).get()
-            }
-        )
-        self._errors = Binding(
-            get: { root.wrappedValue.errorBag.errors(forPath: path).map(\.message) },
-            set: { _ in }
-        )
-        self.language = language
-        self._collapsed = collapsed
-        self.label = label
-        self.codeView = {
+        self.init(
+            collapsed: collapsed,
+            hasErrors: Binding(
+                get: { !root.wrappedValue.errorBag.errors(forPath: path).isEmpty },
+                set: { _ in }
+            ),
+            label: label
+        ) {
             CodeView<Config, Text>(root: root, path: path, label: "", language: language, notifier: notifier)
         }
     }
@@ -58,20 +50,29 @@ struct CodeViewWithDropDown<Label: View>: View {
     }
     
     init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), language: Language, collapsed: Binding<Bool>, delayEdits: Bool = false, label: @escaping () -> Label) {
-        self._value = value
-        self._errors = errors
-        self.language = language
-        self._collapsed = collapsed
-        self.label = label
-        self.codeView = {
+        self.init(
+            collapsed: collapsed,
+            hasErrors: Binding(
+                get: { !errors.wrappedValue.isEmpty },
+                set: { _ in }
+            ),
+            label: label
+        ) {
             CodeView<Config, Text>(value: value, errors: errors, label: "", language: language, delayEdits: delayEdits)
         }
+    }
+    
+    private init(collapsed: Binding<Bool>, hasErrors: Binding<Bool>, label: @escaping () -> Label, codeView: @escaping () -> CodeView<Config, Text>) {
+        self._collapsed = collapsed
+        self._hasErrors = hasErrors
+        self.label = label
+        self.codeView = codeView
     }
     
     var body: some View {
         VStack(alignment: .leading) {
             HStack(spacing: 0) {
-                if !errors.isEmpty {
+                if hasErrors {
                     Text("*").foregroundColor(.red)
                 }
                 label()

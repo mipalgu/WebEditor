@@ -24,7 +24,7 @@ struct StateEditView: View {
             ScrollView {
                 VStack(alignment: .leading) {
                     StateEditTitleView(viewModel: titleViewModel)
-                    ForEach(actionViewModels, id: \.self) {
+                    ForEach(actionViewModels, id: \.id) {
                         StateEditActionView(viewModel: $0)
                         .frame(minHeight: max(geometry.size.height / 3 - 25, 50))
                     }
