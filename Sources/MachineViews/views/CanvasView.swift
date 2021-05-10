@@ -122,34 +122,19 @@ public struct CanvasView: View {
                             }
                         }
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
-                            if viewModel.viewModel(forState: stateName).tracker.isText {
-                                VStack {
-                                    Text(stateName)
-                                        .font(config.fontBody)
-                                        .frame(width: textWidth, height: textHeight)
-//                                    .foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
+                            CanvasObjectView(
+                                viewModel: viewModel.viewModel(forState: stateName).tracker,
+                                coordinateSpace: coordinateSpace,
+                                textRepresentation: viewModel.viewModel(forState: stateName).name
+                            ) {
+                                StateView(
+                                    viewModel: viewModel.viewModel(forState: stateName),
+                                    focused: selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
+                                )
+                                .onChange(of: viewModel.viewModel(forState: stateName).expanded) { _ in
+//                                        self.viewModel.correctTransitionLocations(for: viewModel.viewModel(for: stateName).state.wrappedValue)
                                 }
-                                .coordinateSpace(name: coordinateSpace)
-//                                .position(viewModel.clampPosition(point: viewModel.tracker(for: stateName).location, frame: geometry.size, dx: textWidth / 2.0, dy: textHeight / 2.0))
-                            } else {
-                                VStack {
-                                    CanvasObjectView(
-                                        viewModel: viewModel.viewModel(forState: stateName).tracker,
-                                        coordinateSpace: coordinateSpace
-                                    ) {
-                                        StateView(
-                                            viewModel: viewModel.viewModel(forState: stateName),
-                                            focused: selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
-                                        )
-                                        .onChange(of: viewModel.viewModel(forState: stateName).expanded) { _ in
-    //                                        self.viewModel.correctTransitionLocations(for: viewModel.viewModel(for: stateName).state.wrappedValue)
-                                        }
-                                    }
-//                                    .frame(
-//                                        width: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).width,
-//                                        height: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).height
-//                                    )
-                                }
+                            }
 //                                .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: viewModel.viewModel(for: stateName).stateIndex) }.modifiers(.shift))
 //                                .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
 //                                .onTapGesture { selectedObjects = [.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)]; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
@@ -166,7 +151,6 @@ public struct CanvasView: View {
 //                                        }
 //                                    })
 //                                }
-                            }
                         }
                         if selectedBox != nil {
                             Rectangle()

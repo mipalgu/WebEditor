@@ -59,7 +59,7 @@
 import TokamakShim
 import Transformations
 
-typealias CanvasObjectViewModel = ObservableObject & Positionable & Stretchable
+typealias CanvasObjectViewModel = ObservableObject & Positionable & Stretchable & TextRepresentable
 
 struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
     
@@ -67,20 +67,34 @@ struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
     
     let coordinateSpace: String
     
+    let textRepresentation: String
+    
+    let textFrame: CGSize = CGSize(width: 50, height: 20)
+    
     let object: () -> Object
     
+    @EnvironmentObject var config: Config
+    
     var body: some View {
-        Group {
-            object()
-                .frame(width: viewModel.width, height: viewModel.height)
+        if viewModel.isText {
+            VStack {
+                Text(textRepresentation)
+                    .font(config.fontBody)
+                    .frame(width: textFrame.width, height: textFrame.height)
+            }
+        } else {
+            Group {
+                object()
+                    .frame(width: viewModel.width, height: viewModel.height)
+            }
+            .position(viewModel.location)
+            .coordinateSpace(name: coordinateSpace)
+            .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace)).onChanged {
+                viewModel.location = $0.location
+            }.onEnded {
+                viewModel.location = $0.location
+            })
         }
-        .position(viewModel.location)
-        .coordinateSpace(name: coordinateSpace)
-        .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace)).onChanged {
-            viewModel.location = $0.location
-        }.onEnded {
-            viewModel.location = $0.location
-        })
     }
     
 }
@@ -99,7 +113,7 @@ struct CanvasObjectView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            CanvasObjectView(viewModel: viewModel.tracker, coordinateSpace: "MAIN_VIEW") {
+            CanvasObjectView(viewModel: viewModel.tracker, coordinateSpace: "MAIN_VIEW", textRepresentation: viewModel.name) {
                 StateView(viewModel: viewModel).environmentObject(config)
             }
         }

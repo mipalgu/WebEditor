@@ -106,16 +106,16 @@ final class StateViewModel: ObservableObject, Identifiable {
         Machine.path.states[index]
     }
     
+    var name: StateName {
+        path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].name
+    }
+    
     var transitions: Range<Int> {
         path.isNil(machineRef.value) ? 0..<0 : machineRef.value[keyPath: path.keyPath].transitions.indices
     }
     
     var actions: [String] {
         actionsViewModel.actions
-    }
-    
-    var stateNames: [String] {
-        machineRef.value.states.map(\.name)
     }
     
     init(machine: Ref<Machine>, index: Int, isText: Bool = false, layout: StateLayout? = nil, notifier: GlobalChangeNotifier? = nil) {
