@@ -56,14 +56,19 @@
  *
  */
 
+import Foundation
 import Machines
 
-struct Layout: PlistConvertible {
+struct Layout: PlistConvertible, Hashable, Codable {
+    
+    enum CodingKeys: String, Hashable, CodingKey {
+        case States
+    }
     
     var states: [StateName: StateLayout]
     
     var plistRepresentation: String {
-        return ""
+        (try? PropertyListEncoder().encode(self)).flatMap { String(data: $0, encoding: .utf8) } ?? ""
     }
     
     init(states: [StateName: StateLayout]) {
@@ -71,7 +76,21 @@ struct Layout: PlistConvertible {
     }
     
     init?(fromPlistRepresentation str: String) {
-        return nil
+        guard let data = str.data(using: .utf8), let layout = try? PropertyListDecoder().decode(Layout.self, from: data) else {
+            return nil
+        }
+        self = layout
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let states = try container.decode([StateName: StateLayout].self, forKey: .States)
+        self.init(states: states)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(states, forKey: .States)
     }
     
 }

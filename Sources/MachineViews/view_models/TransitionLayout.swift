@@ -58,7 +58,29 @@
 
 import Foundation
 
-struct TransitionLayout: PlistConvertible {
+extension CGPoint: Hashable {
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(x)
+        hasher.combine(y)
+    }
+    
+}
+
+struct TransitionLayout: PlistConvertible, Hashable {
+    
+    enum CodingKeys: String, Hashable, CodingKey {
+        
+        case controlPoint1X
+        case controlPoint1Y
+        case controlPoint2X
+        case controlPoint2Y
+        case dstPointX
+        case dstPointY
+        case srcPointX
+        case srcPointY
+        
+    }
     
     var srcPoint: CGPoint
     
@@ -95,6 +117,40 @@ struct TransitionLayout: PlistConvertible {
     // Potentially throws? -> init() throws {
     init?(fromPlistRepresentation str: String) {
         return nil // Convert from plist string here.
+    }
+    
+}
+
+extension TransitionLayout: Codable {
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let controlPoint1X = try container.decode(CGFloat.self, forKey: .controlPoint1X)
+        let controlPoint1Y = try container.decode(CGFloat.self, forKey: .controlPoint1Y)
+        let controlPoint2X = try container.decode(CGFloat.self, forKey: .controlPoint2X)
+        let controlPoint2Y = try container.decode(CGFloat.self, forKey: .controlPoint2Y)
+        let dstPointX = try container.decode(CGFloat.self, forKey: .dstPointX)
+        let dstPointY = try container.decode(CGFloat.self, forKey: .dstPointY)
+        let srcPointX = try container.decode(CGFloat.self, forKey: .srcPointX)
+        let srcPointY = try container.decode(CGFloat.self, forKey: .srcPointY)
+        self.init(
+            srcPoint: CGPoint(x: srcPointX, y: srcPointY),
+            dstPoint: CGPoint(x: dstPointX, y: dstPointY),
+            controlPoint1: CGPoint(x: controlPoint1X, y: controlPoint1Y),
+            controlPoint2: CGPoint(x: controlPoint2X, y: controlPoint2Y)
+        )
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(controlPoint1.x, forKey: .controlPoint1X)
+        try container.encode(controlPoint1.y, forKey: .controlPoint1Y)
+        try container.encode(controlPoint2.x, forKey: .controlPoint2X)
+        try container.encode(controlPoint2.y, forKey: .controlPoint2Y)
+        try container.encode(dstPoint.x, forKey: .dstPointX)
+        try container.encode(dstPoint.y, forKey: .dstPointY)
+        try container.encode(srcPoint.x, forKey: .srcPointX)
+        try container.encode(srcPoint.y, forKey: .srcPointY)
     }
     
 }

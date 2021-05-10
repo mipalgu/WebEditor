@@ -58,11 +58,23 @@
 
 import TokamakShim
 
-struct StateLayout: PlistConvertible {
+struct SRGBColor: Hashable, Codable {
+    
+    var alpha: CGFloat
+    
+    var red: CGFloat
+    
+    var green: CGFloat
+    
+    var blue: CGFloat
+    
+}
+
+struct StateLayout: PlistConvertible, Hashable {
     
     var transitions: [TransitionLayout]
     
-    var bgColor: Color
+    var bgColor: SRGBColor
     
     var editingMode: Bool
     
@@ -72,7 +84,7 @@ struct StateLayout: PlistConvertible {
     
     var stateSelected: Bool
     
-    var strokeColor: Color
+    var strokeColor: SRGBColor
     
     var width: CGFloat
     
@@ -82,13 +94,13 @@ struct StateLayout: PlistConvertible {
     
     var y: CGFloat
     
-    var zoomedInActionHeights: [String: CGFloat]
+    var zoomedActionHeights: [String: CGFloat]
     
     var plistRepresentation: String {
         return ""
     }
     
-    init(transitions: [TransitionLayout], bgColor: Color, editingMode: Bool, expanded: Bool, actionHeights: [String: CGFloat], stateSelected: Bool, strokeColor: Color, width: CGFloat, height: CGFloat, x: CGFloat, y: CGFloat, zoomedInActionHeights: [String: CGFloat]) {
+    init(transitions: [TransitionLayout], bgColor: SRGBColor, editingMode: Bool, expanded: Bool, actionHeights: [String: CGFloat], stateSelected: Bool, strokeColor: SRGBColor, width: CGFloat, height: CGFloat, x: CGFloat, y: CGFloat, zoomedActionHeights: [String: CGFloat]) {
         self.transitions = transitions
         self.bgColor = bgColor
         self.editingMode = editingMode
@@ -100,11 +112,99 @@ struct StateLayout: PlistConvertible {
         self.height = height
         self.x = x
         self.y = y
-        self.zoomedInActionHeights = zoomedInActionHeights
+        self.zoomedActionHeights = zoomedActionHeights
     }
     
     init?(fromPlistRepresentation str: String) {
         return nil
+    }
+    
+    struct CodingKeys: CodingKey, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral {
+        
+        var stringValue: String
+        
+        var intValue: Int? {
+            Int(stringValue)
+        }
+        
+        init(stringLiteral value: StringLiteralType) {
+            self.stringValue = String(stringLiteral: value)
+        }
+        
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+        }
+        
+        init(integerLiteral value: IntegerLiteralType) {
+            self.stringValue = "\(Int(integerLiteral: value))"
+        }
+        
+        init?(intValue: Int) {
+            self.stringValue = "\(intValue)"
+        }
+        
+    }
+    
+}
+
+extension StateLayout: Codable {
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let transitions = try container.decode([TransitionLayout].self, forKey: "Transitions")
+        let bgColor = try container.decode(SRGBColor.self, forKey: "bgColor")
+        let editingMode = try container.decode(Bool.self, forKey: "editingMode")
+        let expanded = try container.decode(Bool.self, forKey: "expanded")
+        let height = try container.decode(CGFloat.self, forKey: "h")
+        let stateSelected = try container.decode(Bool.self, forKey: "stateSelected")
+        let strokeColor = try container.decode(SRGBColor.self, forKey: "strokeColor")
+        let width = try container.decode(CGFloat.self, forKey: "w")
+        let x = try container.decode(CGFloat.self, forKey: "x")
+        let y = try container.decode(CGFloat.self, forKey: "y")
+        var actionHeights: [String: CGFloat] = [:]
+        var zoomedActionHeights: [String: CGFloat] = [:]
+        for key in container.allKeys where key.stringValue.hasSuffix("Height") {
+            let name = key.stringValue.dropLast("Height".count)
+            if name.hasPrefix("zoomed") {
+                zoomedActionHeights[String(name.dropFirst("zoomed".count))] = try container.decode(CGFloat.self, forKey: key)
+            } else {
+                actionHeights[String(name)] = try container.decode(CGFloat.self, forKey: key)
+            }
+        }
+        self.init(
+            transitions: transitions,
+            bgColor: bgColor,
+            editingMode: editingMode,
+            expanded: expanded,
+            actionHeights: actionHeights,
+            stateSelected: stateSelected,
+            strokeColor: strokeColor,
+            width: width,
+            height: height,
+            x: x,
+            y: y,
+            zoomedActionHeights: zoomedActionHeights
+        )
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(transitions, forKey: "Transitions")
+        try container.encode(bgColor, forKey: "bgColor")
+        try container.encode(editingMode, forKey: "editingMode")
+        try container.encode(expanded, forKey: "expanded")
+        try container.encode(height, forKey: "h")
+        for (action, height) in actionHeights.sorted(by: { $0.key < $1.key }) {
+            try container.encode(height, forKey: CodingKeys(stringValue: "\(action)Height")!)
+        }
+        try container.encode(stateSelected, forKey: "stateSelected")
+        try container.encode(strokeColor, forKey: "strokeColor")
+        try container.encode(width, forKey: "w")
+        try container.encode(x, forKey: "x")
+        try container.encode(y, forKey: "y")
+        for (action, height) in zoomedActionHeights.sorted(by: { $0.key < $1.key }) {
+            try container.encode(height, forKey: CodingKeys(stringValue: "zoomed\(action)Height")!)
+        }
     }
     
 }
