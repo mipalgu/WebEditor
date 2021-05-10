@@ -48,15 +48,15 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     lazy var canvasViewModel: CanvasViewModel = {
         let plistURL = machine.filePath.appendingPathComponent("Layout.plist")
-        return CanvasViewModel(machine: machineBinding, plist: try? String(contentsOf: plistURL), notifier: self)
+        return CanvasViewModel(machine: machineRef, plist: try? String(contentsOf: plistURL), notifier: self)
     }()
     
     private var stateIndex: Int = -1
     
     private var transitionIndex: Int = -1
     
-    var machineBinding: Binding<Machine> {
-        Binding(
+    var machineRef: Ref<Machine> {
+        Ref(
             get: { self.machine },
             set: { self.machine = $0 }
         )

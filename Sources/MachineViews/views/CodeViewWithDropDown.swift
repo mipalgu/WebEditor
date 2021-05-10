@@ -71,7 +71,9 @@ struct CodeViewWithDropDown<Label: View>: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            DisclosureGroup(isExpanded: $expanded, content: codeView) {
+            DisclosureGroup(isExpanded: $expanded, content: {
+                codeView().padding(.top, -10)
+            }) {
                 HStack(spacing: 0) {
                     if hasErrors {
                         Text("*").foregroundColor(.red)

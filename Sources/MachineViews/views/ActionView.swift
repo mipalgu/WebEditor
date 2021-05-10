@@ -11,32 +11,31 @@ import Utilities
 
 struct ActionView: View {
     
-    @Binding var machine: Machine
-    
     @ObservedObject var viewModel: ActionViewModel
     
     init(action: ActionViewModel) {
-        self._machine = action.machineBinding
-        self.viewModel = action
+        self._viewModel = ObservedObject(initialValue: action)
     }
     
     var body: some View {
+        VStack {
+            Text(viewModel.implementation)
+            CodeViewWithDropDown(
+                value: $viewModel.implementation,
+                errors: $viewModel.errors,
+                label: viewModel.name,
+                language: viewModel.language,
+                expanded: $viewModel.expanded,
+                delayEdits: false
+            )
 //        CodeViewWithDropDown(
-//            value: $viewModel.implementation,
-//            errors: $viewModel.errors,
+//            root: $viewModel.machine,
+//            path: viewModel.path.implementation,
 //            label: viewModel.name,
 //            language: viewModel.language,
-//            collapsed: $viewModel.collapsed,
-//            delayEdits: true
+//            expanded: $viewModel.expanded
 //        )
-        CodeViewWithDropDown(
-            root: $viewModel.machine,
-            path: viewModel.path.implementation,
-            label: viewModel.name,
-            language: viewModel.language,
-            expanded: $viewModel.expanded,
-            notifier: viewModel
-        )
+        }
     }
 }
 

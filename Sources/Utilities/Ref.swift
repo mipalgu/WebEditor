@@ -159,7 +159,7 @@ public final class Ref<T>: ConstRef<T> {
         self.init(get: { value }, set: { value = $0 })
     }
     
-    private init(get: @escaping () -> T, set: @escaping (T) -> Void) {
+    public init(get: @escaping () -> T, set: @escaping (T) -> Void) {
         self.set = set
         super.init(get: get)
     }
