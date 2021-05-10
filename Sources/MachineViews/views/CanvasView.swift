@@ -133,14 +133,18 @@ public struct CanvasView: View {
 //                                .position(viewModel.clampPosition(point: viewModel.tracker(for: stateName).location, frame: geometry.size, dx: textWidth / 2.0, dy: textHeight / 2.0))
                             } else {
                                 VStack {
-                                    StateView(
+                                    CanvasObjectView(
                                         viewModel: viewModel.viewModel(forState: stateName),
                                         coordinateSpace: coordinateSpace,
-                                        frame: geometry.size,
-                                        focused: selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
-                                    )
-                                    .onChange(of: viewModel.viewModel(forState: stateName).expanded) { _ in
-//                                        self.viewModel.correctTransitionLocations(for: viewModel.viewModel(for: stateName).state.wrappedValue)
+                                        frame: geometry.size
+                                    ) {
+                                        StateView(
+                                            viewModel: viewModel.viewModel(forState: stateName),
+                                            focused: selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
+                                        )
+                                        .onChange(of: viewModel.viewModel(forState: stateName).expanded) { _ in
+    //                                        self.viewModel.correctTransitionLocations(for: viewModel.viewModel(for: stateName).state.wrappedValue)
+                                        }
                                     }
 //                                    .frame(
 //                                        width: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).width,
