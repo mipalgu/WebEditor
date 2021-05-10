@@ -1,5 +1,5 @@
 /*
- * CanvasViewModel.swift
+ * TransitionLayout.swift
  * 
  *
  * Created by Callum McColl on 10/5/21.
@@ -56,55 +56,45 @@
  *
  */
 
-import TokamakShim
-import Machines
-import AttributeViews
-import Utilities
-import GUUI
+import Foundation
 
-final class CanvasViewModel: ObservableObject {
+struct TransitionLayout: PlistConvertible {
     
-    let machineRef: Ref<Machine>
+    var srcPoint: CGPoint
     
-    private var stateViewModels: [StateName: StateViewModel]
+    var dstPoint: CGPoint
     
-    var layout: Layout {
-        Layout(states: [:])
+    var controlPoint1: CGPoint
+    
+    var controlPoint2: CGPoint
+    
+    var plistRepresentation: String {
+        return "" // Convert to plist xml here.
     }
     
-    var stateNames: [StateName] {
-        machineRef.value.states.lazy.map(\.name).sorted()
+    var curve: Curve {
+        Curve(
+            point0: srcPoint,
+            point1: controlPoint1,
+            point2: controlPoint2,
+            point3: dstPoint
+        )
     }
     
-    init(machineRef: Ref<Machine>, layout: Layout? = nil, notifier: GlobalChangeNotifier? = nil) {
-        self.machineRef = machineRef
-        self.stateViewModels = Dictionary(uniqueKeysWithValues: layout?.states.compactMap { (stateName, stateLayout) in
-            guard let index = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
-                return nil
-            }
-            return (stateName, StateViewModel(machine: machineRef, index: index, isText: false, layout: stateLayout, notifier: notifier))
-        } ?? [])
+    init(curve: Curve) {
+        self.init(srcPoint: curve.point0, dstPoint: curve.point3, controlPoint1: curve.point1, controlPoint2: curve.point2)
     }
     
-    func transitions(forState state: StateName) -> Range<Int> {
-        return viewModel(forState: state).transitions
+    init(srcPoint: CGPoint, dstPoint: CGPoint, controlPoint1: CGPoint, controlPoint2: CGPoint) {
+        self.srcPoint = srcPoint
+        self.dstPoint = dstPoint
+        self.controlPoint1 = controlPoint1
+        self.controlPoint2 = controlPoint2
     }
     
-    func viewModel(forState state: StateName) -> StateViewModel {
-        if let viewModel = stateViewModels[state] {
-            return viewModel
-        }
-        guard let index = machineRef.value.states.firstIndex(where: { $0.name == state }) else {
-            fatalError("Unable to fetch state named \(state).")
-        }
-        let viewModel = StateViewModel(machine: machineRef, index: index)
-        stateViewModels[state] = viewModel
-        return viewModel
-    }
-    
-    func viewModel(forTransition transitionIndex: Int, attachedToState stateName: StateName) -> TransitionViewModel {
-        let stateViewModel = viewModel(forState: stateName)
-        return stateViewModel.viewModel(forTransition: transitionIndex)
+    // Potentially throws? -> init() throws {
+    init?(fromPlistRepresentation str: String) {
+        return nil // Convert from plist string here.
     }
     
 }

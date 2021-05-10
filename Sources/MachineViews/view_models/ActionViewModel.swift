@@ -1,5 +1,5 @@
 /*
- * CanvasViewModel.swift
+ * ActionViewModel.swift
  * 
  *
  * Created by Callum McColl on 10/5/21.
@@ -57,54 +57,50 @@
  */
 
 import TokamakShim
+import Attributes
 import Machines
-import AttributeViews
 import Utilities
-import GUUI
 
-final class CanvasViewModel: ObservableObject {
+final class ActionViewModel: ObservableObject, Identifiable {
     
     let machineRef: Ref<Machine>
     
-    private var stateViewModels: [StateName: StateViewModel]
+    @Published var stateIndex: Int
     
-    var layout: Layout {
-        Layout(states: [:])
-    }
+    @Published var actionIndex: Int
     
-    var stateNames: [StateName] {
-        machineRef.value.states.lazy.map(\.name).sorted()
-    }
+    @Published var expanded: Bool
     
-    init(machineRef: Ref<Machine>, layout: Layout? = nil, notifier: GlobalChangeNotifier? = nil) {
-        self.machineRef = machineRef
-        self.stateViewModels = Dictionary(uniqueKeysWithValues: layout?.states.compactMap { (stateName, stateLayout) in
-            guard let index = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
-                return nil
-            }
-            return (stateName, StateViewModel(machine: machineRef, index: index, isText: false, layout: stateLayout, notifier: notifier))
-        } ?? [])
-    }
-    
-    func transitions(forState state: StateName) -> Range<Int> {
-        return viewModel(forState: state).transitions
-    }
-    
-    func viewModel(forState state: StateName) -> StateViewModel {
-        if let viewModel = stateViewModels[state] {
-            return viewModel
+    var machine: Machine {
+        get {
+            machineRef.value
+        } set {
+            machineRef.value = newValue
+            objectWillChange.send()
         }
-        guard let index = machineRef.value.states.firstIndex(where: { $0.name == state }) else {
-            fatalError("Unable to fetch state named \(state).")
-        }
-        let viewModel = StateViewModel(machine: machineRef, index: index)
-        stateViewModels[state] = viewModel
-        return viewModel
     }
     
-    func viewModel(forTransition transitionIndex: Int, attachedToState stateName: StateName) -> TransitionViewModel {
-        let stateViewModel = viewModel(forState: stateName)
-        return stateViewModel.viewModel(forTransition: transitionIndex)
+    var path: Attributes.Path<Machine, Action> {
+        Machine.path.states[stateIndex].actions[actionIndex]
+    }
+    
+    var name: String {
+        path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].name
+    }
+    
+    var implementation: Code {
+        path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].implementation
+    }
+    
+    var language: Language {
+        path.isNil(machineRef.value) ? .swift : machineRef.value[keyPath: path.keyPath].language
+    }
+    
+    init(machine: Ref<Machine>, stateIndex: Int, actionIndex: Int, expanded: Bool = true) {
+        self.machineRef = machine
+        self.stateIndex = stateIndex
+        self.actionIndex = actionIndex
+        self.expanded = expanded
     }
     
 }

@@ -1,5 +1,5 @@
 /*
- * CanvasViewModel.swift
+ * StateLayout.swift
  * 
  *
  * Created by Callum McColl on 10/5/21.
@@ -57,54 +57,54 @@
  */
 
 import TokamakShim
-import Machines
-import AttributeViews
-import Utilities
-import GUUI
 
-final class CanvasViewModel: ObservableObject {
+struct StateLayout: PlistConvertible {
     
-    let machineRef: Ref<Machine>
+    var transitions: [TransitionLayout]
     
-    private var stateViewModels: [StateName: StateViewModel]
+    var bgColor: Color
     
-    var layout: Layout {
-        Layout(states: [:])
+    var editingMode: Bool
+    
+    var expanded: Bool
+    
+    var actionHeights: [String: CGFloat]
+    
+    var stateSelected: Bool
+    
+    var strokeColor: Color
+    
+    var width: CGFloat
+    
+    var height: CGFloat
+    
+    var x: CGFloat
+    
+    var y: CGFloat
+    
+    var zoomedInActionHeights: [String: CGFloat]
+    
+    var plistRepresentation: String {
+        return ""
     }
     
-    var stateNames: [StateName] {
-        machineRef.value.states.lazy.map(\.name).sorted()
+    init(transitions: [TransitionLayout], bgColor: Color, editingMode: Bool, expanded: Bool, actionHeights: [String: CGFloat], stateSelected: Bool, strokeColor: Color, width: CGFloat, height: CGFloat, x: CGFloat, y: CGFloat, zoomedInActionHeights: [String: CGFloat]) {
+        self.transitions = transitions
+        self.bgColor = bgColor
+        self.editingMode = editingMode
+        self.expanded = expanded
+        self.actionHeights = actionHeights
+        self.stateSelected = stateSelected
+        self.strokeColor = strokeColor
+        self.width = width
+        self.height = height
+        self.x = x
+        self.y = y
+        self.zoomedInActionHeights = zoomedInActionHeights
     }
     
-    init(machineRef: Ref<Machine>, layout: Layout? = nil, notifier: GlobalChangeNotifier? = nil) {
-        self.machineRef = machineRef
-        self.stateViewModels = Dictionary(uniqueKeysWithValues: layout?.states.compactMap { (stateName, stateLayout) in
-            guard let index = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
-                return nil
-            }
-            return (stateName, StateViewModel(machine: machineRef, index: index, isText: false, layout: stateLayout, notifier: notifier))
-        } ?? [])
-    }
-    
-    func transitions(forState state: StateName) -> Range<Int> {
-        return viewModel(forState: state).transitions
-    }
-    
-    func viewModel(forState state: StateName) -> StateViewModel {
-        if let viewModel = stateViewModels[state] {
-            return viewModel
-        }
-        guard let index = machineRef.value.states.firstIndex(where: { $0.name == state }) else {
-            fatalError("Unable to fetch state named \(state).")
-        }
-        let viewModel = StateViewModel(machine: machineRef, index: index)
-        stateViewModels[state] = viewModel
-        return viewModel
-    }
-    
-    func viewModel(forTransition transitionIndex: Int, attachedToState stateName: StateName) -> TransitionViewModel {
-        let stateViewModel = viewModel(forState: stateName)
-        return stateViewModel.viewModel(forTransition: transitionIndex)
+    init?(fromPlistRepresentation str: String) {
+        return nil
     }
     
 }
