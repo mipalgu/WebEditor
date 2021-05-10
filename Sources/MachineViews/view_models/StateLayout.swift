@@ -58,51 +58,6 @@
 
 import TokamakShim
 
-struct SRGBColor: Hashable, Codable {
-    
-    enum CodingKeys: CodingKey {
-        
-        case alpha
-        case blue
-        case green
-        case red
-        
-    }
-    
-    var alpha: CGFloat
-    
-    var red: CGFloat
-    
-    var green: CGFloat
-    
-    var blue: CGFloat
-    
-    init(alpha: CGFloat = 1.0, red: CGFloat, green: CGFloat, blue: CGFloat) {
-        self.alpha = alpha
-        self.red = red
-        self.green = green
-        self.blue = blue
-    }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let alpha = try container.decode(CGFloat.self, forKey: .alpha)
-        let blue = try container.decode(CGFloat.self, forKey: .blue)
-        let green = try container.decode(CGFloat.self, forKey: .green)
-        let red = try container.decode(CGFloat.self, forKey: .red)
-        self.init(alpha: alpha, red: red, green: green, blue: blue)
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(alpha, forKey: .alpha)
-        try container.encode(blue, forKey: .blue)
-        try container.encode(green, forKey: .green)
-        try container.encode(red, forKey: .red)
-    }
-    
-}
-
 struct StateLayout: PlistConvertible, Hashable {
     
     var transitions: [TransitionLayout]
