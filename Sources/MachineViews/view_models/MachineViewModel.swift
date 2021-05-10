@@ -47,10 +47,17 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     @Published var attributesCollapsed: Bool = false
     
     lazy var canvasViewModel: CanvasViewModel = {
+        let decoder = PropertyListDecoder()
         let plistURL = machine.filePath.appendingPathComponent("Layout.plist")
+        let layout: Layout?
+        if let data = try? Data(contentsOf: plistURL), let plist = try? decoder.decode(Layout.self, from: data) {
+            layout = plist
+        } else {
+            layout = nil
+        }
         return CanvasViewModel(
             machineRef: machineRef,
-            layout: (try? String(contentsOf: plistURL)).flatMap { Layout(fromPlistRepresentation: $0) },
+            layout: layout,
             notifier: self
         )
     }()

@@ -60,6 +60,15 @@ import TokamakShim
 
 struct SRGBColor: Hashable, Codable {
     
+    enum CodingKeys: CodingKey {
+        
+        case alpha
+        case blue
+        case green
+        case red
+        
+    }
+    
     var alpha: CGFloat
     
     var red: CGFloat
@@ -67,6 +76,30 @@ struct SRGBColor: Hashable, Codable {
     var green: CGFloat
     
     var blue: CGFloat
+    
+    init(alpha: CGFloat = 1.0, red: CGFloat, green: CGFloat, blue: CGFloat) {
+        self.alpha = alpha
+        self.red = red
+        self.green = green
+        self.blue = blue
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let alpha = try container.decode(CGFloat.self, forKey: .alpha)
+        let blue = try container.decode(CGFloat.self, forKey: .blue)
+        let green = try container.decode(CGFloat.self, forKey: .green)
+        let red = try container.decode(CGFloat.self, forKey: .red)
+        self.init(alpha: alpha, red: red, green: green, blue: blue)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(alpha, forKey: .alpha)
+        try container.encode(blue, forKey: .blue)
+        try container.encode(green, forKey: .green)
+        try container.encode(red, forKey: .red)
+    }
     
 }
 
@@ -152,12 +185,12 @@ extension StateLayout: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let transitions = try container.decode([TransitionLayout].self, forKey: "Transitions")
-        let bgColor = try container.decode(SRGBColor.self, forKey: "bgColor")
+        let bgColor = try container.decode(SRGBColor.self, forKey: "bgColour")
         let editingMode = try container.decode(Bool.self, forKey: "editingMode")
         let expanded = try container.decode(Bool.self, forKey: "expanded")
         let height = try container.decode(CGFloat.self, forKey: "h")
         let stateSelected = try container.decode(Bool.self, forKey: "stateSelected")
-        let strokeColor = try container.decode(SRGBColor.self, forKey: "strokeColor")
+        let strokeColor = try container.decode(SRGBColor.self, forKey: "strokeColour")
         let width = try container.decode(CGFloat.self, forKey: "w")
         let x = try container.decode(CGFloat.self, forKey: "x")
         let y = try container.decode(CGFloat.self, forKey: "y")
@@ -190,7 +223,7 @@ extension StateLayout: Codable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(transitions, forKey: "Transitions")
-        try container.encode(bgColor, forKey: "bgColor")
+        try container.encode(bgColor, forKey: "bgColour")
         try container.encode(editingMode, forKey: "editingMode")
         try container.encode(expanded, forKey: "expanded")
         try container.encode(height, forKey: "h")
@@ -198,7 +231,7 @@ extension StateLayout: Codable {
             try container.encode(height, forKey: CodingKeys(stringValue: "\(action)Height")!)
         }
         try container.encode(stateSelected, forKey: "stateSelected")
-        try container.encode(strokeColor, forKey: "strokeColor")
+        try container.encode(strokeColor, forKey: "strokeColour")
         try container.encode(width, forKey: "w")
         try container.encode(x, forKey: "x")
         try container.encode(y, forKey: "y")
