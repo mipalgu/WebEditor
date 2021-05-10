@@ -27,7 +27,7 @@ public struct CanvasView: View {
     
     @State var creatingCurve: Curve? = nil
     
-    @State var edittingState: Int? = nil
+    @State var edittingState: StateName? = nil
     
     @State var saving: Bool = false
     
@@ -54,10 +54,7 @@ public struct CanvasView: View {
     public var body: some View {
         Group {
             if let editState = edittingState {
-                StateEditView(
-                    titleViewModel: viewModel.viewModel(for: viewModel.machine.states[editState].name).title,
-                    actionViewModels: viewModel.viewModel(for: viewModel.machine.states[editState].name).actions
-                )
+                StateEditView(viewModel: viewModel.viewModel(forState: editState))
                     .onTapGesture(count: 2) {
                         edittingState = nil
                         focus = .machine
@@ -72,28 +69,28 @@ public struct CanvasView: View {
                             .frame(width: geometry.size.width, height: geometry.size.height)
 //                            .onTapGesture(count: 2) { try? machine.newState() }
                             .onTapGesture { selectedObjects = []; focus = .machine }
-                            .gesture(viewModel.selectionBoxGesture(forView: self))
-                            .gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
-                            .contextMenu {
-                                VStack {
-                                    Button("New State", action: { viewModel.createState() })
-                                    Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))
-                                    if !self.selectedObjects.isEmpty {
-                                        Button("Delete Selected", action: { viewModel.deleteSelected(self) })
-                                    }
-                                    Button("Save", action: {
-                                        guard let _ = try? viewModel.machine.save() else {
-                                            print(viewModel.machine.errorBag.allErrors)
-                                            return
-                                        }
-                                        let plist = viewModel.plist
-                                        guard let _ = try? plist.write(toFile: viewModel.machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
-                                            print("Failed to write plist")
-                                            return
-                                        }
-                                    })
-                                }
-                            }
+                            //.gesture(viewModel.selectionBoxGesture(forView: self))
+                            //.gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
+//                            .contextMenu {
+//                                VStack {
+//                                    Button("New State", action: { viewModel.createState() })
+//                                    Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))
+//                                    if !self.selectedObjects.isEmpty {
+//                                        Button("Delete Selected", action: { viewModel.deleteSelected(self) })
+//                                    }
+//                                    Button("Save", action: {
+//                                        guard let _ = try? viewModel.machine.save() else {
+//                                            print(viewModel.machine.errorBag.allErrors)
+//                                            return
+//                                        }
+//                                        let plist = viewModel.plist
+//                                        guard let _ = try? plist.write(toFile: viewModel.machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
+//                                            print("Failed to write plist")
+//                                            return
+//                                        }
+//                                    })
+//                                }
+//                            }
                         if let curve = creatingCurve {
                             ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                         }
@@ -101,33 +98,31 @@ public struct CanvasView: View {
 //                            ArrowView(curve: .constant(row.data.curve), strokeNumber: 0, colour: config.errorColour)
 //                        }
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
-                            ForEach(viewModel.cache.transitions(source: stateName), id: \.self) { transitionViewModel in
+                            ForEach(viewModel.transitions(forState: stateName), id: \.self) { transitionIndex in
                                 TransitionView(
-                                    viewModel: transitionViewModel,
-                                    tracker: viewModel.tracker(for: transitionViewModel.transitionIndex, originating: stateName),
-                                    strokeNumber: UInt8(transitionViewModel.transitionIndex),
-                                    focused: selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(for: stateName).stateIndex, transitionIndex: transitionViewModel.transitionIndex))
+                                    viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName),
+                                    focused: selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex))
                                 )
                                 .clipped()
-                                .gesture(TapGesture().onEnded {
-                                    viewModel.addSelectedTransition(view: self, from: viewModel.viewModel(for: stateName).stateIndex, at: transitionViewModel.transitionIndex)
-                                }.modifiers(.shift))
-                                .onTapGesture {
-                                    focus = .transition(stateIndex: viewModel.viewModel(for: stateName).stateIndex, transitionIndex: transitionViewModel.transitionIndex)
-                                    selectedObjects = [.transition(stateIndex: viewModel.viewModel(for: stateName).stateIndex, transitionIndex: transitionViewModel.transitionIndex)]
-                                }
-                                .contextMenu {
-                                    Button("Straighten",action: {
-                                        viewModel.straighten(state: stateName, transitionIndex: transitionViewModel.transitionIndex)
-                                    })
-                                    Button("Delete",action: {
-                                        viewModel.deleteTransition(view: self, for: viewModel.viewModel(for: stateName).stateIndex, at: transitionViewModel.transitionIndex)
-                                    })
-                                }
+//                                .gesture(TapGesture().onEnded {
+//                                    viewModel.addSelectedTransition(view: self, from: viewModel.viewModel(for: stateName).stateIndex, at: transitionViewModel.transitionIndex)
+//                                }.modifiers(.shift))
+//                                .onTapGesture {
+//                                    focus = .transition(stateIndex: viewModel.viewModel(for: stateName).stateIndex, transitionIndex: transitionViewModel.transitionIndex)
+//                                    selectedObjects = [.transition(stateIndex: viewModel.viewModel(for: stateName).stateIndex, transitionIndex: transitionViewModel.transitionIndex)]
+//                                }
+//                                .contextMenu {
+//                                    Button("Straighten",action: {
+//                                        viewModel.straighten(state: stateName, transitionIndex: transitionViewModel.transitionIndex)
+//                                    })
+//                                    Button("Delete",action: {
+//                                        viewModel.deleteTransition(view: self, for: viewModel.viewModel(for: stateName).stateIndex, at: transitionViewModel.transitionIndex)
+//                                    })
+//                                }
                             }
                         }
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
-                            if viewModel.tracker(for: stateName).isText {
+                            if viewModel.viewModel(forState: stateName).isText {
                                 VStack {
                                     Text(stateName)
                                         .font(config.fontBody)
@@ -135,18 +130,17 @@ public struct CanvasView: View {
 //                                    .foregroundColor(viewModel.viewModel(for: machine[keyPath: machine.path.states[index].name.keyPath]).highlighted ? config.highlightColour : config.textColor)
                                 }
                                 .coordinateSpace(name: coordinateSpace)
-                                .position(viewModel.clampPosition(point: viewModel.tracker(for: stateName).location, frame: geometry.size, dx: textWidth / 2.0, dy: textHeight / 2.0))
+//                                .position(viewModel.clampPosition(point: viewModel.tracker(for: stateName).location, frame: geometry.size, dx: textWidth / 2.0, dy: textHeight / 2.0))
                             } else {
                                 VStack {
                                     StateView(
-                                        state: viewModel.viewModel(for: stateName),
-                                        tracker: viewModel.tracker(for: stateName),
+                                        viewModel: viewModel.viewModel(forState: stateName),
                                         coordinateSpace: coordinateSpace,
                                         frame: geometry.size,
-                                        focused: selectedObjects.contains(.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex))
+                                        focused: selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
                                     )
-                                    .onChange(of: viewModel.tracker(for: stateName).expanded) { _ in
-                                        self.viewModel.correctTransitionLocations(for: viewModel.viewModel(for: stateName).state.wrappedValue)
+                                    .onChange(of: viewModel.viewModel(forState: stateName).expanded) { _ in
+//                                        self.viewModel.correctTransitionLocations(for: viewModel.viewModel(for: stateName).state.wrappedValue)
                                     }
 //                                    .frame(
 //                                        width: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).width,
@@ -154,23 +148,23 @@ public struct CanvasView: View {
 //                                    )
                                 }
                                 .coordinateSpace(name: coordinateSpace)
-                                .position(viewModel.tracker(for: stateName).location)
-                                .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: viewModel.viewModel(for: stateName).stateIndex) }.modifiers(.shift))
-                                .onTapGesture(count: 2) { edittingState = viewModel.viewModel(for: stateName).stateIndex; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
-                                .onTapGesture { selectedObjects = [.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)]; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
-                                .gesture(viewModel.createTransitionGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex))
-                                .gesture(viewModel.dragStateGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex, size: geometry.size))
-                                .onChange(of: viewModel.tracker(for: stateName).expanded) { _ in
-                                    self.viewModel.updateTransitionLocations(source: viewModel.viewModel(for: stateName).state.wrappedValue)
-                                }
-                                .contextMenu {
-                                    Button("Delete", action: {
-                                        viewModel.deleteState(view: self, at: viewModel.viewModel(for: stateName).stateIndex)
-                                        if selectedObjects.contains(.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)) {
-                                            selectedObjects.remove(.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex))
-                                        }
-                                    })
-                                }
+                                .position(viewModel.viewModel(forState: stateName).location)
+//                                .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: viewModel.viewModel(for: stateName).stateIndex) }.modifiers(.shift))
+//                                .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
+//                                .onTapGesture { selectedObjects = [.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)]; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
+//                                .gesture(viewModel.createTransitionGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex))
+//                                .gesture(viewModel.dragStateGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex, size: geometry.size))
+//                                .onChange(of: viewModel.tracker(for: stateName).expanded) { _ in
+//                                    self.viewModel.updateTransitionLocations(source: viewModel.viewModel(for: stateName).state.wrappedValue)
+//                                }
+//                                .contextMenu {
+//                                    Button("Delete", action: {
+//                                        viewModel.deleteState(view: self, at: viewModel.viewModel(for: stateName).stateIndex)
+//                                        if selectedObjects.contains(.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)) {
+//                                            selectedObjects.remove(.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex))
+//                                        }
+//                                    })
+//                                }
                             }
                         }
                         if selectedBox != nil {
@@ -199,36 +193,36 @@ public struct CanvasView: View {
     
 }
 
-struct CanvasView_Previews: PreviewProvider {
-    
-    struct Parent: View {
-        
-        
-        @State var machine: Machine = Machine.initialSwiftMachine()
-        
-        var body: some View {
-            Preview(viewModel: CanvasViewModel(machine: $machine))
-        }
-        
-    }
-    
-    struct Preview: View {
-        
-        @StateObject var viewModel: CanvasViewModel
-        
-        @State var focus: Focus = .machine
-        
-        let config = Config()
-        
-        var body: some View {
-            CanvasView(viewModel: viewModel, focus: $focus).environmentObject(config)
-        }
-        
-    }
-    
-    static var previews: some View {
-        VStack {
-            Parent()
-        }
-    }
-}
+//struct CanvasView_Previews: PreviewProvider {
+//    
+//    struct Parent: View {
+//        
+//        
+//        @State var machine: Machine = Machine.initialSwiftMachine()
+//        
+//        var body: some View {
+//            Preview(viewModel: CanvasViewModel(machine: $machine))
+//        }
+//        
+//    }
+//    
+//    struct Preview: View {
+//        
+//        @StateObject var viewModel: CanvasViewModel
+//        
+//        @State var focus: Focus = .machine
+//        
+//        let config = Config()
+//        
+//        var body: some View {
+//            CanvasView(viewModel: viewModel, focus: $focus).environmentObject(config)
+//        }
+//        
+//    }
+//    
+//    static var previews: some View {
+//        VStack {
+//            Parent()
+//        }
+//    }
+//}

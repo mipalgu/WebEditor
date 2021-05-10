@@ -21,7 +21,7 @@ struct MachineView: View {
                 switch viewModel.focus {
                 case .machine:
                     CollapsableAttributeGroupsView(
-                        machine: viewModel.machineBinding,
+                        machine: viewModel.machineRef.asBinding,
                         path: viewModel.path,
                         collapsed: $viewModel.attributesCollapsed,
                         label: viewModel.label,
@@ -32,7 +32,7 @@ struct MachineView: View {
                     }
                 default:
                     CollapsableAttributeGroupsView(
-                        machine: viewModel.machineBinding,
+                        machine: viewModel.machineRef.asBinding,
                         path: viewModel.path,
                         collapsed: $viewModel.attributesCollapsed,
                         label: viewModel.label,

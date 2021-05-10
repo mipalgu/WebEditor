@@ -32,30 +32,30 @@ struct StateCollapsedView<TitleView: View>: View {
     
 }
 
-import Machines
-import AttributeViews
-
-struct StateCollapsedView_Previews: PreviewProvider {
-    
-    struct Preview: View {
-        
-        @State var machine: Machine = Machine.initialSwiftMachine()
-        
-        @State var expanded: Bool = false
-        
-        let config = Config()
-        
-        var body: some View {
-            StateCollapsedView {
-                StateTitleView(viewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name, cache: ViewCache(machine: $machine)), expanded: $expanded)
-            }.environmentObject(config)
-        }
-        
-    }
-    
-    static var previews: some View {
-        VStack {
-            Preview()
-        }
-    }
-}
+//import Machines
+//import AttributeViews
+//
+//struct StateCollapsedView_Previews: PreviewProvider {
+//    
+//    struct Preview: View {
+//        
+//        @State var machine: Machine = Machine.initialSwiftMachine()
+//        
+//        @State var expanded: Bool = false
+//        
+//        let config = Config()
+//        
+//        var body: some View {
+//            StateCollapsedView {
+//                StateTitleView(viewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name, cache: ViewCache(machine: $machine)), expanded: $expanded)
+//            }.environmentObject(config)
+//        }
+//        
+//    }
+//    
+//    static var previews: some View {
+//        VStack {
+//            Preview()
+//        }
+//    }
+//}

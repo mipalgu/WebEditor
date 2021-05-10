@@ -21,20 +21,12 @@ struct ActionView: View {
         VStack {
             Text(viewModel.implementation)
             CodeViewWithDropDown(
-                value: $viewModel.implementation,
-                errors: $viewModel.errors,
+                root: $viewModel.machine,
+                path: viewModel.path.implementation,
                 label: viewModel.name,
                 language: viewModel.language,
-                expanded: $viewModel.expanded,
-                delayEdits: false
+                expanded: $viewModel.expanded
             )
-//        CodeViewWithDropDown(
-//            root: $viewModel.machine,
-//            path: viewModel.path.implementation,
-//            label: viewModel.name,
-//            language: viewModel.language,
-//            expanded: $viewModel.expanded
-//        )
         }
     }
 }
@@ -45,44 +37,44 @@ struct ActionView: View {
 //    }
 //}
 
-import Attributes
-import Machines
-
-struct ActionView_Previews: PreviewProvider {
-    
-    struct Preview: View {
-        
-        @State var machine: Machine = Machine.initialSwiftMachine()
-        
-        var body: some View {
-            SubView(machine: $machine, path: Machine.path.states[0].actions[0])
-        }
-        
-    }
-    
-    struct SubView: View {
-        
-        @StateObject var viewModel: ActionViewModel
-        
-        init(machine: Binding<Machine>, path: Attributes.Path<Machine, Action>) {
-            self._viewModel = StateObject(wrappedValue: ActionViewModel(machine: machine, path: path))
-        }
-        
-        var body: some View {
-            VStack {
-                TextField("Something", text: .constant(""))
-                Button("redraw") {
-                    viewModel.objectWillChange.send()
-                }
-                ActionView(action: viewModel)
-            }
-        }
-        
-    }
-    
-    static var previews: some View {
-        VStack {
-            Preview()
-        }
-    }
-}
+//import Attributes
+//import Machines
+//
+//struct ActionView_Previews: PreviewProvider {
+//    
+//    struct Preview: View {
+//        
+//        @State var machine: Machine = Machine.initialSwiftMachine()
+//        
+//        var body: some View {
+//            SubView(machine: $machine, path: Machine.path.states[0].actions[0])
+//        }
+//        
+//    }
+//    
+//    struct SubView: View {
+//        
+//        @StateObject var viewModel: ActionViewModel
+//        
+//        init(machine: Binding<Machine>, path: Attributes.Path<Machine, Action>) {
+//            self._viewModel = StateObject(wrappedValue: ActionViewModel(machine: machine, path: path))
+//        }
+//        
+//        var body: some View {
+//            VStack {
+//                TextField("Something", text: .constant(""))
+//                Button("redraw") {
+//                    viewModel.objectWillChange.send()
+//                }
+//                ActionView(action: viewModel)
+//            }
+//        }
+//        
+//    }
+//    
+//    static var previews: some View {
+//        VStack {
+//            Preview()
+//        }
+//    }
+//}

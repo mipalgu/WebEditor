@@ -14,8 +14,7 @@ import AttributeViews
 
 struct StateEditView: View {
     
-    var titleViewModel: StateTitleViewModel
-    var actionViewModels: [ActionViewModel]
+    @ObservedObject var viewModel: StateViewModel
     
     @EnvironmentObject var config: Config
     
@@ -23,10 +22,14 @@ struct StateEditView: View {
         GeometryReader { geometry in
             ScrollView {
                 VStack(alignment: .leading) {
-                    StateEditTitleView(viewModel: titleViewModel)
-                    ForEach(actionViewModels, id: \.id) {
-                        StateEditActionView(viewModel: $0)
-                        .frame(minHeight: max(geometry.size.height / 3 - 25, 50))
+                    LineView<Config>(root: $viewModel.machine, path: viewModel.path.name, label: "Enter State Name...")
+                        .multilineTextAlignment(.center)
+                        .font(config.fontTitle2)
+                        .background(config.fieldColor)
+                        .foregroundColor(config.textColor)
+                    ForEach(viewModel.actions, id: \.self) { action in
+                        StateEditActionView(viewModel: viewModel.viewModel(forAction: action))
+                            .frame(minHeight: max(geometry.size.height / CGFloat(viewModel.actions.count) - 25, 50))
                     }
                 }.padding(10)
             }.frame(height: geometry.size.height)
@@ -34,27 +37,27 @@ struct StateEditView: View {
     }
 }
 
-struct StateEditView_Previews: PreviewProvider {
-    
-    struct Preview: View {
-        
-        @State var machine: Machine = Machine.initialSwiftMachine()
-        
-        let path = Machine.path.states[0]
-        
-        let config = Config()
-        
-        var body: some View {
-            StateEditView(titleViewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name, cache: ViewCache(machine: $machine)), actionViewModels: machine.states[0].actions.indices.map {
-                ActionViewModel(machine: $machine, path: machine.path.states[0].actions[$0])
-            }).environmentObject(config)
-        }
-        
-    }
-    
-    static var previews: some View {
-        VStack {
-            Preview()
-        }
-    }
-}
+//struct StateEditView_Previews: PreviewProvider {
+//    
+//    struct Preview: View {
+//        
+//        @State var machine: Machine = Machine.initialSwiftMachine()
+//        
+//        let path = Machine.path.states[0]
+//        
+//        let config = Config()
+//        
+//        var body: some View {
+//            StateEditView(titleViewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name, cache: ViewCache(machine: $machine)), actionViewModels: machine.states[0].actions.indices.map {
+//                ActionViewModel(machine: $machine, path: machine.path.states[0].actions[$0])
+//            }).environmentObject(config)
+//        }
+//        
+//    }
+//    
+//    static var previews: some View {
+//        VStack {
+//            Preview()
+//        }
+//    }
+//}

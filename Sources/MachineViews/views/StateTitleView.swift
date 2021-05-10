@@ -63,9 +63,10 @@ import Machines
 import AttributeViews
 import Utilities
 
-struct StateTitleView: View {
+struct StateTitleView<Root: Modifiable>: View {
     
-    @ObservedObject var viewModel: StateTitleViewModel
+    @Binding var root: Root
+    let path: Attributes.Path<Root, String>
     @Binding var expanded: Bool
     
     @EnvironmentObject var config: Config
@@ -73,7 +74,7 @@ struct StateTitleView: View {
     var body: some View {
         HStack {
             Toggle(isOn: $expanded) {
-                LineView<Config>(value: $viewModel.name, errors: $viewModel.errors, label: "Enter State Name...", delayEdits: true)
+                LineView<Config>(root: $root, path: path, label: "Enter State Name...")
                     .multilineTextAlignment(.center)
                     .font(config.fontBody.bold())
             }.toggleStyle(ArrowToggleStyle())
@@ -83,24 +84,24 @@ struct StateTitleView: View {
     
 }
 
-struct StateTitleView_Previews: PreviewProvider {
-    
-    struct Preview: View {
-        
-        @State var machine: Machine = Machine.initialSwiftMachine()
-        @State var expanded: Bool = false
-        
-        let config = Config()
-        
-        var body: some View {
-            StateTitleView(viewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name, cache: ViewCache(machine: $machine)), expanded: $expanded)
-        }
-        
-    }
-    
-    static var previews: some View {
-        VStack {
-            Preview()
-        }
-    }
-}
+//struct StateTitleView_Previews: PreviewProvider {
+//    
+//    struct Preview: View {
+//        
+//        @State var machine: Machine = Machine.initialSwiftMachine()
+//        @State var expanded: Bool = false
+//        
+//        let config = Config()
+//        
+//        var body: some View {
+//            StateTitleView(viewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name, cache: ViewCache(machine: $machine)), expanded: $expanded)
+//        }
+//        
+//    }
+//    
+//    static var previews: some View {
+//        VStack {
+//            Preview()
+//        }
+//    }
+//}

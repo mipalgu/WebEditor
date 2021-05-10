@@ -198,6 +198,10 @@ final class CanvasViewModel: ObservableObject {
         Layout(states: [:])
     }
     
+    var stateNames: [StateName] {
+        machineRef.value.states.lazy.map(\.name).sorted()
+    }
+    
     init(machineRef: Ref<Machine>, layout: Layout? = nil, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machineRef
         self.stateViewModels = Dictionary(uniqueKeysWithValues: layout?.states.compactMap { (stateName, stateLayout) in
@@ -206,6 +210,10 @@ final class CanvasViewModel: ObservableObject {
             }
             return (stateName, StateViewModel(machine: machineRef, index: index, isText: false, layout: stateLayout, notifier: notifier))
         } ?? [])
+    }
+    
+    func transitions(forState state: StateName) -> Range<Int> {
+        return viewModel(forState: state).transitions
     }
     
     func viewModel(forState state: StateName) -> StateViewModel {
@@ -228,6 +236,7 @@ final class CanvasViewModel: ObservableObject {
 }
 
 import Transformations
+import Attributes
 import AttributeViews
 
 final class StateViewModel: ObservableObject, Identifiable, MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable {
@@ -238,18 +247,41 @@ final class StateViewModel: ObservableObject, Identifiable, MoveAndStretchFromDr
     
     @Published var index: Int {
         willSet {
-            actions.forEach {
-                $1.stateIndex = newValue
-            }
-            transitions.forEach {
+            actionsViewModel.stateIndex = newValue
+            transitionViewModels.forEach {
                 $1.stateIndex = newValue
             }
         }
     }
     
-    private var actions: [String: ActionViewModel] = [:]
+    let actionsViewModel: ActionsViewModel
     
-    private var transitions: [Int: TransitionViewModel]
+    private var transitionViewModels: [Int: TransitionViewModel]
+    
+    var machine: Machine {
+        get {
+            machineRef.value
+        } set {
+            machineRef.value = newValue
+            objectWillChange.send()
+        }
+    }
+    
+    var path: Attributes.Path<Machine, Machines.State> {
+        Machine.path.states[index]
+    }
+    
+    var transitions: Range<Int> {
+        path.isNil(machineRef.value) ? 0..<0 : machineRef.value[keyPath: path.keyPath].transitions.indices
+    }
+    
+    var actions: [String] {
+        actionsViewModel.actions
+    }
+    
+    var stateNames: [String] {
+        machineRef.value.states.map(\.name)
+    }
     
     @Published var isText: Bool {
         didSet {
@@ -353,22 +385,27 @@ final class StateViewModel: ObservableObject, Identifiable, MoveAndStretchFromDr
         self._collapsedHeight = (layout?.expanded == true ? 100 : layout?.height) ?? 100
         self._expandedWidth = (layout?.expanded == true ? layout?.width : 200) ?? 200
         self._expandedHeight = (layout?.expanded == true ? layout?.height : 150) ?? 150
+        self.actionsViewModel = ActionsViewModel(machine: machine, stateIndex: index)
         if machine.value.states[index].transitions.isEmpty {
-            self.transitions = [:]
+            self.transitionViewModels = [:]
         } else {
-            self.transitions = Dictionary(uniqueKeysWithValues: layout?.transitions[0..<machine.value.states[index].transitions.count].enumerated().map {
+            self.transitionViewModels = Dictionary(uniqueKeysWithValues: layout?.transitions[0..<machine.value.states[index].transitions.count].enumerated().map {
                 ($0, TransitionViewModel(machine: machine, stateIndex: index, transitionIndex: $0, layout: $1))
             } ?? [])
         }
         self.notifier = notifier
     }
     
+    func viewModel(forAction action: String) -> ActionViewModel {
+        self.actionsViewModel.viewModel(forAction: action)
+    }
+    
     func viewModel(forTransition transitionIndex: Int) -> TransitionViewModel {
-        if let viewModel = transitions[transitionIndex] {
+        if let viewModel = transitionViewModels[transitionIndex] {
             return viewModel
         }
         let viewModel = TransitionViewModel(machine: machineRef, stateIndex: index, transitionIndex: transitionIndex)
-        transitions[transitionIndex] = viewModel
+        transitionViewModels[transitionIndex] = viewModel
         return viewModel
     }
     
@@ -391,6 +428,59 @@ final class StateViewModel: ObservableObject, Identifiable, MoveAndStretchFromDr
     
 }
 
+final class ActionsViewModel: ObservableObject, Identifiable {
+    
+    let machineRef: Ref<Machine>
+    
+    @Published var stateIndex: Int {
+        willSet {
+            actionViewModels.forEach {
+                $1.stateIndex = newValue
+            }
+        }
+    }
+    
+    private var actionViewModels: [String: ActionViewModel]
+    
+    var machine: Machine {
+        get {
+            machineRef.value
+        } set {
+            machineRef.value = newValue
+            objectWillChange.send()
+        }
+    }
+    
+    var path: Attributes.Path<Machine, [Action]> {
+        Machine.path.states[stateIndex].actions
+    }
+    
+    var actions: [String] {
+        path.isNil(machineRef.value) ? [] : machineRef.value[keyPath: path.keyPath].map(\.name)
+    }
+    
+    init(machine: Ref<Machine>, stateIndex: Int) {
+        self.machineRef = machine
+        self.stateIndex = stateIndex
+        self.actionViewModels = stateIndex >= machine.value.states.count ? [:] : Dictionary(uniqueKeysWithValues: machine.value.states[stateIndex].actions.enumerated().map {
+            ($1.name, ActionViewModel(machine: machine, stateIndex: stateIndex, actionIndex: $0))
+        })
+    }
+    
+    func viewModel(forAction action: String) -> ActionViewModel {
+        if let viewModel = actionViewModels[action] {
+            return viewModel
+        }
+        guard let actionIndex = machineRef.value.states[stateIndex].actions.firstIndex(where: { $0.name == action }) else {
+            fatalError("Unable to fetch action \(action).")
+        }
+        let viewModel = ActionViewModel(machine: machineRef, stateIndex: stateIndex, actionIndex: actionIndex)
+        actionViewModels[action] = viewModel
+        return viewModel
+    }
+    
+}
+
 final class ActionViewModel: ObservableObject, Identifiable {
     
     let machineRef: Ref<Machine>
@@ -399,10 +489,38 @@ final class ActionViewModel: ObservableObject, Identifiable {
     
     @Published var actionIndex: Int
     
-    init(machine: Ref<Machine>, stateIndex: Int, actionIndex: Int) {
+    @Published var expanded: Bool
+    
+    var machine: Machine {
+        get {
+            machineRef.value
+        } set {
+            machineRef.value = newValue
+            objectWillChange.send()
+        }
+    }
+    
+    var path: Attributes.Path<Machine, Action> {
+        Machine.path.states[stateIndex].actions[actionIndex]
+    }
+    
+    var name: String {
+        path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].name
+    }
+    
+    var implementation: Code {
+        path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].implementation
+    }
+    
+    var language: Language {
+        path.isNil(machineRef.value) ? .swift : machineRef.value[keyPath: path.keyPath].language
+    }
+    
+    init(machine: Ref<Machine>, stateIndex: Int, actionIndex: Int, expanded: Bool = true) {
         self.machineRef = machine
         self.stateIndex = stateIndex
         self.actionIndex = actionIndex
+        self.expanded = expanded
     }
     
 }
@@ -416,6 +534,23 @@ final class TransitionViewModel: ObservableObject, Identifiable, Positionable {
     @Published var transitionIndex: Int
     
     @Published var curve: Curve
+    
+    var machine: Machine {
+        get {
+            machineRef.value
+        } set {
+            machineRef.value = newValue
+            objectWillChange.send()
+        }
+    }
+    
+    var path: Attributes.Path<Machine, Transition> {
+        Machine.path.states[stateIndex].transitions[transitionIndex]
+    }
+    
+    var condition: Expression {
+        path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].condition ?? ""
+    }
     
     var location: CGPoint {
         get {

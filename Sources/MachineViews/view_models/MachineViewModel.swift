@@ -48,7 +48,11 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     lazy var canvasViewModel: CanvasViewModel = {
         let plistURL = machine.filePath.appendingPathComponent("Layout.plist")
-        return CanvasViewModel(machine: machineRef, plist: try? String(contentsOf: plistURL), notifier: self)
+        return CanvasViewModel(
+            machineRef: machineRef,
+            layout: (try? String(contentsOf: plistURL)).flatMap { Layout(fromPlistRepresentation: $0) },
+            notifier: self
+        )
     }()
     
     private var stateIndex: Int = -1

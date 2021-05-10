@@ -14,61 +14,55 @@ import AttributeViews
 
 struct TransitionView: View {
     
-    var viewModel: TransitionViewModel
-    
-    @ObservedObject var tracker: TransitionTracker
-    
-    let strokeNumber: UInt8
+    @ObservedObject var viewModel: TransitionViewModel
     
     var focused: Bool
     
     @EnvironmentObject var config: Config
     
-    init(viewModel: TransitionViewModel, tracker: TransitionTracker, strokeNumber: UInt8, focused: Bool = false) {
+    init(viewModel: TransitionViewModel, focused: Bool = false) {
         self.viewModel = viewModel
-        self.strokeNumber = strokeNumber
         self.focused = focused
-        self.tracker = tracker
     }
     
     var body: some View {
         ZStack {
             ArrowWithLabelView(
-                curve: $tracker.curve,
-                strokeNumber: strokeNumber,
+                curve: $viewModel.curve,
+                strokeNumber: UInt8(viewModel.transitionIndex),
                 editing: focused,
                 color: focused ? config.highlightColour : config.textColor,
-                label: { LineView<Config>(value: viewModel.condition, label: "<condition>") },
-                editLabel: { LineView<Config>(value: viewModel.condition, label: "") }
+                label: { Text(viewModel.condition) },
+                editLabel: { LineView<Config>(root: $viewModel.machine, path: viewModel.path.condition, label: "Condititon") }
             )
             if focused {
                 AnchorPoint(width: 20, height: 20)
-                    .position(tracker.curve.point0)
+                    .position(viewModel.curve.point0)
                     .gesture(DragGesture().onChanged {
-                        tracker.curve.point0 = $0.location
+                        viewModel.curve.point0 = $0.location
                     }.onEnded {
-                        tracker.curve.point0 = $0.location
+                        viewModel.curve.point0 = $0.location
                     })
                 AnchorPoint(color: .red)
-                    .position(tracker.curve.point1)
+                    .position(viewModel.curve.point1)
                     .gesture(DragGesture().onChanged {
-                        tracker.curve.point1 = $0.location
+                        viewModel.curve.point1 = $0.location
                     }.onEnded {
-                        tracker.curve.point1 = $0.location
+                        viewModel.curve.point1 = $0.location
                     })
                 AnchorPoint(color: .blue)
-                    .position(tracker.curve.point2)
+                    .position(viewModel.curve.point2)
                     .gesture(DragGesture().onChanged {
-                        tracker.curve.point2 = $0.location
+                        viewModel.curve.point2 = $0.location
                     }.onEnded {
-                        tracker.curve.point2 = $0.location
+                        viewModel.curve.point2 = $0.location
                     })
                 AnchorPoint(width: 20, height: 20)
-                    .position(tracker.curve.point3)
+                    .position(viewModel.curve.point3)
                     .gesture(DragGesture().onChanged {
-                        tracker.curve.point3 = $0.location
+                        viewModel.curve.point3 = $0.location
                     }.onEnded {
-                        tracker.curve.point3 = $0.location
+                        viewModel.curve.point3 = $0.location
                     })
             }
         }
