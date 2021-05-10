@@ -22,7 +22,7 @@ struct CodeViewWithDropDown<Label: View>: View {
     @EnvironmentObject var config: Config
     
     init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, label: String, language: Language, expanded: Binding<Bool>, notifier: GlobalChangeNotifier? = nil) where Label == Text {
-        self.init(root: root, path: path, language: language, expanded: expanded, notifier: notifier) { Text(label.capitalized) }
+        self.init(root: root, path: path, language: language, expanded: expanded, notifier: notifier) { Text(label.pretty) }
     }
     
     init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, language: Language, expanded: Binding<Bool>, notifier: GlobalChangeNotifier? = nil, label: @escaping () -> Label) {
