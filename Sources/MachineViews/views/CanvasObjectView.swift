@@ -71,18 +71,16 @@ struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
     
     var body: some View {
         Group {
-            Group {
-                object()
-                    .frame(width: viewModel.width, height: viewModel.height)
-            }
-            .position(viewModel.location)
-            .coordinateSpace(name: coordinateSpace)
-            .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace)).onChanged {
-                viewModel.location = $0.location
-            }.onEnded {
-                viewModel.location = $0.location
-            })
+            object()
+                .frame(width: viewModel.width, height: viewModel.height)
         }
+        .position(viewModel.location)
+        .coordinateSpace(name: coordinateSpace)
+        .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace)).onChanged {
+            viewModel.location = $0.location
+        }.onEnded {
+            viewModel.location = $0.location
+        })
     }
     
 }
