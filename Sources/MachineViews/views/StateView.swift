@@ -26,20 +26,15 @@ struct StateView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        Group {
-            if viewModel.expanded {
-                StateExpandedView(viewModel: viewModel.actionsViewModel, focused: focused) {
-                    StateTitleView(root: $viewModel.machine, path: viewModel.path.name, expanded: $viewModel.expanded)
-                }
-            } else {
-                StateCollapsedView(focused: focused) {
-                    StateTitleView(root: $viewModel.machine, path: viewModel.path.name, expanded: $viewModel.expanded)
-                }
+        if viewModel.expanded {
+            StateExpandedView(viewModel: viewModel.actionsViewModel, focused: focused) {
+                StateTitleView(root: $viewModel.machine, path: viewModel.path.name, expanded: $viewModel.expanded)
             }
-        }.frame(
-            width: viewModel.width,
-            height: viewModel.height
-        )
+        } else {
+            StateCollapsedView(focused: focused) {
+                StateTitleView(root: $viewModel.machine, path: viewModel.path.name, expanded: $viewModel.expanded)
+            }
+        }
     }
 }
 

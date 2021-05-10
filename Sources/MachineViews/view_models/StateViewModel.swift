@@ -63,7 +63,7 @@ import AttributeViews
 import Machines
 import Utilities
 
-final class StateViewModel: ObservableObject, Identifiable, MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable {
+final class StateViewModel: ObservableObject, Identifiable {
     
     let machineRef: Ref<Machine>
     
@@ -81,6 +81,17 @@ final class StateViewModel: ObservableObject, Identifiable, MoveAndStretchFromDr
     let actionsViewModel: ActionsViewModel
     
     private var transitionViewModels: [Int: TransitionViewModel]
+    
+    public let tracker: StateTracker
+    
+    var expanded: Bool {
+        get {
+            tracker.expanded
+        } set {
+            tracker.expanded = newValue
+            objectWillChange.send()
+        }
+    }
     
     var machine: Machine {
         get {
@@ -107,108 +118,10 @@ final class StateViewModel: ObservableObject, Identifiable, MoveAndStretchFromDr
         machineRef.value.states.map(\.name)
     }
     
-    @Published var isText: Bool {
-        didSet {
-            guard let notifier = notifier else {
-                return
-            }
-            notifier.send()
-        }
-    }
-    
-    var isDragging: Bool = false
-    
-    @Published var _collapsedWidth: CGFloat {
-        didSet {
-            guard let notifier = notifier else {
-                return
-            }
-            notifier.send()
-        }
-    }
-    
-    @Published var _collapsedHeight: CGFloat {
-        didSet {
-            guard let notifier = notifier else {
-                return
-            }
-            notifier.send()
-        }
-    }
-    
-    @Published var expanded: Bool {
-        didSet {
-            guard let notifier = notifier else {
-                return
-            }
-            notifier.send()
-        }
-    }
-    
-    @Published var location: CGPoint
-
-    let collapsedMinWidth: CGFloat = 150.0
-    
-    let collapsedMaxWidth: CGFloat = 250.0
-    
-    let collapsedMinHeight: CGFloat = 100.0
-    
-    let collapsedMaxHeight: CGFloat = 125.0
-    
-    @Published var _expandedWidth: CGFloat {
-        didSet {
-            guard let notifier = notifier else {
-                return
-            }
-            notifier.send()
-        }
-    }
-    
-    @Published var _expandedHeight: CGFloat {
-        didSet {
-            guard let notifier = notifier else {
-                return
-            }
-            notifier.send()
-        }
-    }
-    
-    var offset: CGPoint = CGPoint.zero
-    
-    let expandedMinWidth: CGFloat = 200.0
-    
-    let expandedMaxWidth: CGFloat = 600.0
-    
-    let expandedMinHeight: CGFloat = 150.0
-    
-    var expandedMaxHeight: CGFloat = 300.0
-    
-    var isStretchingX: Bool = false
-    
-    var isStretchingY: Bool = false
-    
-    let _collapsedTolerance: CGFloat = 0
-    
-    let _expandedTolerance: CGFloat = 20.0
-    
-    var horizontalEdgeTolerance: CGFloat {
-        expanded ? _expandedTolerance : _collapsedTolerance
-    }
-    
-    var verticalEdgeTolerance: CGFloat {
-        horizontalEdgeTolerance
-    }
-    
     init(machine: Ref<Machine>, index: Int, isText: Bool = false, layout: StateLayout? = nil, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machine
         self.index = index
-        self.isText = isText
-        self.expanded = layout?.expanded ?? false
-        self.location = layout.map { CGPoint(x: $0.x, y: $0.y) } ?? .zero
-        self._collapsedWidth = (layout?.expanded == true ? 150 : layout?.width) ?? 150
-        self._collapsedHeight = (layout?.expanded == true ? 100 : layout?.height) ?? 100
-        self._expandedWidth = (layout?.expanded == true ? layout?.width : 200) ?? 200
-        self._expandedHeight = (layout?.expanded == true ? layout?.height : 150) ?? 150
+        self.tracker = StateTracker(layout: layout, isText: isText, notifier: notifier)
         self.actionsViewModel = ActionsViewModel(machine: machine, stateIndex: index)
         if machine.value.states[index].transitions.isEmpty {
             self.transitionViewModels = [:]
@@ -218,6 +131,11 @@ final class StateViewModel: ObservableObject, Identifiable, MoveAndStretchFromDr
             } ?? [])
         }
         self.notifier = notifier
+    }
+    
+    func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
+        tracker.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight)
+        objectWillChange.send()
     }
     
     func viewModel(forAction action: String) -> ActionViewModel {
@@ -231,23 +149,6 @@ final class StateViewModel: ObservableObject, Identifiable, MoveAndStretchFromDr
         let viewModel = TransitionViewModel(machine: machineRef, stateIndex: index, transitionIndex: transitionIndex)
         transitionViewModels[transitionIndex] = viewModel
         return viewModel
-    }
-    
-    func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
-        self.expanded = !self.expanded
-        let newLocation: CGPoint
-        if self.expanded {
-            newLocation = CGPoint(
-                x: self.location.x,
-                y: self.location.y + collapsedHeight / 2.0
-            )
-        } else {
-            newLocation = CGPoint(
-                x: self.location.x,
-                y: self.location.y - expandedHeight / 2.0
-            )
-        }
-        self.setLocation(width: frameWidth, height: frameHeight, newLocation: newLocation)
     }
     
 }

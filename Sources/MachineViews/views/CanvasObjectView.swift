@@ -59,7 +59,7 @@
 import TokamakShim
 import Transformations
 
-typealias CanvasObjectViewModel = ObservableObject & Positionable
+typealias CanvasObjectViewModel = ObservableObject & Positionable & Stretchable
 
 struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
     
@@ -67,14 +67,13 @@ struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
     
     let coordinateSpace: String
     
-    let frame: CGSize
-    
     let object: () -> Object
     
     var body: some View {
         Group {
             Group {
                 object()
+                    .frame(width: viewModel.width, height: viewModel.height)
             }
             .position(viewModel.location)
             .coordinateSpace(name: coordinateSpace)
@@ -83,7 +82,7 @@ struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
             }.onEnded {
                 viewModel.location = $0.location
             })
-        }.frame(width: frame.width, height: frame.height)
+        }
     }
     
 }
@@ -102,7 +101,7 @@ struct CanvasObjectView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            CanvasObjectView(viewModel: viewModel, coordinateSpace: "MAIN_VIEW", frame: CGSize(width: 300, height: 300)) {
+            CanvasObjectView(viewModel: viewModel.tracker, coordinateSpace: "MAIN_VIEW") {
                 StateView(viewModel: viewModel).environmentObject(config)
             }
         }

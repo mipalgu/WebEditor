@@ -122,7 +122,7 @@ public struct CanvasView: View {
                             }
                         }
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
-                            if viewModel.viewModel(forState: stateName).isText {
+                            if viewModel.viewModel(forState: stateName).tracker.isText {
                                 VStack {
                                     Text(stateName)
                                         .font(config.fontBody)
@@ -134,9 +134,8 @@ public struct CanvasView: View {
                             } else {
                                 VStack {
                                     CanvasObjectView(
-                                        viewModel: viewModel.viewModel(forState: stateName),
-                                        coordinateSpace: coordinateSpace,
-                                        frame: geometry.size
+                                        viewModel: viewModel.viewModel(forState: stateName).tracker,
+                                        coordinateSpace: coordinateSpace
                                     ) {
                                         StateView(
                                             viewModel: viewModel.viewModel(forState: stateName),
@@ -151,8 +150,6 @@ public struct CanvasView: View {
 //                                        height: viewModel.tracker(for: viewModel.machine.states[stateIndex].name).height
 //                                    )
                                 }
-                                .coordinateSpace(name: coordinateSpace)
-                                .position(viewModel.viewModel(forState: stateName).location)
 //                                .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: viewModel.viewModel(for: stateName).stateIndex) }.modifiers(.shift))
 //                                .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
 //                                .onTapGesture { selectedObjects = [.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)]; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
