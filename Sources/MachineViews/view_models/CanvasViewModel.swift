@@ -66,7 +66,18 @@ final class CanvasViewModel: ObservableObject {
     
     let machineRef: Ref<Machine>
     
+    weak var notifier: GlobalChangeNotifier?
+    
     private var stateViewModels: [StateName: StateViewModel]
+    
+    var machine: Machine {
+        get {
+            machineRef.value
+        } set {
+            machineRef.value = newValue
+            objectWillChange.send()
+        }
+    }
     
     var layout: Layout {
         let states = Dictionary<StateName, StateLayout>(uniqueKeysWithValues: machineRef.value.states.map { state in
@@ -93,12 +104,56 @@ final class CanvasViewModel: ObservableObject {
     
     init(machineRef: Ref<Machine>, layout: Layout? = nil, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machineRef
+        self.notifier = notifier
         self.stateViewModels = Dictionary(uniqueKeysWithValues: layout?.states.compactMap { (stateName, stateLayout) in
             guard let index = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
                 return nil
             }
             return (stateName, StateViewModel(machine: machineRef, index: index, isText: false, layout: stateLayout, notifier: notifier))
         } ?? [])
+    }
+    
+    private func sync() {
+        machineRef.value.states.enumerated().forEach {
+            let viewModel = viewModel(forState: $1.name)
+            viewModel.index = $0
+        }
+    }
+    
+    func deleteState(_ stateName: StateName) {
+        let viewModel = viewModel(forState: stateName)
+        let states = machineRef.value.states
+        let result = machineRef.value.deleteState(atIndex: viewModel.index)
+        defer { objectWillChange.send() }
+        switch result {
+        case .failure:
+            notifier?.send()
+            return
+        case .success(true):
+            sync()
+            notifier?.send()
+            return
+        default:
+            stateViewModels[stateName] = nil
+            if viewModel.index + 1 < states.count {
+                states[(viewModel.index + 1..<states.count)].forEach {
+                    let viewModel = self.viewModel(forState: $0.name)
+                    viewModel.index -= 1
+                }
+            }
+            return
+        }
+    }
+    
+    func newState() {
+        let result = machineRef.value.newState()
+        defer { objectWillChange.send() }
+        switch result {
+        case .success(true), .failure:
+            notifier?.send()
+        default:
+            return
+        }
     }
     
     func transitions(forState state: StateName) -> Range<Int> {

@@ -67,30 +67,29 @@ public struct CanvasView: View {
                     ZStack {
                         GridView()
                             .frame(width: geometry.size.width, height: geometry.size.height)
-//                            .onTapGesture(count: 2) { try? machine.newState() }
                             .onTapGesture { selectedObjects = []; focus = .machine }
                             //.gesture(viewModel.selectionBoxGesture(forView: self))
                             //.gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
-//                            .contextMenu {
-//                                VStack {
-//                                    Button("New State", action: { viewModel.createState() })
-//                                    Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))
-//                                    if !self.selectedObjects.isEmpty {
-//                                        Button("Delete Selected", action: { viewModel.deleteSelected(self) })
-//                                    }
-//                                    Button("Save", action: {
-//                                        guard let _ = try? viewModel.machine.save() else {
-//                                            print(viewModel.machine.errorBag.allErrors)
-//                                            return
-//                                        }
-//                                        let plist = viewModel.plist
-//                                        guard let _ = try? plist.write(toFile: viewModel.machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
-//                                            print("Failed to write plist")
-//                                            return
-//                                        }
-//                                    })
-//                                }
-//                            }
+                            .contextMenu {
+                                VStack {
+                                    Button("New State", action: { viewModel.newState() })
+                                    /*Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))
+                                    if !self.selectedObjects.isEmpty {
+                                        Button("Delete Selected", action: { viewModel.deleteSelected(self) })
+                                    }*/
+                                    /*Button("Save", action: {
+                                        guard let _ = try? viewModel.machine.save() else {
+                                            print(viewModel.machine.errorBag.allErrors)
+                                            return
+                                        }
+                                        let plist = viewModel.plist
+                                        guard let _ = try? plist.write(toFile: viewModel.machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
+                                            print("Failed to write plist")
+                                            return
+                                        }
+                                    })*/
+                                }
+                            }
                         if let curve = creatingCurve {
                             ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                         }
@@ -139,21 +138,21 @@ public struct CanvasView: View {
                                 }
                             }
 //                                .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: viewModel.viewModel(for: stateName).stateIndex) }.modifiers(.shift))
-//                                .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
+                                .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index) }
 //                                .onTapGesture { selectedObjects = [.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)]; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
 //                                .gesture(viewModel.createTransitionGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex))
 //                                .gesture(viewModel.dragStateGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex, size: geometry.size))
 //                                .onChange(of: viewModel.tracker(for: stateName).expanded) { _ in
 //                                    self.viewModel.updateTransitionLocations(source: viewModel.viewModel(for: stateName).state.wrappedValue)
 //                                }
-//                                .contextMenu {
-//                                    Button("Delete", action: {
-//                                        viewModel.deleteState(view: self, at: viewModel.viewModel(for: stateName).stateIndex)
+                                .contextMenu {
+                                    Button("Delete", action: {
+                                        viewModel.deleteState(stateName)
 //                                        if selectedObjects.contains(.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)) {
 //                                            selectedObjects.remove(.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex))
 //                                        }
-//                                    })
-//                                }
+                                    })
+                                }
                         }
                         if selectedBox != nil {
                             Rectangle()
