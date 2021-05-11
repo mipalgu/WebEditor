@@ -161,6 +161,9 @@ public struct CanvasView: View {
                         }
                     }.frame(width: geometry.size.width, height: geometry.size.height)
                     .clipped()
+                    .onChange(of: geometry.size) {
+                        viewModel.canvasSize = $0
+                    }
                 }
             }
         }/*.focusedValue(\.saving, $saving).onChange(of: saving) { _ in

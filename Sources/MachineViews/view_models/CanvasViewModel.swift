@@ -75,6 +75,8 @@ final class CanvasViewModel: ObservableObject {
     @Published var selectedObjects: Set<ViewType> = []
     @Published var selectedBox: (CGPoint, CGPoint)?
     
+    var canvasSize: CGSize = .zero
+    
     var machine: Machine {
         get {
             machineRef.value
