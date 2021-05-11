@@ -92,9 +92,7 @@ public struct CanvasView: View {
 //                                }
 //                            }
                         if let curve = creatingCurve {
-                            ArrowView(curve: .constant(curve), colour: config.highlightColour) {
-                                StrokeView(curve: $0, strokeNumber: 0)
-                            }
+                            ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                         }
 //                        ForEach(viewModel.unattachedTransitionsAsRows, id: \.self) { row in
 //                            ArrowView(curve: .constant(row.data.curve), strokeNumber: 0, colour: config.errorColour)

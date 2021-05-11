@@ -9,13 +9,13 @@ import TokamakShim
 
 import Utilities
 
-struct ArrowView<StrokeView: View>: View {
+struct ArrowView<Strokes: View>: View {
     
     @Binding var curve: Curve
     
     var colour: Color
     
-    let strokeView: (Binding<Curve>) -> StrokeView
+    let strokeView: (Binding<Curve>) -> Strokes
     
     var arrowPoint0: CGPoint {
         let theta = atan2(Double(curve.point3.y - curve.point2.y), Double(curve.point3.x - curve.point2.x)) +  Double.pi - Double.pi / 6.0
@@ -32,6 +32,18 @@ struct ArrowView<StrokeView: View>: View {
     }
     
     @EnvironmentObject public var config: Config
+    
+    init(curve: Binding<Curve>, strokeNumber: UInt8, colour: Color) where Strokes == StrokeView {
+        self.init(curve: curve, colour: colour) {
+            StrokeView(curve: $0, strokeNumber: strokeNumber)
+        }
+    }
+    
+    init(curve: Binding<Curve>, colour: Color, strokeView: @escaping (Binding<Curve>) -> Strokes) {
+        self._curve = curve
+        self.colour = colour
+        self.strokeView = strokeView
+    }
     
     var body: some View {
         ZStack {
