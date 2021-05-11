@@ -23,8 +23,6 @@ public struct CanvasView: View {
     
     @State var selectedBox: (CGPoint, CGPoint)?
     
-    @State var selectedObjects: Set<ViewType> = []
-    
     @State var creatingCurve: Curve? = nil
     
     @State var edittingState: StateName? = nil
@@ -67,7 +65,10 @@ public struct CanvasView: View {
                     ZStack {
                         GridView()
                             .frame(width: geometry.size.width, height: geometry.size.height)
-                            .onTapGesture { selectedObjects = []; focus = .machine }
+                            .onTapGesture {
+                                viewModel.selectedObjects = []
+                                focus = .machine
+                            }
                             //.gesture(viewModel.selectionBoxGesture(forView: self))
                             //.gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
                             .contextMenu {
@@ -100,7 +101,7 @@ public struct CanvasView: View {
                             ForEach(viewModel.transitions(forState: stateName), id: \.self) { transitionIndex in
                                 TransitionView(
                                     viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName).tracker,
-                                    focused: selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)),
+                                    focused: viewModel.selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)),
                                     strokeView: { TransitionStrokeView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName), curve: $0) },
                                     label: { TransitionLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) },
                                     editLabel: { TransitionEditLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) }
@@ -111,7 +112,7 @@ public struct CanvasView: View {
 //                                }.modifiers(.shift))
                                 .onTapGesture {
                                     focus = .transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
-//                                    selectedObjects = [.transition(stateIndex: viewModel.viewModel(for: stateName).stateIndex, transitionIndex: transitionViewModel.transitionIndex)]
+                                    viewModel.selectedObjects = [.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)]
                                 }
                                 .contextMenu {
 //                                    Button("Straighten",action: {
@@ -131,7 +132,7 @@ public struct CanvasView: View {
                             ) {
                                 StateView(
                                     viewModel: viewModel.viewModel(forState: stateName),
-                                    focused: selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
+                                    focused: viewModel.selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
                                 )
                                 .onChange(of: viewModel.viewModel(forState: stateName).expanded) { _ in
 //                                        self.viewModel.correctTransitionLocations(for: viewModel.viewModel(for: stateName).state.wrappedValue)
@@ -140,7 +141,7 @@ public struct CanvasView: View {
 //                                .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: viewModel.viewModel(for: stateName).stateIndex) }.modifiers(.shift))
                                 .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index) }
                                 .onTapGesture {
-//                                    selectedObjects = [.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)]
+                                    viewModel.selectedObjects = [.state(stateIndex: viewModel.viewModel(forState: stateName).index)]
                                     focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index)
                                 }
 //                                .gesture(viewModel.createTransitionGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex))
@@ -151,9 +152,7 @@ public struct CanvasView: View {
                                 .contextMenu {
                                     Button("Delete", action: {
                                         viewModel.deleteState(stateName)
-//                                        if selectedObjects.contains(.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)) {
-//                                            selectedObjects.remove(.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex))
-//                                        }
+                                        viewModel.selectedObjects.remove(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
                                     })
                                 }
                         }

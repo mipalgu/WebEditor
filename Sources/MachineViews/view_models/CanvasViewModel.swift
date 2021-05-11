@@ -70,6 +70,8 @@ final class CanvasViewModel: ObservableObject {
     
     private var stateViewModels: [StateName: StateViewModel]
     
+    @Published var selectedObjects: Set<ViewType> = []
+    
     var machine: Machine {
         get {
             machineRef.value
