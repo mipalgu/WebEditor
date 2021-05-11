@@ -146,10 +146,15 @@ final class StateViewModel: ObservableObject, Identifiable {
         case .success(let notify):
             transitionViewModels[transitionIndex] = nil
             if transitionIndex + 1 < transitions.count {
-                ((transitionIndex + 1)..<transitions.count).forEach {
-                    let viewModel = viewModel(forTransition: $0)
-                    viewModel.transitionIndex -= 1
+                var dict: [Int: TransitionViewModel] = [:]
+                dict.reserveCapacity(transitionViewModels.count)
+                transitionViewModels.values.forEach { viewModel in
+                    if viewModel.transitionIndex > transitionIndex {
+                        viewModel.transitionIndex -= 1
+                    }
+                    dict[viewModel.transitionIndex] = viewModel
                 }
+                transitionViewModels = dict
             }
             if notify {
                 notifier?.send()
