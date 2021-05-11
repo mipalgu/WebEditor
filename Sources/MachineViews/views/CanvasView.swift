@@ -152,12 +152,12 @@ public struct CanvasView: View {
                                     })
                                 }
                         }
-                        if let box = viewModel.selectedBox {
+                        if let rect = viewModel.selectedBox {
                             Rectangle()
                                 .background(config.highlightColour)
                                 .opacity(0.2)
-                                .frame(width: width(point0: box.0, point1: box.1), height: height(point0: box.0, point1: box.1))
-                                .position(center(point0: box.0, point1: box.1))
+                                .frame(width: rect.width, height: rect.height)
+                                .position(x: rect.minX + rect.width / 2, y: rect.minY + rect.height / 2)
                         }
                     }.frame(width: geometry.size.width, height: geometry.size.height)
                     .clipped()
