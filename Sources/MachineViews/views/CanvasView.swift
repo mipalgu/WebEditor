@@ -21,15 +21,11 @@ public struct CanvasView: View {
     
     @Binding var focus: Focus
     
-    @State var selectedBox: (CGPoint, CGPoint)?
-    
     @State var creatingCurve: Curve? = nil
     
     @State var edittingState: StateName? = nil
     
     @State var saving: Bool = false
-    
-    let coordinateSpace = "MAIN_VIEW"
     
     let textWidth: CGFloat = 50.0
     
@@ -69,7 +65,7 @@ public struct CanvasView: View {
                                 viewModel.selectedObjects = []
                                 focus = .machine
                             }
-                            //.gesture(viewModel.selectionBoxGesture(forView: self))
+                            .gesture(viewModel.selectionBoxGesture)
                             //.gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
                             .contextMenu {
                                 VStack {
@@ -127,7 +123,7 @@ public struct CanvasView: View {
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
                             CanvasObjectView(
                                 viewModel: viewModel.viewModel(forState: stateName).tracker,
-                                coordinateSpace: coordinateSpace,
+                                coordinateSpace: viewModel.coordinateSpace,
                                 textRepresentation: viewModel.viewModel(forState: stateName).name
                             ) {
                                 StateView(
@@ -156,12 +152,12 @@ public struct CanvasView: View {
                                     })
                                 }
                         }
-                        if selectedBox != nil {
+                        if let box = viewModel.selectedBox {
                             Rectangle()
                                 .background(config.highlightColour)
                                 .opacity(0.2)
-                                .frame(width: width(point0: selectedBox!.0, point1: selectedBox!.1), height: height(point0: selectedBox!.0, point1: selectedBox!.1))
-                                .position(center(point0: selectedBox!.0, point1: selectedBox!.1))
+                                .frame(width: width(point0: box.0, point1: box.1), height: height(point0: box.0, point1: box.1))
+                                .position(center(point0: box.0, point1: box.1))
                         }
                     }.frame(width: geometry.size.width, height: geometry.size.height)
                     .clipped()

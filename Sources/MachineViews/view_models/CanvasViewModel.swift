@@ -70,7 +70,10 @@ final class CanvasViewModel: ObservableObject {
     
     private var stateViewModels: [StateName: StateViewModel]
     
+    let coordinateSpace = "CANVAS_VIEW"
+    
     @Published var selectedObjects: Set<ViewType> = []
+    @Published var selectedBox: (CGPoint, CGPoint)?
     
     var machine: Machine {
         get {
@@ -183,6 +186,107 @@ final class CanvasViewModel: ObservableObject {
     func viewModel(forTransition transitionIndex: Int, attachedToState stateName: StateName) -> TransitionViewModel {
         let stateViewModel = viewModel(forState: stateName)
         return stateViewModel.viewModel(forTransition: transitionIndex)
+    }
+    
+}
+
+// MARK: - Gestures
+
+extension CGRect {
+    
+    init(corner0: CGPoint, corner1: CGPoint) {
+        let left: CGFloat
+        let right: CGFloat
+        let top: CGFloat
+        let bottom: CGFloat
+        if corner1.x > corner0.x {
+            left = corner0.x
+            right = corner1.x
+        } else {
+            left = corner1.x
+            right = corner0.x
+        }
+        if corner1.y > corner0.y {
+            top = corner0.y
+            bottom = corner1.y
+        } else {
+            top = corner1.y
+            bottom = corner0.y
+        }
+        let width = right - left
+        let height = bottom - top
+        self.init(origin: CGPoint(x: left, y: top), size: CGSize(width: width, height: height))
+    }
+    
+}
+
+extension CanvasViewModel {
+    
+    var selectionBoxGesture: some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+            .modifiers(.shift)
+            .onChanged {
+                self.selectedBox = ($0.startLocation, $0.location)
+            }
+            .modifiers(.shift)
+            .onEnded {
+                self.selectedObjects = self.findObjectsInSelection(corner0: $0.startLocation, corner1: $0.location)
+                self.selectedBox = nil
+            }
+    }
+    
+    /// Finds all the views within the selection box.
+    /// - Parameters:
+    ///   - corner0: A corner of the selection box.
+    ///   - corner1: The second corner of the selection box (opposite to corner0).
+    /// - Returns: A set of ViewTypes signifying the views within the selection box.
+    private func findObjectsInSelection(corner0: CGPoint, corner1: CGPoint) -> Set<ViewType> {
+        findSelectedStates(corner0: corner0, corner1: corner1).union(findSelectedTransitions(corner0: corner0, corner1: corner1))
+    }
+    
+    /// Finds the states within the selection box.
+    /// - Parameters:
+    ///   - corner0: A corner of the selection box.
+    ///   - corner1: The second corner of the selection box (opposite to corner0).
+    /// - Returns: A set of ViewTypes signifying the states within the selection box.
+    private func findSelectedStates(corner0: CGPoint, corner1: CGPoint) -> Set<ViewType> {
+        if corner1 == corner0 {
+            return []
+        }
+        let frame = CGRect(corner0: corner0, corner1: corner1)
+        return Set(machineRef.value.states.compactMap {
+            let viewModel = viewModel(forState: $0.name)
+            let position = viewModel.tracker.location
+            if frame.contains(position) {
+                return ViewType.state(stateIndex: viewModel.index)
+            } else {
+                return nil
+            }
+        })
+    }
+    
+    
+    /// Finds the transitions within the selection box.
+    /// - Parameters:
+    ///   - corner0: A corner of the selection box.
+    ///   - corner1: The second corner of the selection box (opposite to corner0).
+    /// - Returns: A set of ViewTypes signifying the transitions within the selection box.
+    private func findSelectedTransitions(corner0: CGPoint, corner1: CGPoint) -> Set<ViewType> {
+        if corner1 == corner0 {
+            return []
+        }
+        let frame = CGRect(corner0: corner0, corner1: corner1)
+        return Set(machineRef.value.states.flatMap { state in
+            state.transitions.indices.compactMap { transitionIndex in
+                let viewModel = viewModel(forTransition: transitionIndex, attachedToState: state.name)
+                let position = viewModel.tracker.location
+                if frame.contains(position) {
+                    return ViewType.transition(stateIndex: viewModel.stateIndex, transitionIndex: transitionIndex)
+                } else {
+                    return nil
+                }
+            }
+        })
     }
     
 }
