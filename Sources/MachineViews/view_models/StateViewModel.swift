@@ -133,6 +133,32 @@ final class StateViewModel: ObservableObject, Identifiable {
         self.notifier = notifier
     }
     
+    func deleteTransition(_ transitionIndex: Int) {
+        guard !path.isNil(machineRef.value), machineRef.value[keyPath: path.keyPath].transitions.count > transitionIndex, transitionViewModels[transitionIndex] != nil else {
+            return
+        }
+        let transitions = machineRef.value[keyPath: path.keyPath].transitions
+        let result = machineRef.value.deleteTransition(atIndex: transitionIndex, attachedTo: name)
+        switch result {
+        case .failure:
+            notifier?.send()
+            return
+        case .success(let notify):
+            transitionViewModels[transitionIndex] = nil
+            if transitionIndex + 1 < transitions.count {
+                ((transitionIndex + 1)..<transitions.count).forEach {
+                    let viewModel = viewModel(forTransition: $0)
+                    viewModel.transitionIndex -= 1
+                }
+            }
+            if notify {
+                notifier?.send()
+            }
+            return
+        }
+        
+    }
+    
     func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
         tracker.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight)
         objectWillChange.send()

@@ -109,18 +109,18 @@ public struct CanvasView: View {
 //                                .gesture(TapGesture().onEnded {
 //                                    viewModel.addSelectedTransition(view: self, from: viewModel.viewModel(for: stateName).stateIndex, at: transitionViewModel.transitionIndex)
 //                                }.modifiers(.shift))
-//                                .onTapGesture {
-//                                    focus = .transition(stateIndex: viewModel.viewModel(for: stateName).stateIndex, transitionIndex: transitionViewModel.transitionIndex)
+                                .onTapGesture {
+                                    focus = .transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
 //                                    selectedObjects = [.transition(stateIndex: viewModel.viewModel(for: stateName).stateIndex, transitionIndex: transitionViewModel.transitionIndex)]
-//                                }
-//                                .contextMenu {
+                                }
+                                .contextMenu {
 //                                    Button("Straighten",action: {
 //                                        viewModel.straighten(state: stateName, transitionIndex: transitionViewModel.transitionIndex)
 //                                    })
-//                                    Button("Delete",action: {
-//                                        viewModel.deleteTransition(view: self, for: viewModel.viewModel(for: stateName).stateIndex, at: transitionViewModel.transitionIndex)
-//                                    })
-//                                }
+                                    Button("Delete",action: {
+                                        viewModel.deleteTransition(transitionIndex, attachedTo: stateName)
+                                    }).keyboardShortcut(.delete)
+                                }
                             }
                         }
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
@@ -139,7 +139,10 @@ public struct CanvasView: View {
                             }
 //                                .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: viewModel.viewModel(for: stateName).stateIndex) }.modifiers(.shift))
                                 .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index) }
-//                                .onTapGesture { selectedObjects = [.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)]; focus = .state(stateIndex: viewModel.viewModel(for: stateName).stateIndex) }
+                                .onTapGesture {
+//                                    selectedObjects = [.state(stateIndex: viewModel.viewModel(for: stateName).stateIndex)]
+                                    focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index)
+                                }
 //                                .gesture(viewModel.createTransitionGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex))
 //                                .gesture(viewModel.dragStateGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex, size: geometry.size))
 //                                .onChange(of: viewModel.tracker(for: stateName).expanded) { _ in

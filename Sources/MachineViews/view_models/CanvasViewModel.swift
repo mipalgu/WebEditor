@@ -136,13 +136,19 @@ final class CanvasViewModel: ObservableObject {
         default:
             stateViewModels[stateName] = nil
             if viewModel.index + 1 < states.count {
-                states[(viewModel.index + 1..<states.count)].forEach {
+                states[(viewModel.index + 1)..<states.count].forEach {
                     let viewModel = self.viewModel(forState: $0.name)
                     viewModel.index -= 1
                 }
             }
             return
         }
+    }
+    
+    func deleteTransition(_ transitionIndex: Int, attachedTo stateName: StateName) {
+        let viewModel = viewModel(forState: stateName)
+        viewModel.deleteTransition(transitionIndex)
+        objectWillChange.send()
     }
     
     func newState() {
