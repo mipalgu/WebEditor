@@ -145,20 +145,32 @@ final class StateViewModel: ObservableObject, Identifiable {
             return
         case .success(let notify):
             transitionViewModels[transitionIndex] = nil
-            if transitionIndex + 1 < transitions.count {
-                var dict: [Int: TransitionViewModel] = [:]
-                dict.reserveCapacity(transitionViewModels.count)
-                transitionViewModels.values.forEach { viewModel in
-                    if viewModel.transitionIndex > transitionIndex {
-                        viewModel.transitionIndex -= 1
-                    }
-                    dict[viewModel.transitionIndex] = viewModel
+            defer {
+                if notify {
+                    notifier?.send()
                 }
-                transitionViewModels = dict
             }
-            if notify {
-                notifier?.send()
+            guard !path.isNil(machineRef.value) && !machineRef.value[keyPath: path.keyPath].transitions.isEmpty else {
+                transitionViewModels.removeAll(keepingCapacity: true)
+                return
             }
+            guard transitionIndex + 1 < transitions.count else {
+                return
+            }
+            // Remove transition view models for transitions that no longer exist.
+            let count = machineRef.value[keyPath: path.keyPath].transitions.count
+            var dict: [Int: TransitionViewModel] = [:]
+            dict.reserveCapacity(count)
+            transitionViewModels.values.forEach { viewModel in
+                if viewModel.transitionIndex - 1 >= count {
+                    return
+                }
+                if viewModel.transitionIndex > transitionIndex {
+                    viewModel.transitionIndex -= 1
+                }
+                dict[viewModel.transitionIndex] = viewModel
+            }
+            transitionViewModels = dict
             return
         }
         
