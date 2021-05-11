@@ -92,7 +92,9 @@ public struct CanvasView: View {
 //                                }
 //                            }
                         if let curve = creatingCurve {
-                            ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
+                            ArrowView(curve: .constant(curve), colour: config.highlightColour) {
+                                StrokeView(curve: $0, strokeNumber: 0)
+                            }
                         }
 //                        ForEach(viewModel.unattachedTransitionsAsRows, id: \.self) { row in
 //                            ArrowView(curve: .constant(row.data.curve), strokeNumber: 0, colour: config.errorColour)
@@ -102,6 +104,7 @@ public struct CanvasView: View {
                                 TransitionView(
                                     viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName).tracker,
                                     focused: selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)),
+                                    strokeView: { TransitionStrokeView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName), curve: $0) },
                                     label: { TransitionLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) },
                                     editLabel: { TransitionEditLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) }
                                 )

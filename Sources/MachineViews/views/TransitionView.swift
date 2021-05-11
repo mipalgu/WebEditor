@@ -12,31 +12,13 @@ import Attributes
 import Utilities
 import AttributeViews
 
-struct TransitionLabelView: View {
-    
-    @ObservedObject var viewModel: TransitionViewModel
-    
-    var body: some View {
-        Text(viewModel.condition)
-    }
-    
-}
-
-struct TransitionEditLabelView: View {
-    
-    @ObservedObject var viewModel: TransitionViewModel
-    
-    var body: some View {
-        LineView<Config>(root: $viewModel.machine, path: viewModel.path.condition, label: "Condition")
-    }
-    
-}
-
-struct TransitionView<Label: View, EditLabel: View>: View {
+struct TransitionView<StrokeView: View, Label: View, EditLabel: View>: View {
     
     @ObservedObject var viewModel: TransitionTracker
     
     var focused: Bool
+    
+    let strokeView: (Binding<Curve>) -> StrokeView
     
     let label: () -> Label
     
@@ -44,9 +26,10 @@ struct TransitionView<Label: View, EditLabel: View>: View {
     
     @EnvironmentObject var config: Config
     
-    init(viewModel: TransitionTracker, focused: Bool = false, label: @escaping () -> Label, editLabel: @escaping () -> EditLabel) {
+    init(viewModel: TransitionTracker, focused: Bool = false, strokeView: @escaping (Binding<Curve>) -> StrokeView, label: @escaping () -> Label, editLabel: @escaping () -> EditLabel) {
         self.viewModel = viewModel
         self.focused = focused
+        self.strokeView = strokeView
         self.label = label
         self.editLabel = editLabel
     }
@@ -55,9 +38,9 @@ struct TransitionView<Label: View, EditLabel: View>: View {
         ZStack {
             ArrowWithLabelView(
                 curve: $viewModel.curve,
-                strokeNumber: 0,
                 editing: focused,
                 color: focused ? config.highlightColour : config.textColor,
+                strokeView: strokeView,
                 label: label,
                 editLabel: editLabel
             )
