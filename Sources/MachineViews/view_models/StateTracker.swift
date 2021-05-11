@@ -129,6 +129,23 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
         self.init(location: location, expanded: expanded, isText: isText, notifier: notifier)
     }
     
+    func layout(transitions: [TransitionLayout], actions: [String], bgColor: SRGBColor, editingMode: Bool, stateSelected: Bool, strokeColor: SRGBColor) -> StateLayout {
+        StateLayout(
+            transitions: transitions,
+            bgColor: bgColor,
+            editingMode: editingMode,
+            expanded: expanded,
+            actionHeights: Dictionary(uniqueKeysWithValues: actions.map { ($0, 0) }),
+            stateSelected: stateSelected,
+            strokeColor: strokeColor,
+            width: width,
+            height: height,
+            x: location.x,
+            y: location.y,
+            zoomedActionHeights: Dictionary(uniqueKeysWithValues: actions.map { ($0, 0) })
+        )
+    }
+    
     func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
         self.expanded = !self.expanded
         let newLocation: CGPoint

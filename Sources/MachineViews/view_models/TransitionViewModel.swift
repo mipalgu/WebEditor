@@ -63,7 +63,7 @@ import Transformations
 import Utilities
 import GUUI
 
-final class TransitionViewModel: ObservableObject, Identifiable, Positionable {
+final class TransitionViewModel: ObservableObject, Identifiable {
     
     let machineRef: Ref<Machine>
     
@@ -71,7 +71,7 @@ final class TransitionViewModel: ObservableObject, Identifiable, Positionable {
     
     @Published var transitionIndex: Int
     
-    @Published var curve: Curve
+    let tracker: TransitionTracker
     
     var machine: Machine {
         get {
@@ -90,17 +90,11 @@ final class TransitionViewModel: ObservableObject, Identifiable, Positionable {
         path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].condition ?? ""
     }
     
-    var location: CGPoint {
-        get {
-            curve.point1 + (curve.point2 - curve.point1) / 2.0
-        } set {}
-    }
-    
     init(machine: Ref<Machine>, stateIndex: Int, transitionIndex: Int, layout: TransitionLayout? = nil) {
         self.machineRef = machine
         self.stateIndex = stateIndex
         self.transitionIndex = transitionIndex
-        self.curve = layout?.curve ?? Curve(source: .zero, target: .zero)
+        self.tracker = layout.map { TransitionTracker(layout: $0) } ?? TransitionTracker(curve: Curve(source: .zero, target: .zero))
     }
     
 }

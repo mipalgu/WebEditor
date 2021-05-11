@@ -100,8 +100,10 @@ public struct CanvasView: View {
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
                             ForEach(viewModel.transitions(forState: stateName), id: \.self) { transitionIndex in
                                 TransitionView(
-                                    viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName),
-                                    focused: selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex))
+                                    viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName).tracker,
+                                    focused: selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)),
+                                    label: { TransitionLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) },
+                                    editLabel: { TransitionEditLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) }
                                 )
                                 .clipped()
 //                                .gesture(TapGesture().onEnded {

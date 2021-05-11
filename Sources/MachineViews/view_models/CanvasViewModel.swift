@@ -69,7 +69,22 @@ final class CanvasViewModel: ObservableObject {
     private var stateViewModels: [StateName: StateViewModel]
     
     var layout: Layout {
-        Layout(states: [:])
+        let states = Dictionary<StateName, StateLayout>(uniqueKeysWithValues: machineRef.value.states.map { state in
+            let transitions = state.transitions.indices.map {
+                self.viewModel(forTransition: $0, attachedToState: state.name).tracker.layout
+            }
+            let viewModel = self.viewModel(forState: state.name)
+            let layout = viewModel.tracker.layout(
+                transitions: transitions,
+                actions: state.actions.map(\.name),
+                bgColor: .init(alpha: 0, red: 0, green: 0, blue: 0),
+                editingMode: false,
+                stateSelected: false,
+                strokeColor: .init(alpha: 0, red: 0, green: 0, blue: 0)
+            )
+            return (state.name, layout)
+        })
+        return Layout(states: states)
     }
     
     var stateNames: [StateName] {
