@@ -118,6 +118,9 @@ final class CanvasViewModel: ObservableObject {
             }
             return (stateName, StateViewModel(machine: machineRef, index: index, isText: false, layout: stateLayout, notifier: notifier))
         } ?? [])
+        stateViewModels.values.forEach {
+            $0.delegate = self
+        }
     }
     
     private func sync() {
@@ -181,6 +184,7 @@ final class CanvasViewModel: ObservableObject {
             fatalError("Unable to fetch state named \(state).")
         }
         let viewModel = StateViewModel(machine: machineRef, index: index)
+        viewModel.delegate = self
         stateViewModels[state] = viewModel
         return viewModel
     }
@@ -188,6 +192,18 @@ final class CanvasViewModel: ObservableObject {
     func viewModel(forTransition transitionIndex: Int, attachedToState stateName: StateName) -> TransitionViewModel {
         let stateViewModel = viewModel(forState: stateName)
         return stateViewModel.viewModel(forTransition: transitionIndex)
+    }
+    
+}
+
+extension CanvasViewModel: StateViewModelDelegate {
+    
+    func didChangeName(_ viewModel: StateViewModel, from oldName: String, to newName: String) {
+        guard stateViewModels[oldName] != nil else {
+            return
+        }
+        stateViewModels[newName] = viewModel
+        objectWillChange.send()
     }
     
 }

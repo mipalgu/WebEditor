@@ -63,19 +63,21 @@ import Machines
 import AttributeViews
 import Utilities
 
-struct StateTitleView<Root: Modifiable>: View {
+struct StateTitleView: View {
     
-    @Binding var root: Root
-    let path: Attributes.Path<Root, String>
-    @Binding var expanded: Bool
+    @ObservedObject var viewModel: StateViewModel
     
     @EnvironmentObject var config: Config
     
     var body: some View {
         HStack {
-            Toggle(isOn: $expanded) {
-                LineView<Config>(root: $root, path: path, label: "Enter State Name...")
-                    .multilineTextAlignment(.center)
+            Toggle(isOn: $viewModel.expanded) {
+                LineView<Config>(
+                    value: $viewModel.name,
+                    errors: Binding(get: { viewModel.machine.errorBag.errors(forPath: viewModel.path.name).map(\.message) }, set: { _ in }),
+                    label: "Enter State Name...",
+                    delayEdits: true
+                ).multilineTextAlignment(.center)
                     .font(config.fontBody.bold())
             }.toggleStyle(ArrowToggleStyle())
             Spacer()

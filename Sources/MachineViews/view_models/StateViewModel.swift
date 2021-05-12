@@ -63,7 +63,15 @@ import AttributeViews
 import Machines
 import Utilities
 
+protocol StateViewModelDelegate: AnyObject {
+    
+    func didChangeName(_ viewModel: StateViewModel, from oldName: String, to newName: String)
+    
+}
+
 final class StateViewModel: ObservableObject, Identifiable {
+    
+    weak var delegate: StateViewModelDelegate?
     
     let machineRef: Ref<Machine>
     
@@ -107,7 +115,28 @@ final class StateViewModel: ObservableObject, Identifiable {
     }
     
     var name: StateName {
-        path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].name
+        get {
+            path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].name
+        } set {
+            guard !path.isNil(machineRef.value) else {
+                return
+            }
+            let oldName = name
+            if newValue == oldName {
+                return
+            }
+            let result = machineRef.value.modify(attribute: path.name, value: newValue)
+            defer { objectWillChange.send() }
+            switch result {
+            case .success(let notify):
+                delegate?.didChangeName(self, from: oldName, to: newValue)
+                if notify {
+                    notifier?.send()
+                }
+            case .failure:
+                notifier?.send()
+            }
+        }
     }
     
     var transitions: Range<Int> {
