@@ -202,7 +202,6 @@ extension CanvasViewModel: StateViewModelDelegate {
     
     func didChangeName(_ viewModel: StateViewModel, from oldName: String, to newName: String) {
         stateViewModels[newName] = viewModel
-        objectWillChange.send()
     }
     
 }
