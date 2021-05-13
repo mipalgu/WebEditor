@@ -17,31 +17,7 @@ struct MachineView: View {
     var body: some View {
         HStack {
             CanvasView(viewModel: viewModel.canvasViewModel, focus: $viewModel.focus)
-            Group {
-                switch viewModel.focus {
-                case .machine:
-                    CollapsableAttributeGroupsView(
-                        machine: viewModel.machineRef.asBinding,
-                        path: viewModel.path,
-                        collapsed: $viewModel.attributesCollapsed,
-                        label: viewModel.label,
-                        selection: $viewModel.selection,
-                        notifier: viewModel.notifier
-                    ) {
-                        DependenciesAttributesView(root: $viewModel.machine, path: viewModel.machine.path, label: "Dependencies")
-                    }
-                default:
-                    CollapsableAttributeGroupsView(
-                        machine: viewModel.machineRef.asBinding,
-                        path: viewModel.path,
-                        collapsed: $viewModel.attributesCollapsed,
-                        label: viewModel.label,
-                        selection: $viewModel.selection,
-                        notifier: viewModel.notifier
-                    )
-                }
-            }
-            .frame(width: !viewModel.attributesCollapsed ? 500 : 50.0)
+            AttributesPaneView(viewModel: viewModel.attributesPaneViewModel)
         }
     }
 }
