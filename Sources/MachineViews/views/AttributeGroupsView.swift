@@ -39,17 +39,21 @@ public struct AttributeGroupsView<Root: Modifiable, ExtraTabs: View>: View {
             Text(label.pretty)
                 .font(.title3)
                 .foregroundColor(config.textColor)
-            TabView(selection: Binding($viewModel.selection)) {
-                ForEach(viewModel.attributes, id: \.id) { group in
-                    AttributeGroupView<Config>(root: $viewModel.root, path: group.path, label: group.name, notifier: viewModel.notifier)
-                        .padding(.horizontal, 10)
-                        .tabItem {
-                            Text(group.name.pretty)
-                        }
+            if !viewModel.attributes.isEmpty {
+                TabView(selection: Binding($viewModel.selection)) {
+                    ForEach(viewModel.attributes, id: \.id) { group in
+                        AttributeGroupView<Config>(root: $viewModel.root, path: group.path, label: group.name, notifier: viewModel.notifier)
+                            .padding(.horizontal, 10)
+                            .tabItem {
+                                Text(group.name.pretty)
+                            }
+                    }
+                    if let extraTabs = extraTabs {
+                        extraTabs()
+                    }
                 }
-                if let extraTabs = extraTabs {
-                    extraTabs()
-                }
+            } else {
+                Spacer()
             }
         }
     }

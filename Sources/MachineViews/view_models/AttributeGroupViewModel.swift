@@ -67,7 +67,13 @@ final class AttributeGroupViewModel<Root: Modifiable>: ObservableObject, Identif
     
     private let rootRef: Ref<Root>
     
-    let path: Attributes.Path<Root, AttributeGroup>
+    private let arrPath: Attributes.Path<Root, [AttributeGroup]>
+    
+    @Published var index: Int
+    
+    var path: Attributes.Path<Root, AttributeGroup> {
+        arrPath[index]
+    }
     
     var group: AttributeGroup {
         path.isNil(rootRef.value) ? AttributeGroup(name: "") : rootRef.value[keyPath: path.keyPath]
@@ -77,9 +83,10 @@ final class AttributeGroupViewModel<Root: Modifiable>: ObservableObject, Identif
         path.isNil(rootRef.value) ? "" : rootRef.value[keyPath: path.keyPath].name
     }
     
-    init(rootRef: Ref<Root>, path: Attributes.Path<Root, AttributeGroup>, notifier: GlobalChangeNotifier? = nil) {
+    init(rootRef: Ref<Root>, arrPath: Attributes.Path<Root, [AttributeGroup]>, index: Int, notifier: GlobalChangeNotifier? = nil) {
         self.rootRef = rootRef
-        self.path = path
+        self.arrPath = arrPath
+        self.index = index
         self.notifier = notifier
     }
     

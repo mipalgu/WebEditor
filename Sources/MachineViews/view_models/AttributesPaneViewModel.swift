@@ -82,9 +82,38 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
     
     private var transitionIndex: Int = -1
     
-    lazy var attributeGroupsViewModel: AttributeGroupsViewModel<Machine> = {
-        AttributeGroupsViewModel(rootRef: machineRef, pathRef: pathRef, selectionRef: selectionRef, notifier: notifier)
-    }()
+    private var focusViewModels: [Focus: AttributeGroupsViewModel<Machine>] = [:]
+    
+    var attributeGroupsViewModel: AttributeGroupsViewModel<Machine> {
+        if let viewModel = focusViewModels[focus] {
+            return viewModel
+        }
+        switch focus {
+        case .machine:
+            let viewModel = AttributeGroupsViewModel(rootRef: machineRef, path: Machine.path.attributes, notifier: notifier)
+            focusViewModels[focus] = viewModel
+            return viewModel
+        case .state(let stateIndex):
+            var path = Machine.path.states[stateIndex].attributes
+            if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
+                path = Machine.path.attributes
+            }
+            let viewModel = AttributeGroupsViewModel(rootRef: machineRef, path: path, notifier: notifier)
+            focusViewModels[focus] = viewModel
+            return viewModel
+        case .transition(let stateIndex, let transitionIndex):
+            var path = Machine.path.states[stateIndex].transitions[transitionIndex].attributes
+            if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
+                path = Machine.path.states[stateIndex].attributes
+            }
+            if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
+                path = Machine.path.attributes
+            }
+            let viewModel = AttributeGroupsViewModel(rootRef: machineRef, path: path, notifier: notifier)
+            focusViewModels[focus] = viewModel
+            return viewModel
+        }
+    }
     
     var machine: Machine {
         get {
@@ -99,75 +128,19 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
         focusRef.value
     }
     
-    var selection: ObjectIdentifier? {
-        get {
-            switch focus {
-            case .machine:
-                return machineSelection
-            case .state(let index):
-                if index >= machine.states.count {
-                    return nil
-                }
-                return stateSelection
-            case .transition(let stateIndex, let transitionIndex):
-                if stateIndex >= machine.states.count || transitionIndex >= machine.states[stateIndex].transitions.count {
-                    return nil
-                }
-                return transitionSelection
-            }
-        } set {
-            switch focus {
-            case .machine:
-                machineSelection = newValue
-            case .state:
-                stateSelection = newValue
-            case .transition:
-                transitionSelection = newValue
-            }
-        }
-    }
-    
-    var selectionRef: Ref<ObjectIdentifier?> {
-        Ref(
-            get: { self.selection },
-            set: { self.selection = $0 }
-        )
-    }
-    
-    var path: Attributes.Path<Machine, [AttributeGroup]> {
-        switch focus {
-            case .machine:
-                return machine.path.attributes
-            case .state(let stateIndex):
-                let path = machine.path.states[stateIndex].attributes
-                if !path.isNil(machine) {
-                    return path
-                }
-                return machine.path.attributes
-            case .transition(let stateIndex, let transitionIndex):
-                let path = machine.path.states[stateIndex].transitions[transitionIndex].attributes
-                if !path.isNil(machine) && !machine.states[stateIndex].transitions[transitionIndex].attributes.isEmpty {
-                    return path
-                }
-                let statePath = machine.path.states[stateIndex].attributes
-                if !statePath.isNil(machine) && !machine.states[stateIndex].attributes.isEmpty {
-                    return statePath
-                }
-                return machine.path.attributes
-        }
-    }
-    
-    var pathRef: ConstRef<Attributes.Path<Machine, [AttributeGroup]>> {
-        ConstRef(get: { self.path })
-    }
-    
     var label: String {
         switch focus {
         case .machine:
             return "Machine: \(machine.name)"
         case .state(let stateIndex):
+            if Machine.path.states[stateIndex].isNil(machineRef.value) {
+                return ""
+            }
             return "State: \(machine.states[stateIndex].name)"
         case .transition(let stateIndex, let transitionIndex):
+            if Machine.path.states[stateIndex].isNil(machineRef.value) {
+                return ""
+            }
             return "State \(machine.states[stateIndex].name) Transition \(transitionIndex)"
         }
     }

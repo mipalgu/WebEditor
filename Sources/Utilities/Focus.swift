@@ -9,7 +9,7 @@ import TokamakShim
 import Machines
 import Attributes
 
-public enum Focus {
+public enum Focus: Hashable {
     case machine
     case state(stateIndex: Int)
     case transition(stateIndex: Int, transitionIndex: Int)

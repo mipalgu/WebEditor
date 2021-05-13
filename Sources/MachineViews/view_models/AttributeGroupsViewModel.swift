@@ -68,11 +68,11 @@ final class AttributeGroupsViewModel<Root: Modifiable>: ObservableObject, Global
     
     private let rootRef: Ref<Root>
     
-    private let pathRef: ConstRef<Attributes.Path<Root, [AttributeGroup]>>
+    let path: Attributes.Path<Root, [AttributeGroup]>
     
-    private let selectionRef: Ref<ObjectIdentifier?>
+    @Published var selection: ObjectIdentifier?
     
-    private var groupViewModels: [KeyPath<Root, AttributeGroup>: AttributeGroupViewModel<Root>] = [:]
+    private var groupViewModels: [String: AttributeGroupViewModel<Root>] = [:]
     
     var root: Root {
         get {
@@ -82,35 +82,23 @@ final class AttributeGroupsViewModel<Root: Modifiable>: ObservableObject, Global
         }
     }
     
-    var path: Attributes.Path<Root, [AttributeGroup]> {
-        pathRef.value
-    }
-    
-    var selection: ObjectIdentifier? {
-        get {
-            selectionRef.value
-        } set {
-            selectionRef.value = newValue
-            objectWillChange.send()
-        }
-    }
-    
     var attributes: [AttributeGroupViewModel<Root>] {
-        rootRef.value[keyPath: path.keyPath].indices.map {
-            let path = path[$0]
-            if let viewModel = groupViewModels[path.keyPath] {
+        rootRef.value[keyPath: path.keyPath].enumerated().map {
+            if let viewModel = groupViewModels[$1.name] {
+                if viewModel.index != $0 {
+                    viewModel.index = $0
+                }
                 return viewModel
             }
-            let viewModel = AttributeGroupViewModel(rootRef: rootRef, path: path)
-            groupViewModels[path.keyPath] = viewModel
+            let viewModel = AttributeGroupViewModel(rootRef: rootRef, arrPath: path, index: $0, notifier: notifier)
+            groupViewModels[$1.name] = viewModel
             return viewModel
         }
     }
     
-    init(rootRef: Ref<Root>, pathRef: ConstRef<Attributes.Path<Root, [AttributeGroup]>>, selectionRef: Ref<ObjectIdentifier?>, notifier: GlobalChangeNotifier? = nil) {
+    init(rootRef: Ref<Root>, path: Attributes.Path<Root, [AttributeGroup]>, notifier: GlobalChangeNotifier? = nil) {
         self.rootRef = rootRef
-        self.pathRef = pathRef
-        self.selectionRef = selectionRef
+        self.path = path
         self.notifier = notifier
     }
     

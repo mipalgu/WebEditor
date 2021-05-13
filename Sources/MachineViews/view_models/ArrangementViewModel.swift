@@ -18,23 +18,14 @@ final class ArrangementViewModel: ObservableObject, GlobalChangeNotifier {
     
     var arrangement: Arrangement
     
-    @Published var selection: ObjectIdentifier?
-    
     lazy var attributeGroupsViewModel: AttributeGroupsViewModel<Arrangement> = {
-        AttributeGroupsViewModel(rootRef: rootRef, pathRef: ConstRef(get: { Arrangement.path.attributes }), selectionRef: selectionRef, notifier: notifier)
+        AttributeGroupsViewModel(rootRef: rootRef, path: Arrangement.path.attributes, notifier: notifier)
     }()
     
     private var rootRef: Ref<Arrangement> {
         Ref(
             get: { self.arrangement },
             set: { self.arrangement = $0 }
-        )
-    }
-    
-    private var selectionRef: Ref<ObjectIdentifier?> {
-        Ref(
-            get: { self.selection },
-            set: { self.selection = $0 }
         )
     }
     
