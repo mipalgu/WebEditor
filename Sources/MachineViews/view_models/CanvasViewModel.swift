@@ -61,6 +61,7 @@ import Machines
 import AttributeViews
 import Utilities
 import GUUI
+import swift_helpers
 
 final class CanvasViewModel: ObservableObject {
     
@@ -69,6 +70,8 @@ final class CanvasViewModel: ObservableObject {
     weak var notifier: GlobalChangeNotifier?
     
     private var stateViewModels: [StateName: StateViewModel]
+    
+    private var targetTransitions: [StateName: SortedCollection<TransitionTracker>]
     
     let coordinateSpace = "CANVAS_VIEW"
     
@@ -112,12 +115,35 @@ final class CanvasViewModel: ObservableObject {
     init(machineRef: Ref<Machine>, layout: Layout? = nil, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machineRef
         self.notifier = notifier
-        self.stateViewModels = Dictionary(uniqueKeysWithValues: layout?.states.compactMap { (stateName, stateLayout) in
+        let stateViewModels: [StateName: StateViewModel] = Dictionary(uniqueKeysWithValues: layout?.states.compactMap { (stateName, stateLayout) in
             guard let index = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
                 return nil
             }
             return (stateName, StateViewModel(machine: machineRef, index: index, isText: false, layout: stateLayout, notifier: notifier))
         } ?? [])
+        var targetTransitions: [StateName: SortedCollection<TransitionTracker>] = [:]
+        stateViewModels.values.forEach { viewModel in
+            viewModel.transitions.forEach {
+                let transitionViewModel = viewModel.viewModel(forTransition: $0)
+                if nil == targetTransitions[transitionViewModel.target] {
+                    targetTransitions[transitionViewModel.target] = SortedCollection {
+                        if $0.id == $1.id {
+                            return .orderedSame
+                        }
+                        if $0.id < $1.id {
+                            return .orderedAscending
+                        }
+                        return .orderedDescending
+                    }
+                }
+                if targetTransitions[transitionViewModel.target]?.contains(transitionViewModel.tracker) == true {
+                    return
+                }
+                targetTransitions[transitionViewModel.target]?.insert(transitionViewModel.tracker)
+            }
+        }
+        self.stateViewModels = stateViewModels
+        self.targetTransitions = targetTransitions
         stateViewModels.values.forEach {
             $0.delegate = self
         }
@@ -200,8 +226,30 @@ final class CanvasViewModel: ObservableObject {
 
 extension CanvasViewModel: StateViewModelDelegate {
     
-    func didChangeName(_ viewModel: StateViewModel, from oldName: String, to newName: String) {
+    func didChangeName(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName) {
         stateViewModels[newName] = viewModel
+        targetTransitions[newName] = targetTransitions[oldName]
+        targetTransitions[oldName] = nil
+    }
+    
+    func didChangeTransitionTarget(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName, transition: TransitionViewModel) {
+        targetTransitions[oldName]?.removeAll(transition.tracker)
+        if nil == targetTransitions[newName] {
+            targetTransitions[newName] = SortedCollection {
+                if $0.id == $1.id {
+                    return .orderedSame
+                }
+                if $0.id < $1.id {
+                    return .orderedAscending
+                }
+                return .orderedDescending
+            }
+        }
+        targetTransitions[newName]?.insert(transition.tracker)
+    }
+    
+    func didDeleteTransition(_ viewModel: StateViewModel, transition: TransitionViewModel, targeting targetStateName: StateName) {
+        targetTransitions[targetStateName]?.removeAll(transition.tracker)
     }
     
 }

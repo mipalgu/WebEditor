@@ -65,7 +65,9 @@ import Utilities
 
 protocol StateViewModelDelegate: AnyObject {
     
-    func didChangeName(_ viewModel: StateViewModel, from oldName: String, to newName: String)
+    func didChangeName(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName)
+    func didChangeTransitionTarget(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName, transition: TransitionViewModel)
+    func didDeleteTransition(_ viewModel: StateViewModel, transition: TransitionViewModel, targeting targetStateName: StateName)
     
 }
 
@@ -166,6 +168,8 @@ final class StateViewModel: ObservableObject, Identifiable {
         guard !path.isNil(machineRef.value), machineRef.value[keyPath: path.keyPath].transitions.count > transitionIndex, transitionViewModels[transitionIndex] != nil else {
             return
         }
+        let transitionViewModel = viewModel(forTransition: transitionIndex)
+        let targetStateName = transitionViewModel.target
         let transitions = machineRef.value[keyPath: path.keyPath].transitions
         let result = machineRef.value.deleteTransition(atIndex: transitionIndex, attachedTo: name)
         switch result {
@@ -174,6 +178,7 @@ final class StateViewModel: ObservableObject, Identifiable {
             return
         case .success(let notify):
             transitionViewModels[transitionIndex] = nil
+            delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
             defer {
                 if notify {
                     notifier?.send()
@@ -186,7 +191,8 @@ final class StateViewModel: ObservableObject, Identifiable {
             guard transitionIndex + 1 < transitions.count else {
                 return
             }
-            // Remove transition view models for transitions that no longer exist.
+            // Remove transition view models for transitions that no longer exist
+            // and update indexes of transition view models that have changed.
             let count = machineRef.value[keyPath: path.keyPath].transitions.count
             var dict: [Int: TransitionViewModel] = [:]
             dict.reserveCapacity(count)

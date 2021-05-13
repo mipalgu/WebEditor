@@ -90,6 +90,10 @@ final class TransitionViewModel: ObservableObject, Identifiable {
         path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].condition ?? ""
     }
     
+    var target: StateName {
+        path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].target
+    }
+    
     init(machine: Ref<Machine>, stateIndex: Int, transitionIndex: Int, layout: TransitionLayout? = nil) {
         self.machineRef = machine
         self.stateIndex = stateIndex

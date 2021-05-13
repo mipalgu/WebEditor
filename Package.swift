@@ -12,6 +12,7 @@ let package = Package(
         .executable(name: "WebEditor", targets: ["WebEditor"])
     ],
     dependencies: ui + [
+        .package(name: "swift_helpers", url: "ssh://git.mipal.net/Users/Shared/git/swift_helpers.git", .branch("master")),
         .package(name: "Machines", url: "ssh://git.mipal.net/Users/Shared/git/Machines.git", .branch("meta")),
         .package(name: "AttributeViews", url: "ssh://git.mipal.net/Users/Shared/git/AttributeViews.git", .branch("master")),
         .package(name: "GUUI", url: "ssh://git.mipal.net/Users/Shared/git/GUUI.git", .branch("master"))
@@ -21,7 +22,7 @@ let package = Package(
         .target(name: "Transformations", dependencies: products + ["GUUI"]),
         .target(
             name: "MachineViews",
-            dependencies: products + ["Machines", "AttributeViews", "Utilities", "Transformations", "GUUI"],
+            dependencies: products + ["Machines", "AttributeViews", "Utilities", "Transformations", "GUUI", "swift_helpers"],
             resources: [.copy("Resources/Assets.xcassets")]
         ),
         .target(

@@ -10,7 +10,7 @@ import GUUI
 import Transformations
 import Utilities
 
-class TransitionTracker: ObservableObject, Hashable, Positionable {
+class TransitionTracker: ObservableObject, Hashable, Identifiable, Positionable {
     
     static func == (lhs: TransitionTracker, rhs: TransitionTracker) -> Bool {
         lhs.id == rhs.id
