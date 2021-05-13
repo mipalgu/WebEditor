@@ -75,9 +75,9 @@ final class StateViewModel: ObservableObject, Identifiable {
     
     weak var delegate: StateViewModelDelegate?
     
-    let machineRef: Ref<Machine>
-    
     weak var notifier: GlobalChangeNotifier?
+    
+    let machineRef: Ref<Machine>
     
     @Published var index: Int {
         willSet {
@@ -158,7 +158,7 @@ final class StateViewModel: ObservableObject, Identifiable {
             self.transitionViewModels = [:]
         } else {
             self.transitionViewModels = Dictionary(uniqueKeysWithValues: layout?.transitions[0..<machine.value.states[index].transitions.count].enumerated().map {
-                ($0, TransitionViewModel(machine: machine, stateIndex: index, transitionIndex: $0, layout: $1))
+                ($0, TransitionViewModel(machine: machine, stateIndex: index, transitionIndex: $0, layout: $1, notifier: notifier))
             } ?? [])
         }
         self.notifier = notifier
@@ -227,6 +227,13 @@ final class StateViewModel: ObservableObject, Identifiable {
         let viewModel = TransitionViewModel(machine: machineRef, stateIndex: index, transitionIndex: transitionIndex)
         transitionViewModels[transitionIndex] = viewModel
         return viewModel
+    }
+    
+    func send() {
+        transitionViewModels.values.forEach {
+            $0.send()
+        }
+        objectWillChange.send()
     }
     
 }

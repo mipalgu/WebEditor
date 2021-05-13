@@ -77,7 +77,7 @@ public class ConstRef<T>: ObservableObject, Identifiable {
         self.init(get: { value })
     }
     
-    fileprivate init(get: @escaping () -> T) {
+    public init(get: @escaping () -> T) {
         self.get = get
     }
     

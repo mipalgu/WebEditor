@@ -62,28 +62,28 @@ import Attributes
 import Machines
 import Utilities
 
-final class AttributesPaneViewModel: ObservableObject {
+final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
+    
+    weak var notifier: GlobalChangeNotifier?
     
     let machineRef: Ref<Machine>
     
     private let focusRef: Ref<Focus>
     
-    weak var notifier: GlobalChangeNotifier?
-    
     @Published var attributesCollapsed: Bool = false
     
-    private var machineSelection: Int?
+    private var machineSelection: ObjectIdentifier?
     
-    private var stateSelection: Int?
+    private var stateSelection: ObjectIdentifier?
     
-    private var transitionSelection: Int?
+    private var transitionSelection: ObjectIdentifier?
 
     private var stateIndex: Int = -1
     
     private var transitionIndex: Int = -1
     
     lazy var attributeGroupsViewModel: AttributeGroupsViewModel<Machine> = {
-        AttributeGroupsViewModel(rootRef: machineRef, path: Machine.path.attributes, selectionRef: selectionRef, notifier: notifier)
+        AttributeGroupsViewModel(rootRef: machineRef, pathRef: pathRef, selectionRef: selectionRef, notifier: notifier)
     }()
     
     var machine: Machine {
@@ -99,21 +99,21 @@ final class AttributesPaneViewModel: ObservableObject {
         focusRef.value
     }
     
-    var selection: Int? {
+    var selection: ObjectIdentifier? {
         get {
             switch focus {
             case .machine:
-                return machineSelection.map { $0 >= machine.attributes.count } == true ? nil : machineSelection
+                return machineSelection
             case .state(let index):
                 if index >= machine.states.count {
                     return nil
                 }
-                return stateSelection.map { $0 >= machine.states[index].attributes.count } == true ? nil : stateSelection
+                return stateSelection
             case .transition(let stateIndex, let transitionIndex):
                 if stateIndex >= machine.states.count || transitionIndex >= machine.states[stateIndex].transitions.count {
                     return nil
                 }
-                return transitionSelection.map { $0 >= machine.states[stateIndex].transitions[transitionIndex].attributes.count } == true ? nil : transitionSelection
+                return transitionSelection
             }
         } set {
             switch focus {
@@ -127,7 +127,7 @@ final class AttributesPaneViewModel: ObservableObject {
         }
     }
     
-    var selectionRef: Ref<Int?> {
+    var selectionRef: Ref<ObjectIdentifier?> {
         Ref(
             get: { self.selection },
             set: { self.selection = $0 }
@@ -155,6 +155,10 @@ final class AttributesPaneViewModel: ObservableObject {
                 }
                 return machine.path.attributes
         }
+    }
+    
+    var pathRef: ConstRef<Attributes.Path<Machine, [AttributeGroup]>> {
+        ConstRef(get: { self.path })
     }
     
     var label: String {
@@ -190,6 +194,11 @@ final class AttributesPaneViewModel: ObservableObject {
             self.transitionIndex = transitionIndex
         }
         attributeGroupsViewModel.objectWillChange.send()
+        objectWillChange.send()
+    }
+    
+    func send() {
+        attributeGroupsViewModel.send()
         objectWillChange.send()
     }
     

@@ -59,11 +59,14 @@
 import TokamakShim
 import Machines
 import Attributes
+import AttributeViews
 import Transformations
 import Utilities
 import GUUI
 
-final class TransitionViewModel: ObservableObject, Identifiable {
+final class TransitionViewModel: ObservableObject, Identifiable, GlobalChangeNotifier {
+    
+    weak var notifier: GlobalChangeNotifier?
     
     let machineRef: Ref<Machine>
     
@@ -94,11 +97,16 @@ final class TransitionViewModel: ObservableObject, Identifiable {
         path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].target
     }
     
-    init(machine: Ref<Machine>, stateIndex: Int, transitionIndex: Int, layout: TransitionLayout? = nil) {
+    init(machine: Ref<Machine>, stateIndex: Int, transitionIndex: Int, layout: TransitionLayout? = nil, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machine
         self.stateIndex = stateIndex
         self.transitionIndex = transitionIndex
         self.tracker = layout.map { TransitionTracker(layout: $0) } ?? TransitionTracker(curve: Curve(source: .zero, target: .zero))
+        self.notifier = notifier
+    }
+    
+    func send() {
+        objectWillChange.send()
     }
     
 }

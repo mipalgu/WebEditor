@@ -42,7 +42,7 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         return CanvasViewModel(
             machineRef: machineRef,
             layout: layout,
-            notifier: self
+            notifier: notifier
         )
     }()
     
@@ -73,8 +73,8 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     }
     
     func send() {
-        attributesPaneViewModel.objectWillChange.send()
-        canvasViewModel.objectWillChange.send()
+        attributesPaneViewModel.send()
+        canvasViewModel.send()
         self.objectWillChange.send()
     }
     

@@ -68,9 +68,11 @@ final class AttributeGroupsViewModel<Root: Modifiable>: ObservableObject, Global
     
     private let rootRef: Ref<Root>
     
-    let path: Attributes.Path<Root, [AttributeGroup]>
+    private let pathRef: ConstRef<Attributes.Path<Root, [AttributeGroup]>>
     
-    private let selectionRef: Ref<Int?>
+    private let selectionRef: Ref<ObjectIdentifier?>
+    
+    private var groupViewModels: [KeyPath<Root, AttributeGroup>: AttributeGroupViewModel<Root>] = [:]
     
     var root: Root {
         get {
@@ -80,7 +82,11 @@ final class AttributeGroupsViewModel<Root: Modifiable>: ObservableObject, Global
         }
     }
     
-    var selection: Int? {
+    var path: Attributes.Path<Root, [AttributeGroup]> {
+        pathRef.value
+    }
+    
+    var selection: ObjectIdentifier? {
         get {
             selectionRef.value
         } set {
@@ -89,22 +95,29 @@ final class AttributeGroupsViewModel<Root: Modifiable>: ObservableObject, Global
         }
     }
     
-    var attributes: [AttributeGroup] {
-        rootRef.value[keyPath: path.keyPath]
+    var attributes: [AttributeGroupViewModel<Root>] {
+        rootRef.value[keyPath: path.keyPath].indices.map {
+            let path = path[$0]
+            if let viewModel = groupViewModels[path.keyPath] {
+                return viewModel
+            }
+            let viewModel = AttributeGroupViewModel(rootRef: rootRef, path: path)
+            groupViewModels[path.keyPath] = viewModel
+            return viewModel
+        }
     }
     
-    init(rootRef: Ref<Root>, path: Attributes.Path<Root, [AttributeGroup]>, selectionRef: Ref<Int?>, notifier: GlobalChangeNotifier? = nil) {
+    init(rootRef: Ref<Root>, pathRef: ConstRef<Attributes.Path<Root, [AttributeGroup]>>, selectionRef: Ref<ObjectIdentifier?>, notifier: GlobalChangeNotifier? = nil) {
         self.rootRef = rootRef
-        self.path = path
+        self.pathRef = pathRef
         self.selectionRef = selectionRef
         self.notifier = notifier
     }
     
-    func attribute(at index: Int) -> AttributeGroup {
-        path[index].isNil(rootRef.value) ? AttributeGroup(name: "") : rootRef.value[keyPath: path.keyPath][index]
-    }
-    
     func send() {
+        self.groupViewModels.values.forEach {
+            $0.send()
+        }
         objectWillChange.send()
     }
     

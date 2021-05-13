@@ -222,6 +222,19 @@ final class CanvasViewModel: ObservableObject {
     
 }
 
+// MARK: - GlobalChangeNotifier
+
+extension CanvasViewModel: GlobalChangeNotifier {
+    
+    func send() {
+        stateViewModels.values.forEach {
+            $0.send()
+        }
+        objectWillChange.send()
+    }
+    
+}
+
 // MARK: - StateViewModelDelegate
 
 extension CanvasViewModel: StateViewModelDelegate {

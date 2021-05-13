@@ -1,8 +1,8 @@
 /*
- * DependenciesViewModel.swift
+ * AttributeGroupViewModel.swift
  * 
  *
- * Created by Callum McColl on 7/5/21.
+ * Created by Callum McColl on 13/5/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,50 +57,33 @@
  */
 
 import TokamakShim
-
-import Machines
 import Attributes
 import AttributeViews
 import Utilities
 
-final class DependenciesViewModel: ObservableObject, GlobalChangeNotifier {
+final class AttributeGroupViewModel<Root: Modifiable>: ObservableObject, Identifiable, GlobalChangeNotifier {
     
     weak var notifier: GlobalChangeNotifier?
     
-    private let _machineViewModel: (URL) -> MachineViewModel?
+    private let rootRef: Ref<Root>
     
-    private var dependencyViewModels: [URL: DependencyViewModel] = [:]
+    let path: Attributes.Path<Root, AttributeGroup>
     
-    @Published var expanded: Bool = false
+    var group: AttributeGroup {
+        path.isNil(rootRef.value) ? AttributeGroup(name: "") : rootRef.value[keyPath: path.keyPath]
+    }
     
-    init(machineViewModel: @escaping (URL) -> MachineViewModel?, notifier: GlobalChangeNotifier? = nil) {
-        self._machineViewModel = machineViewModel
+    var name: String {
+        path.isNil(rootRef.value) ? "" : rootRef.value[keyPath: path.keyPath].name
+    }
+    
+    init(rootRef: Ref<Root>, path: Attributes.Path<Root, AttributeGroup>, notifier: GlobalChangeNotifier? = nil) {
+        self.rootRef = rootRef
+        self.path = path
         self.notifier = notifier
     }
     
-    func machineViewModel(forURL url: URL) -> MachineViewModel? {
-        self._machineViewModel(url)
-    }
-    
-    func viewModel(forDependency dependency: MachineDependency) -> DependencyViewModel {
-        if let viewModel = dependencyViewModels[dependency.filePath] {
-            return viewModel
-        }
-        let newViewModel = DependencyViewModel(
-            url: dependency.filePath,
-            machineViewModel: _machineViewModel,
-            dependencyViewModel: { [unowned self] in
-                self.viewModel(forDependency: $0)
-            }
-        )
-        dependencyViewModels[dependency.filePath] = newViewModel
-        return newViewModel
-    }
-    
     func send() {
-        dependencyViewModels.values.forEach {
-            $0.send()
-        }
         objectWillChange.send()
     }
     

@@ -60,9 +60,12 @@ import TokamakShim
 
 import Machines
 import Attributes
+import AttributeViews
 import Utilities
 
-final class DependencyViewModel: ObservableObject {
+final class DependencyViewModel: ObservableObject, GlobalChangeNotifier {
+    
+    weak var notifier: GlobalChangeNotifier?
     
     private let url: URL
     
@@ -76,14 +79,19 @@ final class DependencyViewModel: ObservableObject {
         _machineViewModel(url)
     }
     
-    init(url: URL, machineViewModel: @escaping (URL) -> MachineViewModel?, dependencyViewModel: @escaping (MachineDependency) -> DependencyViewModel) {
+    init(url: URL, machineViewModel: @escaping (URL) -> MachineViewModel?, dependencyViewModel: @escaping (MachineDependency) -> DependencyViewModel, notifier: GlobalChangeNotifier? = nil) {
         self.url = url
         self._machineViewModel = machineViewModel
         self._dependencyViewModel = dependencyViewModel
+        self.notifier = notifier
     }
     
     func viewModel(forDependency dependency: MachineDependency) -> DependencyViewModel {
         self._dependencyViewModel(dependency)
+    }
+    
+    func send() {
+        objectWillChange.send()
     }
     
 }
