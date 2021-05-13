@@ -15,54 +15,36 @@ import GUUI
 
 public struct AttributeGroupsView<Root: Modifiable, ExtraTabs: View>: View {
     
-    class Temp {
-        
-        var idCache = IDCache<AttributeGroup>()
-        
-    }
+    @ObservedObject var viewModel: AttributeGroupsViewModel<Root>
     
-    @Binding var root: Root
-    let path: Attributes.Path<Root, [AttributeGroup]>
     let label: String
-    let notifier: GlobalChangeNotifier?
     let extraTabs: (() -> ExtraTabs)?
-    
-    let temp = Temp()
     
     @EnvironmentObject var config: Config
     
-    @Binding var selection: Int?
-    
-    public init(root: Binding<Root>, path: Attributes.Path<Root, [AttributeGroup]>, label: String, selection: Binding<Int?>, notifier: GlobalChangeNotifier? = nil) where ExtraTabs == EmptyView {
-        self.init(root: root, path: path, label: label, selection: selection, notifier: notifier, extraTabs: nil)
-    }
-    
-    public init(root: Binding<Root>, path: Attributes.Path<Root, [AttributeGroup]>, label: String, selection: Binding<Int?>, notifier: GlobalChangeNotifier? = nil, extraTabs: (() -> ExtraTabs)?) {
-        self._root = root
-        self.path = path
+    init(viewModel: AttributeGroupsViewModel<Root>, label: String, extraTabs: @escaping () -> ExtraTabs) {
+        self.viewModel = viewModel
         self.label = label
-        self._selection = selection
-        self.notifier = notifier
-        self.extraTabs = extraTabs
+        self.extraTabs = .some(extraTabs)
     }
     
-    var groups: [Row<AttributeGroup>] {
-        root[keyPath: path.path].enumerated().map {
-            Row(id: temp.idCache.id(for: $1), index: $0, data: $1)
-        }
+    init(viewModel: AttributeGroupsViewModel<Root>, label: String) where ExtraTabs == EmptyView {
+        self.viewModel = viewModel
+        self.label = label
+        self.extraTabs = nil
     }
     
     public var body: some View {
         VStack {
-            Text(label.capitalized)
+            Text(label.pretty)
                 .font(.title3)
                 .foregroundColor(config.textColor)
-            TabView(selection: Binding($selection)) {
-                ForEach(groups.indices, id: \.self) { index in
-                    AttributeGroupView<Config>(root: $root, path: path[index], label: root[keyPath: path.keyPath][index].name, notifier: notifier)
+            TabView(selection: Binding($viewModel.selection)) {
+                ForEach(viewModel.attributes.indices, id: \.self) { index in
+                    AttributeGroupView<Config>(root: $viewModel.root, path: viewModel.path[index], label: viewModel.attribute(at: index).name, notifier: viewModel.notifier)
                         .padding(.horizontal, 10)
                         .tabItem {
-                            Text(root[keyPath: path.keyPath][index].name.pretty)
+                            Text(viewModel.attribute(at: index).name.pretty)
                         }
                 }
                 if let extraTabs = extraTabs {

@@ -72,15 +72,19 @@ final class AttributesPaneViewModel: ObservableObject {
     
     @Published var attributesCollapsed: Bool = false
     
-    @Published var machineSelection: Int?
+    private var machineSelection: Int?
     
-    @Published var stateSelection: Int?
+    private var stateSelection: Int?
     
-    @Published var transitionSelection: Int?
+    private var transitionSelection: Int?
 
     private var stateIndex: Int = -1
     
     private var transitionIndex: Int = -1
+    
+    lazy var attributeGroupsViewModel: AttributeGroupsViewModel<Machine> = {
+        AttributeGroupsViewModel(rootRef: machineRef, path: Machine.path.attributes, selectionRef: selectionRef, notifier: notifier)
+    }()
     
     var machine: Machine {
         get {
@@ -121,6 +125,13 @@ final class AttributesPaneViewModel: ObservableObject {
                 transitionSelection = newValue
             }
         }
+    }
+    
+    var selectionRef: Ref<Int?> {
+        Ref(
+            get: { self.selection },
+            set: { self.selection = $0 }
+        )
     }
     
     var path: Attributes.Path<Machine, [AttributeGroup]> {
@@ -178,6 +189,7 @@ final class AttributesPaneViewModel: ObservableObject {
             }
             self.transitionIndex = transitionIndex
         }
+        attributeGroupsViewModel.objectWillChange.send()
         objectWillChange.send()
     }
     

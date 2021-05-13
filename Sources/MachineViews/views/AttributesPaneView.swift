@@ -77,23 +77,11 @@ struct AttributesPaneView: View {
                 VStack {
                     switch viewModel.focus {
                     case .machine:
-                        AttributeGroupsView(
-                            root: $viewModel.machine,
-                            path: viewModel.path,
-                            label: viewModel.label,
-                            selection: $viewModel.selection,
-                            notifier: viewModel.notifier
-                        ) {
+                        AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label) {
                             DependenciesAttributesView(root: $viewModel.machine, path: viewModel.machine.path, label: "Dependencies")
                         }
                     default:
-                        AttributeGroupsView(
-                            root: $viewModel.machine,
-                            path: viewModel.path,
-                            label: viewModel.label,
-                            selection: $viewModel.selection,
-                            notifier: viewModel.notifier
-                        )
+                        AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label)
                     }
                 }.animation(.none)
             } else {

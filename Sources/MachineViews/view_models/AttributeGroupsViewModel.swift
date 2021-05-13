@@ -1,8 +1,8 @@
 /*
- * ArrangementView.swift
+ * AttributeGroupsViewModel.swift
  * 
  *
- * Created by Callum McColl on 24/4/21.
+ * Created by Callum McColl on 13/5/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,21 +57,55 @@
  */
 
 import TokamakShim
-
+import AttributeViews
 import Attributes
 import Machines
+import Utilities
 
-struct ArrangementView: View {
+final class AttributeGroupsViewModel<Root: Modifiable>: ObservableObject, GlobalChangeNotifier {
     
-    @ObservedObject var viewModel: ArrangementViewModel
+    weak var notifier: GlobalChangeNotifier?
     
-    var body: some View {
-        AttributeGroupsView(
-            viewModel: viewModel.attributeGroupsViewModel,
-            label: viewModel.arrangement.name.pretty + " Arrangement"
-        ) {
-            DependenciesAttributesView(root: $viewModel.arrangement, path: viewModel.arrangement.path, label: "Dependencies")
+    private let rootRef: Ref<Root>
+    
+    let path: Attributes.Path<Root, [AttributeGroup]>
+    
+    private let selectionRef: Ref<Int?>
+    
+    var root: Root {
+        get {
+            rootRef.value
+        } set {
+            rootRef.value = newValue
         }
+    }
+    
+    var selection: Int? {
+        get {
+            selectionRef.value
+        } set {
+            selectionRef.value = newValue
+            objectWillChange.send()
+        }
+    }
+    
+    var attributes: [AttributeGroup] {
+        rootRef.value[keyPath: path.keyPath]
+    }
+    
+    init(rootRef: Ref<Root>, path: Attributes.Path<Root, [AttributeGroup]>, selectionRef: Ref<Int?>, notifier: GlobalChangeNotifier? = nil) {
+        self.rootRef = rootRef
+        self.path = path
+        self.selectionRef = selectionRef
+        self.notifier = notifier
+    }
+    
+    func attribute(at index: Int) -> AttributeGroup {
+        path[index].isNil(rootRef.value) ? AttributeGroup(name: "") : rootRef.value[keyPath: path.keyPath][index]
+    }
+    
+    func send() {
+        objectWillChange.send()
     }
     
 }
