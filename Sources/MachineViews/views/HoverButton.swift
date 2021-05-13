@@ -1,6 +1,5 @@
-//
 /*
- * File.swift
+ * HoverButton.swift
  * 
  *
  * Created by Callum McColl on 13/5/21.
@@ -59,48 +58,44 @@
 
 import TokamakShim
 
-struct AttributesPaneView: View {
+#if canImport(Cocoa)
+import Cocoa
+#endif
+
+struct HoverButton<Label: View>: View {
     
-    @ObservedObject var viewModel: AttributesPaneViewModel
+    let action: () -> Void
+    
+    let label: () -> Label
+    
+    @State var hovering: Bool = false
     
     var body: some View {
-        VStack {
-            HStack {
-                Spacer()
-                HoverButton(action: {
-                    viewModel.attributesCollapsed.toggle()
-                }, label: {
-                    Image(systemName: "sidebar.squares.trailing").font(.system(size: 16, weight: .regular))
-                })
-            }.padding(.vertical, 5).padding(.trailing, 12.5)
-            if !viewModel.attributesCollapsed {
-                VStack {
-                    switch viewModel.focus {
-                    case .machine:
-                        AttributeGroupsView(
-                            root: $viewModel.machine,
-                            path: viewModel.path,
-                            label: viewModel.label,
-                            selection: $viewModel.selection,
-                            notifier: viewModel.notifier
-                        ) {
-                            DependenciesAttributesView(root: $viewModel.machine, path: viewModel.machine.path, label: "Dependencies")
-                        }
-                    default:
-                        AttributeGroupsView(
-                            root: $viewModel.machine,
-                            path: viewModel.path,
-                            label: viewModel.label,
-                            selection: $viewModel.selection,
-                            notifier: viewModel.notifier
-                        )
+        VStack(alignment: .trailing) {
+            Button(action: action, label: label).buttonStyle(BorderlessButtonStyle())
+                .onHover { hovering in
+                    self.hovering = hovering
+                    #if canImport(Cocoa)
+                    if hovering {
+                        NSCursor.push(.pointingHand)()
+                    } else {
+                        NSCursor.pop()
                     }
-                }.animation(.none)
+                    #endif
+                }
+        }.padding(3)
+        .background(hovering ? Color(.sRGB, white: 0, opacity: 0.03) : Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 5))
+        .onHover { hovering in
+            self.hovering = hovering
+            #if canImport(Cocoa)
+            if hovering {
+                NSCursor.push(.pointingHand)()
             } else {
-                Spacer()
+                NSCursor.pop()
             }
-        }.transition(.move(edge: .trailing)).animation(.interactiveSpring())
-        .frame(width: !viewModel.attributesCollapsed ? 500 : 50.0)
+            #endif
+        }
     }
     
 }
