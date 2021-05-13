@@ -21,7 +21,7 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     var focus: Focus = .machine {
         willSet {
-            attributesPaneViewModel.changingFocus(to: newValue)
+            attributesPaneViewModel.objectWillChange.send()
             canvasViewModel.objectWillChange.send()
         }
     }

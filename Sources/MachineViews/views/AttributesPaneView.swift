@@ -75,12 +75,9 @@ struct AttributesPaneView: View {
             }.padding(.vertical, 5).padding(.trailing, 12.5)
             if !viewModel.attributesCollapsed {
                 VStack {
-                    switch viewModel.focus {
-                    case .machine:
-                        AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label) {
-                            DependenciesAttributesView(root: $viewModel.machine, path: viewModel.machine.path, label: "Dependencies")
-                        }
-                    default:
+                    if let extraTabs = viewModel.extraTabs {
+                        AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label, extraTabs: extraTabs)
+                    } else {
                         AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label)
                     }
                 }.animation(.none)

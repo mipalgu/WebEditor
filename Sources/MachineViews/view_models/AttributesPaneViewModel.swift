@@ -72,16 +72,6 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
     
     @Published var attributesCollapsed: Bool = false
     
-    private var machineSelection: ObjectIdentifier?
-    
-    private var stateSelection: ObjectIdentifier?
-    
-    private var transitionSelection: ObjectIdentifier?
-
-    private var stateIndex: Int = -1
-    
-    private var transitionIndex: Int = -1
-    
     private var focusViewModels: [Focus: AttributeGroupsViewModel<Machine>] = [:]
     
     var attributeGroupsViewModel: AttributeGroupsViewModel<Machine> {
@@ -145,29 +135,45 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
         }
     }
     
+    var extraTabs: (() -> AnyView)? {
+        let machineExtraTabs = {
+            AnyView(DependenciesAttributesView(
+                root: Binding(get: { self.machine }, set: { self.machine = $0 }),
+                path: Machine.path,
+                label: "Dependencies"
+            ))
+        }
+        let stateExtraTabs: (() -> AnyView)? = nil
+        let transitionExtraTabs: (() -> AnyView)? = nil
+        switch focus {
+        case .machine:
+            return machineExtraTabs
+        case .state(let stateIndex):
+            let path = Machine.path.states[stateIndex].attributes
+            if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
+                return machineExtraTabs
+            } else {
+                return stateExtraTabs
+            }
+        case .transition(let stateIndex, let transitionIndex):
+            var path = Machine.path.states[stateIndex].transitions[transitionIndex].attributes
+            if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
+                path = Machine.path.states[stateIndex].attributes
+            } else {
+                return transitionExtraTabs
+            }
+            if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
+                return machineExtraTabs
+            } else {
+                return stateExtraTabs
+            }
+        }
+    }
+    
     init(machineRef: Ref<Machine>, focusRef: Ref<Focus>, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machineRef
         self.focusRef = focusRef
         self.notifier = notifier
-    }
-    
-    func changingFocus(to newValue: Focus) {
-        switch newValue {
-        case .machine:
-            break
-        case .state(let index):
-            if index != stateIndex {
-                stateSelection = nil
-            }
-            stateIndex = index
-        case .transition(let stateIndex, let transitionIndex):
-            if stateIndex != self.stateIndex || transitionIndex != self.transitionIndex {
-                self.transitionSelection = nil
-            }
-            self.transitionIndex = transitionIndex
-        }
-        attributeGroupsViewModel.objectWillChange.send()
-        objectWillChange.send()
     }
     
     func send() {
