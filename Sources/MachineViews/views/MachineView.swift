@@ -20,42 +20,33 @@ struct MachineView<Sidebar: View>: View {
     @State var attributesCollapsed: Bool = false
 
     var body: some View {
-        VStack {
-            HStack {
-                HStack {
-                    HoverButton(action: {
-                        sideBarCollapsed.toggle()
-                    }, label: {
-                        Image(systemName: "sidebar.leading").font(.system(size: 16, weight: .regular))
-                    })
-                    Spacer()
+        HStack {
+            VStack {
+                if !sideBarCollapsed {
+                    sideBar()
                 }
-                HStack {
-                    Spacer()
+            }.transition(.move(edge: .leading)).animation(.interactiveSpring())
+            CanvasView(viewModel: viewModel.canvasViewModel, focus: $viewModel.focus)
+            VStack {
+                if !attributesCollapsed {
+                    AttributesPaneView(viewModel: viewModel.attributesPaneViewModel)
+                        .frame(maxWidth: 500).animation(.none)
                 }
-                HStack {
-                    Spacer()
-                    HoverButton(action: {
-                        attributesCollapsed.toggle()
-                    }, label: {
-                        Image(systemName: "sidebar.squares.trailing").font(.system(size: 16, weight: .regular))
-                    })
-                }
-            }.padding(.horizontal, 5).padding(.top, 5)
-            Divider()
-            HStack {
-                VStack {
-                    if !sideBarCollapsed {
-                        sideBar()
-                    }
-                }.transition(.move(edge: .leading)).animation(.interactiveSpring())
-                CanvasView(viewModel: viewModel.canvasViewModel, focus: $viewModel.focus)
-                VStack {
-                    if !attributesCollapsed {
-                        AttributesPaneView(viewModel: viewModel.attributesPaneViewModel)
-                            .frame(maxWidth: 500).animation(.none)
-                    }
-                }.transition(.move(edge: .leading)).animation(.interactiveSpring())
+            }.transition(.move(edge: .leading)).animation(.interactiveSpring())
+        }.toolbar {
+            ToolbarItem(placement: ToolbarItemPlacement.navigation) {
+                HoverButton(action: {
+                    sideBarCollapsed.toggle()
+                }, label: {
+                    Image(systemName: "sidebar.leading").font(.system(size: 16, weight: .regular))
+                })
+            }
+            ToolbarItem {
+                HoverButton(action: {
+                    attributesCollapsed.toggle()
+                }, label: {
+                    Image(systemName: "sidebar.squares.trailing").font(.system(size: 16, weight: .regular))
+                })
             }
         }
     }

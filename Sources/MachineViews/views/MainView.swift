@@ -51,7 +51,7 @@ public struct MainView: View {
     }
 
     public var body: some View {
-        subView
+        subView.navigationTitle(viewModel.focus.path)
     }
     
 }
