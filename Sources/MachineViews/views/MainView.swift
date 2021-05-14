@@ -63,7 +63,7 @@ public struct MainView: View {
                     Image(systemName: "sidebar.leading").font(.system(size: 16, weight: .regular))
                 })
             }
-        }
+        }.navigationTitle(viewModel.focus.path)
     }
     
 }
