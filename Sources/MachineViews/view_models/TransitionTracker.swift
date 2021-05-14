@@ -20,7 +20,7 @@ class TransitionTracker: ObservableObject, Hashable, Identifiable, Positionable 
         hasher.combine(id)
     }
     
-    var id: UUID = UUID()
+//    var id: UUID = UUID()
     
     @Published var curve: Curve
     

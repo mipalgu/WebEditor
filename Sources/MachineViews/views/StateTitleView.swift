@@ -67,18 +67,26 @@ struct StateTitleView: View {
     
     @ObservedObject var viewModel: StateViewModel
     
+    let editable: Bool
+    
     @EnvironmentObject var config: Config
     
     var body: some View {
         HStack {
             Toggle(isOn: $viewModel.expanded) {
-                LineView<Config>(
-                    value: $viewModel.name,
-                    errors: Binding(get: { viewModel.machine.errorBag.errors(forPath: viewModel.path.name).map(\.message) }, set: { _ in }),
-                    label: "Enter State Name...",
-                    delayEdits: true
-                ).multilineTextAlignment(.center)
-                    .font(config.fontBody.bold())
+                if editable {
+                    LineView<Config>(
+                        value: $viewModel.name,
+                        errors: Binding(get: { viewModel.machine.errorBag.errors(forPath: viewModel.path.name).map(\.message) }, set: { _ in }),
+                        label: "Enter State Name...",
+                        delayEdits: true
+                    ).multilineTextAlignment(.center)
+                        .font(config.fontBody.bold())
+                } else {
+                    Text(viewModel.name)
+                        .multilineTextAlignment(.center)
+                        .font(config.fontBody.bold())
+                }
             }.toggleStyle(ArrowToggleStyle(side: .left))
 //            Spacer()
         }

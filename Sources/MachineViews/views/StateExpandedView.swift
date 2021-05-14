@@ -17,7 +17,7 @@ struct StateExpandedView<TitleView: View>: View {
     
     @ObservedObject var viewModel: ActionsViewModel
     let titleView: () -> TitleView
-    var focused: Bool = false
+    let focused: Bool
     
 //    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Machines.State>, collapsedActions: Binding<[String: Bool]>, focused: Bool = false, titleView: @escaping () -> TitleView) {
 //        self.init(

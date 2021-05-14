@@ -28,11 +28,11 @@ struct StateView: View {
     var body: some View {
         if viewModel.expanded {
             StateExpandedView(viewModel: viewModel.actionsViewModel, focused: focused) {
-                StateTitleView(viewModel: viewModel)
+                StateTitleView(viewModel: viewModel, editable: true)
             }
         } else {
             StateCollapsedView(focused: focused) {
-                StateTitleView(viewModel: viewModel)
+                StateTitleView(viewModel: viewModel, editable: focused)
             }
         }
     }
