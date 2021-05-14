@@ -65,6 +65,7 @@ import Utilities
 
 protocol StateViewModelDelegate: AnyObject {
     
+    func didChangeExpanded(_ viewModel: StateViewModel, from old: Bool, to new: Bool)
     func didChangeName(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName)
     func didChangeTransitionTarget(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName, transition: TransitionViewModel)
     func didDeleteTransition(_ viewModel: StateViewModel, transition: TransitionViewModel, targeting targetStateName: StateName)
@@ -98,7 +99,9 @@ final class StateViewModel: ObservableObject, Identifiable {
         get {
             tracker.expanded
         } set {
+            let old = tracker.expanded
             tracker.expanded = newValue
+            delegate?.didChangeExpanded(self, from: old, to: newValue)
             objectWillChange.send()
         }
     }

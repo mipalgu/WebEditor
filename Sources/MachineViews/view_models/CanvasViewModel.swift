@@ -244,6 +244,32 @@ extension CanvasViewModel: GlobalChangeNotifier {
 
 extension CanvasViewModel: StateViewModelDelegate {
     
+    func didChangeExpanded(_ viewModel: StateViewModel, from old: Bool, to new: Bool) {
+        if old == new {
+            return
+        }
+        let name = viewModel.name
+        guard let state = machine.states.first(where: { $0.name == viewModel.name }) else {
+            return
+        }
+        state.transitions.indices.forEach {
+            let targetTracker = self.viewModel(forState: state.transitions[$0].target).tracker
+            viewModel.viewModel(forTransition: $0).tracker.rectifyCurve(sourceTracker: viewModel.tracker, targetTracker: targetTracker)
+        }
+        machine.states.forEach { state in
+            let sourceViewModel = self.viewModel(forState: state.name)
+            let sourceTracker = sourceViewModel.tracker
+            state.transitions.indices.forEach {
+                let target = state.transitions[$0].target
+                if target != name {
+                    return
+                }
+                let targetTracker = self.viewModel(forState: target).tracker
+                sourceViewModel.viewModel(forTransition: $0).tracker.rectifyCurve(sourceTracker: sourceTracker, targetTracker: targetTracker)
+            }
+        }
+    }
+    
     func didChangeName(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName) {
         stateViewModels[newName] = viewModel
         targetTransitions[newName] = targetTransitions[oldName]
