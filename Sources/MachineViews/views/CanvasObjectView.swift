@@ -69,9 +69,29 @@ struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
     
     let textRepresentation: String
     
-    let textFrame: CGSize = CGSize(width: 50, height: 20)
+    let textFrame: CGSize
     
     let object: () -> Object
+    
+    let dragGesture: _EndedGesture<_ChangedGesture<DragGesture>>
+    
+    init(viewModel: ViewModel, coordinateSpace: String, textRepresentation: String, textFrame: CGSize = CGSize(width: 50, height: 20), dragGesture: _EndedGesture<_ChangedGesture<DragGesture>>, object: @escaping () -> Object) {
+        self.viewModel = viewModel
+        self.coordinateSpace = coordinateSpace
+        self.textRepresentation = textRepresentation
+        self.textFrame = textFrame
+        self.object = object
+        self.dragGesture = dragGesture
+    }
+    
+    init(viewModel: ViewModel, coordinateSpace: String, textRepresentation: String, textFrame: CGSize = CGSize(width: 50, height: 20), object: @escaping () -> Object) {
+        let dragGesture = DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace)).onChanged {
+            viewModel.location = $0.location
+        }.onEnded {
+            viewModel.location = $0.location
+        }
+        self.init(viewModel: viewModel, coordinateSpace: coordinateSpace, textRepresentation: textRepresentation, textFrame: textFrame, dragGesture: dragGesture, object: object)
+    }
     
     @EnvironmentObject var config: Config
     
@@ -89,11 +109,7 @@ struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
             }
             .position(viewModel.location)
             .coordinateSpace(name: coordinateSpace)
-            .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace)).onChanged {
-                viewModel.location = $0.location
-            }.onEnded {
-                viewModel.location = $0.location
-            })
+            .gesture(dragGesture)
         }
     }
     
