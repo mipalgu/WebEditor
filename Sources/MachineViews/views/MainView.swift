@@ -15,9 +15,6 @@ public struct MainView: View {
     
     @StateObject var viewModel: MainViewModel
     
-    @State var sideBarCollapsed: Bool = false
-    @State var dependenciesWidth: CGFloat = 200
-    
     @EnvironmentObject var config: Config
     
     public init(arrangement: Arrangement) {
@@ -34,18 +31,8 @@ public struct MainView: View {
 
     public var body: some View {
         HStack {
-            SideBar(collapsed: $sideBarCollapsed, width: $dependenciesWidth, maxWidth: 600) {
-                DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
-            }
+            DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
             viewModel.subView
-        }.toolbar {
-            ToolbarItem(placement: ToolbarItemPlacement.navigation) {
-                HoverButton(action: {
-                    sideBarCollapsed.toggle()
-                }, label: {
-                    Image(systemName: "sidebar.leading").font(.system(size: 16, weight: .regular))
-                })
-            }
         }.navigationTitle(viewModel.focus.path)
     }
     

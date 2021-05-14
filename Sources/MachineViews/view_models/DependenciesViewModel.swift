@@ -72,6 +72,8 @@ final class DependenciesViewModel: ObservableObject, GlobalChangeNotifier {
     private var dependencyViewModels: [URL: DependencyViewModel] = [:]
     
     @Published var expanded: Bool = false
+    @Published var sideBarCollapsed: Bool = false
+    @Published var dependenciesWidth: CGFloat = 200
     
     init(machineViewModel: @escaping (URL) -> MachineViewModel?, notifier: GlobalChangeNotifier? = nil) {
         self._machineViewModel = machineViewModel

@@ -64,11 +64,21 @@ struct AttributesPaneView: View {
     @ObservedObject var viewModel: AttributesPaneViewModel
     
     var body: some View {
-        VStack {
-            if let extraTabs = viewModel.extraTabs {
-                AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label, extraTabs: extraTabs)
-            } else {
-                AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label)
+        SideBar(collapsed: $viewModel.attributesCollapsed, width: $viewModel.attributesWidth, edge: .leading, maxWidth: 600) {
+            VStack {
+                if let extraTabs = viewModel.extraTabs {
+                    AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label, extraTabs: extraTabs)
+                } else {
+                    AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label)
+                }
+            }
+        }.toolbar {
+            ToolbarItem {
+                HoverButton(action: {
+                    viewModel.attributesCollapsed.toggle()
+                }, label: {
+                    Image(systemName: "sidebar.squares.trailing").font(.system(size: 16, weight: .regular))
+                })
             }
         }
     }

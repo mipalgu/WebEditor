@@ -30,33 +30,43 @@ struct DependenciesView: View {
     }
     
     var body: some View {
-        VStack {
+        SideBar(collapsed: $viewModel.sideBarCollapsed, width: $viewModel.dependenciesWidth, maxWidth: 600) {
             VStack {
-                HStack {
-                    Toggle(isOn: $viewModel.expanded) {
-                        Text(root.name.pretty)
-                    }
-                    .toggleStyle(ArrowToggleStyle(side: .left))
-                    .onTapGesture {
-                        focus = root.filePath
-                    }
-                    Spacer()
-                }.padding(.leading, padding)
-            }.background(focus == root.filePath ? AnyView(config.highlightColour.clipShape(RoundedRectangle(cornerRadius: 5))) : AnyView(Color.clear))
-            if viewModel.expanded {
                 VStack {
-                    ForEach(root.dependencies, id: \.filePath) { dependency in
-                        DependencyView(
-                            dependency: dependency,
-                            viewModel: viewModel.viewModel(forDependency: dependency),
-                            focus: $focus,
-                            padding: padding + padding,
-                            parents: [root.filePath]
-                        )
-                    }
-                }.padding(.leading, padding)
+                    HStack {
+                        Toggle(isOn: $viewModel.expanded) {
+                            Text(root.name.pretty)
+                        }
+                        .toggleStyle(ArrowToggleStyle(side: .left))
+                        .onTapGesture {
+                            focus = root.filePath
+                        }
+                        Spacer()
+                    }.padding(.leading, padding)
+                }.background(focus == root.filePath ? AnyView(config.highlightColour.clipShape(RoundedRectangle(cornerRadius: 5))) : AnyView(Color.clear))
+                if viewModel.expanded {
+                    VStack {
+                        ForEach(root.dependencies, id: \.filePath) { dependency in
+                            DependencyView(
+                                dependency: dependency,
+                                viewModel: viewModel.viewModel(forDependency: dependency),
+                                focus: $focus,
+                                padding: padding + padding,
+                                parents: [root.filePath]
+                            )
+                        }
+                    }.padding(.leading, padding)
+                }
+                Spacer()
             }
-            Spacer()
+        }.toolbar {
+            ToolbarItem(placement: ToolbarItemPlacement.navigation) {
+                HoverButton(action: {
+                    viewModel.sideBarCollapsed.toggle()
+                }, label: {
+                    Image(systemName: "sidebar.leading").font(.system(size: 16, weight: .regular))
+                })
+            }
         }
     }
     

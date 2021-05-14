@@ -71,6 +71,7 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
     private let focusRef: Ref<Focus>
     
     @Published var attributesCollapsed: Bool = false
+    @Published var attributesWidth: CGFloat = 400
     
     private var focusViewModels: [Focus: AttributeGroupsViewModel<Machine>] = [:]
     

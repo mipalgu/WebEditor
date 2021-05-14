@@ -13,24 +13,11 @@ import Machines
 struct MachineView: View {
     
     @ObservedObject var viewModel: MachineViewModel
-    
-    @State var attributesCollapsed: Bool = false
-    @State var attributesWidth: CGFloat = 400
 
     var body: some View {
         HStack {
             CanvasView(viewModel: viewModel.canvasViewModel, focus: $viewModel.focus)
-            SideBar(collapsed: $attributesCollapsed, width: $attributesWidth, edge: .leading, maxWidth: 600) {
-                AttributesPaneView(viewModel: viewModel.attributesPaneViewModel)
-            }
-        }.toolbar {
-            ToolbarItem {
-                HoverButton(action: {
-                    attributesCollapsed.toggle()
-                }, label: {
-                    Image(systemName: "sidebar.squares.trailing").font(.system(size: 16, weight: .regular))
-                })
-            }
+            AttributesPaneView(viewModel: viewModel.attributesPaneViewModel)
         }
     }
 }
