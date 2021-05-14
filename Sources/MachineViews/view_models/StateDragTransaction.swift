@@ -79,7 +79,7 @@ struct StateDragTransaction {
         return CGSize(width: dW, height: dH)
     }
     
-    private func moveTransitions(translation: CGSize) {
+    private func moveTransitions(translation: CGSize, bounds: CGSize) {
         sourceTrackers.forEach {
             guard let startPoint = transitionStartPoints[$0.id]?.point0 else {
                 return
@@ -91,7 +91,9 @@ struct StateDragTransaction {
             if stateTracker.isStretchingY && startPoint.y < stateStartPoint.y {
                 trans.height = -trans.height
             }
-            $0.curve.point0 = startPoint.moved(by: trans)
+            let dx = translation.width < 0 ? startPoint.x - (stateStartPoint.x - stateTracker.width / 2.0) : stateStartPoint.x + stateTracker.width / 2.0 - startPoint.x
+            let dy = translation.height < 0 ? startPoint.y - (stateStartPoint.y - stateTracker.height / 2.0) : stateStartPoint.y + stateTracker.height / 2.0 - startPoint.y
+            $0.curve.point0 = startPoint.moved(by: trans).clampPosition(frame: bounds, dx: dx, dy: dy)
         }
         targetTrackers.forEach {
             guard let startPoint = transitionStartPoints[$0.id]?.point3 else {
@@ -104,14 +106,16 @@ struct StateDragTransaction {
             if stateTracker.isStretchingY && startPoint.y < stateStartPoint.y {
                 trans.height = -trans.height
             }
-            $0.curve.point3 = startPoint.moved(by: trans)
+            let dx = translation.width < 0 ? startPoint.x - (stateStartPoint.x - stateTracker.width / 2.0) : stateStartPoint.x + stateTracker.width / 2.0 - startPoint.x
+            let dy = translation.height < 0 ? startPoint.y - (stateStartPoint.y - stateTracker.height / 2.0) : stateStartPoint.y + stateTracker.height / 2.0 - startPoint.y
+            $0.curve.point3 = startPoint.moved(by: trans).clampPosition(frame: bounds, dx: dx, dy: dy)
         }
     }
     
     
     func drag(by drag: DragGesture.Value, bounds: CGSize) {
         stateTracker.handleDrag(gesture: drag, frameWidth: bounds.width, frameHeight: bounds.height)
-        moveTransitions(translation: findTranslation(drag: drag))
+        moveTransitions(translation: findTranslation(drag: drag), bounds: bounds)
     }
     
     func finish(by drag: DragGesture.Value, bounds: CGSize) {

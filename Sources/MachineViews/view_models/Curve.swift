@@ -125,4 +125,20 @@ extension CGPoint {
         return CGPoint(x: x + size.width, y: y + size.height)
     }
     
+    func clampPosition(frame: CGSize, dx: CGFloat = 0.0, dy: CGFloat = 0.0) -> CGPoint {
+        var newX: CGFloat = x
+        var newY: CGFloat = y
+        if x < dx {
+            newX = dx
+        } else if x > frame.width - dx {
+            newX = frame.width - dx
+        }
+        if y < dy {
+            newY = dy
+        } else if y > frame.height - dy {
+            newY = frame.height - dy
+        }
+        return CGPoint(x: newX, y: newY)
+    }
+    
 }
