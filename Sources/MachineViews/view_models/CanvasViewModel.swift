@@ -272,63 +272,6 @@ extension CanvasViewModel: StateViewModelDelegate {
     
 }
 
-struct CanvasDragTransaction {
-    
-    private let stateStartPoints: [ObjectIdentifier: CGPoint]
-    private let stateTrackers: [StateName: StateTracker]
-    private let transitionStartPoints: [ObjectIdentifier: Curve]
-    private let transitionTrackers: [ObjectIdentifier: TransitionTracker]
-    
-    private var isMoving = false
-    
-    init(viewModel: CanvasViewModel) {
-        self.stateStartPoints = Dictionary(uniqueKeysWithValues: viewModel.machine.states.map {
-            let viewModel = viewModel.viewModel(forState: $0.name)
-            return (viewModel.tracker.id, viewModel.tracker.location)
-        })
-        self.stateTrackers = Dictionary(uniqueKeysWithValues: viewModel.machine.states.map { state in
-            let viewModel = viewModel.viewModel(forState: state.name)
-            return (state.name, viewModel.tracker)
-        })
-        self.transitionStartPoints = Dictionary(uniqueKeysWithValues: viewModel.machine.states.flatMap { state in
-            state.transitions.indices.map {
-                let viewModel = viewModel.viewModel(forTransition: $0, attachedToState: state.name)
-                return (viewModel.tracker.id, viewModel.tracker.curve)
-            }
-        })
-        self.transitionTrackers = Dictionary(uniqueKeysWithValues: viewModel.machine.states.flatMap { state in
-            state.transitions.indices.map {
-                let viewModel = viewModel.viewModel(forTransition: $0, attachedToState: state.name)
-                return (viewModel.tracker.id, viewModel.tracker)
-            }
-        })
-    }
-    
-    private func moveAll(translation: CGSize) {
-        stateTrackers.values.forEach {
-            guard let startPoint = stateStartPoints[$0.id] else {
-                return
-            }
-            $0.location = startPoint.moved(by: translation)
-        }
-        transitionTrackers.values.forEach {
-            guard let startPoint = transitionStartPoints[$0.id] else {
-                return
-            }
-            $0.curve = startPoint.moved(by: translation)
-        }
-    }
-    
-    func dragCanvas(translation: CGSize) {
-        moveAll(translation: translation)
-    }
-    
-    func finishDragCanvas(translation: CGSize) {
-        moveAll(translation: translation)
-    }
-    
-}
-
 // MARK: - Gestures
 
 extension CanvasViewModel {
@@ -340,12 +283,13 @@ extension CanvasViewModel {
                 if transaction == nil {
                     transaction = CanvasDragTransaction(viewModel: self)
                 }
-                transaction.dragCanvas(translation: $0.translation)
+                transaction.move(by: $0.translation)
             }.onEnded {
                 if transaction == nil {
                     transaction = CanvasDragTransaction(viewModel: self)
                 }
-                transaction.finishDragCanvas(translation: $0.translation)
+                transaction.move(by: $0.translation)
+                transaction.finish()
             }
     }
     
