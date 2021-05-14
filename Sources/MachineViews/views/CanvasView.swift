@@ -125,7 +125,7 @@ public struct CanvasView: View {
                                 viewModel: viewModel.viewModel(forState: stateName).tracker,
                                 coordinateSpace: viewModel.coordinateSpace,
                                 textRepresentation: viewModel.viewModel(forState: stateName).name,
-                                dragGesture: viewModel.dragStateGesture(stateName: stateName)
+                                dragGesture: viewModel.dragStateGesture(stateName: stateName, bounds: geometry.size)
                             ) {
                                 StateView(
                                     viewModel: viewModel.viewModel(forState: stateName),

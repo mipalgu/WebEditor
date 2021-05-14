@@ -366,19 +366,19 @@ extension CanvasViewModel {
             }
     }
     
-    func dragStateGesture(stateName: StateName) -> _EndedGesture<_ChangedGesture<DragGesture>> {
+    func dragStateGesture(stateName: StateName, bounds: CGSize) -> _EndedGesture<_ChangedGesture<DragGesture>> {
         var transaction: StateDragTransaction! = nil
         return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
             .onChanged {
                 if transaction == nil {
                     transaction = StateDragTransaction(viewModel: self, stateName: stateName)
                 }
-                transaction.move(by: $0.translation)
+                transaction.drag(by: $0, bounds: bounds)
             }.onEnded {
                 if transaction == nil {
                     transaction = StateDragTransaction(viewModel: self, stateName: stateName)
                 }
-                transaction.move(by: $0.translation)
+                transaction.finish(by: $0, bounds: bounds)
             }
     }
     
