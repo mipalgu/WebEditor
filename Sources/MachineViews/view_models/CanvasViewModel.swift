@@ -223,6 +223,24 @@ final class CanvasViewModel: ObservableObject {
         let stateViewModel = viewModel(forState: stateName)
         return stateViewModel.viewModel(forTransition: transitionIndex)
     }
+    
+    private var stateDragTransaction: StateDragTransaction? = nil
+    
+    func dragStateGesture(stateName: StateName, bounds: CGSize) -> _EndedGesture<_ChangedGesture<DragGesture>> {
+        return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+            .onChanged {
+                if self.stateDragTransaction == nil {
+                    self.stateDragTransaction = StateDragTransaction(viewModel: self, stateName: stateName)
+                }
+                self.stateDragTransaction!.drag(by: $0, bounds: bounds)
+            }.onEnded {
+                if self.stateDragTransaction == nil {
+                    self.stateDragTransaction = StateDragTransaction(viewModel: self, stateName: stateName)
+                }
+                self.stateDragTransaction!.finish(by: $0, bounds: bounds)
+                self.stateDragTransaction = nil
+            }
+    }
 
     
 }
@@ -366,20 +384,6 @@ extension CanvasViewModel {
             }
     }
     
-    func dragStateGesture(stateName: StateName, bounds: CGSize) -> _EndedGesture<_ChangedGesture<DragGesture>> {
-        var transaction: StateDragTransaction! = nil
-        return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
-            .onChanged {
-                if transaction == nil {
-                    transaction = StateDragTransaction(viewModel: self, stateName: stateName)
-                }
-                transaction.drag(by: $0, bounds: bounds)
-            }.onEnded {
-                if transaction == nil {
-                    transaction = StateDragTransaction(viewModel: self, stateName: stateName)
-                }
-                transaction.finish(by: $0, bounds: bounds)
-            }
-    }
+    
     
 }
