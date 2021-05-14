@@ -54,11 +54,11 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
     
     @Published var location: CGPoint
 
-    let collapsedMinWidth: CGFloat = 150.0
+    let collapsedMinWidth: CGFloat = 100.0
     
     let collapsedMaxWidth: CGFloat = 250.0
     
-    let collapsedMinHeight: CGFloat = 100.0
+    let collapsedMinHeight: CGFloat = 50.0
     
     let collapsedMaxHeight: CGFloat = 125.0
     
@@ -108,7 +108,7 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
         horizontalEdgeTolerance
     }
     
-    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, isText: Bool = false, notifier: GlobalChangeNotifier? = nil) {
+    init(location: CGPoint = CGPoint(x: 75, y: 100), expandedWidth: CGFloat = 75.0, expandedHeight: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 100.0, collapsedHeight: CGFloat = 50.0, isText: Bool = false, notifier: GlobalChangeNotifier? = nil) {
         self.location = location
         self._expandedWidth = expandedWidth
         self._expandedHeight = expandedHeight
