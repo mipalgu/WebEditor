@@ -19,17 +19,14 @@ struct DependenciesView: View {
     
     @Binding var focus: URL
     
-    @Binding var width: CGFloat
-    
     @EnvironmentObject var config: Config
     
     let padding: CGFloat = 10
     
-    init(root: Root, viewModel: DependenciesViewModel, focus: Binding<URL>, width: Binding<CGFloat> = .constant(200)) {
+    init(root: Root, viewModel: DependenciesViewModel, focus: Binding<URL>) {
         self.root = root
         self.viewModel = viewModel
         self._focus = focus
-        self._width = width
     }
     
     var body: some View {
@@ -60,7 +57,7 @@ struct DependenciesView: View {
                 }.padding(.leading, padding)
             }
             Spacer()
-        }.frame(width: width, alignment: .leading)
+        }
     }
     
 }

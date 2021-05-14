@@ -34,11 +34,9 @@ public struct MainView: View {
 
     public var body: some View {
         HStack {
-            VStack {
-                if !sideBarCollapsed {
-                    DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
-                }
-            }.transition(.move(edge: .leading)).animation(.interactiveSpring())
+            SideBar(collapsed: $sideBarCollapsed, width: $dependenciesWidth, maxWidth: 300) {
+                DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
+            }
             viewModel.subView
         }.toolbar {
             ToolbarItem(placement: ToolbarItemPlacement.navigation) {

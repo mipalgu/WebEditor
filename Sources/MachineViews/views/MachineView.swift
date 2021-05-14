@@ -15,16 +15,14 @@ struct MachineView: View {
     @ObservedObject var viewModel: MachineViewModel
     
     @State var attributesCollapsed: Bool = false
+    @State var attributesWidth: CGFloat = 400
 
     var body: some View {
         HStack {
             CanvasView(viewModel: viewModel.canvasViewModel, focus: $viewModel.focus)
-            VStack {
-                if !attributesCollapsed {
-                    AttributesPaneView(viewModel: viewModel.attributesPaneViewModel)
-                        .frame(maxWidth: 500).animation(.none)
-                }
-            }.transition(.move(edge: .leading)).animation(.interactiveSpring())
+            SideBar(collapsed: $attributesCollapsed, width: $attributesWidth, edge: .leading, maxWidth: 400) {
+                AttributesPaneView(viewModel: viewModel.attributesPaneViewModel)
+            }
         }.toolbar {
             ToolbarItem {
                 HoverButton(action: {
