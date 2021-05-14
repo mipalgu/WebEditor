@@ -64,7 +64,7 @@ struct AttributesPaneView: View {
     @ObservedObject var viewModel: AttributesPaneViewModel
     
     var body: some View {
-        SideBar(collapsed: $viewModel.attributesCollapsed, width: $viewModel.attributesWidth, edge: .leading, maxWidth: 600) {
+        SideBar(collapsed: $viewModel.attributesCollapsed, width: $viewModel.attributesWidth, edge: .leading, maxWidth: 1000) {
             VStack {
                 if let extraTabs = viewModel.extraTabs {
                     AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label, extraTabs: extraTabs)
