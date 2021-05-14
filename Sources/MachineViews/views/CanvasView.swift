@@ -66,7 +66,7 @@ public struct CanvasView: View {
                                 focus = .machine
                             }
                             .gesture(viewModel.selectionBoxGesture)
-                            //.gesture(viewModel.dragCanvasGesture(coordinateSpace: coordinateSpace, size: geometry.size))
+                            .gesture(viewModel.dragCanvasGesture)
                             .contextMenu {
                                 VStack {
                                     Button("New State", action: { viewModel.newState() })

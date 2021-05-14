@@ -403,6 +403,15 @@ extension CanvasViewModel: StateViewModelDelegate {
 
 extension CanvasViewModel {
     
+    var dragCanvasGesture: some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+            .onChanged {
+                self.dragCanvas(translation: $0.translation)
+            }.onEnded {
+                self.finishDragCanvas(translation: $0.translation)
+            }
+    }
+    
     var selectionBoxGesture: some Gesture {
         return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
             .modifiers(.shift)
