@@ -10,22 +10,14 @@ import Attributes
 import Utilities
 import Machines
 
-struct MachineView<Sidebar: View>: View {
+struct MachineView: View {
     
     @ObservedObject var viewModel: MachineViewModel
     
-    let sideBar: () -> Sidebar
-    
-    @State var sideBarCollapsed: Bool = false
     @State var attributesCollapsed: Bool = false
 
     var body: some View {
         HStack {
-            VStack {
-                if !sideBarCollapsed {
-                    sideBar()
-                }
-            }.transition(.move(edge: .leading)).animation(.interactiveSpring())
             CanvasView(viewModel: viewModel.canvasViewModel, focus: $viewModel.focus)
             VStack {
                 if !attributesCollapsed {
@@ -34,13 +26,6 @@ struct MachineView<Sidebar: View>: View {
                 }
             }.transition(.move(edge: .leading)).animation(.interactiveSpring())
         }.toolbar {
-            ToolbarItem(placement: ToolbarItemPlacement.navigation) {
-                HoverButton(action: {
-                    sideBarCollapsed.toggle()
-                }, label: {
-                    Image(systemName: "sidebar.leading").font(.system(size: 16, weight: .regular))
-                })
-            }
             ToolbarItem {
                 HoverButton(action: {
                     attributesCollapsed.toggle()

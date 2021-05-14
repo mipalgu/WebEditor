@@ -30,28 +30,40 @@ public struct MainView: View {
     @EnvironmentObject var config: Config
     
     @StateObject var viewModel: MainViewModel
+    @State var sideBarCollapsed: Bool = false
     
     var subView: AnyView {
         switch viewModel.root {
         case .arrangement(let arrangementViewModel):
             if viewModel.focus == arrangementViewModel.arrangement.filePath {
-                return AnyView(ArrangementView(viewModel: arrangementViewModel) {
-                    DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
-                })
+                return AnyView(ArrangementView(viewModel: arrangementViewModel))
             }
             fallthrough
         default:
             guard let machineViewModel = viewModel.viewModel(for: viewModel.focus) else {
                 return AnyView(EmptyView())
             }
-            return AnyView(MachineView(viewModel: machineViewModel) {
-                DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
-            })
+            return AnyView(MachineView(viewModel: machineViewModel))
         }
     }
 
     public var body: some View {
-        subView.navigationTitle(viewModel.focus.path)
+        HStack {
+            VStack {
+                if !sideBarCollapsed {
+                    DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
+                }
+            }.transition(.move(edge: .leading)).animation(.interactiveSpring())
+            subView
+        }.toolbar {
+            ToolbarItem(placement: ToolbarItemPlacement.navigation) {
+                HoverButton(action: {
+                    sideBarCollapsed.toggle()
+                }, label: {
+                    Image(systemName: "sidebar.leading").font(.system(size: 16, weight: .regular))
+                })
+            }
+        }
     }
     
 }
