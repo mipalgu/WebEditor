@@ -12,7 +12,7 @@ import AttributeViews
 import Machines
 import Utilities
 
-class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable, ObservableObject {
+class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable, ObservableObject, Identifiable {
     
     @Published var isText: Bool {
         didSet {

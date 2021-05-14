@@ -99,4 +99,8 @@ class TransitionTracker: ObservableObject, Hashable, Identifiable, Positionable 
         self.init(curve: layout.curve)
     }
     
+    func move(by size: CGSize) {
+        curve.move(by: size)
+    }
+    
 }

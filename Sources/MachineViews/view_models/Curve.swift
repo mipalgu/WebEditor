@@ -96,4 +96,33 @@ struct Curve {
         )
     }
     
+    mutating func move(by size: CGSize) {
+        point0.move(by: size)
+        point1.move(by: size)
+        point2.move(by: size)
+        point3.move(by: size)
+    }
+    
+    func moved(by size: CGSize) -> Curve {
+        return Curve(
+            point0: point0.moved(by: size),
+            point1: point1.moved(by: size),
+            point2: point2.moved(by: size),
+            point3: point3.moved(by: size)
+        )
+    }
+    
+}
+
+extension CGPoint {
+    
+    mutating func move(by size: CGSize) {
+        x += size.width
+        y += size.height
+    }
+    
+    func moved(by size: CGSize) -> CGPoint {
+        return CGPoint(x: x + size.width, y: size.height)
+    }
+    
 }

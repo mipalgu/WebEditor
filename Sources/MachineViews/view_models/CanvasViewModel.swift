@@ -73,16 +73,6 @@ final class CanvasViewModel: ObservableObject {
     
     private var targetTransitions: [StateName: SortedCollection<TransitionTracker>]
     
-    private var stateStartPoints: [StateName: CGPoint] = [:]
-    
-    private var sourceStartPoints: [TransitionTracker: CGPoint] = [:]
-    
-    private var targetStartPoints: [TransitionTracker: CGPoint] = [:]
-    
-    private var transitionStartPoints: [TransitionTracker: Curve] = [:]
-    
-    private var isMoving: Bool = false
-    
     let coordinateSpace = "CANVAS_VIEW"
     
     @Published var selectedObjects: Set<ViewType> = []
@@ -212,6 +202,10 @@ final class CanvasViewModel: ObservableObject {
         return viewModel(forState: state).transitions
     }
     
+    func targetTransitionTrackers(forState state: StateName) -> [TransitionTracker] {
+        return targetTransitions[state].map { Array($0) } ?? []
+    }
+    
     func viewModel(forState state: StateName) -> StateViewModel {
         if let viewModel = stateViewModels[state] {
             return viewModel
@@ -229,128 +223,7 @@ final class CanvasViewModel: ObservableObject {
         let stateViewModel = viewModel(forState: stateName)
         return stateViewModel.viewModel(forTransition: transitionIndex)
     }
-    
-    private func setStateStartPoints(stateName: StateName) {
-        stateStartPoints = [:]
-        guard let _ = self.machineRef.value.states.first(where: { $0.name == stateName }) else {
-            return
-        }
-        let viewModel = viewModel(forState: stateName)
-        stateStartPoints[stateName] = viewModel.tracker.location
-    }
-    
-    private func setTransitionStartCurves() {
-        transitionStartPoints = [:]
-        machineRef.value.states.forEach { state in
-            let name = state.name
-            let viewModel = viewModel(forState: name)
-            state.transitions.indices.forEach { transitionIndex in
-                let tracker = viewModel.viewModel(forTransition: transitionIndex).tracker
-                transitionStartPoints[tracker] = tracker.curve
-            }
-        }
-    }
-    
-    private func setStartPoints(stateName: StateName) {
-        setStateStartPoints(stateName: stateName)
-        sourceStartPoints = [:]
-        targetStartPoints = [:]
-        guard let state = self.machineRef.value.states.first(where: { $0.name == stateName }) else {
-            return
-        }
-        let viewModel = viewModel(forState: stateName)
-        sourceStartPoints = Dictionary(uniqueKeysWithValues: state.transitions.indices.map {
-            let tracker = viewModel.viewModel(forTransition: $0).tracker
-            return (tracker, tracker.curve.point0)
-        })
-        guard let targets = targetTransitions[stateName] else {
-            return
-        }
-        targetStartPoints = Dictionary(uniqueKeysWithValues: targets.map {
-            ($0, $0.curve.point3)
-        })
-    }
-    
-    private func performMove(for state: StateName, translation: CGSize) {
-        guard let start = stateStartPoints[state] else {
-            return
-        }
-        let viewModel = viewModel(forState: state)
-        viewModel.tracker.location.x = translation.width + start.x
-        viewModel.tracker.location.y = translation.height + start.y
-        let sources = sourceStartPoints.keys
-        sources.forEach {
-            let point = sourceStartPoints[$0]!
-            $0.curve.point0.x = point.x + translation.width
-            $0.curve.point0.y = point.y + translation.height
-        }
-        let targets = targetStartPoints.keys
-        targets.forEach {
-            let point = targetStartPoints[$0]!
-            $0.curve.point3.x = point.x + translation.width
-            $0.curve.point3.y = point.y + translation.height
-        }
-    }
-    
-    private func moveTransition(tracker: TransitionTracker, translation: CGSize, start: Curve) {
-        let dx = translation.width
-        let dy = translation.height
-        tracker.curve.point0.x = dx + start.point0.x
-        tracker.curve.point0.y = dy + start.point0.y
-        tracker.curve.point1.x = dx + start.point1.x
-        tracker.curve.point1.y = dy + start.point1.y
-        tracker.curve.point2.x = dx + start.point2.x
-        tracker.curve.point2.y = dy + start.point2.y
-        tracker.curve.point3.x = dx + start.point3.x
-        tracker.curve.point3.y = dy + start.point3.y
-    }
-    
-    func moveState(state: StateName, translation: CGSize) {
-        if !isMoving {
-            setStartPoints(stateName: state)
-            isMoving = true
-        }
-        performMove(for: state, translation: translation)
-    }
-    
-    func finishMoveState(state: StateName, translation: CGSize) {
-        performMove(for: state, translation: translation)
-        isMoving = false
-    }
-    
-    private func moveAll(translation: CGSize) {
-        machineRef.value.states.forEach { state in
-            guard let point = stateStartPoints[state.name] else {
-                return
-            }
-            let viewModel = viewModel(forState: state.name)
-            viewModel.tracker.location.x = point.x + translation.width
-            viewModel.tracker.location.y = point.y + translation.height
-            state.transitions.indices.forEach { transitionIndex in
-                let tracker = viewModel.viewModel(forTransition: transitionIndex).tracker
-                guard let curve = transitionStartPoints[tracker] else {
-                    return
-                }
-                moveTransition(tracker: tracker, translation: translation, start: curve)
-            }
-        }
-    }
-    
-    func dragCanvas(translation: CGSize) {
-        if !isMoving {
-            machineRef.value.states.forEach { state in
-                setStateStartPoints(stateName: state.name)
-                setTransitionStartCurves()
-            }
-            isMoving = true
-        }
-        moveAll(translation: translation)
-    }
-    
-    func finishDragCanvas(translation: CGSize) {
-        moveAll(translation: translation)
-        isMoving = false
-    }
+
     
 }
 
@@ -399,16 +272,80 @@ extension CanvasViewModel: StateViewModelDelegate {
     
 }
 
+struct CanvasDragTransaction {
+    
+    private let stateStartPoints: [ObjectIdentifier: CGPoint]
+    private let stateTrackers: [StateName: StateTracker]
+    private let transitionStartPoints: [ObjectIdentifier: Curve]
+    private let transitionTrackers: [ObjectIdentifier: TransitionTracker]
+    
+    private var isMoving = false
+    
+    init(viewModel: CanvasViewModel) {
+        self.stateStartPoints = Dictionary(uniqueKeysWithValues: viewModel.machine.states.map {
+            let viewModel = viewModel.viewModel(forState: $0.name)
+            return (viewModel.tracker.id, viewModel.tracker.location)
+        })
+        self.stateTrackers = Dictionary(uniqueKeysWithValues: viewModel.machine.states.map { state in
+            let viewModel = viewModel.viewModel(forState: state.name)
+            return (state.name, viewModel.tracker)
+        })
+        self.transitionStartPoints = Dictionary(uniqueKeysWithValues: viewModel.machine.states.flatMap { state in
+            state.transitions.indices.map {
+                let viewModel = viewModel.viewModel(forTransition: $0, attachedToState: state.name)
+                return (viewModel.tracker.id, viewModel.tracker.curve)
+            }
+        })
+        self.transitionTrackers = Dictionary(uniqueKeysWithValues: viewModel.machine.states.flatMap { state in
+            state.transitions.indices.map {
+                let viewModel = viewModel.viewModel(forTransition: $0, attachedToState: state.name)
+                return (viewModel.tracker.id, viewModel.tracker)
+            }
+        })
+    }
+    
+    private func moveAll(translation: CGSize) {
+        stateTrackers.values.forEach {
+            guard let startPoint = stateStartPoints[$0.id] else {
+                return
+            }
+            $0.location = startPoint.moved(by: translation)
+        }
+        transitionTrackers.values.forEach {
+            guard let startPoint = transitionStartPoints[$0.id] else {
+                return
+            }
+            $0.curve = startPoint.moved(by: translation)
+        }
+    }
+    
+    func dragCanvas(translation: CGSize) {
+        moveAll(translation: translation)
+    }
+    
+    func finishDragCanvas(translation: CGSize) {
+        moveAll(translation: translation)
+    }
+    
+}
+
 // MARK: - Gestures
 
 extension CanvasViewModel {
     
     var dragCanvasGesture: some Gesture {
-        DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+        var transaction: CanvasDragTransaction! = nil
+        return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
             .onChanged {
-                self.dragCanvas(translation: $0.translation)
+                if transaction == nil {
+                    transaction = CanvasDragTransaction(viewModel: self)
+                }
+                transaction.dragCanvas(translation: $0.translation)
             }.onEnded {
-                self.finishDragCanvas(translation: $0.translation)
+                if transaction == nil {
+                    transaction = CanvasDragTransaction(viewModel: self)
+                }
+                transaction.finishDragCanvas(translation: $0.translation)
             }
     }
     
