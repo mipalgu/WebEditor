@@ -257,6 +257,9 @@ extension CanvasViewModel: StateViewModelDelegate {
             viewModel.viewModel(forTransition: $0).tracker.rectifyCurve(sourceTracker: viewModel.tracker, targetTracker: targetTracker)
         }
         machine.states.forEach { state in
+            if state.name == name {
+                return
+            }
             let sourceViewModel = self.viewModel(forState: state.name)
             let sourceTracker = sourceViewModel.tracker
             state.transitions.indices.forEach {

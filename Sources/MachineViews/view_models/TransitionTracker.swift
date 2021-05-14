@@ -104,41 +104,54 @@ class TransitionTracker: ObservableObject, Hashable, Identifiable, Positionable 
     }
     
     func rectifyCurve(sourceTracker: StateTracker, targetTracker: StateTracker) {
+        rectifyPoint(sourceTracker: sourceTracker, targetTracker: targetTracker, path: \Curve.point0, sourceAlways: true)
+        rectifyPoint(sourceTracker: sourceTracker, targetTracker: targetTracker, path: \Curve.point1)
+        rectifyPoint(sourceTracker: sourceTracker, targetTracker: targetTracker, path: \Curve.point2)
+        rectifyPoint(sourceTracker: sourceTracker, targetTracker: targetTracker, path: \Curve.point3, targetAlways: true)
+    }
+    
+    private func rectifyPoint(sourceTracker: StateTracker, targetTracker: StateTracker, path: WritableKeyPath<Curve, CGPoint>, sourceAlways: Bool = false, targetAlways: Bool = false) {
+        let point = self.curve[keyPath: path]
         var sourceEdge = sourceTracker.findEdge(point: curve.point0)
         var targetEdge = targetTracker.findEdge(point: curve.point3)
-        let targetSourceEdge = sourceTracker.findEdgeCenter(degrees: (targetEdge - sourceTracker.location)<)
-        let sourceCenter = sourceTracker.findEdgeCenter(degrees: (sourceEdge - sourceTracker.location)<)
-        if targetSourceEdge != sourceCenter {
-            if sourceTracker.expanded {
-                sourceEdge = sourceTracker.moveToEdge(point: curve.point0, edge: targetSourceEdge)
-            } else {
-                let sourceDeg = (sourceEdge - sourceTracker.location)<
-                let targetDeg = (targetEdge - sourceTracker.location)<
-                if abs(sourceDeg - targetDeg) > 90.0 {
-                    sourceEdge = sourceTracker.moveToEdge(point: curve.point0, edge: targetSourceEdge)
+        var newPoint = point
+        if sourceAlways || sourceTracker.isWithin(point: point) {
+            let targetSourceEdge = sourceTracker.findEdgeCenter(degrees: (targetEdge - sourceTracker.location)<)
+            let sourceCenter = sourceTracker.findEdgeCenter(degrees: (sourceEdge - sourceTracker.location)<)
+            if targetSourceEdge != sourceCenter {
+                if sourceTracker.expanded {
+                    sourceEdge = sourceTracker.moveToEdge(point: point, edge: targetSourceEdge)
+                } else {
+                    let sourceDeg = (sourceEdge - sourceTracker.location)<
+                    let targetDeg = (targetEdge - sourceTracker.location)<
+                    if abs(sourceDeg - targetDeg) > 90.0 {
+                        sourceEdge = sourceTracker.moveToEdge(point: point, edge: targetSourceEdge)
+                    }
                 }
             }
+            newPoint = sourceEdge
         }
-        let targetsPreferredEdge = targetTracker.findEdgeCenter(degrees: (sourceEdge - targetTracker.location)<)
-        let targetEdgeCenter = targetTracker.findEdgeCenter(degrees: (targetEdge - targetTracker.location)<)
-        if targetEdgeCenter != targetsPreferredEdge {
-            if targetTracker.expanded {
-                targetEdge = targetTracker.moveToEdge(point: targetEdge, edge: targetsPreferredEdge)
-            } else {
-                let targetSourceDeg = (sourceEdge - targetTracker.location)<
-                let targetEdgeDeg = (targetEdge - targetTracker.location)<
-                let dDeg = targetSourceDeg - targetEdgeDeg
-                if dDeg > 90.0 {
-                    targetEdge = targetTracker.findEdge(degrees: targetEdgeDeg + 90.0)
-                }
-                if dDeg < -90.0 {
-                    targetEdge = targetTracker.findEdge(degrees: targetEdgeDeg - 90.0)
+        if targetAlways || targetTracker.isWithin(point: newPoint) {
+            let targetsPreferredEdge = targetTracker.findEdgeCenter(degrees: (sourceEdge - targetTracker.location)<)
+            let targetEdgeCenter = targetTracker.findEdgeCenter(degrees: (targetEdge - targetTracker.location)<)
+            if targetEdgeCenter != targetsPreferredEdge {
+                if targetTracker.expanded {
+                    targetEdge = targetTracker.moveToEdge(point: targetEdge, edge: targetsPreferredEdge)
+                } else {
+                    let targetSourceDeg = (sourceEdge - targetTracker.location)<
+                    let targetEdgeDeg = (targetEdge - targetTracker.location)<
+                    let dDeg = targetSourceDeg - targetEdgeDeg
+                    if dDeg > 90.0 {
+                        targetEdge = targetTracker.findEdge(degrees: targetEdgeDeg + 90.0)
+                    }
+                    if dDeg < -90.0 {
+                        targetEdge = targetTracker.findEdge(degrees: targetEdgeDeg - 90.0)
+                    }
                 }
             }
+            newPoint = targetEdge
         }
-        let newCurve = Curve(source: sourceEdge, target: targetEdge)
-        curve.point0 = newCurve.point0
-        curve.point3 = newCurve.point3
+        curve[keyPath: path] = newPoint
     }
     
 }
