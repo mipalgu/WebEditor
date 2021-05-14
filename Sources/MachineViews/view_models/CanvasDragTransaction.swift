@@ -94,13 +94,13 @@ struct CanvasDragTransaction {
             guard let startPoint = stateStartPoints[$0.id] else {
                 return
             }
-            $0.location = startPoint.moved(by: translation)
+            $0.location = startPoint.moved(by: CGSize(width: -translation.width, height: -translation.height))
         }
         transitionTrackers.values.forEach {
             guard let startPoint = transitionStartPoints[$0.id] else {
                 return
             }
-            $0.curve = startPoint.moved(by: translation)
+            $0.curve = startPoint.moved(by: CGSize(width: -translation.width, height: -translation.height))
         }
     }
     
