@@ -224,7 +224,7 @@ final class CanvasViewModel: ObservableObject {
         return stateViewModel.viewModel(forTransition: transitionIndex)
     }
     
-    private var stateDragTransaction: StateDragTransaction? = nil
+    private var stateDragTransaction: StateDragTransaction! = nil
     
     func dragStateGesture(stateName: StateName, bounds: CGSize) -> _EndedGesture<_ChangedGesture<DragGesture>> {
         return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
@@ -232,12 +232,12 @@ final class CanvasViewModel: ObservableObject {
                 if self.stateDragTransaction == nil {
                     self.stateDragTransaction = StateDragTransaction(viewModel: self, stateName: stateName)
                 }
-                self.stateDragTransaction!.drag(by: $0, bounds: bounds)
+                self.stateDragTransaction.drag(by: $0, bounds: bounds)
             }.onEnded {
                 if self.stateDragTransaction == nil {
                     self.stateDragTransaction = StateDragTransaction(viewModel: self, stateName: stateName)
                 }
-                self.stateDragTransaction!.finish(by: $0, bounds: bounds)
+                self.stateDragTransaction.finish(by: $0, bounds: bounds)
                 self.stateDragTransaction = nil
             }
     }

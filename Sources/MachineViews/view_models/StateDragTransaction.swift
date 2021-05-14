@@ -17,10 +17,7 @@ struct StateDragTransaction {
     private let sourceTrackers: [TransitionTracker]
     private let targetTrackers: [TransitionTracker]
     
-    init?(viewModel: CanvasViewModel, stateName: StateName) {
-        guard let state = viewModel.machine.states.first(where: { $0.name == stateName }) else {
-            return nil
-        }
+    init(viewModel: CanvasViewModel, stateName: StateName) {
         let stateViewModel = viewModel.viewModel(forState: stateName)
         self.stateTracker = stateViewModel.tracker
         self.stateOriginalDimensions = CGSize(width: stateViewModel.tracker.width, height: stateViewModel.tracker.height)
@@ -34,7 +31,7 @@ struct StateDragTransaction {
                 return (viewModel.tracker.id, viewModel.tracker.curve)
             }
         })
-        self.sourceTrackers = state.transitions.indices.map {
+        self.sourceTrackers = stateViewModel.transitions.map {
             stateViewModel.viewModel(forTransition: $0).tracker
         }
         self.targetTrackers = viewModel.machine.states.flatMap { (state) -> [TransitionTracker] in
