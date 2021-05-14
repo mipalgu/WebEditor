@@ -115,7 +115,7 @@ struct StateDragTransaction {
     }
     
     func finish(by drag: DragGesture.Value, bounds: CGSize) {
-        moveTransitions(translation: findTranslation(drag: drag))
+//        moveTransitions(translation: findTranslation(drag: drag))
         stateTracker.finishDrag(gesture: drag, frameWidth: bounds.width, frameHeight: bounds.height)
     }
     
