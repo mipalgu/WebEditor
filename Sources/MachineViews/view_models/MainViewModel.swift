@@ -25,6 +25,21 @@ final class MainViewModel: ObservableObject, GlobalChangeNotifier {
         })
     }()
     
+    var subView: AnyView {
+        switch root {
+        case .arrangement(let arrangementViewModel):
+            if focus == arrangementViewModel.arrangement.filePath {
+                return AnyView(ArrangementView(viewModel: arrangementViewModel))
+            }
+            fallthrough
+        default:
+            guard let machineViewModel = viewModel(for: focus) else {
+                return AnyView(EmptyView())
+            }
+            return AnyView(MachineView(viewModel: machineViewModel))
+        }
+    }
+    
     init(root: Root) {
         self.root = root
         switch root {

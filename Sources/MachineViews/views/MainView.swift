@@ -13,7 +13,12 @@ import Utilities
 
 public struct MainView: View {
     
+    @StateObject var viewModel: MainViewModel
+    
+    @State var sideBarCollapsed: Bool = false
     @State var dependenciesWidth: CGFloat = 200
+    
+    @EnvironmentObject var config: Config
     
     public init(arrangement: Arrangement) {
         self.init(viewModel: MainViewModel(root: .arrangement(ArrangementViewModel(arrangement: arrangement))))
@@ -26,26 +31,6 @@ public struct MainView: View {
     private init(viewModel: MainViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
-    
-    @EnvironmentObject var config: Config
-    
-    @StateObject var viewModel: MainViewModel
-    @State var sideBarCollapsed: Bool = false
-    
-    var subView: AnyView {
-        switch viewModel.root {
-        case .arrangement(let arrangementViewModel):
-            if viewModel.focus == arrangementViewModel.arrangement.filePath {
-                return AnyView(ArrangementView(viewModel: arrangementViewModel))
-            }
-            fallthrough
-        default:
-            guard let machineViewModel = viewModel.viewModel(for: viewModel.focus) else {
-                return AnyView(EmptyView())
-            }
-            return AnyView(MachineView(viewModel: machineViewModel))
-        }
-    }
 
     public var body: some View {
         HStack {
@@ -54,7 +39,7 @@ public struct MainView: View {
                     DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
                 }
             }.transition(.move(edge: .leading)).animation(.interactiveSpring())
-            subView
+            viewModel.subView
         }.toolbar {
             ToolbarItem(placement: ToolbarItemPlacement.navigation) {
                 HoverButton(action: {
