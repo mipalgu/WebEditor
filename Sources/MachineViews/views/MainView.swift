@@ -34,7 +34,7 @@ public struct MainView: View {
 
     public var body: some View {
         HStack {
-            SideBar(collapsed: $sideBarCollapsed, width: $dependenciesWidth, maxWidth: 300) {
+            SideBar(collapsed: $sideBarCollapsed, width: $dependenciesWidth, maxWidth: 600) {
                 DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
             }
             viewModel.subView

@@ -137,12 +137,13 @@ struct SideBar<Content: View>: View {
                                 #endif
                             }
                             .gesture(DragGesture().onChanged {
+                                let distance = edge == .trailing ? $0.startLocation.x + $0.location.x : $0.startLocation.x - $0.location.x
                                 guard let initialWidth = tracker.initialWidth else {
                                     tracker.initialWidth = binding.wrappedValue
-                                    binding.wrappedValue = edge == .trailing ? binding.wrappedValue + $0.translation.width : binding.wrappedValue - $0.translation.width
+                                    binding.wrappedValue = binding.wrappedValue + distance
                                     return
                                 }
-                                binding.wrappedValue = edge == .trailing ? initialWidth + $0.translation.width : initialWidth - $0.translation.width
+                                binding.wrappedValue = initialWidth + distance
                             }.onEnded { _ in
                                 tracker.initialWidth = nil
                             })

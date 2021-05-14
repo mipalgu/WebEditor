@@ -20,7 +20,7 @@ struct MachineView: View {
     var body: some View {
         HStack {
             CanvasView(viewModel: viewModel.canvasViewModel, focus: $viewModel.focus)
-            SideBar(collapsed: $attributesCollapsed, width: $attributesWidth, edge: .leading, maxWidth: 400) {
+            SideBar(collapsed: $attributesCollapsed, width: $attributesWidth, edge: .leading, maxWidth: 600) {
                 AttributesPaneView(viewModel: viewModel.attributesPaneViewModel)
             }
         }.toolbar {
