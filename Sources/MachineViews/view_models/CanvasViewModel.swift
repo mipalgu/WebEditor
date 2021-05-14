@@ -73,6 +73,14 @@ final class CanvasViewModel: ObservableObject {
     
     private var targetTransitions: [StateName: SortedCollection<TransitionTracker>]
     
+    private var stateStartPoints: [StateName: CGPoint] = [:]
+    
+    private var sourceStartPoints: [TransitionTracker: CGPoint] = [:]
+    
+    private var targetStartPoints: [TransitionTracker: CGPoint] = [:]
+    
+    private var isMoving: Bool = false
+    
     let coordinateSpace = "CANVAS_VIEW"
     
     @Published var selectedObjects: Set<ViewType> = []
@@ -218,6 +226,61 @@ final class CanvasViewModel: ObservableObject {
     func viewModel(forTransition transitionIndex: Int, attachedToState stateName: StateName) -> TransitionViewModel {
         let stateViewModel = viewModel(forState: stateName)
         return stateViewModel.viewModel(forTransition: transitionIndex)
+    }
+    
+    private func setStartPoints(stateName: StateName) {
+        stateStartPoints = [:]
+        sourceStartPoints = [:]
+        targetStartPoints = [:]
+        guard let state = self.machineRef.value.states.first(where: { $0.name == stateName }) else {
+            return
+        }
+        let viewModel = viewModel(forState: stateName)
+        stateStartPoints[stateName] = viewModel.tracker.location
+        sourceStartPoints = Dictionary(uniqueKeysWithValues: state.transitions.indices.map {
+            let tracker = viewModel.viewModel(forTransition: $0).tracker
+            return (tracker, tracker.curve.point0)
+        })
+        guard let targets = targetTransitions[stateName] else {
+            return
+        }
+        targetStartPoints = Dictionary(uniqueKeysWithValues: targets.map {
+            ($0, $0.curve.point3)
+        })
+    }
+    
+    private func performMove(for state: StateName, translation: CGSize) {
+        guard let start = stateStartPoints[state] else {
+            return
+        }
+        let viewModel = viewModel(forState: state)
+        viewModel.tracker.location.x = translation.width + start.x
+        viewModel.tracker.location.y = translation.height + start.y
+        let sources = sourceStartPoints.keys
+        sources.forEach {
+            let point = sourceStartPoints[$0]!
+            $0.curve.point0.x = point.x + translation.width
+            $0.curve.point0.y = point.y + translation.height
+        }
+        let targets = targetStartPoints.keys
+        targets.forEach {
+            let point = targetStartPoints[$0]!
+            $0.curve.point3.x = point.x + translation.width
+            $0.curve.point3.y = point.y + translation.height
+        }
+    }
+    
+    func moveState(state: StateName, translation: CGSize) {
+        if !isMoving {
+            setStartPoints(stateName: state)
+            isMoving = true
+        }
+        performMove(for: state, translation: translation)
+    }
+    
+    func finishMoveState(state: StateName, translation: CGSize) {
+        performMove(for: state, translation: translation)
+        isMoving = false
     }
     
 }
