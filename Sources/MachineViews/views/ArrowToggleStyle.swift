@@ -87,9 +87,9 @@ struct ArrowToggleStyle: ToggleStyle {
     
     private func button(_ configuration: Configuration) -> some View {
         Button(action: { configuration.isOn.toggle() }) {
-            Image(systemName: configuration.isOn ? "arrowtriangle.down.fill" : "arrowtriangle.right.fill")
-                .font(.system(size: 8, weight: .regular))
-                .frame(width: 15, height: 15)
+            Image(systemName: configuration.isOn ? "chevron.down" : "chevron.right")
+                .font(.system(size: 10, weight: .bold))
+//                .frame(width: 15, height: 15)
         }.buttonStyle(PlainButtonStyle()).padding(5)
         .onHover { hovering in
             #if canImport(SwiftUI)

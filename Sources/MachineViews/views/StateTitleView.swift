@@ -79,8 +79,8 @@ struct StateTitleView: View {
                     delayEdits: true
                 ).multilineTextAlignment(.center)
                     .font(config.fontBody.bold())
-            }.toggleStyle(ArrowToggleStyle())
-            Spacer()
+            }.toggleStyle(ArrowToggleStyle(side: .left))
+//            Spacer()
         }
     }
     

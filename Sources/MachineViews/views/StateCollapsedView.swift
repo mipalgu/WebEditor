@@ -22,7 +22,8 @@ struct StateCollapsedView<TitleView: View>: View {
             config.stateColour
             VStack {
                 titleView()
-            }.padding(15)
+            }
+            .padding(.trailing, 5)
         }.background(Ellipse().stroke()).clipShape(Ellipse())
         .overlay(
             Ellipse()
