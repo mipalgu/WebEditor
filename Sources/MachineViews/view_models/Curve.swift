@@ -122,7 +122,7 @@ extension CGPoint {
     }
     
     func moved(by size: CGSize) -> CGPoint {
-        return CGPoint(x: x + size.width, y: size.height)
+        return CGPoint(x: x + size.width, y: y + size.height)
     }
     
 }
