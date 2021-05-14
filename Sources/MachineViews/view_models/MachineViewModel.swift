@@ -72,6 +72,10 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         self.notifier = notifier
     }
     
+    func toggleAttributesCollapsed() {
+        attributesPaneViewModel.attributesCollapsed.toggle()
+    }
+    
     func send() {
         attributesPaneViewModel.send()
         canvasViewModel.send()

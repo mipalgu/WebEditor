@@ -61,16 +61,46 @@ import TokamakShim
 import Attributes
 import Machines
 
-struct ArrangementView: View {
+struct ArrangementView<Sidebar: View>: View {
     
     @ObservedObject var viewModel: ArrangementViewModel
     
+    let sideBar: () -> Sidebar
+    
+    @State var sideBarCollapsed: Bool = false
+    
     var body: some View {
-        AttributeGroupsView(
-            viewModel: viewModel.attributeGroupsViewModel,
-            label: viewModel.arrangement.name.pretty + " Arrangement"
-        ) {
-            DependenciesAttributesView(root: $viewModel.arrangement, path: viewModel.arrangement.path, label: "Dependencies")
+        VStack {
+            HStack {
+                HStack {
+                    HoverButton(action: {
+                        sideBarCollapsed.toggle()
+                    }, label: {
+                        Image(systemName: "sidebar.leading").font(.system(size: 16, weight: .regular))
+                    })
+                    Spacer()
+                }
+                HStack {
+                    Spacer()
+                }
+                HStack {
+                    Spacer()
+                }
+            }.padding(.horizontal, 5).padding(.top, 5)
+            Divider()
+            HStack {
+                VStack {
+                    if !sideBarCollapsed {
+                        sideBar()
+                    }
+                }.transition(.move(edge: .leading)).animation(.interactiveSpring())
+                AttributeGroupsView(
+                    viewModel: viewModel.attributeGroupsViewModel,
+                    label: viewModel.arrangement.name.pretty + " Arrangement"
+                ) {
+                    DependenciesAttributesView(root: $viewModel.arrangement, path: viewModel.arrangement.path, label: "Dependencies")
+                }
+            }
         }
     }
     

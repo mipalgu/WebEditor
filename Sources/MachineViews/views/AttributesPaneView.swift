@@ -65,27 +65,12 @@ struct AttributesPaneView: View {
     
     var body: some View {
         VStack {
-            HStack {
-                Spacer()
-                HoverButton(action: {
-                    viewModel.attributesCollapsed.toggle()
-                }, label: {
-                    Image(systemName: "sidebar.squares.trailing").font(.system(size: 16, weight: .regular))
-                })
-            }.padding(.vertical, 5).padding(.trailing, 12.5)
-            if !viewModel.attributesCollapsed {
-                VStack {
-                    if let extraTabs = viewModel.extraTabs {
-                        AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label, extraTabs: extraTabs)
-                    } else {
-                        AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label)
-                    }
-                }.animation(.none)
+            if let extraTabs = viewModel.extraTabs {
+                AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label, extraTabs: extraTabs)
             } else {
-                Spacer()
+                AttributeGroupsView(viewModel: viewModel.attributeGroupsViewModel, label: viewModel.label)
             }
-        }.transition(.move(edge: .trailing)).animation(.interactiveSpring())
-        .frame(width: !viewModel.attributesCollapsed ? 500 : 50.0)
+        }
     }
     
 }

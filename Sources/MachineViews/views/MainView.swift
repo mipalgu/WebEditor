@@ -30,23 +30,28 @@ public struct MainView: View {
     @EnvironmentObject var config: Config
     
     @StateObject var viewModel: MainViewModel
+    
+    var subView: AnyView {
+        switch viewModel.root {
+        case .arrangement(let arrangementViewModel):
+            if viewModel.focus == arrangementViewModel.arrangement.filePath {
+                return AnyView(ArrangementView(viewModel: arrangementViewModel) {
+                    DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
+                })
+            }
+            fallthrough
+        default:
+            guard let machineViewModel = viewModel.viewModel(for: viewModel.focus) else {
+                return AnyView(EmptyView())
+            }
+            return AnyView(MachineView(viewModel: machineViewModel) {
+                DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
+            })
+        }
+    }
 
     public var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
-                switch viewModel.root {
-                case .arrangement(let arrangementViewModel):
-                    if viewModel.focus == arrangementViewModel.arrangement.filePath {
-                        ArrangementView(viewModel: arrangementViewModel)
-                    } else {
-                        MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!)
-                    }
-                case .machine:
-                    MachineView(viewModel: viewModel.viewModel(for: viewModel.focus)!)
-                }
-            }
-        }
+        subView
     }
     
 }
