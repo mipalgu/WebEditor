@@ -114,10 +114,10 @@ public struct CanvasView: View {
                                     viewModel.selectedObjects = [.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)]
                                 }
                                 .contextMenu {
-//                                    Button("Straighten",action: {
-//                                        viewModel.straighten(state: stateName, transitionIndex: transitionViewModel.transitionIndex)
-//                                    })
-                                    Button("Delete",action: {
+                                    Button("Straighten", action: {
+                                        viewModel.straighten(stateName: stateName, transitionIndex: transitionIndex)
+                                    })
+                                    Button("Delete", action: {
                                         viewModel.deleteTransition(transitionIndex, attachedTo: stateName)
                                     }).keyboardShortcut(.delete)
                                 }

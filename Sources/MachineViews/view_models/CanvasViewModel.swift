@@ -253,6 +253,16 @@ final class CanvasViewModel: ObservableObject {
                 self.stateDragTransaction = nil
             }
     }
+    
+    func straighten(stateName: StateName, transitionIndex: Int) {
+        guard let state = machine.states.first(where: { $0.name == stateName }) else {
+            return
+        }
+        let sourceViewModel = viewModel(forState: stateName)
+        let targetTracker = viewModel(forState: state.transitions[transitionIndex].target).tracker
+        let newTracker = TransitionTracker(source: sourceViewModel.tracker, target: targetTracker)
+        sourceViewModel.viewModel(forTransition: transitionIndex).tracker.curve = newTracker.curve
+    }
 
     
 }
