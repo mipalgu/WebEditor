@@ -21,8 +21,6 @@ public struct CanvasView: View {
     
     @Binding var focus: Focus
     
-    @State var creatingCurve: Curve? = nil
-    
     @State var edittingState: StateName? = nil
     
     @State var saving: Bool = false
@@ -87,7 +85,7 @@ public struct CanvasView: View {
                                     })*/
                                 }
                             }
-                        if let curve = creatingCurve {
+                        if let curve = viewModel.creatingCurve {
                             ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                         }
 //                        ForEach(viewModel.unattachedTransitionsAsRows, id: \.self) { row in
@@ -131,21 +129,18 @@ public struct CanvasView: View {
                                     focused: viewModel.selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
                                 )
                             }
-//                            .position(viewModel.viewModel(forState: stateName).tracker.location)
-//                            .coordinateSpace(name: viewModel.coordinateSpace)
                             .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index) }
                             .onTapGesture {
                                 viewModel.selectedObjects = [.state(stateIndex: viewModel.viewModel(forState: stateName).index)]
                                 focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index)
                             }
+                            .gesture(
+                                TapGesture().onEnded {
+                                    viewModel.selectedObjects.insert(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
+                                }.modifiers(.shift)
+                            )
+                            .gesture(viewModel.createTransitionGesture)
                             .gesture(viewModel.dragStateGesture(stateName: stateName, bounds: geometry.size))
-//                                    .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: viewModel.viewModel(for: stateName).stateIndex) }.modifiers(.shift))
-//
-//                                    .gesture(viewModel.createTransitionGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex))
-//                                    .gesture(viewModel.dragStateGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex, size: geometry.size))
-//                                    .onChange(of: viewModel.tracker(for: stateName).expanded) { _ in
-//                                        self.viewModel.updateTransitionLocations(source: viewModel.viewModel(for: stateName).state.wrappedValue)
-//                                    }
                             .contextMenu {
                                 Button("Delete", action: {
                                     viewModel.deleteState(stateName)

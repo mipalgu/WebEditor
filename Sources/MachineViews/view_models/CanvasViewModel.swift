@@ -75,6 +75,8 @@ final class CanvasViewModel: ObservableObject {
     
     let coordinateSpace = "CANVAS_VIEW"
     
+    var creatingCurve: Curve? = nil
+    
     @Published var selectedObjects: Set<ViewType> = []
     @Published var selectedBox: CGRect?
     
@@ -196,6 +198,16 @@ final class CanvasViewModel: ObservableObject {
         default:
             return
         }
+    }
+    
+    func newTransition(source: Machines.State, target: Machines.State, tracker: TransitionTracker) {
+        let result = machineRef.value.newTransition(source: source.name, target: target.name, condition: "true")
+        guard let _ = try? result.get() else {
+            return
+        }
+        let stateViewModel = viewModel(forState: source.name)
+        stateViewModel.viewModel(forTransition: source.transitions.count).tracker.curve = tracker.curve
+        self.objectWillChange.send()
     }
     
     func transitions(forState state: StateName) -> Range<Int> {
@@ -322,6 +334,31 @@ extension CanvasViewModel: StateViewModelDelegate {
 // MARK: - Gestures
 
 extension CanvasViewModel {
+    
+    var createTransitionGesture: some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+            .onChanged {
+                self.creatingCurve = Curve(source: $0.startLocation, target: $0.location)
+                self.objectWillChange.send()
+            }
+            .onEnded { gesture in
+                self.creatingCurve = nil
+                guard
+                    let sourceState = self.machine.states.first(where: { self.viewModel(forState: $0.name).tracker.isWithin(point: gesture.startLocation) }),
+                    let targetState = self.machine.states.first(where: { self.viewModel(forState: $0.name).tracker.isWithin(point: gesture.location) })
+                else {
+                    return
+                }
+                let tracker = TransitionTracker(
+                    source: self.viewModel(forState: sourceState.name).tracker,
+                    sourcePoint: gesture.startLocation,
+                    target: self.viewModel(forState: targetState.name).tracker,
+                    targetPoint: gesture.location
+                )
+                self.newTransition(source: sourceState, target: targetState, tracker: tracker)
+            }
+            .modifiers(.command)
+    }
     
     var dragCanvasGesture: some Gesture {
         var transaction: CanvasDragTransaction! = nil
