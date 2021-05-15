@@ -200,13 +200,13 @@ final class CanvasViewModel: ObservableObject {
         }
     }
     
-    func newTransition(source: Machines.State, target: Machines.State, tracker: TransitionTracker) {
+    func newTransition(source: Machines.State, target: Machines.State, suggested shape: Curve) {
         let result = machineRef.value.newTransition(source: source.name, target: target.name, condition: "true")
         guard let _ = try? result.get() else {
             return
         }
         let stateViewModel = viewModel(forState: source.name)
-        stateViewModel.viewModel(forTransition: source.transitions.count).tracker.curve = tracker.curve
+        stateViewModel.viewModel(forTransition: source.transitions.count).tracker.curve = shape
         self.objectWillChange.send()
     }
     
@@ -355,7 +355,7 @@ extension CanvasViewModel {
                     target: self.viewModel(forState: targetState.name).tracker,
                     targetPoint: gesture.location
                 )
-                self.newTransition(source: sourceState, target: targetState, tracker: tracker)
+                self.newTransition(source: sourceState, target: targetState, suggested: tracker.curve)
             }
             .modifiers(.command)
     }
