@@ -14,14 +14,14 @@ import Utilities
 
 class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable, ObservableObject, Identifiable {
     
-    @Published var isText: Bool {
-        didSet {
-            guard let notifier = notifier else {
-                return
-            }
-            notifier.send()
-        }
-    }
+    @Published var isText: Bool 
+//        didSet {
+//            guard let notifier = notifier else {
+//                return
+//            }
+//            notifier.send()
+//        }
+//    }
     
     var isDragging: Bool = false
     

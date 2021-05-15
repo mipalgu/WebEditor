@@ -64,7 +64,7 @@ public struct CanvasView: View {
                                 focus = .machine
                             }
                             .gesture(viewModel.selectionBoxGesture)
-                            .gesture(viewModel.dragCanvasGesture)
+                            .gesture(viewModel.dragCanvasGesture(bounds: geometry.size))
                             .contextMenu {
                                 VStack {
                                     Button("New State", action: { viewModel.newState() })
@@ -92,34 +92,36 @@ public struct CanvasView: View {
 //                            ArrowView(curve: .constant(row.data.curve), strokeNumber: 0, colour: config.errorColour)
 //                        }
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
-                            ForEach(viewModel.transitions(forState: stateName), id: \.self) { transitionIndex in
-                                TransitionView(
-                                    viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName).tracker,
-                                    focused: viewModel.selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)),
-                                    strokeView: { TransitionStrokeView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName), curve: $0) },
-                                    label: { TransitionLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) },
-                                    editLabel: { TransitionEditLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) }
-                                )
-                                .clipped()
-                                .gesture(TapGesture().onEnded {
-                                    viewModel.selectedObjects.insert(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex))
-                                    if viewModel.selectedObjects.count > 1 {
-                                        focus = .machine
-                                    } else {
+                            if !viewModel.viewModel(forState: stateName).tracker.isText {
+                                ForEach(viewModel.transitions(forState: stateName), id: \.self) { transitionIndex in
+                                    TransitionView(
+                                        viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName).tracker,
+                                        focused: viewModel.selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)),
+                                        strokeView: { TransitionStrokeView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName), curve: $0) },
+                                        label: { TransitionLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) },
+                                        editLabel: { TransitionEditLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) }
+                                    )
+                                    .clipped()
+                                    .gesture(TapGesture().onEnded {
+                                        viewModel.selectedObjects.insert(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex))
+                                        if viewModel.selectedObjects.count > 1 {
+                                            focus = .machine
+                                        } else {
+                                            focus = .transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
+                                        }
+                                    }.modifiers(.shift))
+                                    .onTapGesture {
                                         focus = .transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
+                                        viewModel.selectedObjects = [.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)]
                                     }
-                                }.modifiers(.shift))
-                                .onTapGesture {
-                                    focus = .transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
-                                    viewModel.selectedObjects = [.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)]
-                                }
-                                .contextMenu {
-                                    Button("Straighten", action: {
-                                        viewModel.straighten(stateName: stateName, transitionIndex: transitionIndex)
-                                    })
-                                    Button("Delete", action: {
-                                        viewModel.deleteTransition(transitionIndex, attachedTo: stateName)
-                                    }).keyboardShortcut(.delete)
+                                    .contextMenu {
+                                        Button("Straighten", action: {
+                                            viewModel.straighten(stateName: stateName, transitionIndex: transitionIndex)
+                                        })
+                                        Button("Delete", action: {
+                                            viewModel.deleteTransition(transitionIndex, attachedTo: stateName)
+                                        }).keyboardShortcut(.delete)
+                                    }
                                 }
                             }
                         }
@@ -127,7 +129,8 @@ public struct CanvasView: View {
                             CanvasObjectView(
                                 viewModel: viewModel.viewModel(forState: stateName).tracker,
                                 coordinateSpace: viewModel.coordinateSpace,
-                                textRepresentation: viewModel.viewModel(forState: stateName).name
+                                textRepresentation: viewModel.viewModel(forState: stateName).name,
+                                frame: geometry.size
                             ) {
                                 StateView(
                                     viewModel: viewModel.viewModel(forState: stateName),

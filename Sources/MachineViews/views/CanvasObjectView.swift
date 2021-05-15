@@ -61,6 +61,15 @@ import Transformations
 
 typealias CanvasObjectViewModel = ObservableObject & Positionable & Stretchable & TextRepresentable
 
+extension Positionable {
+    func clampedLocation(bounds: CGSize, offset: CGSize) -> CGPoint {
+        CGPoint(
+            x: min(max(offset.width, location.x), bounds.width - offset.width),
+            y: min(max(offset.height, location.y), bounds.height - offset.height)
+        )
+    }
+}
+
 struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
     
     @ObservedObject var viewModel: ViewModel
@@ -71,15 +80,18 @@ struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
     
     let textFrame: CGSize
     
+    let frame: CGSize
+    
     let object: () -> Object
     
 //    let dragGesture: _EndedGesture<_ChangedGesture<DragGesture>>
     
-    init(viewModel: ViewModel, coordinateSpace: String, textRepresentation: String, textFrame: CGSize = CGSize(width: 50, height: 20), object: @escaping () -> Object) {
+    init(viewModel: ViewModel, coordinateSpace: String, textRepresentation: String, textFrame: CGSize = CGSize(width: 50, height: 20), frame: CGSize, object: @escaping () -> Object) {
         self.viewModel = viewModel
         self.coordinateSpace = coordinateSpace
         self.textRepresentation = textRepresentation
         self.textFrame = textFrame
+        self.frame = frame
         self.object = object
 //        self.dragGesture = dragGesture
     }
@@ -102,6 +114,8 @@ struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
                     .font(config.fontBody)
                     .frame(width: textFrame.width, height: textFrame.height)
             }
+            .position(viewModel.clampedLocation(bounds: frame, offset: CGSize(width: textFrame.width / 2.0, height: textFrame.height / 2.0)))
+            .coordinateSpace(name: coordinateSpace)
         } else {
             Group {
                 object()
@@ -129,7 +143,7 @@ struct CanvasObjectView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            CanvasObjectView(viewModel: viewModel.tracker, coordinateSpace: "MAIN_VIEW", textRepresentation: viewModel.name) {
+            CanvasObjectView(viewModel: viewModel.tracker, coordinateSpace: "MAIN_VIEW", textRepresentation: viewModel.name, frame: CGSize(width: 1000, height: 1000)) {
                 StateView(viewModel: viewModel).environmentObject(config)
             }
         }

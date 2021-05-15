@@ -89,12 +89,24 @@ struct CanvasDragTransaction {
         })
     }
     
-    func move(by translation: CGSize) {
+    func move(by translation: CGSize, bounds: CGSize) {
         stateTrackers.values.forEach {
             guard let startPoint = stateStartPoints[$0.id] else {
                 return
             }
-            $0.location = startPoint.moved(by: CGSize(width: -translation.width, height: -translation.height))
+            let newLocation = startPoint.moved(by: CGSize(width: -translation.width, height: -translation.height))
+            if newLocation.x < 0 || newLocation.x > bounds.width || newLocation.y < 0 || newLocation.y > bounds.height {
+                if !$0.isText {
+                    $0.isText = true
+                }
+                $0.location = newLocation
+                return
+            }
+            if $0.isText {
+                $0.isText = false
+            }
+            $0.location = newLocation
+            
         }
         transitionTrackers.values.forEach {
             guard let startPoint = transitionStartPoints[$0.id] else {

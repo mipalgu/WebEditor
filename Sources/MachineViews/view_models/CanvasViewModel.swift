@@ -370,19 +370,19 @@ extension CanvasViewModel {
             .modifiers(.command)
     }
     
-    var dragCanvasGesture: some Gesture {
+    func dragCanvasGesture(bounds: CGSize) -> some Gesture {
         var transaction: CanvasDragTransaction! = nil
         return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
             .onChanged {
                 if transaction == nil {
                     transaction = CanvasDragTransaction(viewModel: self)
                 }
-                transaction.move(by: $0.translation)
+                transaction.move(by: $0.translation, bounds: bounds)
             }.onEnded {
                 if transaction == nil {
                     transaction = CanvasDragTransaction(viewModel: self)
                 }
-                transaction.move(by: $0.translation)
+                transaction.move(by: $0.translation, bounds: bounds)
                 transaction.finish()
                 transaction = nil
             }

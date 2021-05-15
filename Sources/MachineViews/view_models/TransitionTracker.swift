@@ -24,6 +24,8 @@ class TransitionTracker: ObservableObject, Hashable, Identifiable, Positionable 
     
     @Published var curve: Curve
     
+    @Published var isDisplayed: Bool = true
+    
     var location: CGPoint {
         get {
             curve.point1 + (curve.point2 - curve.point1) / 2.0
