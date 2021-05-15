@@ -101,9 +101,14 @@ public struct CanvasView: View {
                                     editLabel: { TransitionEditLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) }
                                 )
                                 .clipped()
-//                                .gesture(TapGesture().onEnded {
-//                                    viewModel.addSelectedTransition(view: self, from: viewModel.viewModel(for: stateName).stateIndex, at: transitionViewModel.transitionIndex)
-//                                }.modifiers(.shift))
+                                .gesture(TapGesture().onEnded {
+                                    viewModel.selectedObjects.insert(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex))
+                                    if viewModel.selectedObjects.count > 1 {
+                                        focus = .machine
+                                    } else {
+                                        focus = .transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
+                                    }
+                                }.modifiers(.shift))
                                 .onTapGesture {
                                     focus = .transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
                                     viewModel.selectedObjects = [.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)]
@@ -129,16 +134,21 @@ public struct CanvasView: View {
                                     focused: viewModel.selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
                                 )
                             }
+                            .gesture(
+                                TapGesture().onEnded {
+                                    viewModel.selectedObjects.insert(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
+                                    if viewModel.selectedObjects.count > 1 {
+                                        focus = .machine
+                                    } else {
+                                        focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index)
+                                    }
+                                }.modifiers(.shift)
+                            )
                             .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index) }
                             .onTapGesture {
                                 viewModel.selectedObjects = [.state(stateIndex: viewModel.viewModel(forState: stateName).index)]
                                 focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index)
                             }
-                            .gesture(
-                                TapGesture().onEnded {
-                                    viewModel.selectedObjects.insert(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
-                                }.modifiers(.shift)
-                            )
                             .gesture(viewModel.createTransitionGesture)
                             .gesture(viewModel.dragStateGesture(stateName: stateName, bounds: geometry.size))
                             .contextMenu {
