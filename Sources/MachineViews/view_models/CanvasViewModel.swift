@@ -384,6 +384,7 @@ extension CanvasViewModel {
                 }
                 transaction.move(by: $0.translation)
                 transaction.finish()
+                transaction = nil
             }
     }
     
