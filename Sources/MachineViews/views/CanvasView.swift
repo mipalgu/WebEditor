@@ -124,34 +124,34 @@ public struct CanvasView: View {
                             CanvasObjectView(
                                 viewModel: viewModel.viewModel(forState: stateName).tracker,
                                 coordinateSpace: viewModel.coordinateSpace,
-                                textRepresentation: viewModel.viewModel(forState: stateName).name,
-                                dragGesture: viewModel.dragStateGesture(stateName: stateName, bounds: geometry.size)
+                                textRepresentation: viewModel.viewModel(forState: stateName).name
                             ) {
                                 StateView(
                                     viewModel: viewModel.viewModel(forState: stateName),
                                     focused: viewModel.selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
                                 )
-                                .onChange(of: viewModel.viewModel(forState: stateName).expanded) { _ in
-//                                        self.viewModel.correctTransitionLocations(for: viewModel.viewModel(for: stateName).state.wrappedValue)
-                                }
                             }
-//                                .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: viewModel.viewModel(for: stateName).stateIndex) }.modifiers(.shift))
-                                .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index) }
-                                .onTapGesture {
-                                    viewModel.selectedObjects = [.state(stateIndex: viewModel.viewModel(forState: stateName).index)]
-                                    focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index)
-                                }
-//                                .gesture(viewModel.createTransitionGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex))
-//                                .gesture(viewModel.dragStateGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex, size: geometry.size))
-//                                .onChange(of: viewModel.tracker(for: stateName).expanded) { _ in
-//                                    self.viewModel.updateTransitionLocations(source: viewModel.viewModel(for: stateName).state.wrappedValue)
-//                                }
-                                .contextMenu {
-                                    Button("Delete", action: {
-                                        viewModel.deleteState(stateName)
-                                        viewModel.selectedObjects.remove(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
-                                    })
-                                }
+//                            .position(viewModel.viewModel(forState: stateName).tracker.location)
+//                            .coordinateSpace(name: viewModel.coordinateSpace)
+                            .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index) }
+                            .onTapGesture {
+                                viewModel.selectedObjects = [.state(stateIndex: viewModel.viewModel(forState: stateName).index)]
+                                focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index)
+                            }
+                            .gesture(viewModel.dragStateGesture(stateName: stateName, bounds: geometry.size))
+//                                    .gesture(TapGesture().onEnded { viewModel.addSelectedState(view: self, at: viewModel.viewModel(for: stateName).stateIndex) }.modifiers(.shift))
+//
+//                                    .gesture(viewModel.createTransitionGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex))
+//                                    .gesture(viewModel.dragStateGesture(forView: self, forState: viewModel.viewModel(for: stateName).stateIndex, size: geometry.size))
+//                                    .onChange(of: viewModel.tracker(for: stateName).expanded) { _ in
+//                                        self.viewModel.updateTransitionLocations(source: viewModel.viewModel(for: stateName).state.wrappedValue)
+//                                    }
+                            .contextMenu {
+                                Button("Delete", action: {
+                                    viewModel.deleteState(stateName)
+                                    viewModel.selectedObjects.remove(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
+                                })
+                            }
                         }
                         if let rect = viewModel.selectedBox {
                             Rectangle()
