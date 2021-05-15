@@ -21,8 +21,6 @@ public struct CanvasView: View {
     
     @Binding var focus: Focus
     
-    @State var edittingState: StateName? = nil
-    
     @State var saving: Bool = false
     
     let textWidth: CGFloat = 50.0
@@ -45,14 +43,14 @@ public struct CanvasView: View {
     
     public var body: some View {
         Group {
-            if let editState = edittingState {
+            if let editState = viewModel.edittingState {
                 StateEditView(viewModel: viewModel.viewModel(forState: editState))
                     .onTapGesture(count: 2) {
-                        edittingState = nil
+                        viewModel.edittingState = nil
                         focus = .machine
                     }
                     .contextMenu {
-                        Button("Go Back", action: { edittingState = nil }).keyboardShortcut(.escape)
+                        Button("Go Back", action: { self.viewModel.edittingState = nil }).keyboardShortcut(.escape)
                     }
             } else {
                 GeometryReader { (geometry: GeometryProxy) in
@@ -147,7 +145,7 @@ public struct CanvasView: View {
                                     }
                                 }.modifiers(.shift)
                             )
-                            .onTapGesture(count: 2) { edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index) }
+                            .onTapGesture(count: 2) { self.viewModel.edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index) }
                             .onTapGesture {
                                 viewModel.selectedObjects = [.state(stateIndex: viewModel.viewModel(forState: stateName).index)]
                                 focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index)

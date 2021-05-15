@@ -77,6 +77,8 @@ final class CanvasViewModel: ObservableObject {
     
     var creatingCurve: Curve? = nil
     
+    @Published var edittingState: StateName? = nil
+    
     @Published var selectedObjects: Set<ViewType> = []
     @Published var selectedBox: CGRect?
     
