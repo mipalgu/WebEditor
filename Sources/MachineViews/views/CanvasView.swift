@@ -90,7 +90,7 @@ public struct CanvasView: View {
 //                            ArrowView(curve: .constant(row.data.curve), strokeNumber: 0, colour: config.errorColour)
 //                        }
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
-                            if !viewModel.viewModel(forState: stateName).tracker.isText {
+//                            if !viewModel.viewModel(forState: stateName).tracker.isText {
                                 ForEach(viewModel.transitions(forState: stateName), id: \.self) { transitionIndex in
                                     TransitionView(
                                         viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName).tracker,
@@ -122,7 +122,7 @@ public struct CanvasView: View {
                                     }
                                 }
                             }
-                        }
+//                        }
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
                             CanvasObjectView(
                                 viewModel: viewModel.viewModel(forState: stateName).tracker,
