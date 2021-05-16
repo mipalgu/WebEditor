@@ -187,7 +187,7 @@ final class StateViewModel: ObservableObject, Identifiable {
                 }
             }
             var indexes = sortedIndexSet
-            let firstCount = indexes.count
+            var decrement = indexes.count
             var lastIndex = transitions.count
             var dict: [Int: TransitionViewModel] = [:]
             dict.reserveCapacity(transitions.count)
@@ -202,10 +202,11 @@ final class StateViewModel: ObservableObject, Identifiable {
                 delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
                 (index..<lastIndex).forEach {
                     let viewModel = viewModel(forTransition: $0)
-                    viewModel.transitionIndex -= firstCount - indexes.count
+                    viewModel.transitionIndex -= decrement
                     dict[viewModel.transitionIndex] = viewModel
                 }
                 lastIndex = index
+                decrement -= 1
             }
             transitionViewModels = dict
         }
