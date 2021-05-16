@@ -209,7 +209,7 @@ final class CanvasViewModel: ObservableObject {
             notifier?.send()
             return
         case .success(let notify):
-            deleteTransitions(targeting: stateName)
+//            deleteTransitions(targeting: stateName)
             if notify {
                 sync()
                 notifier?.send()
@@ -225,16 +225,16 @@ final class CanvasViewModel: ObservableObject {
         }
     }
     
-    private func syncTransitions(targeting targetStateName: StateName, viewModels: [TransitonViewModel], countBeforeDeletion count: Int) {
-        stateViewModels.keys.forEach { stateName in
-            let viewModel = viewModel(forState: stateName)
-            viewModel.viewModels(targeting: targetStateName)
-            let transitionIndexes = IndexSet(state.transitions.indices.filter {
-                targetStateName == state.transitions[$0].target
-            })
-            deleteTransitions(transitionIndexes, attachedTo: stateName)
-        }
-    }
+//    private func syncTransitions(targeting targetStateName: StateName, viewModels: [TransitonViewModel], countBeforeDeletion count: Int) {
+//        stateViewModels.keys.forEach { stateName in
+//            let viewModel = viewModel(forState: stateName)
+//            viewModel.viewModels(targeting: targetStateName)
+//            let transitionIndexes = IndexSet(state.transitions.indices.filter {
+//                targetStateName == state.transitions[$0].target
+//            })
+//            deleteTransitions(transitionIndexes, attachedTo: stateName)
+//        }
+//    }
     
     func deleteStates(_ states: IndexSet) {
         // Delete States from machine
@@ -243,6 +243,25 @@ final class CanvasViewModel: ObservableObject {
             ($0, machineRef.value.states[$0].name)
         })
         let viewModels: [Int: StateViewModel] = stateNames.mapValues { self.viewModel(forState: $0) }
+        let stateCounts = Dictionary(uniqueKeysWithValues: machineRef.value.states.map {
+            ($0.name, $0.transitions.count)
+        })
+        var deletingTransitions: [StateName: IndexSet] = Dictionary(uniqueKeysWithValues: states.map {
+            (machine.states[$0].name, IndexSet(machine.states[$0].transitions.indices))
+        })
+        let deletingStateNames = Set(states.map { machine.states[$0].name })
+        machine.states.forEach { s in
+            s.transitions.indices.forEach { transitionIndex in
+                if !deletingStateNames.contains(s.transitions[transitionIndex].target) {
+                    return
+                }
+                guard let _ = deletingTransitions[s.name] else {
+                    deletingTransitions[s.name] = IndexSet(integer: transitionIndex)
+                    return
+                }
+                deletingTransitions[s.name]!.insert(transitionIndex)
+            }
+        }
         let result = machineRef.value.delete(states: states)
         defer { objectWillChange.send() }
         switch result {
@@ -253,8 +272,14 @@ final class CanvasViewModel: ObservableObject {
             defer {
                 if notify { notifier?.send() }
             }
-            stateNames.values.forEach {
-                deleteTransitions(targeting: $0)
+            viewModels.values.forEach {
+                guard
+                    let deletedTransitions = deletingTransitions[$0.name],
+                    let countBeforeDeletion = stateCounts[$0.name]
+                else {
+                    return
+                }
+                $0.syncTransitions(afterDeleting: deletedTransitions, countBeforeDeletion: countBeforeDeletion)
             }
             var indexes = Array(stateIndices)
             indexes.remove(atOffsets: states) { (index, nextIndex, previouslyDeleted) in
