@@ -62,6 +62,7 @@ import Attributes
 import AttributeViews
 import Machines
 import Utilities
+import swift_helpers
 
 protocol StateViewModelDelegate: AnyObject {
     
@@ -186,27 +187,19 @@ final class StateViewModel: ObservableObject, Identifiable {
                     notifier?.send()
                 }
             }
-            var indexes = sortedIndexSet
-            var decrement = indexes.count
-            var lastIndex = transitions.count
             var dict: [Int: TransitionViewModel] = [:]
             dict.reserveCapacity(transitions.count)
-            while (!indexes.isEmpty) {
-                let index = indexes.removeFirst()
+            var indexes = Array(transitions.indices)
+            indexes.remove(atOffsets: indexSet) { (index, nextIndex, previouslyDeleted) in
                 let transitionViewModel = viewModels.removeFirst()
                 let targetStateName = targetStateNames.removeFirst()
-                if index >= lastIndex {
-                    continue
-                }
                 transitionViewModels[index] = nil
                 delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
-                ((index + 1)..<lastIndex).forEach {
+                ((index + 1)..<nextIndex).forEach {
                     let viewModel = viewModel(forTransition: $0)
-                    viewModel.transitionIndex -= decrement
+                    viewModel.transitionIndex -= previouslyDeleted
                     dict[viewModel.transitionIndex] = viewModel
                 }
-                lastIndex = index
-                decrement -= 1
             }
             transitionViewModels = dict
         }
