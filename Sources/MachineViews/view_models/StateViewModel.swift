@@ -168,13 +168,27 @@ final class StateViewModel: ObservableObject, Identifiable {
         self.notifier = notifier
     }
     
+    func syncTransitions(afterDeleting indexSet: IndexSet, countBeforeDeletion count: Int) {
+        var dict: [Int: TransitionViewModel] = [:]
+        dict.reserveCapacity(count)
+        var indexes = Array(0..<count)
+        indexes.remove(atOffsets: indexSet) { (index, nextIndex, previouslyDeleted) in
+            ((index + 1)..<nextIndex).forEach {
+                let viewModel = viewModel(forTransition: $0)
+                viewModel.transitionIndex -= previouslyDeleted
+                dict[viewModel.transitionIndex] = viewModel
+            }
+        }
+        transitionViewModels = dict
+    }
+    
     func deleteTransitions(in indexSet: IndexSet) {
         guard !indexSet.isEmpty, !path.isNil(machineRef.value) else {
             return
         }
         let sortedIndexSet = indexSet.sorted(by: >)
-        var viewModels = sortedIndexSet.map { self.viewModel(forTransition: $0) }
-        var targetStateNames = viewModels.map { $0.target }
+        let viewModels = Dictionary(uniqueKeysWithValues: sortedIndexSet.map { ($0, self.viewModel(forTransition: $0)) })
+        let targetStateNames = viewModels.mapValues(\.target)
         let transitions = machineRef.value[keyPath: path.keyPath].transitions
         let result = machineRef.value.delete(transitions: indexSet, attachedTo: name)
         switch result {
@@ -186,22 +200,16 @@ final class StateViewModel: ObservableObject, Identifiable {
                 if notify {
                     notifier?.send()
                 }
-            }
-            var dict: [Int: TransitionViewModel] = [:]
-            dict.reserveCapacity(transitions.count)
-            var indexes = Array(transitions.indices)
-            indexes.remove(atOffsets: indexSet) { (index, nextIndex, previouslyDeleted) in
-                let transitionViewModel = viewModels.removeFirst()
-                let targetStateName = targetStateNames.removeFirst()
-                transitionViewModels[index] = nil
-                delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
-                ((index + 1)..<nextIndex).forEach {
-                    let viewModel = viewModel(forTransition: $0)
-                    viewModel.transitionIndex -= previouslyDeleted
-                    dict[viewModel.transitionIndex] = viewModel
+                sortedIndexSet.forEach {
+                    guard let transitionViewModel = viewModels[$0], let targetStateName = targetStateNames[$0] else {
+                        return
+                    }
+                    transitionViewModels[index] = nil
+                    delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
                 }
+                syncTransitions(afterDeleting: indexSet, inIndices: transitions.indices)
             }
-            transitionViewModels = dict
+            
         }
     }
     
@@ -255,6 +263,10 @@ final class StateViewModel: ObservableObject, Identifiable {
     func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
         tracker.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight)
         objectWillChange.send()
+    }
+    
+    func viewModels(targeting stateName: StateName) -> [TransitionViewModel] {
+        transitionViewModels.values.filter { $0.target == stateName }
     }
     
     func viewModel(forAction action: String) -> ActionViewModel {

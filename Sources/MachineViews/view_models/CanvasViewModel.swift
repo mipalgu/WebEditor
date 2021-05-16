@@ -165,32 +165,27 @@ final class CanvasViewModel: ObservableObject {
     }
     
     func deleteSelected() {
-        let states = IndexSet(selectedObjects.compactMap {
-            switch $0 {
-            case .state(let stateIndex):
-                return stateIndex
-            default:
+        let sorted = selectedObjects.sorted { (lhs, _) in
+            lhs.isTransition
+        }
+        let firstStateIndex = sorted.firstIndex(where: \.isState)
+        let states = IndexSet((firstStateIndex == nil ? [] : sorted[firstStateIndex!..<sorted.count]).map(\.stateIndex))
+        let transitionViewTypes = sorted[0..<(firstStateIndex ?? sorted.count)]
+        let transitions: [StateName: IndexSet] = Dictionary(uniqueKeysWithValues: transitionViewTypes.sorted {
+            $0.stateIndex < $1.stateIndex
+        }.lazy.grouped {
+            $0.stateIndex == $1.stateIndex
+        }.compactMap {
+            if $0.isEmpty, machineRef.value.states.count <= $0[0].stateIndex {
                 return nil
             }
+            return (machineRef.value.states[$0[0].stateIndex].name, IndexSet($0.map { $0.transitionIndex }))
         })
-        var transitions: [StateName: IndexSet] = [:]
-        selectedObjects.forEach {
-            switch $0 {
-            case .transition(let stateIndex, let transitionIndex):
-                let name = machine.states[stateIndex].name
-                guard let _ = transitions[name] else {
-                    transitions[name] = IndexSet(integer: transitionIndex)
-                    return
-                }
-                transitions[name]!.insert(transitionIndex)
-            default:
-                return
-            }
-        }
         transitions.forEach {
             deleteTransitions($1, attachedTo: $0)
         }
         deleteStates(states)
+        selectedObjects = []
     }
     
     func deleteState(_ stateName: StateName) {
@@ -199,16 +194,12 @@ final class CanvasViewModel: ObservableObject {
         }
         let state = machineRef.value.states[stateIndex]
         let viewType = ViewType.state(stateIndex: stateIndex)
-        if selectedObjects.contains(viewType) {
-            selectedObjects.remove(viewType)
-        }
+        selectedObjects.remove(viewType)
         if let editState = edittingState {
             if editState == stateName {
                 edittingState = nil
             }
         }
-        deleteTransitions(IndexSet(state.transitions.indices), attachedTo: stateName)
-        deleteTransitions(with: stateName)
         let viewModel = viewModel(forState: stateName)
         let states = machineRef.value.states
         let result = machineRef.value.deleteState(atIndex: viewModel.index)
@@ -217,11 +208,13 @@ final class CanvasViewModel: ObservableObject {
         case .failure:
             notifier?.send()
             return
-        case .success(true):
-            sync()
-            notifier?.send()
-            return
-        default:
+        case .success(let notify):
+            deleteTransitions(targeting: stateName)
+            if notify {
+                sync()
+                notifier?.send()
+                return
+            }
             stateViewModels[stateName] = nil
             if viewModel.index + 1 < states.count {
                 states[(viewModel.index + 1)..<states.count].forEach {
@@ -229,58 +222,50 @@ final class CanvasViewModel: ObservableObject {
                     viewModel.index -= 1
                 }
             }
-            return
         }
     }
     
-    private func deleteTransitions(with target: StateName) {
+    private func syncTransitions(targeting targetStateName: StateName, viewModels: [TransitonViewModel], countBeforeDeletion count: Int) {
         stateViewModels.keys.forEach { stateName in
-            guard let state = machineRef.value.states.first(where: { $0.name == stateName }) else {
-                return
-            }
+            let viewModel = viewModel(forState: stateName)
+            viewModel.viewModels(targeting: targetStateName)
             let transitionIndexes = IndexSet(state.transitions.indices.filter {
-                target == state.transitions[$0].target
+                targetStateName == state.transitions[$0].target
             })
-            if transitionIndexes.isEmpty {
-                return
-            }
             deleteTransitions(transitionIndexes, attachedTo: stateName)
         }
     }
     
     func deleteStates(_ states: IndexSet) {
-        let stateNames = states.map { machine.states[$0].name }
-        let stateNameSet = Set(stateNames)
-        // Delete editting State
-        if let editState = edittingState {
-            if stateNameSet.contains(editState) {
-                edittingState = nil
-            }
-        }
-        // Removed from selected objects
-        states.forEach {
-            let viewType = ViewType.state(stateIndex: $0)
-            if selectedObjects.contains(viewType) {
-                selectedObjects.remove(viewType)
-            }
-        }
-        // Delete state transitions and trackers
-        stateNames.forEach { name in
-            guard let state = machineRef.value.states.first(where: { $0.name == name }) else {
-                return
-            }
-            deleteTransitions(IndexSet(state.transitions.indices), attachedTo: name)
-        }
-        // Remove transitions with target name == state
-        stateNames.forEach {
-            deleteTransitions(with: $0)
-        }
         // Delete States from machine
+        let stateIndices = machineRef.value.states.indices
+        let stateNames = Dictionary(uniqueKeysWithValues: stateIndices.map {
+            ($0, machineRef.value.states[$0].name)
+        })
+        let viewModels: [Int: StateViewModel] = stateNames.mapValues { self.viewModel(forState: $0) }
         let result = machineRef.value.delete(states: states)
-        guard let _ = try? result.get() else {
-            fatalError("Removed view models but couldn't remove states from machine.")
+        defer { objectWillChange.send() }
+        switch result {
+        case .failure:
+            notifier?.send()
+            return
+        case .success(let notify):
+            defer {
+                if notify { notifier?.send() }
+            }
+            stateNames.values.forEach {
+                deleteTransitions(targeting: $0)
+            }
+            var indexes = Array(stateIndices)
+            indexes.remove(atOffsets: states) { (index, nextIndex, previouslyDeleted) in
+                ((index + 1)..<nextIndex).forEach { currentIndex in
+                    guard let viewModel = viewModels[currentIndex] else {
+                        return
+                    }
+                    viewModel.index -= previouslyDeleted
+                }
+            }
         }
-        self.objectWillChange.send()
     }
     
     func deleteTransition(_ transitionIndex: Int, attachedTo stateName: StateName) {
@@ -292,12 +277,6 @@ final class CanvasViewModel: ObservableObject {
     }
     
     func deleteTransitions(_ transitions: IndexSet, attachedTo stateName: StateName) {
-        guard let stateIndex = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
-            return
-        }
-        transitions.map { ViewType.transition(stateIndex: stateIndex, transitionIndex: $0) }.forEach {
-            selectedObjects.remove($0)
-        }
         let viewModel = viewModel(forState: stateName)
         viewModel.deleteTransitions(in: transitions)
         self.objectWillChange.send()
@@ -327,14 +306,9 @@ final class CanvasViewModel: ObservableObject {
     func selectAll() {
         machine.states.indices.forEach { stateIndex in
             let stateViewType = ViewType.state(stateIndex: stateIndex)
-            if !selectedObjects.contains(stateViewType) {
-                selectedObjects.insert(stateViewType)
-            }
+            selectedObjects.insert(stateViewType)
             machine.states[stateIndex].transitions.indices.forEach {
                 let transitionViewType = ViewType.transition(stateIndex: stateIndex, transitionIndex: $0)
-                if selectedObjects.contains(transitionViewType) {
-                    return
-                }
                 selectedObjects.insert(transitionViewType)
             }
         }
