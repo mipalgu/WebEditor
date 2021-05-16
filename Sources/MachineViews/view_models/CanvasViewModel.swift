@@ -284,10 +284,7 @@ final class CanvasViewModel: ObservableObject {
     }
     
     func deleteTransition(_ transitionIndex: Int, attachedTo stateName: StateName) {
-        guard let stateIndex = machine.states.firstIndex(where: { $0.name == stateName }) else {
-            return
-        }
-        let viewType = ViewType.transition(stateIndex: stateIndex, transitionIndex: transitionIndex)
+        let viewType = viewType(stateName: stateName, transitionIndex: transitionIndex)
         if selectedObjects.contains(viewType) {
             selectedObjects.remove(viewType)
         }
@@ -399,6 +396,16 @@ final class CanvasViewModel: ObservableObject {
     func viewModel(forTransition transitionIndex: Int, attachedToState stateName: StateName) -> TransitionViewModel {
         let stateViewModel = viewModel(forState: stateName)
         return stateViewModel.viewModel(forTransition: transitionIndex)
+    }
+    
+    private func viewType(stateName: StateName, transitionIndex: Int?) -> ViewType {
+        guard let stateIndex = machine.states.firstIndex(where: { $0.name == stateName }) else {
+            fatalError("Couldn't find state called \(stateName)")
+        }
+        guard let index = transitionIndex else {
+            return ViewType.state(stateIndex: stateIndex)
+        }
+        return ViewType.transition(stateIndex: stateIndex, transitionIndex: index)
     }
     
     private var stateDragTransaction: StateDragTransaction! = nil
