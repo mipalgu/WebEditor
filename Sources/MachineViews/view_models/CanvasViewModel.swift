@@ -190,10 +190,21 @@ final class CanvasViewModel: ObservableObject {
     }
     
     func deleteState(_ stateName: StateName) {
-        guard let state = machineRef.value.states.first(where: { $0.name == stateName }) else {
+        guard let stateIndex = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
             return
         }
+        let state = machineRef.value.states[stateIndex]
+        let viewType = ViewType.state(stateIndex: stateIndex)
+        if selectedObjects.contains(viewType) {
+            selectedObjects.remove(viewType)
+        }
+        if let editState = edittingState {
+            if editState == stateName {
+                edittingState = nil
+            }
+        }
         deleteTransitions(IndexSet(state.transitions.indices), attachedTo: stateName)
+        deleteTransitions(with: stateName)
         let viewModel = viewModel(forState: stateName)
         let states = machineRef.value.states
         let result = machineRef.value.deleteState(atIndex: viewModel.index)
@@ -215,6 +226,21 @@ final class CanvasViewModel: ObservableObject {
                 }
             }
             return
+        }
+    }
+    
+    private func deleteTransitions(with target: StateName) {
+        stateViewModels.keys.forEach { stateName in
+            guard let state = machineRef.value.states.first(where: { $0.name == stateName }) else {
+                return
+            }
+            let transitionIndexes = IndexSet(state.transitions.indices.filter {
+                target == state.transitions[$0].target
+            })
+            if transitionIndexes.isEmpty {
+                return
+            }
+            deleteTransitions(transitionIndexes, attachedTo: stateName)
         }
     }
     
