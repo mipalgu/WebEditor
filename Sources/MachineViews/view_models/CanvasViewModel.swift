@@ -161,20 +161,17 @@ final class CanvasViewModel: ObservableObject {
     }
     
     func deleteSelected() {
-        var states: IndexSet = []
-        var transitions: [StateName: IndexSet] = [:]
-        selectedObjects.sorted(by: { (lhs, _) in
-            switch lhs {
-            case .transition:
-                return true
-            default:
-                return false
-            }
-        }).forEach {
+        let states = IndexSet(selectedObjects.compactMap {
             switch $0 {
             case .state(let stateIndex):
-                states.insert(stateIndex)
-                transitions[machine.states[stateIndex].name] = nil
+                return stateIndex
+            default:
+                return nil
+            }
+        })
+        var transitions: [StateName: IndexSet] = [:]
+        selectedObjects.forEach {
+            switch $0 {
             case .transition(let stateIndex, let transitionIndex):
                 let name = machine.states[stateIndex].name
                 guard let _ = transitions[name] else {
@@ -182,24 +179,21 @@ final class CanvasViewModel: ObservableObject {
                     return
                 }
                 transitions[name]!.insert(transitionIndex)
-            }
-        }
-        transitions.keys.forEach { stateName in
-            guard let indexSet = transitions[stateName] else {
+            default:
                 return
             }
-            let viewModel = viewModel(forState: stateName)
-            viewModel.deleteTransitions(in: indexSet)
         }
-        let result = machineRef.value.delete(states: states)
-        guard let _ = try? result.get() else {
-            self.objectWillChange.send()
-            return
+        transitions.forEach {
+            deleteTransitions($1, attachedTo: $0)
         }
-        self.objectWillChange.send()
+        deleteStates(states)
     }
     
     func deleteState(_ stateName: StateName) {
+        guard let state = machineRef.value.states.first(where: { $0.name == stateName }) else {
+            return
+        }
+        deleteTransitions(IndexSet(state.transitions.indices), attachedTo: stateName)
         let viewModel = viewModel(forState: stateName)
         let states = machineRef.value.states
         let result = machineRef.value.deleteState(atIndex: viewModel.index)
@@ -224,10 +218,101 @@ final class CanvasViewModel: ObservableObject {
         }
     }
     
+    func deleteStates(_ states: IndexSet) {
+        let stateNames = states.map { machine.states[$0].name }
+        let stateNameSet = Set(stateNames)
+        // Delete editting State
+        if let editState = edittingState {
+            if stateNameSet.contains(editState) {
+                edittingState = nil
+            }
+        }
+        // Removed from selected objects
+        states.forEach {
+            let viewType = ViewType.state(stateIndex: $0)
+            if selectedObjects.contains(viewType) {
+                selectedObjects.remove(viewType)
+            }
+        }
+        // Delete state transitions and trackers
+        stateNames.forEach { name in
+            guard let state = machineRef.value.states.first(where: { $0.name == name }) else {
+                return
+            }
+            deleteTransitions(IndexSet(state.transitions.indices), attachedTo: name)
+        }
+        // Remove viewModels
+//        stateNames.forEach {
+//            stateViewModels[$0] = nil
+//            targetTransitions[$0] = nil
+//        }
+        // Remove transitions with target name == state
+        stateViewModels.keys.forEach { stateName in
+            guard let state = machineRef.value.states.first(where: { $0.name == stateName }) else {
+                return
+            }
+            let transitionIndexes = IndexSet(state.transitions.indices.filter {
+                stateNameSet.contains(state.transitions[$0].target)
+            })
+            if transitionIndexes.isEmpty {
+                return
+            }
+            deleteTransitions(transitionIndexes, attachedTo: stateName)
+        }
+        // Delete States from machine
+        let result = machineRef.value.delete(states: states)
+        guard let _ = try? result.get() else {
+            fatalError("Removed view models but couldn't remove states from machine.")
+        }
+        self.objectWillChange.send()
+    }
+    
     func deleteTransition(_ transitionIndex: Int, attachedTo stateName: StateName) {
+        guard let stateIndex = machine.states.firstIndex(where: { $0.name == stateName }) else {
+            return
+        }
+        let viewType = ViewType.transition(stateIndex: stateIndex, transitionIndex: transitionIndex)
+        if selectedObjects.contains(viewType) {
+            selectedObjects.remove(viewType)
+        }
         let viewModel = viewModel(forState: stateName)
+        let transitionTracker = viewModel.viewModel(forTransition: transitionIndex).tracker
+        targetTransitions.keys.forEach { targetName in
+            guard let _ = targetTransitions[targetName] else {
+                return
+            }
+            if targetTransitions[targetName]!.contains(transitionTracker) {
+                targetTransitions[targetName]!.removeAll(transitionTracker)
+            }
+        }
         viewModel.deleteTransition(transitionIndex)
         objectWillChange.send()
+    }
+    
+    func deleteTransitions(_ transitions: IndexSet, attachedTo stateName: StateName) {
+        guard let stateIndex = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
+            return
+        }
+        let viewTypes = transitions.map { ViewType.transition(stateIndex: stateIndex, transitionIndex: $0) }
+        viewTypes.forEach {
+            if selectedObjects.contains($0) {
+                selectedObjects.remove($0)
+            }
+        }
+        let viewModel = viewModel(forState: stateName)
+        let transitionTrackers = transitions.map { viewModel.viewModel(forTransition: $0).tracker }
+        targetTransitions.keys.forEach { targetName in
+            guard let _ = targetTransitions[targetName] else {
+                return
+            }
+            transitionTrackers.forEach {
+                if targetTransitions[targetName]!.contains($0) {
+                    targetTransitions[targetName]!.removeAll($0)
+                }
+            }
+        }
+        viewModel.deleteTransitions(in: transitions)
+        self.objectWillChange.send()
     }
     
     func newState() {
