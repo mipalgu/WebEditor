@@ -184,6 +184,9 @@ final class StateViewModel: ObservableObject, Identifiable {
     }
     
     func syncTransitions(afterDeleting indexSet: IndexSet, countBeforeDeletion count: Int) {
+        if indexSet.isEmpty {
+            return
+        }
         var dict: [Int: TransitionViewModel] = [:]
         dict.reserveCapacity(count)
         var indexes = Array(0..<count)

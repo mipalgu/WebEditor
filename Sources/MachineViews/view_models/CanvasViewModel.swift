@@ -277,6 +277,12 @@ extension CanvasViewModel {
             notifier?.send()
             return
         case .success(let notify):
+            defer {
+                machineRef.value.states.forEach {
+                    let viewModel = self.viewModel(forState: $0.name)
+                    viewModel.removeTransitionViewModels(targeting: stateName)
+                }
+            }
             if notify {
                 sync()
                 notifier?.send()
@@ -288,10 +294,6 @@ extension CanvasViewModel {
                     let viewModel = self.viewModel(forState: $0.name)
                     viewModel.index -= 1
                 }
-            }
-            machineRef.value.states.forEach {
-                let viewModel = self.viewModel(forState: $0.name)
-                viewModel.removeTransitionViewModels(targeting: stateName)
             }
         }
     }
