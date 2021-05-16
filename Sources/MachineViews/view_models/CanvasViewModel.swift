@@ -193,8 +193,10 @@ final class CanvasViewModel: ObservableObject {
         }
         let result = machineRef.value.delete(states: states)
         guard let _ = try? result.get() else {
+            self.objectWillChange.send()
             return
         }
+        self.objectWillChange.send()
     }
     
     func deleteState(_ stateName: StateName) {
