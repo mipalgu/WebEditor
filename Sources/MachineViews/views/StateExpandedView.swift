@@ -54,10 +54,12 @@ struct StateExpandedView<TitleView: View>: View {
         Group {
             VStack {
                 titleView()
-                ScrollView {
-                    VStack(spacing: 0) {
-                        ForEach(viewModel.actions, id: \.self) { action in
-                            ActionView(action: viewModel.viewModel(forAction: action))
+                GeometryReader { geometry in
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            ForEach(viewModel.actions, id: \.self) { action in
+                                ActionView(action: viewModel.viewModel(forAction: action), height: viewModel.getActionHeight(frame: geometry.size, action: action))
+                            }
                         }
                     }
                 }

@@ -61,7 +61,15 @@ import Attributes
 import Machines
 import Utilities
 
+protocol ActionDelegate: AnyObject {
+    
+    func expandedDidChange(old: Bool, new: Bool)
+    
+}
+
 final class ActionViewModel: ObservableObject, Identifiable {
+    
+    weak var delegate: ActionDelegate?
     
     let machineRef: Ref<Machine>
     
@@ -69,7 +77,18 @@ final class ActionViewModel: ObservableObject, Identifiable {
     
     @Published var actionIndex: Int
     
-    @Published var expanded: Bool
+    @Published var _expanded: Bool
+    
+    var expanded: Bool {
+        get {
+            _expanded
+        }
+        set {
+            let old = _expanded
+            _expanded = newValue
+            delegate?.expandedDidChange(old: old, new: newValue)
+        }
+    }
     
     var machine: Machine {
         get {
@@ -100,7 +119,7 @@ final class ActionViewModel: ObservableObject, Identifiable {
         self.machineRef = machine
         self.stateIndex = stateIndex
         self.actionIndex = actionIndex
-        self.expanded = expanded
+        self._expanded = expanded
     }
     
 }

@@ -13,8 +13,11 @@ struct ActionView: View {
     
     @ObservedObject var viewModel: ActionViewModel
     
-    init(action: ActionViewModel) {
+    let height: CGFloat
+    
+    init(action: ActionViewModel, height: CGFloat) {
         self._viewModel = ObservedObject(initialValue: action)
+        self.height = height
     }
     
     var body: some View {
@@ -23,7 +26,8 @@ struct ActionView: View {
             path: viewModel.path.implementation,
             label: viewModel.name,
             language: viewModel.language,
-            expanded: $viewModel.expanded
+            expanded: $viewModel.expanded,
+            minHeight: height
         )
     }
 }
@@ -44,7 +48,7 @@ struct ActionView_Previews: PreviewProvider {
         @StateObject var viewModel: ActionViewModel = ActionViewModel(machine: Ref(copying: Machine.initialSwiftMachine()), stateIndex: 0, actionIndex: 0)
 
         var body: some View {
-            ActionView(action: viewModel)
+            ActionView(action: viewModel, height: 100.0)
         }
 
     }

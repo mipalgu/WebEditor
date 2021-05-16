@@ -16,40 +16,44 @@ struct CodeViewWithDropDown<Label: View>: View {
     @Binding var expanded: Bool
     @Binding var hasErrors: Bool
     
+    let minHeight: CGFloat
+    
     let label: () -> Label
     let codeView: () -> CodeView<Config, Text>
     
     @EnvironmentObject var config: Config
     
-    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, label: String, language: Language, expanded: Binding<Bool>, notifier: GlobalChangeNotifier? = nil) where Label == Text {
-        self.init(root: root, path: path, language: language, expanded: expanded, notifier: notifier) { Text(label.pretty) }
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, label: String, language: Language, expanded: Binding<Bool>, minHeight: CGFloat = 0.0, notifier: GlobalChangeNotifier? = nil) where Label == Text {
+        self.init(root: root, path: path, language: language, expanded: expanded, minHeight: minHeight, notifier: notifier) { Text(label.pretty) }
     }
     
-    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, language: Language, expanded: Binding<Bool>, notifier: GlobalChangeNotifier? = nil, label: @escaping () -> Label) {
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, language: Language, expanded: Binding<Bool>, minHeight: CGFloat = 100.0, notifier: GlobalChangeNotifier? = nil, label: @escaping () -> Label) {
         self.init(
             expanded: expanded,
             hasErrors: Binding(
                 get: { !root.wrappedValue.errorBag.errors(forPath: path).isEmpty },
                 set: { _ in }
             ),
+            minHeight: minHeight,
             label: label
         ) {
             CodeView<Config, Text>(root: root, path: path, label: "", language: language, notifier: notifier)
         }
     }
     
-    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), label: String, language: Language, expanded: Binding<Bool>, delayEdits: Bool = false) where Label == Text {
+    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), label: String, language: Language, expanded: Binding<Bool>, minHeight: CGFloat = 0.0, delayEdits: Bool = false) where Label == Text {
         self.init(
             value: value,
             errors: errors,
             language: language,
             expanded: expanded,
             delayEdits: delayEdits,
+            minHeight: minHeight,
             label: { Text(label.pretty) }
         )
     }
     
-    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), language: Language, expanded: Binding<Bool>, delayEdits: Bool = false, label: @escaping () -> Label) {
+    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), language: Language, expanded: Binding<Bool>, delayEdits: Bool = false, minHeight: CGFloat = 0.0, label: @escaping () -> Label) {
         self.init(
             expanded: expanded,
             hasErrors: Binding(
@@ -62,17 +66,18 @@ struct CodeViewWithDropDown<Label: View>: View {
         }
     }
     
-    private init(expanded: Binding<Bool>, hasErrors: Binding<Bool>, label: @escaping () -> Label, codeView: @escaping () -> CodeView<Config, Text>) {
+    private init(expanded: Binding<Bool>, hasErrors: Binding<Bool>, minHeight: CGFloat = 0.0, label: @escaping () -> Label, codeView: @escaping () -> CodeView<Config, Text>) {
         self._expanded = expanded
         self._hasErrors = hasErrors
         self.label = label
         self.codeView = codeView
+        self.minHeight = minHeight
     }
     
     var body: some View {
         VStack(alignment: .leading) {
             DisclosureGroup(isExpanded: $expanded, content: {
-                codeView().padding(.top, -10)
+                codeView().padding(.top, -10).frame(minHeight: self.minHeight)
             }) {
                 HStack(spacing: 0) {
                     if hasErrors {

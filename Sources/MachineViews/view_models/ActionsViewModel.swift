@@ -61,7 +61,7 @@ import Attributes
 import Machines
 import Utilities
 
-final class ActionsViewModel: ObservableObject, Identifiable {
+final class ActionsViewModel: ObservableObject, Identifiable, ActionDelegate {
     
     let machineRef: Ref<Machine>
     
@@ -98,6 +98,9 @@ final class ActionsViewModel: ObservableObject, Identifiable {
         self.actionViewModels = stateIndex >= machine.value.states.count ? [:] : Dictionary(uniqueKeysWithValues: machine.value.states[stateIndex].actions.enumerated().map {
             ($1.name, ActionViewModel(machine: machine, stateIndex: stateIndex, actionIndex: $0))
         })
+        self.actionViewModels.values.forEach {
+            $0.delegate = self
+        }
     }
     
     func viewModel(forAction action: String) -> ActionViewModel {
@@ -108,8 +111,37 @@ final class ActionsViewModel: ObservableObject, Identifiable {
             fatalError("Unable to fetch action \(action).")
         }
         let viewModel = ActionViewModel(machine: machineRef, stateIndex: stateIndex, actionIndex: actionIndex)
+        viewModel.delegate = self
         actionViewModels[action] = viewModel
         return viewModel
+    }
+    
+    func expandedDidChange(old: Bool, new: Bool) {
+        self.objectWillChange.send()
+    }
+    
+}
+
+extension ActionsViewModel {
+    
+    var expanded: [String: Bool] {
+        Dictionary(uniqueKeysWithValues: actions.map {
+            ($0, self.viewModel(forAction: $0).expanded)
+        })
+    }
+    
+    func getActionHeight(frame: CGSize, action: String) -> CGFloat {
+        let minHeight: CGFloat = 100.0
+        let expanded = expanded
+        let expandedActions = expanded.values.filter { $0 }.count
+        let collapsedActions = expanded.values.filter { !$0 }.count
+        let collapsedHeight: CGFloat = 15.0
+        guard let isExpanded = expanded[action], isExpanded else {
+            print("\(action) height: \(collapsedHeight)")
+            return collapsedHeight
+        }
+        let padding = 10.0 + collapsedHeight * CGFloat(collapsedActions) + 5.0 * CGFloat(expandedActions)
+        return max((frame.height - padding) / CGFloat(max(expandedActions, 1)), minHeight)
     }
     
 }
