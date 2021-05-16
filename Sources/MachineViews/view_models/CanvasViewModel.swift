@@ -277,17 +277,8 @@ final class CanvasViewModel: ObservableObject {
 //            targetTransitions[$0] = nil
 //        }
         // Remove transitions with target name == state
-        stateViewModels.keys.forEach { stateName in
-            guard let state = machineRef.value.states.first(where: { $0.name == stateName }) else {
-                return
-            }
-            let transitionIndexes = IndexSet(state.transitions.indices.filter {
-                stateNameSet.contains(state.transitions[$0].target)
-            })
-            if transitionIndexes.isEmpty {
-                return
-            }
-            deleteTransitions(transitionIndexes, attachedTo: stateName)
+        stateNames.forEach {
+            deleteTransitions(with: $0)
         }
         // Delete States from machine
         let result = machineRef.value.delete(states: states)
