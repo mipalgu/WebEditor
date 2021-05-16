@@ -19,8 +19,6 @@ public struct CanvasView: View {
     
     @ObservedObject var viewModel: CanvasViewModel
     
-    @Binding var focus: Focus
-    
     @State var saving: Bool = false
     
     let textWidth: CGFloat = 50.0
@@ -36,19 +34,15 @@ public struct CanvasView: View {
 //        self.viewModel = MachineViewModel(machine: machine, plist: plist)
 //    }
     
-    init(viewModel: CanvasViewModel, focus: Binding<Focus>) {
+    init(viewModel: CanvasViewModel) {
         self.viewModel = viewModel
-        self._focus = focus
     }
     
     public var body: some View {
         Group {
             if let editState = viewModel.edittingState {
                 StateEditView(viewModel: viewModel.viewModel(forState: editState))
-                    .onTapGesture(count: 2) {
-                        viewModel.edittingState = nil
-                        focus = .machine
-                    }
+                    .gesture(viewModel.clearEdittingStateGesture)
                     .contextMenu {
                         Button("Go Back", action: { self.viewModel.edittingState = nil }).keyboardShortcut(.escape)
                     }
@@ -57,10 +51,7 @@ public struct CanvasView: View {
                     ZStack {
                         GridView()
                             .frame(width: geometry.size.width, height: geometry.size.height)
-                            .onTapGesture {
-                                viewModel.selectedObjects = []
-                                focus = .machine
-                            }
+                            .gesture(viewModel.clearSelectionGesture)
                             .gesture(viewModel.selectionBoxGesture)
                             .gesture(viewModel.dragCanvasGesture(bounds: geometry.size))
                             .contextMenu {
@@ -74,43 +65,32 @@ public struct CanvasView: View {
                         if let curve = viewModel.creatingCurve {
                             ArrowView(curve: .constant(curve), strokeNumber: 0, colour: config.highlightColour)
                         }
-//                        ForEach(viewModel.unattachedTransitionsAsRows, id: \.self) { row in
-//                            ArrowView(curve: .constant(row.data.curve), strokeNumber: 0, colour: config.errorColour)
-//                        }
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
-//                            if !viewModel.viewModel(forState: stateName).tracker.isText {
-                                ForEach(viewModel.transitions(forState: stateName), id: \.self) { transitionIndex in
-                                    TransitionView(
-                                        viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName).tracker,
-                                        focused: viewModel.selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)),
-                                        strokeView: { TransitionStrokeView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName), curve: $0) },
-                                        label: { TransitionLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) },
-                                        editLabel: { TransitionEditLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) }
-                                    )
-                                    .clipped()
-                                    .gesture(TapGesture().onEnded {
-                                        viewModel.selectedObjects.insert(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex))
-                                        if viewModel.selectedObjects.count > 1 {
-                                            focus = .machine
-                                        } else {
-                                            focus = .transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
-                                        }
-                                    }.modifiers(.shift))
-                                    .onTapGesture {
-                                        focus = .transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
-                                        viewModel.selectedObjects = [.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)]
-                                    }
-                                    .contextMenu {
-                                        Button("Straighten", action: {
-                                            viewModel.straighten(stateName: stateName, transitionIndex: transitionIndex)
-                                        })
+                            ForEach(viewModel.transitions(forState: stateName), id: \.self) { transitionIndex in
+                                TransitionView(
+                                    viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName).tracker,
+                                    focused: viewModel.selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)),
+                                    strokeView: { TransitionStrokeView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName), curve: $0) },
+                                    label: { TransitionLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) },
+                                    editLabel: { TransitionEditLabelView(viewModel: viewModel.viewModel(forTransition: transitionIndex, attachedToState: stateName)) }
+                                )
+                                .clipped()
+                                .gesture(viewModel.addTransitionToSelectionGesture(transition: transitionIndex, state: stateName))
+                                .gesture(viewModel.makeTransitionSelectionGesture(transition: transitionIndex, state: stateName))
+                                .contextMenu {
+                                    Button("Straighten", action: {
+                                        viewModel.straighten(stateName: stateName, transitionIndex: transitionIndex)
+                                    })
+                                    if viewModel.selectedObjects.contains(.transition(stateIndex: viewModel.viewModel(forState: stateName).index, transitionIndex: transitionIndex)) {
+                                        Button("Delete Selected", action: viewModel.deleteSelected)
+                                    } else {
                                         Button("Delete", action: {
                                             viewModel.deleteTransition(transitionIndex, attachedTo: stateName)
                                         }).keyboardShortcut(.delete)
                                     }
                                 }
                             }
-//                        }
+                        }
                         ForEach(viewModel.stateNames, id: \.self) { stateName in
                             CanvasObjectView(
                                 viewModel: viewModel.viewModel(forState: stateName).tracker,
@@ -123,28 +103,20 @@ public struct CanvasView: View {
                                     focused: viewModel.selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
                                 )
                             }
-                            .gesture(
-                                TapGesture().onEnded {
-                                    viewModel.selectedObjects.insert(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
-                                    if viewModel.selectedObjects.count > 1 {
-                                        focus = .machine
-                                    } else {
-                                        focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index)
-                                    }
-                                }.modifiers(.shift)
-                            )
-                            .onTapGesture(count: 2) { self.viewModel.edittingState = stateName; focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index) }
-                            .onTapGesture {
-                                viewModel.selectedObjects = [.state(stateIndex: viewModel.viewModel(forState: stateName).index)]
-                                focus = .state(stateIndex: viewModel.viewModel(forState: stateName).index)
-                            }
+                            .gesture(viewModel.addStateToSelectionGesture(state: stateName))
+                            .gesture(viewModel.setEdittingStateGesture(state: stateName))
+                            .gesture(viewModel.makeStateSelectionGesture(state: stateName))
                             .gesture(viewModel.createTransitionGesture)
                             .gesture(viewModel.dragStateGesture(stateName: stateName, bounds: geometry.size))
                             .contextMenu {
-                                Button("Delete", action: {
-                                    viewModel.deleteState(stateName)
-                                    viewModel.selectedObjects.remove(.state(stateIndex: viewModel.viewModel(forState: stateName).index))
-                                })
+                                if viewModel.selectedObjects.contains(.state(stateIndex: viewModel.viewModel(forState: stateName).index)) {
+                                    Button("Straighten Transitions", action: viewModel.straightenSelected).disabled(!viewModel.hasTransitions)
+                                    Button("Delete Selected", action: viewModel.deleteSelected)
+                                } else {
+                                    Button("Delete", action: {
+                                        viewModel.deleteState(stateName)
+                                    })
+                                }
                             }
                         }
                         if let rect = viewModel.selectedBox {
@@ -161,17 +133,7 @@ public struct CanvasView: View {
                     }
                 }
             }
-        }/*.focusedValue(\.saving, $saving).onChange(of: saving) { _ in
-            guard let _ = try? viewModel.machine.save() else {
-                print(viewModel.machine.errorBag.allErrors)
-                return
-            }
-            let plist = viewModel.plist
-            guard let _ = try? plist.write(toFile: viewModel.machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
-                print("Failed to write plist")
-                return
-            }
-        }*/
+        }
     }
     
 }

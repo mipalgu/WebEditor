@@ -41,6 +41,7 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         }
         return CanvasViewModel(
             machineRef: machineRef,
+            focusRef: focusRef,
             layout: layout,
             notifier: notifier
         )

@@ -16,7 +16,7 @@ struct MachineView: View {
 
     var body: some View {
         HStack {
-            CanvasView(viewModel: viewModel.canvasViewModel, focus: $viewModel.focus)
+            CanvasView(viewModel: viewModel.canvasViewModel)
             AttributesPaneView(viewModel: viewModel.attributesPaneViewModel)
         }
     }

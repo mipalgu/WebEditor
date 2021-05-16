@@ -67,6 +67,8 @@ final class CanvasViewModel: ObservableObject {
     
     let machineRef: Ref<Machine>
     
+    let focusRef: Ref<Focus>
+    
     weak var notifier: GlobalChangeNotifier?
     
     private var stateViewModels: [StateName: StateViewModel]
@@ -99,6 +101,15 @@ final class CanvasViewModel: ObservableObject {
         }
     }
     
+    var focus: Focus {
+        get {
+            focusRef.value
+        } set {
+            focusRef.value = newValue
+            objectWillChange.send()
+        }
+    }
+    
     var layout: Layout {
         let states = Dictionary<StateName, StateLayout>(uniqueKeysWithValues: machineRef.value.states.map { state in
             let transitions = state.transitions.indices.map {
@@ -122,8 +133,9 @@ final class CanvasViewModel: ObservableObject {
         machineRef.value.states.lazy.map(\.name).sorted()
     }
     
-    init(machineRef: Ref<Machine>, layout: Layout? = nil, notifier: GlobalChangeNotifier? = nil) {
+    init(machineRef: Ref<Machine>, focusRef: Ref<Focus>, layout: Layout? = nil, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machineRef
+        self.focusRef = focusRef
         self.notifier = notifier
         let stateViewModels: [StateName: StateViewModel] = Dictionary(uniqueKeysWithValues: layout?.states.compactMap { (stateName, stateLayout) in
             guard let index = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
@@ -282,6 +294,7 @@ extension CanvasViewModel {
                     let viewModel = self.viewModel(forState: $0.name)
                     viewModel.removeTransitionViewModels(targeting: stateName)
                 }
+                selectedObjects = []
             }
             if notify {
                 sync()
@@ -480,6 +493,20 @@ extension CanvasViewModel: StateViewModelDelegate {
 
 extension CanvasViewModel {
     
+    var clearEdittingStateGesture: some Gesture {
+        TapGesture(count: 2).onEnded {
+            self.edittingState = nil
+            self.focus = .machine
+        }
+    }
+    
+    var clearSelectionGesture: some Gesture {
+        TapGesture().onEnded {
+            self.selectedObjects = []
+            self.focus = .machine
+        }
+    }
+    
     var createTransitionGesture: some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
             .onChanged {
@@ -549,6 +576,28 @@ extension CanvasViewModel {
             }
     }
     
+    func addStateToSelectionGesture(state stateName: StateName) -> some Gesture {
+        TapGesture().onEnded {
+            self.selectedObjects.insert(.state(stateIndex: self.viewModel(forState: stateName).index))
+            if self.selectedObjects.count > 1 {
+                self.focus = .machine
+            } else {
+                self.focus = .state(stateIndex: self.viewModel(forState: stateName).index)
+            }
+        }.modifiers(.shift)
+    }
+    
+    func addTransitionToSelectionGesture(transition transitionIndex: Int, state stateName: StateName) -> some Gesture {
+        TapGesture().onEnded {
+            self.selectedObjects.insert(.transition(stateIndex: self.viewModel(forState: stateName).index, transitionIndex: transitionIndex))
+            if self.selectedObjects.count > 1 {
+                self.focus = .machine
+            } else {
+                self.focus = .transition(stateIndex: self.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
+            }
+        }.modifiers(.shift)
+    }
+    
     func dragCanvasGesture(bounds: CGSize) -> some Gesture {
         var transaction: CanvasDragTransaction! = nil
         return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
@@ -581,6 +630,27 @@ extension CanvasViewModel {
                 self.stateDragTransaction.finish(by: $0, bounds: bounds)
                 self.stateDragTransaction = nil
             }
+    }
+    
+    func makeStateSelectionGesture(state stateName: StateName) -> some Gesture {
+        TapGesture().onEnded {
+            self.selectedObjects = [.state(stateIndex: self.viewModel(forState: stateName).index)]
+            self.focus = .state(stateIndex: self.viewModel(forState: stateName).index)
+        }
+    }
+    
+    func makeTransitionSelectionGesture(transition transitionIndex: Int, state stateName: StateName) -> some Gesture {
+        TapGesture().onEnded {
+            self.focus = .transition(stateIndex: self.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
+            self.selectedObjects = [.transition(stateIndex: self.viewModel(forState: stateName).index, transitionIndex: transitionIndex)]
+        }
+    }
+    
+    func setEdittingStateGesture(state stateName: StateName) -> some Gesture {
+        TapGesture(count: 2).onEnded {
+            self.edittingState = stateName
+            self.focus = .state(stateIndex: self.viewModel(forState: stateName).index)
+        }
     }
     
 }
