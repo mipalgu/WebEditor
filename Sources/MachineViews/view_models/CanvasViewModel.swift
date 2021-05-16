@@ -285,19 +285,8 @@ final class CanvasViewModel: ObservableObject {
     
     func deleteTransition(_ transitionIndex: Int, attachedTo stateName: StateName) {
         let viewType = viewType(stateName: stateName, transitionIndex: transitionIndex)
-        if selectedObjects.contains(viewType) {
-            selectedObjects.remove(viewType)
-        }
+        selectedObjects.remove(viewType)
         let viewModel = viewModel(forState: stateName)
-        let transitionTracker = viewModel.viewModel(forTransition: transitionIndex).tracker
-        targetTransitions.keys.forEach { targetName in
-            guard let _ = targetTransitions[targetName] else {
-                return
-            }
-            if targetTransitions[targetName]!.contains(transitionTracker) {
-                targetTransitions[targetName]!.removeAll(transitionTracker)
-            }
-        }
         viewModel.deleteTransition(transitionIndex)
         objectWillChange.send()
     }
@@ -306,24 +295,10 @@ final class CanvasViewModel: ObservableObject {
         guard let stateIndex = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
             return
         }
-        let viewTypes = transitions.map { ViewType.transition(stateIndex: stateIndex, transitionIndex: $0) }
-        viewTypes.forEach {
-            if selectedObjects.contains($0) {
-                selectedObjects.remove($0)
-            }
+        transitions.map { ViewType.transition(stateIndex: stateIndex, transitionIndex: $0) }.forEach {
+            selectedObjects.remove($0)
         }
         let viewModel = viewModel(forState: stateName)
-        let transitionTrackers = transitions.map { viewModel.viewModel(forTransition: $0).tracker }
-        targetTransitions.keys.forEach { targetName in
-            guard let _ = targetTransitions[targetName] else {
-                return
-            }
-            transitionTrackers.forEach {
-                if targetTransitions[targetName]!.contains($0) {
-                    targetTransitions[targetName]!.removeAll($0)
-                }
-            }
-        }
         viewModel.deleteTransitions(in: transitions)
         self.objectWillChange.send()
     }
