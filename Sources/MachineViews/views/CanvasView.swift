@@ -70,6 +70,9 @@ public struct CanvasView: View {
                                     if !viewModel.selectedObjects.isEmpty {
                                         Button("Delete Selected", action: { viewModel.deleteSelected() })
                                     }
+                                    if viewModel.hasTransitions {
+                                        Button("Straighten Transitions", action: viewModel.straightenSelected)
+                                    }
                                     /*Button("Save", action: {
                                         guard let _ = try? viewModel.machine.save() else {
                                             print(viewModel.machine.errorBag.allErrors)

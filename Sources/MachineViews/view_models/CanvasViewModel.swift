@@ -84,6 +84,10 @@ final class CanvasViewModel: ObservableObject {
     
     var canvasSize: CGSize = .zero
     
+    var hasTransitions: Bool {
+        selectedObjects.first(where: \.isTransition) != nil
+    }
+    
     var machine: Machine {
         get {
             machineRef.value
@@ -360,6 +364,13 @@ final class CanvasViewModel: ObservableObject {
         let stateViewModel = viewModel(forState: source.name)
         stateViewModel.viewModel(forTransition: source.transitions.count).tracker.curve = shape
         self.objectWillChange.send()
+    }
+    
+    func straightenSelected() {
+        selectedObjects.lazy.filter(\.isTransition).forEach {
+            let name = machine.states[$0.stateIndex].name
+            straighten(stateName: name, transitionIndex: $0.transitionIndex)
+        }
     }
     
     func transitions(forState state: StateName) -> Range<Int> {

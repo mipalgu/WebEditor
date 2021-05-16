@@ -16,6 +16,15 @@ public enum ViewType: Hashable {
         }
     }
     
+    public var transitionIndex: Int {
+        switch self {
+        case .transition(_, let index):
+            return index
+        default:
+            fatalError("Trying to fetch transition index on a state!")
+        }
+    }
+    
     public var isState: Bool {
         switch self {
         case .state:
