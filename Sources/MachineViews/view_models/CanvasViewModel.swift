@@ -271,11 +271,6 @@ final class CanvasViewModel: ObservableObject {
             }
             deleteTransitions(IndexSet(state.transitions.indices), attachedTo: name)
         }
-        // Remove viewModels
-//        stateNames.forEach {
-//            stateViewModels[$0] = nil
-//            targetTransitions[$0] = nil
-//        }
         // Remove transitions with target name == state
         stateNames.forEach {
             deleteTransitions(with: $0)
