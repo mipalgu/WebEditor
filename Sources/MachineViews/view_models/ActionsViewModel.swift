@@ -137,7 +137,6 @@ extension ActionsViewModel {
         let collapsedActions = expanded.values.filter { !$0 }.count
         let collapsedHeight: CGFloat = 15.0
         guard let isExpanded = expanded[action], isExpanded else {
-            print("\(action) height: \(collapsedHeight)")
             return collapsedHeight
         }
         let padding = 10.0 + collapsedHeight * CGFloat(collapsedActions) + 5.0 * CGFloat(expandedActions)
