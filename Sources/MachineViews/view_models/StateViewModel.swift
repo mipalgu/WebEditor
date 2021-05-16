@@ -207,7 +207,7 @@ final class StateViewModel: ObservableObject, Identifiable {
                     transitionViewModels[index] = nil
                     delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
                 }
-                syncTransitions(afterDeleting: indexSet, inIndices: transitions.indices)
+                syncTransitions(afterDeleting: indexSet, countBeforeDeletion: transitions.count)
             }
             
         }
