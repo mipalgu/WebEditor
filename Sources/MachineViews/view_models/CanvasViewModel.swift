@@ -73,6 +73,8 @@ final class CanvasViewModel: ObservableObject {
     
     private var targetTransitions: [StateName: SortedCollection<TransitionTracker>]
     
+    private var stateDragTransaction: StateDragTransaction! = nil
+    
     let coordinateSpace = "CANVAS_VIEW"
     
     var creatingCurve: Curve? = nil
@@ -157,12 +159,54 @@ final class CanvasViewModel: ObservableObject {
         }
     }
     
-    private func sync() {
-        machineRef.value.states.enumerated().forEach {
-            let viewModel = viewModel(forState: $1.name)
-            viewModel.index = $0
-        }
+    func transitions(forState state: StateName) -> Range<Int> {
+        return viewModel(forState: state).transitions
     }
+    
+    func targetTransitionTrackers(forState state: StateName) -> [TransitionTracker] {
+        return targetTransitions[state].map { Array($0) } ?? []
+    }
+    
+    func viewModel(forState state: StateName) -> StateViewModel {
+        if let viewModel = stateViewModels[state] {
+            return viewModel
+        }
+        guard let index = machineRef.value.states.firstIndex(where: { $0.name == state }) else {
+            fatalError("Unable to fetch state named \(state).")
+        }
+        let viewModel = StateViewModel(machine: machineRef, index: index)
+        viewModel.delegate = self
+        stateViewModels[state] = viewModel
+        return viewModel
+    }
+    
+    func viewModel(forTransition transitionIndex: Int, attachedToState stateName: StateName) -> TransitionViewModel {
+        let stateViewModel = viewModel(forState: stateName)
+        return stateViewModel.viewModel(forTransition: transitionIndex)
+    }
+
+    
+}
+
+// MARK: - View Operations
+
+extension CanvasViewModel {
+    
+    func straighten(stateName: StateName, transitionIndex: Int) {
+        guard let state = machine.states.first(where: { $0.name == stateName }) else {
+            return
+        }
+        let sourceViewModel = viewModel(forState: stateName)
+        let targetTracker = viewModel(forState: state.transitions[transitionIndex].target).tracker
+        let newTracker = TransitionTracker(source: sourceViewModel.tracker, target: targetTracker)
+        sourceViewModel.viewModel(forTransition: transitionIndex).tracker.curve = newTracker.curve
+    }
+    
+}
+
+// MARK: - Selection Management
+
+extension CanvasViewModel {
     
     func deleteSelected() {
         let sorted = selectedObjects.sorted { (lhs, _) in
@@ -186,7 +230,32 @@ final class CanvasViewModel: ObservableObject {
         }
         deleteStates(states)
         selectedObjects = []
+        objectWillChange.send()
     }
+    
+    func selectAll() {
+        machine.states.indices.forEach { stateIndex in
+            let stateViewType = ViewType.state(stateIndex: stateIndex)
+            selectedObjects.insert(stateViewType)
+            machine.states[stateIndex].transitions.indices.forEach {
+                let transitionViewType = ViewType.transition(stateIndex: stateIndex, transitionIndex: $0)
+                selectedObjects.insert(transitionViewType)
+            }
+        }
+    }
+    
+    func straightenSelected() {
+        selectedObjects.lazy.filter(\.isTransition).forEach {
+            let name = machine.states[$0.stateIndex].name
+            straighten(stateName: name, transitionIndex: $0.transitionIndex)
+        }
+    }
+    
+}
+
+// MARK: - CRUD Operations
+
+extension CanvasViewModel {
     
     func deleteState(_ stateName: StateName) {
         guard let stateIndex = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
@@ -225,18 +294,7 @@ final class CanvasViewModel: ObservableObject {
         }
     }
     
-//    private func syncTransitions(targeting targetStateName: StateName, viewModels: [TransitonViewModel], countBeforeDeletion count: Int) {
-//        stateViewModels.keys.forEach { stateName in
-//            let viewModel = viewModel(forState: stateName)
-//            viewModel.viewModels(targeting: targetStateName)
-//            let transitionIndexes = IndexSet(state.transitions.indices.filter {
-//                targetStateName == state.transitions[$0].target
-//            })
-//            deleteTransitions(transitionIndexes, attachedTo: stateName)
-//        }
-//    }
-    
-    func deleteStates(_ states: IndexSet) {
+    private func deleteStates(_ states: IndexSet) {
         // Delete States from machine
         let stateIndices = machineRef.value.states.indices
         let stateNames = Dictionary(uniqueKeysWithValues: stateIndices.map {
@@ -246,22 +304,18 @@ final class CanvasViewModel: ObservableObject {
         let stateCounts = Dictionary(uniqueKeysWithValues: machineRef.value.states.map {
             ($0.name, $0.transitions.count)
         })
-        var deletingTransitions: [StateName: IndexSet] = Dictionary(uniqueKeysWithValues: states.map {
-            (machine.states[$0].name, IndexSet(machine.states[$0].transitions.indices))
-        })
-        let deletingStateNames = Set(states.map { machine.states[$0].name })
-        machine.states.forEach { s in
-            s.transitions.indices.forEach { transitionIndex in
-                if !deletingStateNames.contains(s.transitions[transitionIndex].target) {
-                    return
-                }
-                guard let _ = deletingTransitions[s.name] else {
-                    deletingTransitions[s.name] = IndexSet(integer: transitionIndex)
-                    return
-                }
-                deletingTransitions[s.name]!.insert(transitionIndex)
+        let deletingTransitions: [StateName: IndexSet] = Dictionary(uniqueKeysWithValues: machineRef.value.states.compactMap { state in
+            let viewModel = self.viewModel(forState: state.name)
+            if states.contains(viewModel.index) {
+                return nil
             }
-        }
+            let transitions: [Int] = viewModel.transitions.compactMap {
+                let transitionViewModel = self.viewModel(forTransition: $0, attachedToState: state.name)
+                let targetViewModel = self.viewModel(forState: transitionViewModel.target)
+                return states.contains(targetViewModel.index) ? transitionViewModel.transitionIndex : nil
+            }
+            return transitions.isEmpty ? nil : (state.name, IndexSet(transitions))
+        })
         let result = machineRef.value.delete(states: states)
         defer { objectWillChange.send() }
         switch result {
@@ -272,14 +326,11 @@ final class CanvasViewModel: ObservableObject {
             defer {
                 if notify { notifier?.send() }
             }
-            viewModels.values.forEach {
-                guard
-                    let deletedTransitions = deletingTransitions[$0.name],
-                    let countBeforeDeletion = stateCounts[$0.name]
-                else {
+            deletingTransitions.forEach {
+                guard let count = stateCounts[$0] else {
                     return
                 }
-                $0.syncTransitions(afterDeleting: deletedTransitions, countBeforeDeletion: countBeforeDeletion)
+                self.viewModel(forState: $0).removeTransitionViewModels(atOffsets: $1, countBeforeDeletion: count)
             }
             var indexes = Array(stateIndices)
             indexes.remove(atOffsets: states) { (index, nextIndex, previouslyDeleted) in
@@ -328,48 +379,11 @@ final class CanvasViewModel: ObservableObject {
         self.objectWillChange.send()
     }
     
-    func selectAll() {
-        machine.states.indices.forEach { stateIndex in
-            let stateViewType = ViewType.state(stateIndex: stateIndex)
-            selectedObjects.insert(stateViewType)
-            machine.states[stateIndex].transitions.indices.forEach {
-                let transitionViewType = ViewType.transition(stateIndex: stateIndex, transitionIndex: $0)
-                selectedObjects.insert(transitionViewType)
-            }
+    private func sync() {
+        machineRef.value.states.enumerated().forEach {
+            let viewModel = viewModel(forState: $1.name)
+            viewModel.index = $0
         }
-    }
-    
-    func straightenSelected() {
-        selectedObjects.lazy.filter(\.isTransition).forEach {
-            let name = machine.states[$0.stateIndex].name
-            straighten(stateName: name, transitionIndex: $0.transitionIndex)
-        }
-    }
-    
-    func transitions(forState state: StateName) -> Range<Int> {
-        return viewModel(forState: state).transitions
-    }
-    
-    func targetTransitionTrackers(forState state: StateName) -> [TransitionTracker] {
-        return targetTransitions[state].map { Array($0) } ?? []
-    }
-    
-    func viewModel(forState state: StateName) -> StateViewModel {
-        if let viewModel = stateViewModels[state] {
-            return viewModel
-        }
-        guard let index = machineRef.value.states.firstIndex(where: { $0.name == state }) else {
-            fatalError("Unable to fetch state named \(state).")
-        }
-        let viewModel = StateViewModel(machine: machineRef, index: index)
-        viewModel.delegate = self
-        stateViewModels[state] = viewModel
-        return viewModel
-    }
-    
-    func viewModel(forTransition transitionIndex: Int, attachedToState stateName: StateName) -> TransitionViewModel {
-        let stateViewModel = viewModel(forState: stateName)
-        return stateViewModel.viewModel(forTransition: transitionIndex)
     }
     
     private func viewType(stateName: StateName, transitionIndex: Int?) -> ViewType {
@@ -381,35 +395,6 @@ final class CanvasViewModel: ObservableObject {
         }
         return ViewType.transition(stateIndex: stateIndex, transitionIndex: index)
     }
-    
-    private var stateDragTransaction: StateDragTransaction! = nil
-    
-    func dragStateGesture(stateName: StateName, bounds: CGSize) -> _EndedGesture<_ChangedGesture<DragGesture>> {
-        return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
-            .onChanged {
-                if self.stateDragTransaction == nil {
-                    self.stateDragTransaction = StateDragTransaction(viewModel: self, stateName: stateName)
-                }
-                self.stateDragTransaction.drag(by: $0, bounds: bounds)
-            }.onEnded {
-                if self.stateDragTransaction == nil {
-                    self.stateDragTransaction = StateDragTransaction(viewModel: self, stateName: stateName)
-                }
-                self.stateDragTransaction.finish(by: $0, bounds: bounds)
-                self.stateDragTransaction = nil
-            }
-    }
-    
-    func straighten(stateName: StateName, transitionIndex: Int) {
-        guard let state = machine.states.first(where: { $0.name == stateName }) else {
-            return
-        }
-        let sourceViewModel = viewModel(forState: stateName)
-        let targetTracker = viewModel(forState: state.transitions[transitionIndex].target).tracker
-        let newTracker = TransitionTracker(source: sourceViewModel.tracker, target: targetTracker)
-        sourceViewModel.viewModel(forTransition: transitionIndex).tracker.curve = newTracker.curve
-    }
-
     
 }
 
@@ -516,24 +501,6 @@ extension CanvasViewModel {
             .modifiers(.command)
     }
     
-    func dragCanvasGesture(bounds: CGSize) -> some Gesture {
-        var transaction: CanvasDragTransaction! = nil
-        return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
-            .onChanged {
-                if transaction == nil {
-                    transaction = CanvasDragTransaction(viewModel: self)
-                }
-                transaction.move(by: $0.translation, bounds: bounds)
-            }.onEnded {
-                if transaction == nil {
-                    transaction = CanvasDragTransaction(viewModel: self)
-                }
-                transaction.move(by: $0.translation, bounds: bounds)
-                transaction.finish()
-                transaction = nil
-            }
-    }
-    
     var selectionBoxGesture: some Gesture {
         return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
             .modifiers(.shift)
@@ -578,6 +545,38 @@ extension CanvasViewModel {
             }
     }
     
+    func dragCanvasGesture(bounds: CGSize) -> some Gesture {
+        var transaction: CanvasDragTransaction! = nil
+        return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+            .onChanged {
+                if transaction == nil {
+                    transaction = CanvasDragTransaction(viewModel: self)
+                }
+                transaction.move(by: $0.translation, bounds: bounds)
+            }.onEnded {
+                if transaction == nil {
+                    transaction = CanvasDragTransaction(viewModel: self)
+                }
+                transaction.move(by: $0.translation, bounds: bounds)
+                transaction.finish()
+                transaction = nil
+            }
+    }
     
+    func dragStateGesture(stateName: StateName, bounds: CGSize) -> _EndedGesture<_ChangedGesture<DragGesture>> {
+        return DragGesture(minimumDistance: 0, coordinateSpace: .named(coordinateSpace))
+            .onChanged {
+                if self.stateDragTransaction == nil {
+                    self.stateDragTransaction = StateDragTransaction(viewModel: self, stateName: stateName)
+                }
+                self.stateDragTransaction.drag(by: $0, bounds: bounds)
+            }.onEnded {
+                if self.stateDragTransaction == nil {
+                    self.stateDragTransaction = StateDragTransaction(viewModel: self, stateName: stateName)
+                }
+                self.stateDragTransaction.finish(by: $0, bounds: bounds)
+                self.stateDragTransaction = nil
+            }
+    }
     
 }

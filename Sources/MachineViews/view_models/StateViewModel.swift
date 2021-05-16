@@ -168,6 +168,13 @@ final class StateViewModel: ObservableObject, Identifiable {
         self.notifier = notifier
     }
     
+    func removeTransitionViewModels(atOffsets offsets: IndexSet, countBeforeDeletion count: Int) {
+        offsets.forEach {
+            transitionViewModels.removeValue(forKey: $0)
+        }
+        syncTransitions(afterDeleting: offsets, countBeforeDeletion: count)
+    }
+    
     func syncTransitions(afterDeleting indexSet: IndexSet, countBeforeDeletion count: Int) {
         var dict: [Int: TransitionViewModel] = [:]
         dict.reserveCapacity(count)
@@ -200,16 +207,15 @@ final class StateViewModel: ObservableObject, Identifiable {
                 if notify {
                     notifier?.send()
                 }
-                sortedIndexSet.forEach {
-                    guard let transitionViewModel = viewModels[$0], let targetStateName = targetStateNames[$0] else {
-                        return
-                    }
-                    transitionViewModels[index] = nil
-                    delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
-                }
-                syncTransitions(afterDeleting: indexSet, countBeforeDeletion: transitions.count)
             }
-            
+            sortedIndexSet.forEach {
+                guard let transitionViewModel = viewModels[$0], let targetStateName = targetStateNames[$0] else {
+                    return
+                }
+                transitionViewModels[index] = nil
+                delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
+            }
+            syncTransitions(afterDeleting: indexSet, countBeforeDeletion: transitions.count)
         }
     }
     
