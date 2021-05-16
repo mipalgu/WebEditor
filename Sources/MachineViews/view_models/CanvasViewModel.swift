@@ -160,6 +160,43 @@ final class CanvasViewModel: ObservableObject {
         }
     }
     
+    func deleteSelected() {
+        var states: IndexSet = []
+        var transitions: [StateName: IndexSet] = [:]
+        selectedObjects.sorted(by: { (lhs, _) in
+            switch lhs {
+            case .transition:
+                return true
+            default:
+                return false
+            }
+        }).forEach {
+            switch $0 {
+            case .state(let stateIndex):
+                states.insert(stateIndex)
+                transitions[machine.states[stateIndex].name] = nil
+            case .transition(let stateIndex, let transitionIndex):
+                let name = machine.states[stateIndex].name
+                guard let _ = transitions[name] else {
+                    transitions[name] = IndexSet(integer: transitionIndex)
+                    return
+                }
+                transitions[name]!.insert(transitionIndex)
+            }
+        }
+        transitions.keys.forEach { stateName in
+            guard let indexSet = transitions[stateName] else {
+                return
+            }
+            let viewModel = viewModel(forState: stateName)
+            viewModel.deleteTransitions(in: indexSet)
+        }
+        let result = machineRef.value.delete(states: states)
+        guard let _ = try? result.get() else {
+            return
+        }
+    }
+    
     func deleteState(_ stateName: StateName) {
         let viewModel = viewModel(forState: stateName)
         let states = machineRef.value.states

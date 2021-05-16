@@ -66,10 +66,10 @@ public struct CanvasView: View {
                             .contextMenu {
                                 VStack {
                                     Button("New State", action: { viewModel.newState() })
-                                    /*Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))
-                                    if !self.selectedObjects.isEmpty {
-                                        Button("Delete Selected", action: { viewModel.deleteSelected(self) })
-                                    }*/
+                                    /*Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))*/
+                                    if !viewModel.selectedObjects.isEmpty {
+                                        Button("Delete Selected", action: { viewModel.deleteSelected() })
+                                    }
                                     /*Button("Save", action: {
                                         guard let _ = try? viewModel.machine.save() else {
                                             print(viewModel.machine.errorBag.allErrors)
