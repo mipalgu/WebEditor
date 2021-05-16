@@ -366,6 +366,22 @@ final class CanvasViewModel: ObservableObject {
         self.objectWillChange.send()
     }
     
+    func selectAll() {
+        machine.states.indices.forEach { stateIndex in
+            let stateViewType = ViewType.state(stateIndex: stateIndex)
+            if !selectedObjects.contains(stateViewType) {
+                selectedObjects.insert(stateViewType)
+            }
+            machine.states[stateIndex].transitions.indices.forEach {
+                let transitionViewType = ViewType.transition(stateIndex: stateIndex, transitionIndex: $0)
+                if selectedObjects.contains(transitionViewType) {
+                    return
+                }
+                selectedObjects.insert(transitionViewType)
+            }
+        }
+    }
+    
     func straightenSelected() {
         selectedObjects.lazy.filter(\.isTransition).forEach {
             let name = machine.states[$0.stateIndex].name

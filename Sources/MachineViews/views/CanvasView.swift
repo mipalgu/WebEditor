@@ -65,21 +65,10 @@ public struct CanvasView: View {
                             .gesture(viewModel.dragCanvasGesture(bounds: geometry.size))
                             .contextMenu {
                                 VStack {
-                                    Button("New State", action: { viewModel.newState() })
-                                    /*Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))*/
+                                    Button("New State", action: viewModel.newState)
+                                    Button("Select All", action: viewModel.selectAll).keyboardShortcut(.init("a"))
                                     Button("Straighten Transitions", action: viewModel.straightenSelected).disabled(!viewModel.hasTransitions)
                                     Button("Delete Selected", action: viewModel.deleteSelected).disabled(viewModel.selectedObjects.isEmpty)
-                                    /*Button("Save", action: {
-                                        guard let _ = try? viewModel.machine.save() else {
-                                            print(viewModel.machine.errorBag.allErrors)
-                                            return
-                                        }
-                                        let plist = viewModel.plist
-                                        guard let _ = try? plist.write(toFile: viewModel.machine.filePath.appendingPathComponent("Layout.plist").path, atomically: true, encoding: .utf8) else {
-                                            print("Failed to write plist")
-                                            return
-                                        }
-                                    })*/
                                 }
                             }
                         if let curve = viewModel.creatingCurve {
