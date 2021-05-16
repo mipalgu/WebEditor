@@ -67,12 +67,8 @@ public struct CanvasView: View {
                                 VStack {
                                     Button("New State", action: { viewModel.newState() })
                                     /*Button("Select All", action: { viewModel.selectAll(self) }).keyboardShortcut(.init("a"))*/
-                                    if !viewModel.selectedObjects.isEmpty {
-                                        Button("Delete Selected", action: { viewModel.deleteSelected() })
-                                    }
-                                    if viewModel.hasTransitions {
-                                        Button("Straighten Transitions", action: viewModel.straightenSelected)
-                                    }
+                                    Button("Straighten Transitions", action: viewModel.straightenSelected).disabled(!viewModel.hasTransitions)
+                                    Button("Delete Selected", action: viewModel.deleteSelected).disabled(viewModel.selectedObjects.isEmpty)
                                     /*Button("Save", action: {
                                         guard let _ = try? viewModel.machine.save() else {
                                             print(viewModel.machine.errorBag.allErrors)
