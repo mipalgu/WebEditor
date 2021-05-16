@@ -200,7 +200,7 @@ final class StateViewModel: ObservableObject, Identifiable {
                 }
                 transitionViewModels[index] = nil
                 delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
-                (index..<lastIndex).forEach {
+                ((index + 1)..<lastIndex).forEach {
                     let viewModel = viewModel(forTransition: $0)
                     viewModel.transitionIndex -= decrement
                     dict[viewModel.transitionIndex] = viewModel
