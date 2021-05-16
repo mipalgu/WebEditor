@@ -188,7 +188,7 @@ final class CanvasViewModel: ObservableObject {
     
 }
 
-// MARK: - View Operations
+// MARK: - Transition Operations
 
 extension CanvasViewModel {
     
@@ -261,7 +261,6 @@ extension CanvasViewModel {
         guard let stateIndex = machineRef.value.states.firstIndex(where: { $0.name == stateName }) else {
             return
         }
-        let state = machineRef.value.states[stateIndex]
         let viewType = ViewType.state(stateIndex: stateIndex)
         selectedObjects.remove(viewType)
         if let editState = edittingState {
@@ -278,7 +277,6 @@ extension CanvasViewModel {
             notifier?.send()
             return
         case .success(let notify):
-//            deleteTransitions(targeting: stateName)
             if notify {
                 sync()
                 notifier?.send()
@@ -290,6 +288,10 @@ extension CanvasViewModel {
                     let viewModel = self.viewModel(forState: $0.name)
                     viewModel.index -= 1
                 }
+            }
+            machineRef.value.states.forEach {
+                let viewModel = self.viewModel(forState: $0.name)
+                viewModel.removeTransitionViewModels(targeting: stateName)
             }
         }
     }

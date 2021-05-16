@@ -168,6 +168,14 @@ final class StateViewModel: ObservableObject, Identifiable {
         self.notifier = notifier
     }
     
+    func removeTransitionViewModels(targeting stateName: StateName) {
+        if path.isNil(machineRef.value) {
+            return
+        }
+        let offsets = IndexSet(transitions.filter { self.viewModel(forTransition: $0).target == stateName })
+        removeTransitionViewModels(atOffsets: offsets, countBeforeDeletion: transitions.upperBound)
+    }
+    
     func removeTransitionViewModels(atOffsets offsets: IndexSet, countBeforeDeletion count: Int) {
         offsets.forEach {
             transitionViewModels.removeValue(forKey: $0)
