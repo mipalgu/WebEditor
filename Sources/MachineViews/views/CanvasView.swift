@@ -11,7 +11,6 @@ import Machines
 import Attributes
 import Utilities
 import GUUI
-//import AttributeViews
 
 public struct CanvasView: View {
     
@@ -20,19 +19,6 @@ public struct CanvasView: View {
     @ObservedObject var viewModel: CanvasViewModel
     
     @State var saving: Bool = false
-    
-    let textWidth: CGFloat = 50.0
-    
-    let textHeight: CGFloat = 20.0
-    
-//    public init(machine: Binding<Machine>, focus: Binding<Focus>) {
-//        self._focus = focus
-//        guard let plist = try? String(contentsOf: machine.wrappedValue.filePath.appendingPathComponent("Layout.plist")) else {
-//            self.viewModel = MachineViewModel(machine: machine)
-//            return
-//        }
-//        self.viewModel = MachineViewModel(machine: machine, plist: plist)
-//    }
     
     init(viewModel: CanvasViewModel) {
         self.viewModel = viewModel
