@@ -167,6 +167,50 @@ final class StateViewModel: ObservableObject, Identifiable {
         self.notifier = notifier
     }
     
+    func deleteTransitions(in indexSet: IndexSet) {
+        guard !indexSet.isEmpty, !path.isNil(machineRef.value) else {
+            return
+        }
+        let sortedIndexSet = indexSet.sorted(by: >)
+        var viewModels = sortedIndexSet.map { self.viewModel(forTransition: $0) }
+        var targetStateNames = viewModels.map { $0.target }
+        let transitions = machineRef.value[keyPath: path.keyPath].transitions
+        let result = machineRef.value.delete(transitions: indexSet, attachedTo: name)
+        switch result {
+        case .failure:
+            notifier?.send()
+            return
+        case .success(let notify):
+            defer {
+                if notify {
+                    notifier?.send()
+                }
+            }
+            var indexes = sortedIndexSet
+            let firstCount = indexes.count
+            var lastIndex = transitions.count
+            var dict: [Int: TransitionViewModel] = [:]
+            dict.reserveCapacity(transitions.count)
+            while (!indexes.isEmpty) {
+                let index = indexes.removeFirst()
+                let transitionViewModel = viewModels.removeFirst()
+                let targetStateName = targetStateNames.removeFirst()
+                if index >= lastIndex {
+                    continue
+                }
+                transitionViewModels[index] = nil
+                delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
+                (index..<lastIndex).forEach {
+                    let viewModel = viewModel(forTransition: $0)
+                    viewModel.transitionIndex -= firstCount - indexes.count
+                    dict[viewModel.transitionIndex] = viewModel
+                }
+                lastIndex = index
+            }
+            transitionViewModels = dict
+        }
+    }
+    
     func deleteTransition(_ transitionIndex: Int) {
         guard !path.isNil(machineRef.value), machineRef.value[keyPath: path.keyPath].transitions.count > transitionIndex, transitionViewModels[transitionIndex] != nil else {
             return
