@@ -61,6 +61,7 @@ import AttributeViews
 import Attributes
 import Machines
 import Utilities
+import GUUI
 
 final class AttributeGroupsViewModel<Root: Modifiable>: ObservableObject, GlobalChangeNotifier {
     

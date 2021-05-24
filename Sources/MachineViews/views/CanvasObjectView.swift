@@ -131,6 +131,7 @@ struct CanvasObjectView<ViewModel: CanvasObjectViewModel, Object: View>: View {
 
 import Machines
 import Utilities
+import GUUI
 
 struct CanvasObjectView_Previews: PreviewProvider {
     

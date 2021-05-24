@@ -60,6 +60,7 @@ import TokamakShim
 import Attributes
 import AttributeViews
 import Utilities
+import GUUI
 
 final class AttributeGroupViewModel<Root: Modifiable>: ObservableObject, Identifiable, GlobalChangeNotifier {
     

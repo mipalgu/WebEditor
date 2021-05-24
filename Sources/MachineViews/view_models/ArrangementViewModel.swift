@@ -11,6 +11,7 @@ import Machines
 import AttributeViews
 import Attributes
 import Utilities
+import GUUI
 
 final class ArrangementViewModel: ObservableObject, GlobalChangeNotifier {
     
