@@ -121,6 +121,10 @@ final class StateViewModel: ObservableObject, Identifiable {
         Machine.path.states[index]
     }
     
+    lazy var nameViewModel: LineViewModel = {
+        LineViewModel(root: machineRef, path: path.name, label: "", notifier: notifier)
+    }()
+    
     var name: StateName {
         get {
             path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].name

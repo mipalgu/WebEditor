@@ -19,7 +19,7 @@ struct CodeViewWithDropDown<Label: View>: View {
     let minHeight: CGFloat
     
     let label: () -> Label
-    let codeView: () -> CodeView<Config, Text>
+    let codeView: () -> CodeView<Text>
     
     @EnvironmentObject var config: Config
     
@@ -37,7 +37,7 @@ struct CodeViewWithDropDown<Label: View>: View {
             minHeight: minHeight,
             label: label
         ) {
-            CodeView<Config, Text>(root: root, path: path, label: "", language: language, notifier: notifier)
+            CodeView<Text>(root: root, path: path, label: "", language: language, notifier: notifier)
         }
     }
     
@@ -62,11 +62,11 @@ struct CodeViewWithDropDown<Label: View>: View {
             ),
             label: label
         ) {
-            CodeView<Config, Text>(value: value, errors: errors, label: "", language: language, delayEdits: delayEdits)
+            CodeView<Text>(value: value, errors: errors, label: "", language: language, delayEdits: delayEdits)
         }
     }
     
-    private init(expanded: Binding<Bool>, hasErrors: Binding<Bool>, minHeight: CGFloat = 0.0, label: @escaping () -> Label, codeView: @escaping () -> CodeView<Config, Text>) {
+    private init(expanded: Binding<Bool>, hasErrors: Binding<Bool>, minHeight: CGFloat = 0.0, label: @escaping () -> Label, codeView: @escaping () -> CodeView<Text>) {
         self._expanded = expanded
         self._hasErrors = hasErrors
         self.label = label

@@ -42,7 +42,7 @@ public struct AttributeGroupsView<Root: Modifiable, ExtraTabs: View>: View {
             if !viewModel.attributes.isEmpty {
                 TabView(selection: Binding($viewModel.selection)) {
                     ForEach(viewModel.attributes, id: \.id) { group in
-                        AttributeGroupView<Config>(root: $viewModel.root, path: group.path, label: group.name, notifier: viewModel.notifier)
+                        AttributeGroupView(viewModel: group)
                             .padding(.horizontal, 10)
                             .tabItem {
                                 Text(group.name.pretty)

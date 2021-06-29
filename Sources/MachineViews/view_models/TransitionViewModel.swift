@@ -97,6 +97,10 @@ final class TransitionViewModel: ObservableObject, Identifiable, GlobalChangeNot
         path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].target
     }
     
+    lazy var lineViewModel: LineViewModel = {
+        LineViewModel(root: machineRef, path: path.condition, label: "", notifier: notifier)
+    }()
+    
     init(machine: Ref<Machine>, stateIndex: Int, transitionIndex: Int, layout: TransitionLayout? = nil, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machine
         self.stateIndex = stateIndex

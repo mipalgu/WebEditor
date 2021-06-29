@@ -22,12 +22,8 @@ struct StateEditView: View {
         GeometryReader { geometry in
             ScrollView {
                 VStack(alignment: .leading) {
-                    LineView<Config>(
-                        value: $viewModel.name,
-                        errors: Binding(get: { viewModel.machine.errorBag.errors(forPath: viewModel.path.name).map(\.message) }, set: { _ in }),
-                        label: "Enter State Name...",
-                        delayEdits: true
-                    ).multilineTextAlignment(.center)
+                    LineView(viewModel: viewModel.nameViewModel)
+                        .multilineTextAlignment(.center)
                         .font(config.fontTitle2)
                         .background(config.fieldColor)
                         .foregroundColor(config.textColor)

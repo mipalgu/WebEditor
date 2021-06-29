@@ -24,12 +24,12 @@ struct DependenciesAttributesView<Root: Modifiable, Value: DependenciesContainer
             Form {
                 HStack {
                     VStack(alignment: .leading) {
-                        CollectionView<Config>(
-                            root: $root,
-                            path: path.dependencyAttributes,
-                            label: label,
-                            type: root[keyPath: path.path].dependencyAttributeType
-                        )
+//                        CollectionView(
+//                            root: $root,
+//                            path: path.dependencyAttributes,
+//                            label: label,
+//                            type: root[keyPath: path.path].dependencyAttributeType
+//                        )
                     }
                     Spacer()
                 }

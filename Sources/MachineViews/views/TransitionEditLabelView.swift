@@ -65,7 +65,7 @@ struct TransitionEditLabelView: View {
     @ObservedObject var viewModel: TransitionViewModel
     
     var body: some View {
-        LineView<Config>(root: $viewModel.machine, path: viewModel.path.condition, label: "Condition")
+        LineView(viewModel: viewModel.lineViewModel)
     }
     
 }

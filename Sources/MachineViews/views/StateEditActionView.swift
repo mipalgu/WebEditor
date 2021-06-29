@@ -16,7 +16,7 @@ struct StateEditActionView: View {
     @EnvironmentObject var config: Config
     
     var body: some View {
-        CodeView<Config, Text>(
+        CodeView(
             root: $viewModel.machine,
             path: viewModel.path.implementation,
             label: viewModel.name,

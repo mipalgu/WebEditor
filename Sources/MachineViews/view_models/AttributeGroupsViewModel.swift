@@ -73,7 +73,7 @@ final class AttributeGroupsViewModel<Root: Modifiable>: ObservableObject, Global
     
     @Published var selection: ObjectIdentifier?
     
-    private var groupViewModels: [String: AttributeGroupViewModel<Root>] = [:]
+    private var groupViewModels: [String: (AttributeGroupViewModel, Int)] = [:]
     
     var root: Root {
         get {
@@ -83,16 +83,16 @@ final class AttributeGroupsViewModel<Root: Modifiable>: ObservableObject, Global
         }
     }
     
-    var attributes: [AttributeGroupViewModel<Root>] {
+    var attributes: [AttributeGroupViewModel] {
         rootRef.value[keyPath: path.keyPath].enumerated().map {
-            if let viewModel = groupViewModels[$1.name] {
-                if viewModel.index != $0 {
-                    viewModel.index = $0
+            if let (viewModel, index) = groupViewModels[$1.name] {
+                if index != $0 {
+                    groupViewModels[$1.name] = (viewModel, index)
                 }
                 return viewModel
             }
-            let viewModel = AttributeGroupViewModel(rootRef: rootRef, arrPath: path, index: $0, notifier: notifier)
-            groupViewModels[$1.name] = viewModel
+            let viewModel = AttributeGroupViewModel(root: rootRef, path: path[$0], notifier: notifier)
+            groupViewModels[$1.name] = (viewModel, $0)
             return viewModel
         }
     }
@@ -105,7 +105,7 @@ final class AttributeGroupsViewModel<Root: Modifiable>: ObservableObject, Global
     
     func send() {
         self.groupViewModels.values.forEach {
-            $0.send()
+            $0.0.send()
         }
         objectWillChange.send()
     }

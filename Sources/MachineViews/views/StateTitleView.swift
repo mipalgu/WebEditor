@@ -75,12 +75,8 @@ struct StateTitleView: View {
         HStack {
             Toggle(isOn: $viewModel.expanded) {
                 if editable {
-                    LineView<Config>(
-                        value: $viewModel.name,
-                        errors: Binding(get: { viewModel.machine.errorBag.errors(forPath: viewModel.path.name).map(\.message) }, set: { _ in }),
-                        label: "Enter State Name...",
-                        delayEdits: true
-                    ).multilineTextAlignment(.center)
+                    LineView(viewModel: viewModel.nameViewModel)
+                        .multilineTextAlignment(.center)
                         .font(config.fontBody.bold())
                 } else {
                     Text(viewModel.name)
