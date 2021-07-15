@@ -7,7 +7,7 @@
 
 import TokamakShim
 
-import Machines
+import MetaMachines
 import Attributes
 import Utilities
 import AttributeViews

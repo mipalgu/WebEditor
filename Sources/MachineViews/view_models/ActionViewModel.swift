@@ -58,7 +58,7 @@
 
 import TokamakShim
 import Attributes
-import Machines
+import MetaMachines
 import Utilities
 import GUUI
 
@@ -72,7 +72,7 @@ final class ActionViewModel: ObservableObject, Identifiable {
     
     weak var delegate: ActionDelegate?
     
-    let machineRef: Ref<Machine>
+    let machineRef: Ref<MetaMachine>
     
     @Published var stateIndex: Int
     
@@ -91,7 +91,7 @@ final class ActionViewModel: ObservableObject, Identifiable {
         }
     }
     
-    var machine: Machine {
+    var machine: MetaMachine {
         get {
             machineRef.value
         } set {
@@ -100,8 +100,8 @@ final class ActionViewModel: ObservableObject, Identifiable {
         }
     }
     
-    var path: Attributes.Path<Machine, Action> {
-        Machine.path.states[stateIndex].actions[actionIndex]
+    var path: Attributes.Path<MetaMachine, Action> {
+        MetaMachine.path.states[stateIndex].actions[actionIndex]
     }
     
     var name: String {
@@ -116,7 +116,7 @@ final class ActionViewModel: ObservableObject, Identifiable {
         path.isNil(machineRef.value) ? .swift : machineRef.value[keyPath: path.keyPath].language
     }
     
-    init(machine: Ref<Machine>, stateIndex: Int, actionIndex: Int, expanded: Bool = true) {
+    init(machine: Ref<MetaMachine>, stateIndex: Int, actionIndex: Int, expanded: Bool = true) {
         self.machineRef = machine
         self.stateIndex = stateIndex
         self.actionIndex = actionIndex

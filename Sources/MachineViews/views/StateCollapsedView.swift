@@ -33,14 +33,14 @@ struct StateCollapsedView<TitleView: View>: View {
     
 }
 
-//import Machines
+//import MetaMachines
 //import AttributeViews
 //
 //struct StateCollapsedView_Previews: PreviewProvider {
 //    
 //    struct Preview: View {
 //        
-//        @State var machine: Machine = Machine.initialSwiftMachine()
+//        @State var machine: MetaMachine = MetaMachine.initialSwiftMachine()
 //        
 //        @State var expanded: Bool = false
 //        

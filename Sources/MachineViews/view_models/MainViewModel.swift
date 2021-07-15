@@ -9,7 +9,7 @@ import Foundation
 import TokamakShim
 import AttributeViews
 import Attributes
-import Machines
+import MetaMachines
 
 final class MainViewModel: ObservableObject, GlobalChangeNotifier {
     

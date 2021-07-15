@@ -7,7 +7,7 @@
 
 import TokamakShim
 
-import Machines
+import MetaMachines
 import Attributes
 import Utilities
 import AttributeViews
@@ -41,7 +41,7 @@ struct StateEditView: View {
 //    
 //    struct Preview: View {
 //        
-//        @State var machine: Machine = Machine.initialSwiftMachine()
+//        @State var machine: MetaMachine = MetaMachine.initialSwiftMachine()
 //        
 //        let path = Machine.path.states[0]
 //        

@@ -7,7 +7,7 @@
 
 import TokamakShim
 
-import Machines
+import MetaMachines
 import Attributes
 import Utilities
 import AttributeViews
@@ -99,9 +99,9 @@ struct StateExpandedView<TitleView: View>: View {
 //    
 //    struct Binding_Preview: View {
 //        
-//        @State var machine: Machine = Machine.initialSwiftMachine()
+//        @State var machine: MetaMachine = MetaMachine.initialSwiftMachine()
 ////
-////        @State var value: Machines.State = Machines.State(
+////        @State var value: MetaMachines.State = Machines.State(
 ////            name: "Initial",
 ////            actions: [
 ////                Action(name: "OnEntry", implementation: "let a = 2", language: .swift),

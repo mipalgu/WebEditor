@@ -25,13 +25,13 @@ struct StateEditActionView: View {
     }
 }
 
-import Machines
+import MetaMachines
 
 //struct StateEditActionView_Previews: PreviewProvider {
 //    
 //    struct Preview: View {
 //        
-//        @State var machine: Machine = Machine.initialSwiftMachine()
+//        @State var machine: MetaMachine = MetaMachine.initialSwiftMachine()
 //        
 //        let config: Config = Config()
 //        

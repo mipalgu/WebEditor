@@ -7,7 +7,7 @@
 
 import TokamakShim
 
-import Machines
+import MetaMachines
 import Attributes
 import Utilities
 
@@ -84,7 +84,7 @@ struct DependenciesView: View {
 //
 //        @State var dependencies: [MachineDependency] = Machine.initialSwiftMachine().dependencies
 //
-//        @State var machines: [URL: Machine] = [:]
+//        @State var machines: [URL: MetaMachine] = [:]
 //
 //        let config = Config()
 //

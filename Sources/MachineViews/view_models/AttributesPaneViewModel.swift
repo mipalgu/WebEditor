@@ -59,7 +59,7 @@
 import TokamakShim
 import AttributeViews
 import Attributes
-import Machines
+import MetaMachines
 import Utilities
 import GUUI
 
@@ -67,39 +67,39 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
     
     weak var notifier: GlobalChangeNotifier?
     
-    let machineRef: Ref<Machine>
+    let machineRef: Ref<MetaMachine>
     
     private let focusRef: Ref<Focus>
     
     @Published var attributesCollapsed: Bool = false
     @Published var attributesWidth: CGFloat = 400
     
-    private var focusViewModels: [Focus: AttributeGroupsViewModel<Machine>] = [:]
+    private var focusViewModels: [Focus: AttributeGroupsViewModel<MetaMachine>] = [:]
     
-    var attributeGroupsViewModel: AttributeGroupsViewModel<Machine> {
+    var attributeGroupsViewModel: AttributeGroupsViewModel<MetaMachine> {
         if let viewModel = focusViewModels[focus] {
             return viewModel
         }
         switch focus {
         case .machine:
-            let viewModel = AttributeGroupsViewModel(rootRef: machineRef, path: Machine.path.attributes, notifier: notifier)
+            let viewModel = AttributeGroupsViewModel(rootRef: machineRef, path: MetaMachine.path.attributes, notifier: notifier)
             focusViewModels[focus] = viewModel
             return viewModel
         case .state(let stateIndex):
-            var path = Machine.path.states[stateIndex].attributes
+            var path = MetaMachine.path.states[stateIndex].attributes
             if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
-                path = Machine.path.attributes
+                path = MetaMachine.path.attributes
             }
             let viewModel = AttributeGroupsViewModel(rootRef: machineRef, path: path, notifier: notifier)
             focusViewModels[focus] = viewModel
             return viewModel
         case .transition(let stateIndex, let transitionIndex):
-            var path = Machine.path.states[stateIndex].transitions[transitionIndex].attributes
+            var path = MetaMachine.path.states[stateIndex].transitions[transitionIndex].attributes
             if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
-                path = Machine.path.states[stateIndex].attributes
+                path = MetaMachine.path.states[stateIndex].attributes
             }
             if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
-                path = Machine.path.attributes
+                path = MetaMachine.path.attributes
             }
             let viewModel = AttributeGroupsViewModel(rootRef: machineRef, path: path, notifier: notifier)
             focusViewModels[focus] = viewModel
@@ -107,7 +107,7 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
         }
     }
     
-    var machine: Machine {
+    var machine: MetaMachine {
         get {
             machineRef.value
         } set {
@@ -125,12 +125,12 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
         case .machine:
             return "Machine: \(machine.name)"
         case .state(let stateIndex):
-            if Machine.path.states[stateIndex].isNil(machineRef.value) {
+            if MetaMachine.path.states[stateIndex].isNil(machineRef.value) {
                 return ""
             }
             return "State: \(machine.states[stateIndex].name)"
         case .transition(let stateIndex, let transitionIndex):
-            if Machine.path.states[stateIndex].isNil(machineRef.value) {
+            if MetaMachine.path.states[stateIndex].isNil(machineRef.value) {
                 return ""
             }
             return "State \(machine.states[stateIndex].name) Transition \(transitionIndex)"
@@ -141,7 +141,7 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
         let machineExtraTabs = {
             AnyView(DependenciesAttributesView(
                 root: Binding(get: { self.machine }, set: { self.machine = $0 }),
-                path: Machine.path,
+                path: MetaMachine.path,
                 label: "Dependencies"
             ))
         }
@@ -151,16 +151,16 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
         case .machine:
             return machineExtraTabs
         case .state(let stateIndex):
-            let path = Machine.path.states[stateIndex].attributes
+            let path = MetaMachine.path.states[stateIndex].attributes
             if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
                 return machineExtraTabs
             } else {
                 return stateExtraTabs
             }
         case .transition(let stateIndex, let transitionIndex):
-            var path = Machine.path.states[stateIndex].transitions[transitionIndex].attributes
+            var path = MetaMachine.path.states[stateIndex].transitions[transitionIndex].attributes
             if path.isNil(machineRef.value) || machineRef.value[keyPath: path.keyPath].isEmpty {
-                path = Machine.path.states[stateIndex].attributes
+                path = MetaMachine.path.states[stateIndex].attributes
             } else {
                 return transitionExtraTabs
             }
@@ -172,7 +172,7 @@ final class AttributesPaneViewModel: ObservableObject, GlobalChangeNotifier {
         }
     }
     
-    init(machineRef: Ref<Machine>, focusRef: Ref<Focus>, notifier: GlobalChangeNotifier? = nil) {
+    init(machineRef: Ref<MetaMachine>, focusRef: Ref<Focus>, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machineRef
         self.focusRef = focusRef
         self.notifier = notifier

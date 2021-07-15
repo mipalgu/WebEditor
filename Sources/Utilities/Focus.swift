@@ -6,7 +6,7 @@
 //
 
 import TokamakShim
-import Machines
+import MetaMachines
 import Attributes
 
 public enum Focus: Hashable {

@@ -9,7 +9,7 @@ import Foundation
 import TokamakShim
 import Transformations
 import AttributeViews
-import Machines
+import MetaMachines
 import Utilities
 
 class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable, ObservableObject, Identifiable {

@@ -57,7 +57,7 @@
  */
 
 import TokamakShim
-import Machines
+import MetaMachines
 import AttributeViews
 import Utilities
 import GUUI
@@ -65,7 +65,7 @@ import swift_helpers
 
 final class CanvasViewModel: ObservableObject {
     
-    let machineRef: Ref<Machine>
+    let machineRef: Ref<MetaMachine>
     
     let focusRef: Ref<Focus>
     
@@ -92,7 +92,7 @@ final class CanvasViewModel: ObservableObject {
         selectedObjects.first(where: \.isTransition) != nil
     }
     
-    var machine: Machine {
+    var machine: MetaMachine {
         get {
             machineRef.value
         } set {
@@ -133,7 +133,7 @@ final class CanvasViewModel: ObservableObject {
         machineRef.value.states.lazy.map(\.name).sorted()
     }
     
-    init(machineRef: Ref<Machine>, focusRef: Ref<Focus>, layout: Layout? = nil, notifier: GlobalChangeNotifier? = nil) {
+    init(machineRef: Ref<MetaMachine>, focusRef: Ref<Focus>, layout: Layout? = nil, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machineRef
         self.focusRef = focusRef
         self.notifier = notifier
@@ -386,7 +386,7 @@ extension CanvasViewModel {
         }
     }
     
-    func newTransition(source: Machines.State, target: Machines.State, suggested shape: Curve) {
+    func newTransition(source: MetaMachines.State, target: MetaMachines.State, suggested shape: Curve) {
         let result = machineRef.value.newTransition(source: source.name, target: target.name, condition: "true")
         guard let _ = try? result.get() else {
             return

@@ -59,7 +59,7 @@
 import TokamakShim
 
 import Attributes
-import Machines
+import MetaMachines
 
 struct ArrangementView: View {
     

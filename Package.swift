@@ -13,22 +13,22 @@ let package = Package(
     ],
     dependencies: ui + [
         .package(name: "swift_helpers", url: "ssh://git.mipal.net/Users/Shared/git/swift_helpers.git", .branch("master")),
-        .package(name: "Machines", url: "ssh://git.mipal.net/Users/Shared/git/Machines.git", .branch("meta")),
+        .package(name: "MetaMachines", url: "ssh://git.mipal.net/Users/Shared/git/MetaMachines.git", .branch("master")),
         .package(name: "AttributeViews", url: "ssh://git.mipal.net/Users/Shared/git/AttributeViews.git", .branch("master")),
         .package(name: "GUUI", url: "ssh://git.mipal.net/Users/Shared/git/GUUI.git", .branch("master"))
     ],
     targets: [
-        .target(name: "Utilities", dependencies: products + ["Machines", "AttributeViews"]),
+        .target(name: "Utilities", dependencies: products + ["MetaMachines", "AttributeViews"]),
         .target(name: "Transformations", dependencies: products + ["GUUI"]),
         .target(
             name: "MachineViews",
-            dependencies: products + ["Machines", "AttributeViews", "Utilities", "Transformations", "GUUI", "swift_helpers"],
+            dependencies: products + ["MetaMachines", "AttributeViews", "Utilities", "Transformations", "GUUI", "swift_helpers"],
             resources: [.copy("Resources/Assets.xcassets")]
         ),
         .target(
             name: "WebEditor",
             dependencies: products + [
-                "Machines",
+                "MetaMachines",
                 "MachineViews"
             ]),
         .testTarget(

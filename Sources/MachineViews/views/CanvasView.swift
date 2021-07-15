@@ -7,7 +7,7 @@
 
 import TokamakShim
 
-import Machines
+import MetaMachines
 import Attributes
 import Utilities
 import GUUI
@@ -129,7 +129,7 @@ public struct CanvasView: View {
 //    struct Parent: View {
 //        
 //        
-//        @State var machine: Machine = Machine.initialSwiftMachine()
+//        @State var machine: MetaMachine = Machine.initialSwiftMachine()
 //        
 //        var body: some View {
 //            Preview(viewModel: CanvasViewModel(machine: $machine))

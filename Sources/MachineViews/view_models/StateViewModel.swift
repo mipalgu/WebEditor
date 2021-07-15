@@ -60,7 +60,7 @@ import TokamakShim
 import Transformations
 import Attributes
 import AttributeViews
-import Machines
+import MetaMachines
 import Utilities
 import swift_helpers
 import GUUI
@@ -80,7 +80,7 @@ final class StateViewModel: ObservableObject, Identifiable {
     
     weak var notifier: GlobalChangeNotifier?
     
-    let machineRef: Ref<Machine>
+    let machineRef: Ref<MetaMachine>
     
     @Published var index: Int {
         willSet {
@@ -108,7 +108,7 @@ final class StateViewModel: ObservableObject, Identifiable {
         }
     }
     
-    var machine: Machine {
+    var machine: MetaMachine {
         get {
             machineRef.value
         } set {
@@ -117,8 +117,8 @@ final class StateViewModel: ObservableObject, Identifiable {
         }
     }
     
-    var path: Attributes.Path<Machine, Machines.State> {
-        Machine.path.states[index]
+    var path: Attributes.Path<MetaMachine, MetaMachines.State> {
+        MetaMachine.path.states[index]
     }
     
     lazy var nameViewModel: LineViewModel = {
@@ -158,7 +158,7 @@ final class StateViewModel: ObservableObject, Identifiable {
         actionsViewModel.actions
     }
     
-    init(machine: Ref<Machine>, index: Int, isText: Bool = false, layout: StateLayout? = nil, notifier: GlobalChangeNotifier? = nil) {
+    init(machine: Ref<MetaMachine>, index: Int, isText: Bool = false, layout: StateLayout? = nil, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machine
         self.index = index
         self.tracker = StateTracker(layout: layout, isText: isText, notifier: notifier)

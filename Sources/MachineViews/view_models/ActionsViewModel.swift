@@ -58,13 +58,13 @@
 
 import TokamakShim
 import Attributes
-import Machines
+import MetaMachines
 import Utilities
 import GUUI
 
 final class ActionsViewModel: ObservableObject, Identifiable, ActionDelegate {
     
-    let machineRef: Ref<Machine>
+    let machineRef: Ref<MetaMachine>
     
     @Published var stateIndex: Int {
         willSet {
@@ -76,7 +76,7 @@ final class ActionsViewModel: ObservableObject, Identifiable, ActionDelegate {
     
     private var actionViewModels: [String: ActionViewModel]
     
-    var machine: Machine {
+    var machine: MetaMachine {
         get {
             machineRef.value
         } set {
@@ -85,15 +85,15 @@ final class ActionsViewModel: ObservableObject, Identifiable, ActionDelegate {
         }
     }
     
-    var path: Attributes.Path<Machine, [Action]> {
-        Machine.path.states[stateIndex].actions
+    var path: Attributes.Path<MetaMachine, [Action]> {
+        MetaMachine.path.states[stateIndex].actions
     }
     
     var actions: [String] {
         path.isNil(machineRef.value) ? [] : machineRef.value[keyPath: path.keyPath].map(\.name)
     }
     
-    init(machine: Ref<Machine>, stateIndex: Int) {
+    init(machine: Ref<MetaMachine>, stateIndex: Int) {
         self.machineRef = machine
         self.stateIndex = stateIndex
         self.actionViewModels = stateIndex >= machine.value.states.count ? [:] : Dictionary(uniqueKeysWithValues: machine.value.states[stateIndex].actions.enumerated().map {

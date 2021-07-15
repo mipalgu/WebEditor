@@ -7,7 +7,7 @@
 
 import TokamakShim
 
-import Machines
+import MetaMachines
 import Attributes
 import Utilities
 
@@ -21,7 +21,7 @@ public struct MainView: View {
         self.init(viewModel: MainViewModel(root: .arrangement(ArrangementViewModel(arrangement: arrangement))))
     }
     
-    public init(machine: Machine) {
+    public init(machine: MetaMachine) {
         self.init(viewModel: MainViewModel(root: .machine(MachineViewModel(machine: machine))))
     }
     
@@ -45,7 +45,7 @@ struct MainView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            MainView(machine: Machine.initialSwiftMachine()).environmentObject(config)
+            MainView(machine: MetaMachine.initialSwiftMachine()).environmentObject(config)
         }
         
     }

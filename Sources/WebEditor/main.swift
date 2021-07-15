@@ -1,4 +1,4 @@
-import Machines
+import MetaMachines
 import Attributes
 
 #if canImport(TokamakShim)
@@ -78,7 +78,7 @@ struct AppCommands: Commands {
 enum DisplayType {
     
     case arrangement(Arrangement)
-    case machine(Machine)
+    case machine(MetaMachine)
     case none
     
 }
@@ -161,7 +161,7 @@ struct WebEditorDefaultMenu: View {
         }
         
         case arrangement(Arrangement.Semantics)
-        case machine(Machine.Semantics)
+        case machine(MetaMachine.Semantics)
     }
     
     enum Sheets {
@@ -199,7 +199,7 @@ struct WebEditorDefaultMenu: View {
                     presentNewFileSheet = true
                 }
             }
-            ForEach(Machine.supportedSemantics, id: \.self) { semantics in
+            ForEach(MetaMachine.supportedSemantics, id: \.self) { semantics in
                 Button("New \(semantics.rawValue) Machine") {
                     fileType = .machine(semantics)
                     presentNewFileSheet = true
@@ -211,7 +211,7 @@ struct WebEditorDefaultMenu: View {
                     presentOpenFileSheet = true
                 }
             }
-            ForEach(Machine.supportedSemantics, id: \.self) { semantics in
+            ForEach(MetaMachine.supportedSemantics, id: \.self) { semantics in
                 Button("Open \(semantics.rawValue) Machine") {
                     fileType = .machine(semantics)
                     presentOpenFileSheet = true
@@ -241,7 +241,7 @@ struct WebEditorDefaultMenu: View {
                         }
                         display = .arrangement(arrangement)
                     case .machine(let semantics):
-                        let machine = Machine.initialMachine(forSemantics: semantics, filePath: url)
+                        let machine = MetaMachine.initialMachine(forSemantics: semantics, filePath: url)
                         do {
                             try machine.save()
                         } catch let e {
@@ -278,9 +278,9 @@ struct WebEditorDefaultMenu: View {
                     }
                     display = .arrangement(arrangement)
                 case .machine:
-                    let machine: Machine
+                    let machine: MetaMachine
                     do {
-                        machine = try Machine(filePath: url)
+                        machine = try MetaMachine(filePath: url)
                     } catch let e {
                         print("\(e)")
                         return

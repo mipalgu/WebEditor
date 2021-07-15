@@ -59,7 +59,7 @@
 import Foundation
 import TokamakShim
 import AttributeViews
-import Machines
+import MetaMachines
 import Utilities
 import GUUI
 
@@ -73,7 +73,7 @@ import GUUI
 //    
 //    var isStateMoving: Bool = false
 //    
-//    var machineBinding: Binding<Machine>
+//    var machineBinding: Binding<MetaMachine>
 //    
 //    var movingSourceTransitions: [CGPoint] = []
 //    
@@ -93,7 +93,7 @@ import GUUI
 //    
 //    var transitionStartLocations: [StateName: [Curve]] = [:]
 //    
-//    var machine: Machine {
+//    var machine: MetaMachine {
 //        get {
 //            machineBinding.wrappedValue
 //        } set {
@@ -101,7 +101,7 @@ import GUUI
 //        }
 //    }
 //    
-//    private init(machineBinding: Binding<Machine>, cache: ViewCache, notifier: GlobalChangeNotifier?) {
+//    private init(machineBinding: Binding<MetaMachine>, cache: ViewCache, notifier: GlobalChangeNotifier?) {
 //        self.machineBinding = machineBinding
 //        self.cache = cache
 //        self.notifier = notifier
@@ -154,7 +154,7 @@ import GUUI
 //    
 //    /// This function moves transitions if their start and end points exist within the state width and height.
 //    /// - Parameter state: The state that is overlapping with the transitions
-//    func correctTransitionLocations(for state: Machines.State) {
+//    func correctTransitionLocations(for state: MetaMachines.State) {
 //        let sources = self.cache.trackers(for: state)
 //        let sourceTracker = self.cache.tracker(for: state)
 //        let targets = self.cache.transitions(target: state.name).filter {
@@ -429,7 +429,7 @@ import GUUI
 //        self.cache.viewModel(for: transition, originating: state)
 //    }
 //    
-//    func updateTransitionLocations(source: Machines.State) {
+//    func updateTransitionLocations(source: MetaMachines.State) {
 //        updateTransitionsSources(source: source)
 //        updateTransitionsTargets(source: source)
 //        self.objectWillChange.send()
@@ -759,7 +759,7 @@ import GUUI
 //        return temp
 //    }
 //    
-//    private func updateTransitionsSources(source: Machines.State) {
+//    private func updateTransitionsSources(source: MetaMachines.State) {
 //        let sourceTracker = self.cache.tracker(for: source.name)
 //        source.transitions.indices.forEach {
 //            let existingViewModel = self.cache.tracker(for: $0, originating: source)
@@ -777,7 +777,7 @@ import GUUI
 //        }
 //    }
 //    
-//    private func updateTransitionsTargets(source: Machines.State) {
+//    private func updateTransitionsTargets(source: MetaMachines.State) {
 //        guard let _ = machine.states.firstIndex(where: { $0 == source }) else {
 //            return
 //        }
@@ -815,7 +815,7 @@ import GUUI
 ////PLIST EXTENSION
 //extension CanvasViewModel {
 //    
-//    convenience init(machine: Binding<Machine>, plist data: String? = nil, notifier: GlobalChangeNotifier? = nil) {
+//    convenience init(machine: Binding<MetaMachine>, plist data: String? = nil, notifier: GlobalChangeNotifier? = nil) {
 //        let cache: ViewCache
 //        if let data = data {
 //            cache = ViewCache(machine: machine, plist: data, notifier: notifier)

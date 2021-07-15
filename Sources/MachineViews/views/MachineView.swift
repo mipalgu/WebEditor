@@ -8,7 +8,7 @@
 import TokamakShim
 import Attributes
 import Utilities
-import Machines
+import MetaMachines
 
 struct MachineView: View {
     

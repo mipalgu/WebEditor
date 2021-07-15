@@ -9,13 +9,13 @@ import Foundation
 import TokamakShim
 import AttributeViews
 import Attributes
-import Machines
+import MetaMachines
 import Utilities
 import GUUI
 
 final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
-    var machine: Machine
+    var machine: MetaMachine
     
     weak var notifier: GlobalChangeNotifier?
     
@@ -47,7 +47,7 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         )
     }()
     
-    var machineRef: Ref<Machine> {
+    var machineRef: Ref<MetaMachine> {
         Ref(
             get: { self.machine },
             set: { self.machine = $0 }
@@ -62,13 +62,13 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     }
     
     convenience init?(filePath url: URL, notifier: GlobalChangeNotifier? = nil) {
-        guard let machine = try? Machine(filePath: url) else {
+        guard let machine = try? MetaMachine(filePath: url) else {
             return nil
         }
         self.init(machine: machine, notifier: notifier)
     }
     
-    init(machine: Machine, notifier: GlobalChangeNotifier? = nil) {
+    init(machine: MetaMachine, notifier: GlobalChangeNotifier? = nil) {
         self.machine = machine
         self.notifier = notifier
     }

@@ -57,7 +57,7 @@
  */
 
 import TokamakShim
-import Machines
+import MetaMachines
 import Attributes
 import AttributeViews
 import Transformations
@@ -68,7 +68,7 @@ final class TransitionViewModel: ObservableObject, Identifiable, GlobalChangeNot
     
     weak var notifier: GlobalChangeNotifier?
     
-    let machineRef: Ref<Machine>
+    let machineRef: Ref<MetaMachine>
     
     @Published var stateIndex: Int
     
@@ -76,7 +76,7 @@ final class TransitionViewModel: ObservableObject, Identifiable, GlobalChangeNot
     
     let tracker: TransitionTracker
     
-    var machine: Machine {
+    var machine: MetaMachine {
         get {
             machineRef.value
         } set {
@@ -85,8 +85,8 @@ final class TransitionViewModel: ObservableObject, Identifiable, GlobalChangeNot
         }
     }
     
-    var path: Attributes.Path<Machine, Transition> {
-        Machine.path.states[stateIndex].transitions[transitionIndex]
+    var path: Attributes.Path<MetaMachine, Transition> {
+        MetaMachine.path.states[stateIndex].transitions[transitionIndex]
     }
     
     var condition: Expression {
@@ -101,7 +101,7 @@ final class TransitionViewModel: ObservableObject, Identifiable, GlobalChangeNot
         LineViewModel(root: machineRef, path: path.condition, label: "", notifier: notifier)
     }()
     
-    init(machine: Ref<Machine>, stateIndex: Int, transitionIndex: Int, layout: TransitionLayout? = nil, notifier: GlobalChangeNotifier? = nil) {
+    init(machine: Ref<MetaMachine>, stateIndex: Int, transitionIndex: Int, layout: TransitionLayout? = nil, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machine
         self.stateIndex = stateIndex
         self.transitionIndex = transitionIndex

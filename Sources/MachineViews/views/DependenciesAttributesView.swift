@@ -9,7 +9,7 @@ import TokamakShim
 import Attributes
 import AttributeViews
 import Utilities
-import Machines
+import MetaMachines
 
 struct DependenciesAttributesView<Root: Modifiable, Value: DependenciesContainer>: View {
     

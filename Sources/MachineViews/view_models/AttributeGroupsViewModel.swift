@@ -59,7 +59,7 @@
 import TokamakShim
 import AttributeViews
 import Attributes
-import Machines
+import MetaMachines
 import Utilities
 import GUUI
 
