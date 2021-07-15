@@ -5,11 +5,8 @@
 //  Created by Morgan McColl on 22/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
+import Foundation
 
 public protocol Rigidable: Positionable {
     
@@ -26,6 +23,8 @@ public protocol Rigidable: Positionable {
     var left: CGPoint {get}
     
     func isWithin(point: CGPoint) -> Bool
+    
+    func isWithin(point: CGPoint, padding: CGFloat) -> Bool
     
     func findEdge(degrees: CGFloat) -> CGPoint
     
@@ -44,4 +43,6 @@ public protocol Rigidable: Positionable {
     func closestPointToEdge(point: CGPoint, radians: CGFloat) -> CGPoint
     
     func closestPointToEdge(point: CGPoint, source: CGPoint) -> CGPoint
+    
+    func moveToEdge(point: CGPoint, edge: CGPoint) -> CGPoint
 }

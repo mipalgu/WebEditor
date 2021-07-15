@@ -1,454 +1,314 @@
-//
-//  StateViewModel.swift
-//  
-//
-//  Created by Morgan McColl on 15/11/20.
-//
+/*
+ * StateViewModel.swift
+ * 
+ *
+ * Created by Callum McColl on 10/5/21.
+ * Copyright © 2021 Callum McColl. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ *    copyright notice, this list of conditions and the following
+ *    disclaimer in the documentation and/or other materials
+ *    provided with the distribution.
+ *
+ * 3. All advertising materials mentioning features or use of this
+ *    software must display the following acknowledgement:
+ *
+ *        This product includes software developed by Callum McColl.
+ *
+ * 4. Neither the name of the author nor the names of contributors
+ *    may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * -----------------------------------------------------------------------
+ * This program is free software; you can redistribute it and/or
+ * modify it under the above terms or under the terms of the GNU
+ * General Public License as published by the Free Software Foundation;
+ * either version 2 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see http://www.gnu.org/licenses/
+ * or write to the Free Software Foundation, Inc., 51 Franklin Street,
+ * Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ */
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
-
-import Machines
-import Attributes
 import Transformations
+import Attributes
+import AttributeViews
+import MetaMachines
 import Utilities
+import swift_helpers
+import GUUI
 
-public final class StateViewModel: DynamicViewModel, Identifiable, Equatable {
+protocol StateViewModelDelegate: AnyObject {
     
-    public static func == (lhs: StateViewModel, rhs: StateViewModel) -> Bool {
-        lhs === rhs
-    }
+    func didChangeExpanded(_ viewModel: StateViewModel, from old: Bool, to new: Bool)
+    func didChangeName(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName)
+    func didChangeTransitionTarget(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName, transition: TransitionViewModel)
+    func didDeleteTransition(_ viewModel: StateViewModel, transition: TransitionViewModel, targeting targetStateName: StateName)
     
-    @Reference public var machine: Machine
-    
-    let path: Attributes.Path<Machine, Machines.State>
-    
-    @Published public var location: CGPoint
-    
-    @Published var __width: CGFloat
-    
-    public var _width: CGFloat {
-        get {
-            __width
-        }
-        set {
-            __width = newValue
-        }
-    }
-    
-    @Published var __height: CGFloat
-    
-    public var _height: CGFloat {
-        get {
-            __height
-        }
-        set {
-            __height = newValue
-        }
-    }
-    
-    @Published public var expanded: Bool
-    
-    @Published public var _collapsedWidth: CGFloat
-    
-    @Published public var _collapsedHeight: CGFloat
-    
-    @Published public var _collapsedActions: [String: Bool]
-    
-    var collapsedActions: [String: Bool] {
-        get {
-            actions.forEach() {
-                guard let _ = _collapsedActions[$0.name] else {
-                    _collapsedActions[$0.name] = false
-                    return
-                }
-            }
-            if actions.count != _collapsedActions.count {
-                let actionsSet = Set(actions.map { $0.name })
-                _collapsedActions.forEach {
-                    if !actionsSet.contains($0.0) {
-                        _collapsedActions.removeValue(forKey: $0.0)
-                    }
-                }
-            }
-            return _collapsedActions
-        }
-        set {
-            _collapsedActions = newValue
-        }
-    }
-    
-    public let collapsedMinWidth: CGFloat = 150.0
-    
-    public let collapsedMinHeight: CGFloat = 100.0
-    
-    public let collapsedMaxWidth: CGFloat = 750.0
-    
-    public let collapsedMaxHeight: CGFloat = 500.0
-    
-    let minTitleHeight: CGFloat = 42.0
-    
-    let maxTitleHeight: CGFloat = 42.0
-    
-    var minTitleWidth: CGFloat {
-        elementMinWidth - buttonDimensions
-    }
-    
-    var maxTitleWidth: CGFloat {
-        elementMaxWidth - buttonDimensions
-    }
-    
-    public let minWidth: CGFloat = 200.0
-    
-    public let maxWidth: CGFloat = 1200.0
-    
-    public var minHeight: CGFloat {
-        CGFloat(actions.count - collapsedActions.count) * minActionHeight +
-            CGFloat(collapsedActions.count) * minCollapsedActionHeight +
-            minTitleHeight + bottomPadding + topPadding + 20.0
-    }
-    
-    public let maxHeight: CGFloat = 600.0
-    
-    let minEditWidth: CGFloat = 800.0
-    
-    let maxEditTitleHeight: CGFloat = 32.0
-    
-    let editActionPadding: CGFloat = 20.0
-    
-    let minEditActionHeight: CGFloat = 200.0
-    
-    let editPadding: CGFloat = 10.0
-    
-    let topPadding: CGFloat = 10.0
-    
-    let leftPadding: CGFloat = 20.0
-    
-    let rightPadding: CGFloat = 20.0
-    
-    let bottomPadding: CGFloat = 20.0
-    
-    let buttonSize: CGFloat = 8.0
-    
-    let buttonDimensions: CGFloat = 15.0
-    
-    let minActionHeight: CGFloat = 80.0
-    
-    let minCollapsedActionHeight: CGFloat = 20.0
-    
-    public let horizontalEdgeTolerance: CGFloat = 20.0
+}
 
-    public let verticalEdgeTolerance: CGFloat = 20.0
+final class StateViewModel: ObservableObject, Identifiable {
     
-    let collapsedActionHeight: CGFloat = 16.0
+    weak var delegate: StateViewModelDelegate?
     
-    let actionPadding: CGFloat = 0.0
+    weak var notifier: GlobalChangeNotifier?
     
-    var originalPoint0s: [CGPoint] = []
+    let machineRef: Ref<MetaMachine>
     
-    var originalPoint1s: [CGPoint] = []
-    
-    var originalPoint2s: [CGPoint] = []
-    
-    var originalPoint3s: [CGPoint] = []
-    
-    public var name: String {
-        String(machine[keyPath: path.path].name)
-    }
-    
-    var actions: [Machines.Action] {
-        machine[keyPath: path.path].actions
-    }
-    
-    var attributes: [AttributeGroup] {
-        machine[keyPath: path.path].attributes
-    }
-    
-    var transitions: [Transition] {
-        machine[keyPath: path.path].transitions
-    }
-    
-    var transitionViewModels: [TransitionViewModel]
-    
-    var elementMinWidth: CGFloat {
-        minWidth - leftPadding - rightPadding
-    }
-    
-    var elementMaxWidth: CGFloat {
-        width - leftPadding - rightPadding
-    }
-    
-    var elementMinHeight: CGFloat {
-        minHeight - topPadding - bottomPadding
-    }
-    
-    var elementMaxHeight: CGFloat {
-        height - topPadding - bottomPadding - 20.0
-    }
-    
-    var isAccepting: Bool {
-        machine[keyPath: path.path].transitions.isEmpty
-    }
-    
-    var isEmpty: Bool {
-        return nil == actions.first { !$0.implementation.isEmpty }
-    }
-    
-    var actionsMaxHeight: CGFloat {
-        elementMaxHeight - maxTitleHeight
-    }
-    
-    var actionHeight: CGFloat {
-        let expandedActions = collapsedActions.filter { $0.1 == false }.count
-        if expandedActions == 0 {
-            return collapsedActionHeight
+    @Published var index: Int {
+        willSet {
+            actionsViewModel.stateIndex = newValue
+            transitionViewModels.forEach {
+                $1.stateIndex = newValue
+            }
         }
-        let collapsedActionsNumber = CGFloat(actions.count - expandedActions)
-        let availableSpace = actionsMaxHeight - CGFloat(actions.count) * actionPadding * 2.0 - collapsedActionsNumber * collapsedActionHeight
-        return max(minActionHeight, availableSpace / CGFloat(expandedActions))
     }
     
-    public var isDragging: Bool = false
+    let actionsViewModel: ActionsViewModel
     
-    public var isStretchingX: Bool = false
+    private var transitionViewModels: [Int: TransitionViewModel]
     
-    public var isStretchingY: Bool = false
+    public let tracker: StateTracker
     
-    public var offset: CGPoint = CGPoint.zero
-    
-    var originalLocation: CGPoint = .zero
-    
-    @Published var highlighted: Bool
-    
-    var machineName: String {
-        self.machine.name
+    var expanded: Bool {
+        get {
+            tracker.expanded
+        } set {
+            let old = tracker.expanded
+            tracker.expanded = newValue
+            delegate?.didChangeExpanded(self, from: old, to: newValue)
+            objectWillChange.send()
+        }
     }
     
-    var machineId: UUID {
-        self.machine.id
+    var machine: MetaMachine {
+        get {
+            machineRef.value
+        } set {
+            machineRef.value = newValue
+            objectWillChange.send()
+        }
     }
     
-    var stateIndex: Int {
-        self.machine.states.firstIndex(of: self.machine[keyPath: path.path]).wrappedValue
+    var path: Attributes.Path<MetaMachine, MetaMachines.State> {
+        MetaMachine.path.states[index]
     }
     
-    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel]) {
-        self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: 150.0, collapsedHeight: collapsedHeight, collapsedActions: collapsedActions, highlighted: highlighted, transitionViewModels: transitionViewModels)
-        self._collapsedWidth = collapsedMinWidth / collapsedMinHeight * collapsedHeight
-    }
+    lazy var nameViewModel: LineViewModel = {
+        LineViewModel(root: machineRef, path: path.name, label: "", notifier: notifier)
+    }()
     
-    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel]) {
-        self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: collapsedWidth, collapsedHeight: 100.0, collapsedActions: collapsedActions, highlighted: highlighted, transitionViewModels: transitionViewModels)
-        self.collapsedHeight = collapsedMinHeight / collapsedMinWidth * collapsedWidth
-    }
-    
-    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false) {
-        self.init(machine: machine, path: path, location: location, width: width, height: height, expanded: expanded, collapsedWidth: 150.0, transitionViewModels: [])
-    }
-    
-    private init(machine: Ref<Machine>, path: Attributes.Path<Machine, Machines.State>, location: CGPoint = CGPoint(x: 75, y: 100), width: CGFloat = 75.0, height: CGFloat = 100.0, expanded: Bool = false, collapsedWidth: CGFloat = 150.0, collapsedHeight: CGFloat = 100.0, collapsedActions: [String: Bool] = [:], highlighted: Bool = false, transitionViewModels: [TransitionViewModel]) {
-        self._machine = Reference(reference: machine)
-        self.path = path
-        self.location = CGPoint(x: max(0.0, location.x), y: max(0.0, location.y))
-        self.__width = min(max(minWidth, width), maxWidth)
-        self.__height = height
-        self.expanded = expanded
-        self._collapsedWidth = collapsedWidth
-        self._collapsedHeight = collapsedHeight
-        self._collapsedActions = collapsedActions
-        self.highlighted = highlighted
-        let transitionsSet = Set(transitionViewModels.map { $0.transition })
-        machine.value[keyPath: path.path].transitions.forEach {
-            if transitionsSet.contains($0) {
+    var name: StateName {
+        get {
+            path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].name
+        } set {
+            guard !path.isNil(machineRef.value) else {
                 return
             }
-            fatalError("Not Enough transitions view models for machine.")
-        }
-        self.transitionViewModels = transitionViewModels
-        self.listen(to: $machine)
-    }
-    
-    func isEmpty(forAction action: String) -> Bool {
-        machine[keyPath: path.path].actions.first {
-            $0.name == action
-        }?.implementation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true
-    }
-    
-    func createTitleView(forAction action: String, color: Color) -> AnyView {
-        if self.isEmpty(forAction: action) {
-            return AnyView(
-                Text(action + ":").font(.headline).underline().italic().foregroundColor(color).frame(height: collapsedActionHeight)
-            )
-        }
-        return AnyView(
-            Text(action + ":").font(.headline).underline().foregroundColor(color).frame(height: collapsedActionHeight)
-        )
-    }
-    
-    func createCollapsedBinding(forAction action: String) -> Binding<Bool> {
-        Binding(
-            get: { self.collapsedActions[action] ?? false },
-            set: { self.collapsedActions[action] = $0 }
-        )
-    }
-    
-    fileprivate func collapsedEdge(theta: Double) -> CGPoint {
-        rectEdge(theta: theta)
-    }
-    
-    fileprivate func staticHeightEdge(theta: Double) -> CGPoint {
-        let pctTheta = 1.0 - (abs(theta) / (Double.pi / 4.0)).truncatingRemainder(dividingBy: 1.0)
-        let dx = CGFloat(pctTheta * Double(abs(theta) > Double.pi / 2.0 ? -width : width))
-        let dy = theta > 0 ? -height : height
-        return CGPoint(x: location.x + dx, y: location.y + dy)
-    }
-    
-    fileprivate func staticWidthEdge(theta: Double) -> CGPoint {
-        let pctTheta = (abs(theta) / (Double.pi / 4.0)).truncatingRemainder(dividingBy: 1.0)
-        let dx = abs(theta) <= Double.pi / 4.0 ? width : -width
-        let dy = CGFloat(pctTheta * Double(theta > 0  ? -height : height ))
-        return CGPoint(x: location.x + dx, y: location.y + dy)
-    }
-    
-    fileprivate func rectEdge(theta: Double) -> CGPoint {
-        if abs(theta) <= Double.pi / 4.0 {
-            return staticWidthEdge(theta: theta)
-        }
-        if abs(theta) >= 3 * Double.pi / 4.0 {
-            return staticWidthEdge(theta: theta)
-        }
-        return staticHeightEdge(theta: theta)
-    }
-    
-    func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat, externalTransitions: [TransitionViewModel]) {
-        self.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight)
-        externalTransitions.forEach {
-            $0.point3 = self.findEdge(point: $0.point3)
-        }
-        transitionViewModels.forEach {
-            $0.point0 = self.findEdge(point: $0.point0)
+            let oldName = name
+            if newValue == oldName {
+                return
+            }
+            let result = machineRef.value.modify(attribute: path.name, value: newValue)
+            defer { objectWillChange.send() }
+            switch result {
+            case .success(let notify):
+                delegate?.didChangeName(self, from: oldName, to: newValue)
+                if notify {
+                    notifier?.send()
+                }
+            case .failure:
+                notifier?.send()
+            }
         }
     }
     
-    func transitionViewModel(transition: Transition, index: Int, target destinationViewModel: StateViewModel) -> TransitionViewModel {
-        let dx = destinationViewModel.location.x - location.x
-        let dy = destinationViewModel.location.y - location.y
-        let theta = atan2(Double(dy), Double(dx))
-        let sourceEdge = findEdge(radians: CGFloat(theta))
-        let destinationTheta = theta + Double.pi > Double.pi ? theta - Double.pi : theta + Double.pi
-        let destinationEdge = destinationViewModel.findEdge(radians: CGFloat(destinationTheta))
-        let tPath: Attributes.Path<Machine, Transition> = path.transitions[index]
-        let priority = UInt8(index)
-        return TransitionViewModel(
-            machine: $machine,
-            path: tPath,
-            source: sourceEdge,
-            destination: destinationEdge,
-            priority: priority
-        )
+    var transitions: Range<Int> {
+        path.isNil(machineRef.value) ? 0..<0 : machineRef.value[keyPath: path.keyPath].transitions.indices
     }
     
-    func getHeightOfAction(actionName: String) -> CGFloat {
-        guard let collapsed = collapsedActions[actionName] else {
-            return collapsedActionHeight
+    var actions: [String] {
+        actionsViewModel.actions
+    }
+    
+    init(machine: Ref<MetaMachine>, index: Int, isText: Bool = false, layout: StateLayout? = nil, notifier: GlobalChangeNotifier? = nil) {
+        self.machineRef = machine
+        self.index = index
+        self.tracker = StateTracker(layout: layout, isText: isText, notifier: notifier)
+        self.actionsViewModel = ActionsViewModel(machine: machine, stateIndex: index)
+        if machine.value.states[index].transitions.isEmpty {
+            self.transitionViewModels = [:]
+        } else {
+            self.transitionViewModels = Dictionary(uniqueKeysWithValues: layout?.transitions[0..<machine.value.states[index].transitions.count].enumerated().map {
+                ($0, TransitionViewModel(machine: machine, stateIndex: index, transitionIndex: $0, layout: $1, notifier: notifier))
+            } ?? [])
         }
-        return collapsed ? collapsedActionHeight : actionHeight
+        self.notifier = notifier
     }
     
-    func getHeightOfActionForEdit(height editHeight: CGFloat) -> CGFloat {
-        let numberOfActions = CGFloat(actions.count)
-        let availableSpace = editHeight - maxTitleHeight - editPadding * 2.0 - numberOfActions * editActionPadding
-        return max(minEditActionHeight, availableSpace / numberOfActions)
+    func removeTransitionViewModels(targeting stateName: StateName) {
+        if path.isNil(machineRef.value) {
+            return
+        }
+        let offsets = IndexSet(transitions.filter { self.viewModel(forTransition: $0).target == stateName })
+        removeTransitionViewModels(atOffsets: offsets, countBeforeDeletion: transitions.upperBound)
     }
     
-    func isHidden(frameWidth: CGFloat, frameHeight: CGFloat) -> Bool {
-        return right.x < 0 || left.x > frameWidth || bottom.y < 0 || top.y > frameHeight
+    func removeTransitionViewModels(atOffsets offsets: IndexSet, countBeforeDeletion count: Int) {
+        offsets.forEach {
+            transitionViewModels.removeValue(forKey: $0)
+        }
+        syncTransitions(afterDeleting: offsets, countBeforeDeletion: count)
     }
     
-    func createNewTransition(destination: StateViewModel, point0: CGPoint, point3: CGPoint) {
-        do {
-            try machine.newTransition(source: self.name, target: destination.name)
-            let lastIndex = machine[keyPath: path.path].transitions.count - 1
-            try machine.modify(attribute: path.transitions[lastIndex].condition, value: "true")
-            let priority = UInt8(lastIndex)
-            let source = self.closestPointToEdge(point: point0, source: point3)
-            let dest = destination.closestPointToEdge(point: point3, source: source)
-            let newViewModel = TransitionViewModel(machine: $machine, path: path.transitions[lastIndex], source: source, destination: dest, priority: priority)
-            transitionViewModels.append(newViewModel)
-        } catch let error {
-            print(error, stderr)
+    func syncTransitions(afterDeleting indexSet: IndexSet, countBeforeDeletion count: Int) {
+        if indexSet.isEmpty {
+            return
+        }
+        var dict: [Int: TransitionViewModel] = [:]
+        dict.reserveCapacity(count)
+        var indexes = Array(0..<count)
+        indexes.remove(atOffsets: indexSet) { (index, nextIndex, previouslyDeleted) in
+            ((index + 1)..<nextIndex).forEach {
+                let viewModel = viewModel(forTransition: $0)
+                viewModel.transitionIndex -= previouslyDeleted
+                dict[viewModel.transitionIndex] = viewModel
+            }
+        }
+        transitionViewModels = dict
+    }
+    
+    func deleteTransitions(in indexSet: IndexSet) {
+        guard !indexSet.isEmpty, !path.isNil(machineRef.value) else {
+            return
+        }
+        let sortedIndexSet = indexSet.sorted(by: >)
+        let viewModels = Dictionary(uniqueKeysWithValues: sortedIndexSet.map { ($0, self.viewModel(forTransition: $0)) })
+        let targetStateNames = viewModels.mapValues(\.target)
+        let transitions = machineRef.value[keyPath: path.keyPath].transitions
+        let result = machineRef.value.delete(transitions: indexSet, attachedTo: name)
+        switch result {
+        case .failure:
+            notifier?.send()
+            return
+        case .success(let notify):
+            defer {
+                if notify {
+                    notifier?.send()
+                }
+            }
+            sortedIndexSet.forEach {
+                guard let transitionViewModel = viewModels[$0], let targetStateName = targetStateNames[$0] else {
+                    return
+                }
+                transitionViewModels[index] = nil
+                delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
+            }
+            syncTransitions(afterDeleting: indexSet, countBeforeDeletion: transitions.count)
+        }
+    }
+    
+    func deleteTransition(_ transitionIndex: Int) {
+        guard !path.isNil(machineRef.value), machineRef.value[keyPath: path.keyPath].transitions.count > transitionIndex, transitionViewModels[transitionIndex] != nil else {
+            return
+        }
+        let transitionViewModel = viewModel(forTransition: transitionIndex)
+        let targetStateName = transitionViewModel.target
+        let transitions = machineRef.value[keyPath: path.keyPath].transitions
+        let result = machineRef.value.deleteTransition(atIndex: transitionIndex, attachedTo: name)
+        switch result {
+        case .failure:
+            notifier?.send()
+            return
+        case .success(let notify):
+            transitionViewModels[transitionIndex] = nil
+            delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
+            defer {
+                if notify {
+                    notifier?.send()
+                }
+            }
+            guard !path.isNil(machineRef.value) && !machineRef.value[keyPath: path.keyPath].transitions.isEmpty else {
+                transitionViewModels.removeAll(keepingCapacity: true)
+                return
+            }
+            guard transitionIndex + 1 < transitions.count else {
+                return
+            }
+            // Remove transition view models for transitions that no longer exist
+            // and update indexes of transition view models that have changed.
+            let count = machineRef.value[keyPath: path.keyPath].transitions.count
+            var dict: [Int: TransitionViewModel] = [:]
+            dict.reserveCapacity(count)
+            transitionViewModels.values.forEach { viewModel in
+                if viewModel.transitionIndex - 1 >= count {
+                    return
+                }
+                if viewModel.transitionIndex > transitionIndex {
+                    viewModel.transitionIndex -= 1
+                }
+                dict[viewModel.transitionIndex] = viewModel
+            }
+            transitionViewModels = dict
+            return
         }
         
     }
     
-    func moveSelf(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat, collapsed: Bool, externalTransitions: [TransitionViewModel]) {
-        if !isDragging && !isStretchingY && !isStretchingX {
-            originalPoint0s = transitionViewModels.map { $0.point0 }
-            originalPoint1s = transitionViewModels.map { $0.point1 }
-            originalPoint2s = transitionViewModels.map { $0.point2 }
-            originalPoint3s = externalTransitions.map { $0.point3 }
-            originalLocation = location
-        }
-        if collapsed {
-            handleCollapsedDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
-        } else {
-            handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
-            if isStretchingX || isStretchingY {
-                externalTransitions.forEach {
-                    $0.point3 = closestPointToEdge(point: $0.point3, source: $0.point0)
-                }
-                transitionViewModels.forEach {
-                    $0.point0 = closestPointToEdge(point: $0.point0, source: $0.point3)
-                }
-            }
-        }
-        if !isDragging {
-            return
-        }
-        let translation = CGSize(width: location.x - originalLocation.x, height: location.y - originalLocation.y)
-        transitionViewModels.indices.forEach {
-            let vm = transitionViewModels[$0]
-            vm.point0 = vm.boundTranslate(point: originalPoint0s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            vm.point1 = vm.boundTranslate(point: originalPoint1s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            vm.point2 = vm.boundTranslate(point: originalPoint2s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
-        }
-        externalTransitions.indices.forEach {
-            let vm = externalTransitions[$0]
-            vm.point3 = vm.boundTranslate(point: originalPoint3s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
-        }
+    func toggleExpand(frameWidth: CGFloat, frameHeight: CGFloat) {
+        tracker.toggleExpand(frameWidth: frameWidth, frameHeight: frameHeight)
+        objectWillChange.send()
     }
     
-    func finishMoveSelf(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat, collapsed: Bool, externalTransitions: [TransitionViewModel]) {
-        if collapsed {
-            finishCollapsedDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
-        } else {
-            finishDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
-            if isStretchingX || isStretchingY {
-                externalTransitions.forEach {
-                    $0.point3 = closestPointToEdge(point: $0.point3, source: $0.point0)
-                }
-                transitionViewModels.forEach {
-                    $0.point0 = closestPointToEdge(point: $0.point0, source: $0.point3)
-                }
-            }
+    func viewModels(targeting stateName: StateName) -> [TransitionViewModel] {
+        transitionViewModels.values.filter { $0.target == stateName }
+    }
+    
+    func viewModel(forAction action: String) -> ActionViewModel {
+        self.actionsViewModel.viewModel(forAction: action)
+    }
+    
+    func viewModel(forTransition transitionIndex: Int) -> TransitionViewModel {
+        if let viewModel = transitionViewModels[transitionIndex] {
+            return viewModel
         }
-        if !isDragging {
-            return
+        let viewModel = TransitionViewModel(machine: machineRef, stateIndex: index, transitionIndex: transitionIndex)
+        transitionViewModels[transitionIndex] = viewModel
+        return viewModel
+    }
+    
+    func send() {
+        transitionViewModels.values.forEach {
+            $0.send()
         }
-        let translation = CGSize(width: location.x - originalLocation.x, height: location.y - originalLocation.y)
-        transitionViewModels.indices.forEach {
-            let vm = transitionViewModels[$0]
-            vm.point0 = vm.boundTranslate(point: originalPoint0s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            vm.point1 = vm.boundTranslate(point: originalPoint1s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            vm.point2 = vm.boundTranslate(point: originalPoint2s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
-        }
-        externalTransitions.indices.forEach {
-            let vm = externalTransitions[$0]
-            vm.point3 = vm.boundTranslate(point: originalPoint3s[$0], trans: translation, frameWidth: frameWidth, frameHeight: frameHeight)
-        }
+        objectWillChange.send()
     }
     
 }

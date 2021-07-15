@@ -5,11 +5,18 @@
 //  Created by Morgan McColl on 23/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
+import Foundation
+
+import GUUI
+
+public protocol _Rigidable: AnyObject {
+    
+    var _width: CGFloat { get set }
+    
+    var _height: CGFloat { get set }
+    
+}
 
 public extension Rigidable where Self: Positionable {
     
@@ -47,8 +54,12 @@ public extension Rigidable where Self: Positionable {
         )
     }
     
+    func isWithin(point: CGPoint, padding: CGFloat) -> Bool {
+        point.x >= left.x - padding && point.x <= right.x + padding && point.y >= top.y - padding && point.y <= bottom.y + padding
+    }
+    
     func isWithin(point: CGPoint) -> Bool {
-        point.x >= left.x && point.x <= right.x && point.y >= top.y && point.y <= bottom.y
+        isWithin(point: point, padding: 0)
     }
     
     func findEdge(degrees: CGFloat) -> CGPoint {
@@ -95,8 +106,27 @@ public extension Rigidable where Self: Positionable {
     func findEdge(point: CGPoint) -> CGPoint {
         let dx = point.x - location.x
         let dy = point.y - location.y
-        let theta = CGFloat(atan2(Double(dy), Double(dx)))
-        return findEdge(radians: theta)
+        let angle = atan2(Double(dy), Double(dx))
+        let theta = angle / Double.pi * 180.0
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        if theta >= -45.0 && theta <= 45.0 {
+            x = right.x
+            y = location.y + dx * CGFloat(tan(angle))
+        } else if theta <= 135.0 && theta >= 45.0 {
+            y = bottom.y
+            x = location.x + dy / CGFloat(tan(angle))
+        } else if theta < 180.0 && theta > 135.0 {
+            x = left.x
+            y = location.y + dx * CGFloat(tan(angle))
+        } else if theta > -135.0 {
+            y = top.y
+            x = location.x + dy / CGFloat(tan(angle))
+        } else {
+            x = left.x
+            y = location.y + dx * CGFloat(tan(angle))
+        }
+        return CGPoint(x: x, y: y)
     }
     
     func findEdgeCenter(degrees: CGFloat) -> CGPoint {
@@ -163,6 +193,15 @@ public extension Rigidable where Self: Positionable {
         let dy = source.y - location.y
         let theta = CGFloat(atan2(Double(dy), Double(dx)))
         return closestPointToEdge(point: point, radians: theta)
+    }
+    
+    func moveToEdge(point: CGPoint, edge: CGPoint) -> CGPoint {
+        let relativeEdge = edge - point
+        let angle = relativeEdge<
+        if angle >= -45 && angle <= 45 || angle >= 135 || angle <= -135 {
+            return CGPoint(x: edge.x, y: point.y)
+        }
+        return CGPoint(x: point.x, y: edge.y)
     }
     
 }

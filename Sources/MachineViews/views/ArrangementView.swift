@@ -1,74 +1,77 @@
-//
-//  SwiftUIView.swift
-//  
-//
-//  Created by Morgan McColl on 2/12/20.
-//
+/*
+ * ArrangementView.swift
+ * 
+ *
+ * Created by Callum McColl on 24/4/21.
+ * Copyright © 2021 Callum McColl. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ *    copyright notice, this list of conditions and the following
+ *    disclaimer in the documentation and/or other materials
+ *    provided with the distribution.
+ *
+ * 3. All advertising materials mentioning features or use of this
+ *    software must display the following acknowledgement:
+ *
+ *        This product includes software developed by Callum McColl.
+ *
+ * 4. Neither the name of the author nor the names of contributors
+ *    may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * -----------------------------------------------------------------------
+ * This program is free software; you can redistribute it and/or
+ * modify it under the above terms or under the terms of the GNU
+ * General Public License as published by the Free Software Foundation;
+ * either version 2 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see http://www.gnu.org/licenses/
+ * or write to the Free Software Foundation, Inc., 51 Franklin Street,
+ * Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ */
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
-import Machines
 import Attributes
-import Utilities
+import MetaMachines
 
-public struct ArrangementView: View {
+struct ArrangementView: View {
     
-    @ObservedObject public var viewModel: ArrangementViewModel
+    @ObservedObject var viewModel: ArrangementViewModel
     
-    @Binding var showArrangement: Bool
-    
-    @EnvironmentObject public var config: Config
-    
-    func getMachine(_ index: Int) -> EditorViewModel {
-        viewModel.allMachines[index]
-    }
-    
-    
-    public init(viewModel: ArrangementViewModel, showArrangement: Binding<Bool>) {
-        self.viewModel = viewModel
-        self._showArrangement = showArrangement
-    }
-    
-    public var body: some View {
-        GeometryReader { (geometry: GeometryProxy) in
-            ForEach(Array(viewModel.allMachines.indices), id: \.self) { index in
-                Text(getMachine(index).machine.name)
-                    .font(config.fontTitle2)
-                    .coordinateSpace(name: "MAIN_VIEW")
-                    .position(getMachine(index).machine.getLocation(width: geometry.size.width, height: geometry.size.height))
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .background(config.stateColour)
-                            .foregroundColor(getMachine(index) === viewModel.currentMachine ? config.highlightColour : config.borderColour)
-                    )
-                    .frame(width: getMachine(index).machine.width, height: getMachine(index).machine.height)
-                    .onTapGesture(count: 2) {
-                        viewModel.currentMachineIndex = index
-                        showArrangement = false
-                    }
-                    .onTapGesture(count: 1) {
-                        viewModel.currentMachineIndex = index
-                    }
-                    .gesture(DragGesture().onChanged {
-                        getMachine(index).machine.handleDrag(
-                            gesture: $0,
-                            frameWidth: geometry.size.width,
-                            frameHeight: geometry.size.height
-                        )
-                    }.onEnded {
-                        getMachine(index).machine.finishDrag(
-                            gesture: $0,
-                            frameWidth: geometry.size.width,
-                            frameHeight: geometry.size.height
-                        )
-                    })
-            }
-            .frame(minWidth: 1280, minHeight: 720)
+    var body: some View {
+        AttributeGroupsView(
+            viewModel: viewModel.attributeGroupsViewModel,
+            label: viewModel.arrangement.name.pretty + " Arrangement"
+        ) {
+            DependenciesAttributesView(root: $viewModel.arrangement, path: viewModel.arrangement.path, label: "Dependencies")
         }
     }
+    
 }
-

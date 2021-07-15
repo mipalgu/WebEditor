@@ -5,46 +5,54 @@
 //  Created by Morgan McColl on 21/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
-import Machines
+import MetaMachines
 import Attributes
 import Utilities
 
-struct MainView: View {
+public struct MainView: View {
     
-    @ObservedObject var editorViewModel: EditorViewModel
-    
-    @ObservedObject var machineViewModel: MachineViewModel
-    
-    @Binding var type: ViewType
-    
-    @Binding var creatingTransitions: Bool
+    @StateObject var viewModel: MainViewModel
     
     @EnvironmentObject var config: Config
     
-    var body: some View {
-        switch type {
-        case .machine, .transition:
-            MachineView(editorViewModel: editorViewModel, viewModel: machineViewModel, creatingTransitions: $creatingTransitions)
-                .coordinateSpace(name: "MAIN_VIEW")
-                
-        case .state(let stateIndex):
-            StateEditView(viewModel: machineViewModel.states[stateIndex])
-                .onTapGesture(count: 2) {
-                    editorViewModel.changeMainView()
-                    editorViewModel.changeFocus()
-                }
-                .background(KeyEventHandling(keyDownCallback: {
-                    if $0.keyCode == 53 {
-                        editorViewModel.changeMainView()
-                        editorViewModel.changeFocus()
-                    }
-                }, keyUpCallback: { _ in }))
+    public init(arrangement: Arrangement) {
+        self.init(viewModel: MainViewModel(root: .arrangement(ArrangementViewModel(arrangement: arrangement))))
+    }
+    
+    public init(machine: MetaMachine) {
+        self.init(viewModel: MainViewModel(root: .machine(MachineViewModel(machine: machine))))
+    }
+    
+    private init(viewModel: MainViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+    }
+
+    public var body: some View {
+        HStack {
+            DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
+            viewModel.subView
+        }.navigationTitle(viewModel.focus.path)
+    }
+    
+}
+
+struct MainView_Previews: PreviewProvider {
+    
+    struct Preview: View {
+        
+        let config = Config()
+        
+        var body: some View {
+            MainView(machine: MetaMachine.initialSwiftMachine()).environmentObject(config)
+        }
+        
+    }
+    
+    static var previews: some View {
+        VStack {
+            Preview()
         }
     }
 }

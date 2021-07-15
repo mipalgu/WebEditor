@@ -5,13 +5,10 @@
 //  Created by Morgan McColl on 22/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
+import Foundation
 
-public protocol _Moveable: class {}
+public protocol _Moveable {}
 
 public extension Moveable where Self: _Moveable {
     

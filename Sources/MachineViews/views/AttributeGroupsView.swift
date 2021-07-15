@@ -5,67 +5,56 @@
 //  Created by Morgan McColl on 15/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
-import Machines
+import MetaMachines
 import Attributes
 import Utilities
 import AttributeViews
+import GUUI
 
-public struct AttributeGroupsView: View {
+public struct AttributeGroupsView<Root: Modifiable, ExtraTabs: View>: View {
     
-    @ObservedObject var machine: Ref<Machine>
-    let path: Attributes.Path<Machine, [AttributeGroup]>
+    @ObservedObject var viewModel: AttributeGroupsViewModel<Root>
+    
     let label: String
+    let extraTabs: (() -> ExtraTabs)?
     
     @EnvironmentObject var config: Config
     
-    @State var selection: AttributeGroup? = nil
-    
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, [AttributeGroup]>, label: String) {
-        self.machine = machine
-        self.path = path
+    init(viewModel: AttributeGroupsViewModel<Root>, label: String, extraTabs: @escaping () -> ExtraTabs) {
+        self.viewModel = viewModel
         self.label = label
+        self.extraTabs = .some(extraTabs)
+    }
+    
+    init(viewModel: AttributeGroupsViewModel<Root>, label: String) where ExtraTabs == EmptyView {
+        self.viewModel = viewModel
+        self.label = label
+        self.extraTabs = nil
     }
     
     public var body: some View {
         VStack {
-            Text(label.capitalized)
+            Text(label.pretty)
                 .font(.title3)
                 .foregroundColor(config.textColor)
-            TabView(selection: Binding($selection)) {
-                ForEach(Array(machine[path: path].value.enumerated()), id: \.1.name) { (index, group) in
-                    AttributeGroupView<Config>(root: machine.asBinding, path: path[index], label: group.name)
-                        .padding(.horizontal, 10)
-                        .tabItem {
-                            Text(group.name.pretty)
-                        }
-                }
-                ScrollView(.vertical, showsIndicators: true) {
-                    Form {
-                        HStack {
-                            VStack(alignment: .leading) {
-                                CollectionView<Config>(
-                                    root: machine.asBinding,
-                                    path: Machine.path.dependencyAttributes,
-                                    label: "Machine Dependencies",
-                                    type: machine.value.dependencyAttributeType
-                                )
+            if !viewModel.attributes.isEmpty {
+                TabView(selection: Binding($viewModel.selection)) {
+                    ForEach(viewModel.attributes, id: \.id) { group in
+                        AttributeGroupView(viewModel: group)
+                            .padding(.horizontal, 10)
+                            .tabItem {
+                                Text(group.name.pretty)
                             }
-                            Spacer()
-                        }
+                    }
+                    if let extraTabs = extraTabs {
+                        extraTabs()
                     }
                 }
-                .padding(.horizontal, 10)
-                .tabItem {
-                    Text("Dependencies")
-                }
+            } else {
+                Spacer()
             }
-            
         }
     }
 }

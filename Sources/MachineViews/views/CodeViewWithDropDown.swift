@@ -5,93 +5,86 @@
 //  Created by Morgan McColl on 16/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
+import AttributeViews
 import Attributes
 import Utilities
 
 struct CodeViewWithDropDown<Label: View>: View {
     
-    @Binding var value: Code
-    @Binding var errors: [String]
-    let language: Language
-    let label: () -> Label
+    @Binding var expanded: Bool
+    @Binding var hasErrors: Bool
     
-    @Binding var collapsed: Bool
+    let minHeight: CGFloat
+    
+    let label: () -> Label
+    let codeView: () -> CodeView<Text>
     
     @EnvironmentObject var config: Config
     
-    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, label: String, language: Language, collapsed: Binding<Bool>) where Label == Text {
-        self.init(root: root, path: path, language: language, collapsed: collapsed) { Text(label.capitalized) }
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, label: String, language: Language, expanded: Binding<Bool>, minHeight: CGFloat = 0.0, notifier: GlobalChangeNotifier? = nil) where Label == Text {
+        self.init(root: root, path: path, language: language, expanded: expanded, minHeight: minHeight, notifier: notifier) { Text(label.pretty) }
     }
     
-    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, language: Language, collapsed: Binding<Bool>, label: @escaping () -> Label) {
+    init<Root: Modifiable>(root: Binding<Root>, path: Attributes.Path<Root, Code>, language: Language, expanded: Binding<Bool>, minHeight: CGFloat = 100.0, notifier: GlobalChangeNotifier? = nil, label: @escaping () -> Label) {
         self.init(
-            value: Binding(
-                get: { root.wrappedValue[keyPath: path.keyPath] },
-                set: {
-                    _ = try? root.wrappedValue.modify(attribute: path, value: $0)
-                }
-            ),
-            errors: Binding(
-                get: { root.wrappedValue.errorBag.errors(forPath: path).map(\.message) },
+            expanded: expanded,
+            hasErrors: Binding(
+                get: { !root.wrappedValue.errorBag.errors(forPath: path).isEmpty },
                 set: { _ in }
             ),
-            language: language,
-            collapsed: collapsed,
+            minHeight: minHeight,
             label: label
-        )
+        ) {
+            CodeView<Text>(root: root, path: path, label: "", language: language, notifier: notifier)
+        }
     }
     
-    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), label: String, language: Language, collapsed: Binding<Bool>) where Label == Text {
+    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), label: String, language: Language, expanded: Binding<Bool>, minHeight: CGFloat = 0.0, delayEdits: Bool = false) where Label == Text {
         self.init(
             value: value,
             errors: errors,
             language: language,
-            collapsed: collapsed,
+            expanded: expanded,
+            delayEdits: delayEdits,
+            minHeight: minHeight,
             label: { Text(label.pretty) }
         )
     }
     
-    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), language: Language, collapsed: Binding<Bool>, label: @escaping () -> Label) {
-        self._value = value
-        self._errors = errors
-        self.language = language
-        self._collapsed = collapsed
+    init(value: Binding<Code>, errors: Binding<[String]> = .constant([]), language: Language, expanded: Binding<Bool>, delayEdits: Bool = false, minHeight: CGFloat = 0.0, label: @escaping () -> Label) {
+        self.init(
+            expanded: expanded,
+            hasErrors: Binding(
+                get: { !errors.wrappedValue.isEmpty },
+                set: { _ in }
+            ),
+            label: label
+        ) {
+            CodeView<Text>(value: value, errors: errors, label: "", language: language, delayEdits: delayEdits)
+        }
+    }
+    
+    private init(expanded: Binding<Bool>, hasErrors: Binding<Bool>, minHeight: CGFloat = 0.0, label: @escaping () -> Label, codeView: @escaping () -> CodeView<Text>) {
+        self._expanded = expanded
+        self._hasErrors = hasErrors
         self.label = label
+        self.codeView = codeView
+        self.minHeight = minHeight
     }
     
     var body: some View {
         VStack(alignment: .leading) {
-            HStack(spacing: 0) {
-                if !errors.isEmpty {
-                    Text("*").foregroundColor(.red)
-                }
-                label()
-                Button(action: { collapsed = !collapsed }) {
-                    Image(systemName: collapsed ? "arrowtriangle.right.fill" : "arrowtriangle.down.fill")
-                        .font(.system(size: 8.0, weight: .regular))
-                        .frame(width: 12.0, height: 12.0)
-                }.buttonStyle(PlainButtonStyle())
-                Spacer()
-            }
-            if !collapsed {
-                ForEach(errors, id: \.self) { error in
-                    Text(error).foregroundColor(.red)
-                }
-                TextEditor(text: $value)
-                    .font(config.fontBody)
-                    .foregroundColor(config.textColor)
-                    .disableAutocorrection(true)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 2)
-                    )
-                    .frame(minHeight: 80)
+            DisclosureGroup(isExpanded: $expanded, content: {
+                codeView().padding(.top, -10).frame(minHeight: self.minHeight)
+            }) {
+                HStack(spacing: 0) {
+                    if hasErrors {
+                        Text("*").foregroundColor(.red)
+                    }
+                    label()
+                }.frame(alignment: .leading)
             }
         }
     }
@@ -111,7 +104,7 @@ struct CodeViewWithDropDown_Previews: PreviewProvider {
         
         let config = Config()
         
-        @State var collapsed: Bool = false
+        @State var expanded: Bool = true
         
         var body: some View {
             CodeViewWithDropDown(
@@ -119,7 +112,7 @@ struct CodeViewWithDropDown_Previews: PreviewProvider {
                 path: path,
                 label: "Root",
                 language: .swift,
-                collapsed: $collapsed
+                expanded: $expanded
             ).environmentObject(config)
         }
         
@@ -129,7 +122,7 @@ struct CodeViewWithDropDown_Previews: PreviewProvider {
         
         @State var value: Code = "print(\"Hello World!\")"
         @State var errors: [String] = ["An error", "A second error"]
-        @State var collapsed: Bool = false
+        @State var expanded: Bool = true
         
         let config = Config()
         
@@ -139,7 +132,7 @@ struct CodeViewWithDropDown_Previews: PreviewProvider {
                 errors: $errors,
                 label: "Binding",
                 language: .swift,
-                collapsed: $collapsed
+                expanded: $expanded
             ).environmentObject(config)
         }
         
@@ -149,7 +142,7 @@ struct CodeViewWithDropDown_Previews: PreviewProvider {
         VStack {
             Root_Preview()
             Binding_Preview()
-        }
+        }.padding(10)
     }
 }
 

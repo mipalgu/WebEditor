@@ -5,48 +5,116 @@
 //  Created by Morgan McColl on 2/12/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
 import Utilities
 
-struct ArrowWithLabelView: View {
+struct ArrowWithLabelView<StrokeView: View, LabelView: View, EditLabelView: View>: View {
     
-    var point0: CGPoint
+    @Binding var curve: Curve
     
-    var point1: CGPoint
+    var editing: Bool
     
-    var point2: CGPoint
+    var color: Color
     
-    var point3: CGPoint
+    let strokeView: (Binding<Curve>) -> StrokeView
     
-    var strokeNumber: UInt8
+    let label: () -> LabelView
     
-    @Binding var label: String
-    
-    var colour: Color
+    let editLabel: () -> EditLabelView
     
     @EnvironmentObject public var config: Config
     
     var center: CGPoint {
-        let dx = (point2.x - point1.x) / 2.0
-        let dy = (point2.y - point1.y) / 2.0
-        return CGPoint(x: point1.x + dx, y: point1.y + dy)
+        let dx = (curve.point2.x - curve.point1.x) / 2.0
+        let dy = (curve.point2.y - curve.point1.y) / 2.0
+        return CGPoint(x: curve.point1.x + dx, y: curve.point1.y + dy)
     }
     
     var body: some View {
         ZStack {
-            ArrowView(point0: point0, point1: point1, point2: point2, point3: point3, strokeNumber: strokeNumber, colour: colour)
-                .coordinateSpace(name: "MAIN_VIEW")
-            TextField("", text: $label)
-                .coordinateSpace(name: "MAIN_VIEW")
-                .font(config.fontBody)
-                .fixedSize()
-                .position(center)
+            ArrowView(curve: $curve, colour: color, strokeView: strokeView)
+            if editing {
+//                TextField("", text: $label)
+//                    .font(config.fontBody)
+                editLabel()
+                    .fixedSize()
+                    .position(center)
+            } else {
+//                Text(label)
+//                    .font(config.fontBody.italic())
+                label()
+                    .fixedSize()
+                    .position(center)
+            }
         }
-        .coordinateSpace(name: "MAIN_VIEW")
     }
 }
+
+//struct ArrowWithLabelView_Previews: PreviewProvider {
+//
+//    struct Editing_Preview: View {
+//
+//        @State var curve = Curve(
+//            point0: CGPoint(x: 50, y: 50),
+//            point1: CGPoint(x: 100, y: 100),
+//            point2: CGPoint(x: 150, y: 100),
+//            point3: CGPoint(x: 150, y: 50)
+//        )
+//
+//        let strokeNumber: UInt8 = 2
+//        @State var label: String = "true"
+//        var editing: Bool = true
+//        let color: Color = .black
+//
+//        let config = Config()
+//
+//        var body: some View {
+//            ArrowWithLabelView(
+//                curve: $curve,
+//                strokeNumber: strokeNumber,
+//                editing: editing,
+//                color: color,
+//                label: { Text(label) },
+//                editLabel: { TextField("", text: $label) }
+//            ).environmentObject(config)
+//        }
+//
+//    }
+//
+//    struct NotEditing_Preview: View {
+//
+//        @State var curve = Curve(
+//            point0: CGPoint(x: 50, y: 50),
+//            point1: CGPoint(x: 100, y: 100),
+//            point2: CGPoint(x: 150, y: 100),
+//            point3: CGPoint(x: 150, y: 50)
+//        )
+//
+//        let strokeNumber: UInt8 = 2
+//        @State var label: String = "true"
+//        var editing: Bool = false
+//        let color: Color = .black
+//
+//        let config = Config()
+//
+//        var body: some View {
+//            ArrowWithLabelView(
+//                curve: $curve,
+//                strokeNumber: strokeNumber,
+//                editing: editing,
+//                color: color,
+//                label: { Text(label) },
+//                editLabel: { TextField("", text: $label) }
+//            ).environmentObject(config)
+//        }
+//
+//    }
+//
+//    static var previews: some View {
+//        VStack {
+//            Editing_Preview()
+//            NotEditing_Preview()
+//        }
+//    }
+//}

@@ -5,30 +5,22 @@
 //  Created by Morgan McColl on 15/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
-import Machines
+import MetaMachines
 import Attributes
 import AttributeViews
 
 public final class Config: ObservableObject, AttributeViewConfig {
     
-    #if canImport(TokamakShim)
-    @Published public var textColor = Color.black
-    #elseif canImport(AppKit)
+    #if canImport(AppKit)
     @Published public var textColor = Color(NSColor.controlTextColor)
     #elseif canImport(UIKit)
     @Published public var textColor = Color(UIColor.secondaryLabel)
     #else
     @Published public var textColor = Color.black
     #endif
-    
-    #if canImport(TokamakShim)
-    @Published public var backgroundColor = Color.white
-    #elseif canImport(AppKit)
+
+    #if canImport(AppKit)
     @Published public var backgroundColor = Color(NSColor.controlBackgroundColor)
     #elseif canImport(UIKit)
     @Published public var backgroundColor = Color(UIColor.secondarySystemBackground)
@@ -42,9 +34,7 @@ public final class Config: ObservableObject, AttributeViewConfig {
     
     @Published public var height: CGFloat = 200
     
-    #if canImport(TokamakShim)
-    @Published public var stateColour = Color.white
-    #elseif canImport(AppKit)
+    #if canImport(AppKit)
     @Published public var stateColour = Color(NSColor.windowBackgroundColor)
     #elseif canImport(UIKit)
     @Published public var stateColour = Color(UIColor.systemBackground)
@@ -52,9 +42,7 @@ public final class Config: ObservableObject, AttributeViewConfig {
     @Published public var stateColour = Color.white
     #endif
     
-    #if canImport(TokamakShim)
-    @Published public var stateTextColour = Color.black
-    #elseif canImport(AppKit)
+    #if canImport(AppKit)
     @Published public var stateTextColour = Color(NSColor.labelColor)
     #elseif canImport(UIKit)
     @Published public var stateTextColour = Color(UIColor.label)
@@ -62,35 +50,38 @@ public final class Config: ObservableObject, AttributeViewConfig {
     @Published public var stateTextColour = Color.black
     #endif
     
-    #if canImport(TokamakShim)
-    @Published public var borderColour = Color.white
-    #elseif canImport(AppKit)
+    #if canImport(AppKit)
     @Published public var borderColour = Color(NSColor.separatorColor)
     #elseif canImport(UIKit)
     @Published public var borderColour = Color(UIColor.opaqueSeparator)
     #else
     @Published public var borderColour = Color.white
     #endif
-    
-    #if canImport(TokamakShim)
-    @Published public var shadowColour = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5)
-    #elseif canImport(AppKit)
+
+    #if canImport(AppKit)
     @Published public var shadowColour = Color(NSColor.shadowColor)
     #elseif canImport(UIKit)
     @Published public var shadowColour = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5)
     #else
     @Published public var shadowColour = Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.5)
     #endif
-    
-    #if canImport(TokamakShim)
-    @Published public var highlightColour = Color.blue
-    #elseif canImport(AppKit)
+
+    #if canImport(AppKit)
     @Published public var highlightColour = Color(NSColor.selectedContentBackgroundColor)
     #elseif canImport(UIKit)
     @Published public var highlightColour = Color(UIColor.tertiarySystemBackground)
     #else
     @Published public var highlightColour = Color.blue
     #endif
+
+    #if canImport(AppKit)
+    @Published public var errorColour = Color(NSColor.systemRed)
+    #elseif canImport(UIKit)
+    @Published public var errorColour = Color(.sRGB, red: 1.0, green: 0, blue: 0, opacity: 0.5)
+    #else
+    @Published public var errorColour = Color.red
+    #endif
+    
     @Published public var fontTitle1: Font = Font.system(size: 32.0)
     @Published public var fontTitle2: Font = Font.system(size: 24.0)
     @Published public var fontTitle3: Font = Font.system(size: 20.0)
@@ -99,7 +90,9 @@ public final class Config: ObservableObject, AttributeViewConfig {
     
     @Published public var rightPaneStartPoint: CGFloat = 200.0
     
-    @Published public var alertView: DialogType = .none
+    //@Published public var alertView: DialogType = .none
+    
+//    @Published public var focusedObjects: FocusedObjects = FocusedObjects()
     
     public init() {}
     

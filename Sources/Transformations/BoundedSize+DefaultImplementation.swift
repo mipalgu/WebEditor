@@ -5,21 +5,10 @@
 //  Created by Morgan McColl on 25/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
+import Foundation
 
-public protocol _BoundedSize: class {
-    
-    var _width: CGFloat { get set }
-    
-    var _height: CGFloat { get set }
-    
-}
-
-public extension BoundedSize where Self: _BoundedSize & Rigidable {
+public extension BoundedSize where Self: _Rigidable & Rigidable {
     
     var width: CGFloat {
         get {

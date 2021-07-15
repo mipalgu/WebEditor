@@ -5,13 +5,9 @@
 //  Created by Morgan McColl on 14/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
-import Machines
+import MetaMachines
 import Attributes
 import Utilities
 import AttributeViews
@@ -22,40 +18,46 @@ struct StateEditView: View {
     
     @EnvironmentObject var config: Config
     
-    init(viewModel: StateViewModel) {
-        self.viewModel = viewModel
-    }
-    
     var body: some View {
-        GeometryReader { reader in
+        GeometryReader { geometry in
             ScrollView {
                 VStack(alignment: .leading) {
-                    LineView<Config>(root: viewModel.$machine.asBinding, path: viewModel.path.name, label: viewModel.name)
+                    LineView(viewModel: viewModel.nameViewModel)
                         .multilineTextAlignment(.center)
                         .font(config.fontTitle2)
                         .background(config.fieldColor)
                         .foregroundColor(config.textColor)
-                        .frame(minWidth: min(viewModel.minEditWidth - 2.0 * viewModel.editPadding, reader.size.width - 2.0 * viewModel.editPadding), maxWidth: reader.size.width - 2.0 * viewModel.editPadding, maxHeight: viewModel.maxTitleHeight, alignment: .center)
-                    ForEach(Array(viewModel.actions.enumerated()), id: \.0) { (index, action) in
-                        CodeView<Config, AnyView>(root: viewModel.$machine.asBinding, path: viewModel.path.actions[index].implementation, language: .swift) { () -> AnyView in
-                            if viewModel.isEmpty(forAction: action.name) {
-                                return AnyView(
-                                    Text(action.name + ":").font(config.fontHeading).underline().italic().foregroundColor(config.stateTextColour)
-                                )
-                            } else {
-                                return AnyView(
-                                    Text(action.name + ":").font(config.fontHeading).underline().foregroundColor(config.stateTextColour)
-                                )
-                            }
-                        }
-                        .padding(.top, viewModel.editActionPadding)
-                        .padding(.horizontal, 0)
-                        .frame(width: reader.size.width - 2.0 * viewModel.editPadding, height: viewModel.getHeightOfActionForEdit(height: reader.size.height))
-                        
+                    ForEach(viewModel.actions, id: \.self) { action in
+                        StateEditActionView(viewModel: viewModel.viewModel(forAction: action))
+                            .frame(minHeight: max(geometry.size.height / CGFloat(viewModel.actions.count) - 25, 50))
                     }
-                }
-            }
-            .padding(viewModel.editPadding)
+                }.padding(10)
+            }.frame(height: geometry.size.height)
         }
     }
 }
+
+//struct StateEditView_Previews: PreviewProvider {
+//    
+//    struct Preview: View {
+//        
+//        @State var machine: MetaMachine = MetaMachine.initialSwiftMachine()
+//        
+//        let path = Machine.path.states[0]
+//        
+//        let config = Config()
+//        
+//        var body: some View {
+//            StateEditView(titleViewModel: StateTitleViewModel(machine: $machine, path: machine.path.states[0].name, cache: ViewCache(machine: $machine)), actionViewModels: machine.states[0].actions.indices.map {
+//                ActionViewModel(machine: $machine, path: machine.path.states[0].actions[$0])
+//            }).environmentObject(config)
+//        }
+//        
+//    }
+//    
+//    static var previews: some View {
+//        VStack {
+//            Preview()
+//        }
+//    }
+//}

@@ -5,17 +5,16 @@
 //  Created by Morgan McColl on 22/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
+import Foundation
 
 public protocol MoveFromDrag: Dragable, _Moveable, Moveable {}
 
 public protocol StretchFromDrag: Dragable, Stretchable {}
 
 public protocol MoveAndStretchFromDrag: MoveFromDrag, StretchFromDrag {}
+
+public protocol NoMoveOnTextRepresentable: MoveAndStretchFromDrag, RigidCollapsableTextRepresentable {}
 
 public extension Dragable where Self: MoveFromDrag {
     
@@ -103,6 +102,29 @@ public extension Dragable where Self: MoveAndStretchFromDrag {
         self.isDragging = false
         self.isStretchingY = false
         self.isStretchingX = false
+    }
+    
+}
+
+public extension NoMoveOnTextRepresentable {
+    
+    func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        if isText {
+            return
+        }
+        if isStretchingY || isStretchingX {
+            stretchFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+            return
+        }
+        if isDragging {
+            moveFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+            return
+        }
+        if onEdge(point: gesture.startLocation) {
+            stretchFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+            return
+        }
+        moveFromDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
     }
     
 }

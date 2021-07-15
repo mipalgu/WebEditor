@@ -5,77 +5,101 @@
 //  Created by Morgan McColl on 30/11/20.
 //
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
 
-import Machines
+import MetaMachines
 import Attributes
 import Utilities
 
 struct DependencyView: View {
     
-    @Binding var machines: [Ref<Machine>]
+    let dependency: MachineDependency
     
-    @Binding var currentIndex: Int
+    @ObservedObject var viewModel: DependencyViewModel
     
-    @Binding var dependency: Ref<Machine>
+    @Binding var focus: URL
     
-    @State var collapsed: Bool = true
+    let padding: CGFloat
+    
+    let parents: Set<URL>
     
     @EnvironmentObject var config: Config
     
     var body: some View {
         VStack {
             HStack {
-                if machines.count > 0 {
-                    if !collapsed {
-                        Button(action: { collapsed = true }) {
-                            Image(systemName: "arrowtriangle.down.fill")
-                                .font(.system(size: 8.0, weight: .regular))
-                                .frame(width: 15.0, height: 15.0)
-                        }.buttonStyle(PlainButtonStyle())
-                        
+                Group {
+                    if let machineViewModel = viewModel.viewModel, machineViewModel.machine.dependencies.isEmpty {
+                        Text(dependency.name)
+                            .foregroundColor(config.textColor)
+                            .padding(.leading, 25)
+                            .frame(height: 28)
+                    } else if let machineViewModel = viewModel.viewModel, !machineViewModel.machine.dependencies.isEmpty {
+                        Toggle(isOn: $viewModel.expanded) {
+                            Text(dependency.name)
+                                .foregroundColor(config.textColor)
+                                .frame(height: 28)
+                        }.toggleStyle(ArrowToggleStyle(side: .left))
                     } else {
-                        Button(action: { collapsed = false }) {
-                            Image(systemName: "arrowtriangle.right.fill")
-                                .font(.system(size: 8.0, weight: .regular))
-                                .frame(width: 15.0, height: 15.0)
-                        }.buttonStyle(PlainButtonStyle())
+                        Text(dependency.name)
+                            .foregroundColor(.red)
+                            .padding(.leading, 25)
+                            .frame(height: 28)
                     }
+                }.onTapGesture {
+                    focus = dependency.filePath
                 }
-                DependencyLabelView(
-                    machines: $machines,
-                    currentIndex: $currentIndex,
-                    name: Binding(
-                        get: { dependency.value.name },
-                        set: {_ in }
-                    ),
-                    collapsed: Binding(get: { collapsed }, set: { collapsed = $0 })
-                )
                 Spacer()
-            }
-            if !collapsed {
-                if machines.count > 0 {
-                    ForEach(Array(dependency.value.dependencies.indices), id: \.self) { (index: Int) -> AnyView in
-                        guard let machine = machines.first(where: { $0.value.name == dependency.value.dependencies[index].name }) else {
-                            return AnyView(EmptyView())
+            }.padding(.leading, 10)
+            .background(focus == dependency.filePath ? AnyView(config.highlightColour.clipShape(RoundedRectangle(cornerRadius: 5))) : AnyView(Color.clear))
+            if viewModel.expanded, let machineViewModel = viewModel.viewModel {
+                VStack {
+                    ForEach(machineViewModel.machine.dependencies, id: \.filePath) { dependency in
+                        if !parents.contains(dependency.filePath) {
+                            DependencyView(
+                                dependency: dependency,
+                                viewModel: viewModel.viewModel(forDependency: dependency),
+                                focus: $focus,
+                                padding: padding + padding,
+                                parents: parents.union([dependency.filePath])
+                            )
                         }
-                        return AnyView(DependencyView(
-                            machines: $machines,
-                            currentIndex: $currentIndex,
-                            dependency: Binding(get: { machine }, set: { _ in })
-                        ))
                     }
-                } else {
-                    Text("Nothing")
-                }
+                }.padding(.leading, 10)
             }
         }
-        .padding(.leading, 10)
-        .clipped()
     }
 }
 
+//struct DependencyView_Previews: PreviewProvider {
+//
+//    struct Preview: View {
+//
+//        @State var expanded: Bool = false
+//
+//        @State var focus: URL = Machine.initialSwiftMachine().filePath
+//
+//        @State var dependency: MachineDependency = MachineDependency(name: "Initial Swift Machine", filePath: MetaMachine.initialSwiftMachine().filePath)
+//
+//        @State var machines: [URL: MetaMachine] = [:]
+//
+//        let config = Config()
+//
+//        var body: some View {
+//            DependencyView(
+//                expanded: $expanded,
+//                focus: $focus,
+//                dependency: $dependency,
+//                machines: $machines,
+//                padding: 10
+//            ).environmentObject(config)
+//        }
+//
+//    }
+//
+//    static var previews: some View {
+//        VStack {
+//            Preview()
+//        }
+//    }
+//}

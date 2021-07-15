@@ -56,10 +56,10 @@
  *
  */
 
-#if canImport(TokamakShims)
-import TokamakShims
+#if canImport(TokamakShim)
+import TokamakShim
 
-public typealias State = TokamakShims.State
+public typealias State = TokamakShim.State
 #else
 import SwiftUI
 

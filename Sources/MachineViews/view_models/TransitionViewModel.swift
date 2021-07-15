@@ -1,138 +1,116 @@
-//
-//  TransitionViewModel.swift
-//  
-//
-//  Created by Morgan McColl on 22/11/20.
-//
+/*
+ * TransitionViewModel.swift
+ * 
+ *
+ * Created by Callum McColl on 10/5/21.
+ * Copyright © 2021 Callum McColl. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ *    copyright notice, this list of conditions and the following
+ *    disclaimer in the documentation and/or other materials
+ *    provided with the distribution.
+ *
+ * 3. All advertising materials mentioning features or use of this
+ *    software must display the following acknowledgement:
+ *
+ *        This product includes software developed by Callum McColl.
+ *
+ * 4. Neither the name of the author nor the names of contributors
+ *    may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * -----------------------------------------------------------------------
+ * This program is free software; you can redistribute it and/or
+ * modify it under the above terms or under the terms of the GNU
+ * General Public License as published by the Free Software Foundation;
+ * either version 2 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, see http://www.gnu.org/licenses/
+ * or write to the Free Software Foundation, Inc., 51 Franklin Street,
+ * Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ */
 
-#if canImport(TokamakShim)
 import TokamakShim
-#else
-import SwiftUI
-#endif
-
-import Machines
+import MetaMachines
 import Attributes
+import AttributeViews
 import Transformations
 import Utilities
+import GUUI
 
-public final class TransitionViewModel: ObservableObject, Equatable, Hashable, Dragable {
+final class TransitionViewModel: ObservableObject, Identifiable, GlobalChangeNotifier {
     
-    public static func == (lhs: TransitionViewModel, rhs: TransitionViewModel) -> Bool {
-        lhs === rhs
-    }
+    weak var notifier: GlobalChangeNotifier?
     
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(machine)
-        hasher.combine(path)
-    }
+    let machineRef: Ref<MetaMachine>
     
-    @Reference var machine: Machine
+    @Published var stateIndex: Int
     
-    let path: Attributes.Path<Machine, Transition>
+    @Published var transitionIndex: Int
     
-    var transition: Transition {
-        machine[keyPath: path.path]
-    }
+    let tracker: TransitionTracker
     
-    @Published var priority: UInt8
-    
-    @Published var point0: CGPoint
-    
-    @Published var point1: CGPoint
-    
-    @Published var point2: CGPoint
-    
-    @Published var point3: CGPoint
-    
-    let pointDiameter: CGFloat
-    
-    var condition: String {
+    var machine: MetaMachine {
         get {
-            String(machine[keyPath: path.path].condition ?? "")
-        }
-        set {
-            do {
-                try machine.modify(attribute: path.condition, value: Expression(newValue))
-            } catch let error {
-                print(error)
-            }
+            machineRef.value
+        } set {
+            machineRef.value = newValue
+            objectWillChange.send()
         }
     }
     
-    var conditionPosition: CGPoint {
-        let dx = (point2.x - point1.x) / 2.0
-        let dy = (point2.y - point1.y) / 2.0
-        return CGPoint(x: point1.x + dx, y: point1.y + dy)
+    var path: Attributes.Path<MetaMachine, Transition> {
+        MetaMachine.path.states[stateIndex].transitions[transitionIndex]
     }
     
-    public var isDragging: Bool = false
-    
-    var startLocation: (CGPoint, CGPoint, CGPoint, CGPoint) = (.zero, .zero, .zero, .zero)
-    
-    public init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, point0: CGPoint, point1: CGPoint, point2: CGPoint, point3: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
-        self._machine = Reference(reference: machine)
-        self.path = path
-        self.point0 = point0
-        self.point1 = point1
-        self.point2 = point2
-        self.point3 = point3
-        self.priority = priority
-        self.pointDiameter = pointDiameter
-        self.listen(to: $machine)
+    var condition: Expression {
+        path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].condition ?? ""
     }
     
-    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: CGPoint, destination: CGPoint, priority: UInt8, pointDiameter: CGFloat = 10.0) {
-        let dx = destination.x - source.x
-        let dy = destination.y - source.y
-        let r = sqrt(dx * dx + dy * dy)
-        let theta = atan2(Double(dy), Double(dx))
-        let rcost = r * CGFloat(cos(theta))
-        let rsint = r * CGFloat(sin(theta))
-        let p1x = source.x + 0.33 * rcost
-        let p1y = source.y + 0.33 * rsint
-        let p2x = source.x + 0.66 * rcost
-        let p2y = source.y + 0.66 * rsint
-        self.init(machine: machine, path: path, point0: source, point1: CGPoint(x: p1x, y: p1y), point2: CGPoint(x: p2x, y: p2y), point3: destination, priority: priority, pointDiameter: pointDiameter)
+    var target: StateName {
+        path.isNil(machineRef.value) ? "" : machineRef.value[keyPath: path.keyPath].target
     }
     
-    public convenience init(machine: Ref<Machine>, path: Attributes.Path<Machine, Transition>, source: StateViewModel, destination: StateViewModel, priority: UInt8, pointDiameter: CGFloat = 10.0) {
-        let dx = destination.location.x - source.location.x
-        let dy = destination.location.y - source.location.y
-        let theta = atan2(Double(dy), Double(dx))
-        let sourceEdge = source.findEdge(radians: CGFloat(theta))
-        let destinationTheta = theta + Double.pi > Double.pi ? theta - Double.pi : theta + Double.pi
-        let destinationEdge = destination.findEdge(radians: CGFloat(destinationTheta))
-        self.init(machine: machine, path: path, source: sourceEdge, destination: destinationEdge, priority: priority, pointDiameter: pointDiameter)
+    lazy var lineViewModel: LineViewModel = {
+        LineViewModel(root: machineRef, path: path.condition, label: "", notifier: notifier)
+    }()
+    
+    init(machine: Ref<MetaMachine>, stateIndex: Int, transitionIndex: Int, layout: TransitionLayout? = nil, notifier: GlobalChangeNotifier? = nil) {
+        self.machineRef = machine
+        self.stateIndex = stateIndex
+        self.transitionIndex = transitionIndex
+        self.tracker = layout.map { TransitionTracker(layout: $0) } ?? TransitionTracker(curve: Curve(source: .zero, target: .zero))
+        self.notifier = notifier
     }
     
-    func translate(point: CGPoint, trans: CGSize) -> CGPoint {
-        CGPoint(x: point.x + trans.width, y: point.y + trans.height)
-    }
-    
-    func boundPoint(point: CGPoint, frameWidth: CGFloat, frameHeight: CGFloat) -> CGPoint {
-        CGPoint(x: min(max(0, point.x), frameWidth), y: min(max(0, point.y), frameHeight))
-    }
-    
-    func boundTranslate(point: CGPoint, trans: CGSize, frameWidth: CGFloat, frameHeight: CGFloat) -> CGPoint {
-        boundPoint(point: translate(point: point, trans: trans), frameWidth: frameWidth, frameHeight: frameHeight)
-    }
-    
-    public func handleDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
-        if isDragging {
-            point0 = boundTranslate(point: startLocation.0, trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            point1 = boundTranslate(point: startLocation.1, trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            point2 = boundTranslate(point: startLocation.2, trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            point3 = boundTranslate(point: startLocation.3, trans: gesture.translation, frameWidth: frameWidth, frameHeight: frameHeight)
-            return
-        }
-        startLocation = (point0, point1, point2, point3)
-        isDragging = true
-    }
-    
-    public func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
-        handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
-        isDragging = false
+    func send() {
+        objectWillChange.send()
     }
     
 }
