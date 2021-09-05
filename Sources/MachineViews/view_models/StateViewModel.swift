@@ -137,7 +137,7 @@ final class StateViewModel: ObservableObject, Identifiable {
             if newValue == oldName {
                 return
             }
-            let result = machineRef.value.modify(attribute: path.name, value: newValue)
+            let result = machineRef.value.changeStateName(atIndex: index, to: newValue)
             defer { objectWillChange.send() }
             switch result {
             case .success(let notify):
