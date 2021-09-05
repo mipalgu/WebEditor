@@ -10,25 +10,32 @@ import TokamakShim
 import AttributeViews
 import Attributes
 import MetaMachines
+import CXXMachines
 
 final class MainViewModel: ObservableObject, GlobalChangeNotifier {
     
-    @Published var focus: URL
+    struct IOError: Error {
+        
+        var message: String
+        
+    }
+    
+    @Published var focus: String
     
     let root: Root
     
-    private var viewModels: [URL: MachineViewModel]
+    private var viewModels: [String: MachineViewModel]
     
-    lazy var dependenciesViewModel: DependenciesViewModel = {
-        DependenciesViewModel(machineViewModel: { [unowned self] in
-            self.viewModel(for: $0)
-        })
-    }()
+//    lazy var dependenciesViewModel: DependenciesViewModel = {
+//        DependenciesViewModel(machineViewModel: { [unowned self] in
+//            self.viewModel(for: $0)
+//        })
+//    }()
     
     var subView: AnyView {
         switch root {
         case .arrangement(let arrangementViewModel):
-            if focus == arrangementViewModel.arrangement.filePath {
+            if focus == arrangementViewModel.arrangement.name {
                 return AnyView(ArrangementView(viewModel: arrangementViewModel))
             }
             fallthrough
@@ -40,33 +47,45 @@ final class MainViewModel: ObservableObject, GlobalChangeNotifier {
         }
     }
     
+    convenience init(wrapper: FileWrapper) throws {
+        guard let filename = wrapper.filename else {
+            throw IOError(message: "Wrapper does not have a file name.")
+        }
+        if filename.hasPrefix(".machine") {
+            try self.init(root: .machine(MachineViewModel(wrapper: wrapper, notifier: nil)))
+            return
+        }
+        throw IOError(message: "Attempting to open an unsupported file format.")
+    }
+    
     init(root: Root) {
         self.root = root
         switch root {
         case .arrangement(let viewModel):
-            focus = viewModel.arrangement.filePath
+            focus = viewModel.arrangement.name
             viewModels = [:]
             viewModel.notifier = self
         case .machine(let viewModel):
-            focus = viewModel.machine.filePath
-            self.viewModels = [viewModel.machine.filePath: viewModel]
+            focus = viewModel.machine.name
+            self.viewModels = [viewModel.machine.name: viewModel]
             viewModel.notifier = self
         }
     }
     
-    func viewModel(for url: URL) -> MachineViewModel? {
-        if let viewModel = viewModels[url] {
+    func viewModel(for name: String) -> MachineViewModel? {
+        if let viewModel = viewModels[name] {
             return viewModel
         }
-        viewModels[url] = MachineViewModel(filePath: url, notifier: self)
-        return viewModels[url]
+        fatalError("Attempting to laod view model of dependent machine.")
+        //viewModels[name] = MachineViewModel(filePath: machineURL, notifier: self)
+        //return viewModels[url]
     }
     
     public func send() {
-        self.dependenciesViewModel.send()
+        //self.dependenciesViewModel.send()
         switch root {
         case .arrangement(let viewModel):
-            if viewModel.arrangement.filePath == focus {
+            if viewModel.arrangement.name == focus {
                 viewModel.send()
             } else {
                 fallthrough
