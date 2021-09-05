@@ -70,9 +70,8 @@ final class MachineDocument: ReferenceFileDocument {
         machineRef.value
     }
     
-    func fileWrapper(snapshot: GUIMachine, configuration: WriteConfiguration) throws -> FileWrapper {
-        let wrapper = try snapshot.fileWrapper()
-        return wrapper
+    func fileWrapper(snapshot: GUIMachine, configuration: FileDocumentWriteConfiguration) throws -> FileWrapper {
+        return try snapshot.fileWrapper()
     }
     
 }
