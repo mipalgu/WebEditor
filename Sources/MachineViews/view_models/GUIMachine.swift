@@ -63,11 +63,11 @@ public struct GUIMachine: Hashable, Codable {
     
     public var machine: MetaMachine
     
-    public var layout: Layout?
+    public var layout: Layout
     
     public init(machine: MetaMachine, layout: Layout?) {
         self.machine = machine
-        self.layout = layout
+        self.layout = layout ?? Layout(states: [:])
     }
     
     public init(from fileWrapper: FileWrapper) throws {
@@ -76,19 +76,13 @@ public struct GUIMachine: Hashable, Codable {
             self.init(machine: machine, layout: nil)
             return
         }
-        do {
-            let layout = try Layout(from: layoutWrapper)
-            self.init(machine: machine, layout: layout)
-        } catch {
-            self.init(machine: machine, layout: nil)
-        }
+        let layout = try Layout(from: layoutWrapper)
+        self.init(machine: machine, layout: layout)
     }
     
     public func fileWrapper() throws -> FileWrapper {
         let wrapper = try machine.fileWrapper()
-        guard let layoutWrapper = try layout?.fileWrapper() else {
-            return wrapper
-        }
+        let layoutWrapper = try layout.fileWrapper()
         layoutWrapper.preferredFilename = "Layout.plist"
         wrapper.addFileWrapper(layoutWrapper)
         return wrapper
