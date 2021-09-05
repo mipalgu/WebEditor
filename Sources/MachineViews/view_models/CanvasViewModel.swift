@@ -467,12 +467,14 @@ extension CanvasViewModel: StateViewModelDelegate {
                 sourceViewModel.viewModel(forTransition: $0).tracker.rectifyCurve(sourceTracker: sourceTracker, targetTracker: targetTracker)
             }
         }
+        changeLayout()
     }
     
     func didChangeName(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName) {
         stateViewModels[newName] = viewModel
         targetTransitions[newName] = targetTransitions[oldName]
         targetTransitions[oldName] = nil
+        changeLayout()
     }
     
     func didChangeTransitionTarget(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName, transition: TransitionViewModel) {
@@ -489,10 +491,23 @@ extension CanvasViewModel: StateViewModelDelegate {
             }
         }
         targetTransitions[newName]?.insert(transition.tracker)
+        changeLayout()
     }
     
     func didDeleteTransition(_ viewModel: StateViewModel, transition: TransitionViewModel, targeting targetStateName: StateName) {
         targetTransitions[targetStateName]?.removeAll(transition.tracker)
+        changeLayout()
+    }
+    
+    func didChangeLayout(_ viewModel: StateViewModel) {
+        changeLayout()
+    }
+    
+    private func changeLayout() {
+        guard let delegate = self.delegate else {
+            return
+        }
+        delegate.layoutDidChange(self, layout: self.layout)
     }
     
 }

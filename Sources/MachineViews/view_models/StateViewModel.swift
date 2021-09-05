@@ -71,6 +71,7 @@ protocol StateViewModelDelegate: AnyObject {
     func didChangeName(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName)
     func didChangeTransitionTarget(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName, transition: TransitionViewModel)
     func didDeleteTransition(_ viewModel: StateViewModel, transition: TransitionViewModel, targeting targetStateName: StateName)
+    func didChangeLayout(_ viewModel: StateViewModel)
     
 }
 
