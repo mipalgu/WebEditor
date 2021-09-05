@@ -47,17 +47,6 @@ final class MainViewModel: ObservableObject, GlobalChangeNotifier {
         }
     }
     
-    convenience init(wrapper: FileWrapper) throws {
-        guard let filename = wrapper.filename else {
-            throw IOError(message: "Wrapper does not have a file name.")
-        }
-        if filename.hasPrefix(".machine") {
-            try self.init(root: .machine(MachineViewModel(wrapper: wrapper, notifier: nil)))
-            return
-        }
-        throw IOError(message: "Attempting to open an unsupported file format.")
-    }
-    
     init(root: Root) {
         self.root = root
         switch root {

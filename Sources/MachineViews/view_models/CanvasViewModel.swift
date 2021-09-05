@@ -63,7 +63,15 @@ import Utilities
 import GUUI
 import swift_helpers
 
+protocol CanvasViewModelDelegate: AnyObject {
+    
+    func layoutDidChange(_: CanvasViewModel, layout: Layout)
+    
+}
+
 final class CanvasViewModel: ObservableObject {
+    
+    weak var delegate: CanvasViewModelDelegate?
     
     let machineRef: Ref<MetaMachine>
     

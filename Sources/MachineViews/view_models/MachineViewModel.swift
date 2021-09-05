@@ -17,10 +17,10 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     
     var machine: MetaMachine {
         get {
-            machineRef.value
+            machineRef.machine.value
         } set {
             self.objectWillChange.send()
-            machineRef.value = newValue
+            machineRef.machine.value = newValue
         }
     }
     
@@ -40,26 +40,21 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     }
     
     lazy var attributesPaneViewModel: AttributesPaneViewModel = {
-        AttributesPaneViewModel(machineRef: machineRef, focusRef: focusRef, notifier: notifier)
+        AttributesPaneViewModel(machineRef: machineRef.machine, focusRef: focusRef, notifier: notifier)
     }()
     
-    var machineRef: Ref<MetaMachine>
+    var machineRef: Ref<GUIMachine>
     
     var focusRef: Ref<Focus>
     
     convenience init(notifier: GlobalChangeNotifier? = nil) {
-        let machineRef = Ref(copying: MetaMachine.initialSwiftMachine)
+        let machineRef = Ref(copying: GUIMachine(machine: MetaMachine.initialSwiftMachine, layout: nil))
         let focusRef = Ref(copying: Focus.machine)
-        let canvasViewModel = CanvasViewModel(machineRef: machineRef, focusRef: focusRef)
+        let canvasViewModel = CanvasViewModel(machineRef: machineRef.machine, focusRef: focusRef)
         self.init(machineRef: machineRef, focusRef: focusRef, canvasViewModel: canvasViewModel, notifier: notifier)
     }
     
-    convenience init(filePath url: URL, notifier: GlobalChangeNotifier? = nil) throws {
-        let wrapper = try FileWrapper(url: url, options: .immediate)
-        try self.init(wrapper: wrapper, notifier: notifier)
-    }
-    
-    init(machineRef: Ref<MetaMachine>, focusRef: Ref<Focus>, canvasViewModel: CanvasViewModel, notifier: GlobalChangeNotifier? = nil) {
+    init(machineRef: Ref<GUIMachine>, focusRef: Ref<Focus>, canvasViewModel: CanvasViewModel, notifier: GlobalChangeNotifier? = nil) {
         self.machineRef = machineRef
         self.focusRef = focusRef
         self.canvasViewModel = canvasViewModel
@@ -69,26 +64,6 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
     convenience init(machineRef: Ref<GUIMachine>, notifier: GlobalChangeNotifier? = nil) {
         let focusRef = Ref(copying: Focus.machine)
         let canvasViewModel = CanvasViewModel(machineRef: machineRef.machine, focusRef: focusRef, layout: machineRef.value.layout, notifier: notifier)
-        self.init(machineRef: machineRef.machine, focusRef: focusRef, canvasViewModel: canvasViewModel, notifier: notifier)
-    }
-    
-    convenience init(wrapper: FileWrapper, notifier: GlobalChangeNotifier? = nil) throws {
-        let machine = try MetaMachine(from: wrapper)
-        let decoder = PropertyListDecoder()
-        let layout: Layout?
-        if let data = wrapper.fileWrappers?["Layout.plist"]?.regularFileContents, let plist = try? decoder.decode(Layout.self, from: data) {
-            layout = plist
-        } else {
-            layout = nil
-        }
-        let machineRef = Ref(copying: machine)
-        let focusRef = Ref(copying: Focus.machine)
-        let canvasViewModel = CanvasViewModel(
-            machineRef: machineRef,
-            focusRef: focusRef,
-            layout: layout,
-            notifier: notifier
-        )
         self.init(machineRef: machineRef, focusRef: focusRef, canvasViewModel: canvasViewModel, notifier: notifier)
     }
     
@@ -96,6 +71,14 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         attributesPaneViewModel.send()
         canvasViewModel.send()
         self.objectWillChange.send()
+    }
+    
+}
+
+extension MachineViewModel: CanvasViewModelDelegate {
+    
+    func layoutDidChange(_: CanvasViewModel, layout: Layout) {
+        machineRef.value.layout = layout
     }
     
 }
