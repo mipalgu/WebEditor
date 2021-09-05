@@ -71,6 +71,7 @@ public struct GUIMachine: Hashable, Codable {
     }
     
     public init(from fileWrapper: FileWrapper) throws {
+        print(fileWrapper.fileWrappers ?? [:])
         let machine = try MetaMachine(from: fileWrapper)
         guard let layoutWrapper = fileWrapper.fileWrappers?["Layout.plist"] else {
             self.init(machine: machine, layout: nil)

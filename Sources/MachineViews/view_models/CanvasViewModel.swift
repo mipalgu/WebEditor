@@ -385,7 +385,10 @@ extension CanvasViewModel {
     
     func newState() {
         let result = machineRef.value.newState()
-        defer { objectWillChange.send() }
+        defer {
+            changeLayout()
+            objectWillChange.send()
+        }
         switch result {
         case .success(true), .failure:
             notifier?.send()
@@ -499,7 +502,7 @@ extension CanvasViewModel: StateViewModelDelegate {
         changeLayout()
     }
     
-    func didChangeLayout(_ viewModel: StateViewModel) {
+    func layoutDidChange(_ viewModel: StateViewModel) {
         changeLayout()
     }
     

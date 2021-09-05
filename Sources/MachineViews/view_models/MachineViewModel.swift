@@ -59,6 +59,7 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
         self.focusRef = focusRef
         self.canvasViewModel = canvasViewModel
         self.notifier = notifier
+        self.canvasViewModel.delegate = self
     }
     
     convenience init(machineRef: Ref<GUIMachine>, notifier: GlobalChangeNotifier? = nil) {

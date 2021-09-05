@@ -12,7 +12,15 @@ import AttributeViews
 import MetaMachines
 import Utilities
 
+protocol StateTrackerDelegate: AnyObject {
+    
+    func layoutDidChange(_ viewModel: StateTracker)
+    
+}
+
 class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetector, TextRepresentable, BoundedSize, _Rigidable, ObservableObject, Identifiable {
+    
+    weak var delegate: StateTrackerDelegate?
     
     @Published var isText: Bool 
 //        didSet {
@@ -161,6 +169,14 @@ class StateTracker: MoveAndStretchFromDrag, _Collapsable, Collapsable, EdgeDetec
             )
         }
         self.setLocation(width: frameWidth, height: frameHeight, newLocation: newLocation)
+    }
+    
+    func finishDrag(gesture: DragGesture.Value, frameWidth: CGFloat, frameHeight: CGFloat) {
+        self.handleDrag(gesture: gesture, frameWidth: frameWidth, frameHeight: frameHeight)
+        self.isDragging = false
+        self.isStretchingY = false
+        self.isStretchingX = false
+        self.delegate?.layoutDidChange(self)
     }
 
 }
