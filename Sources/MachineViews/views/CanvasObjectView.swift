@@ -137,7 +137,7 @@ struct CanvasObjectView_Previews: PreviewProvider {
     
     struct Preview: View {
         
-        @StateObject var viewModel = StateViewModel(machine: Ref(copying: MetaMachine.initialSwiftMachine()), index: 0)
+        @StateObject var viewModel = StateViewModel(machine: Ref(copying: MetaMachine.initialSwiftMachine), index: 0)
         
         @State var expanded: Bool = false
         

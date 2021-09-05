@@ -46,7 +46,7 @@ struct ActionView_Previews: PreviewProvider {
 
     struct Preview: View {
 
-        @StateObject var viewModel: ActionViewModel = ActionViewModel(machine: Ref(copying: MetaMachine.initialSwiftMachine()), stateIndex: 0, actionIndex: 0)
+        @StateObject var viewModel: ActionViewModel = ActionViewModel(machine: Ref(copying: MetaMachine.initialSwiftMachine), stateIndex: 0, actionIndex: 0)
 
         var body: some View {
             ActionView(action: viewModel, height: 100.0)

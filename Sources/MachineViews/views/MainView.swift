@@ -45,7 +45,7 @@ struct MainView_Previews: PreviewProvider {
         let config = Config()
         
         var body: some View {
-            MainView(machine: MetaMachine.initialSwiftMachine()).environmentObject(config)
+            MainView(machine: MetaMachine.initialSwiftMachine).environmentObject(config)
         }
         
     }
