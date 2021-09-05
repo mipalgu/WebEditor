@@ -65,6 +65,8 @@ import swift_helpers
 
 protocol CanvasViewModelDelegate: AnyObject {
     
+    func didChangeFocus(_ viewModel: CanvasViewModel)
+    
     func layoutDidChange(_: CanvasViewModel, layout: Layout)
     
 }
@@ -523,6 +525,7 @@ extension CanvasViewModel {
         TapGesture(count: 2).onEnded {
             self.edittingState = nil
             self.focus = .machine
+            self.delegate?.didChangeFocus(self)
         }
     }
     
@@ -530,6 +533,7 @@ extension CanvasViewModel {
         TapGesture().onEnded {
             self.selectedObjects = []
             self.focus = .machine
+            self.delegate?.didChangeFocus(self)
         }
     }
     
@@ -610,6 +614,7 @@ extension CanvasViewModel {
             } else {
                 self.focus = .state(stateIndex: self.viewModel(forState: stateName).index)
             }
+            self.delegate?.didChangeFocus(self)
         }.modifiers(.shift)
     }
     
@@ -621,6 +626,7 @@ extension CanvasViewModel {
             } else {
                 self.focus = .transition(stateIndex: self.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
             }
+            self.delegate?.didChangeFocus(self)
         }.modifiers(.shift)
     }
     
@@ -662,6 +668,7 @@ extension CanvasViewModel {
         TapGesture().onEnded {
             self.selectedObjects = [.state(stateIndex: self.viewModel(forState: stateName).index)]
             self.focus = .state(stateIndex: self.viewModel(forState: stateName).index)
+            self.delegate?.didChangeFocus(self)
         }
     }
     
@@ -669,6 +676,7 @@ extension CanvasViewModel {
         TapGesture().onEnded {
             self.focus = .transition(stateIndex: self.viewModel(forState: stateName).index, transitionIndex: transitionIndex)
             self.selectedObjects = [.transition(stateIndex: self.viewModel(forState: stateName).index, transitionIndex: transitionIndex)]
+            self.delegate?.didChangeFocus(self)
         }
     }
     
@@ -676,6 +684,7 @@ extension CanvasViewModel {
         TapGesture(count: 2).onEnded {
             self.edittingState = stateName
             self.focus = .state(stateIndex: self.viewModel(forState: stateName).index)
+            self.delegate?.didChangeFocus(self)
         }
     }
     

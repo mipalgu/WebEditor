@@ -78,6 +78,10 @@ final class MachineViewModel: ObservableObject, GlobalChangeNotifier {
 
 extension MachineViewModel: CanvasViewModelDelegate {
     
+    func didChangeFocus(_: CanvasViewModel) {
+        self.attributesPaneViewModel.send()
+    }
+    
     func layoutDidChange(_: CanvasViewModel, layout: Layout) {
         machineRef.value.layout = layout
     }
