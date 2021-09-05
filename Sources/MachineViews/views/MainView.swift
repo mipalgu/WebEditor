@@ -10,19 +10,20 @@ import TokamakShim
 import MetaMachines
 import Attributes
 import Utilities
+import GUUI
 
 public struct MainView: View {
     
     @StateObject var viewModel: MainViewModel
     
-    @EnvironmentObject var config: Config
+    var config: Config = Config()
     
-    public init(arrangement: Arrangement) {
-        self.init(viewModel: MainViewModel(root: .arrangement(ArrangementViewModel(arrangement: arrangement))))
-    }
+//    public init(arrangementRef: ArrangementRef) {
+//        self.init(viewModel: MainViewModel(root: .arrangement(ArrangementViewModel(arrangementRef: arrangementRef))))
+//    }
     
-    public init(machine: MetaMachine) {
-        self.init(viewModel: MainViewModel(root: .machine(MachineViewModel(machine: machine))))
+    public init(machineRef: Ref<GUIMachine>) {
+        self.init(viewModel: MainViewModel(root: .machine(MachineViewModel(machineRef: machineRef))))
     }
     
     private init(viewModel: MainViewModel) {
@@ -31,9 +32,9 @@ public struct MainView: View {
 
     public var body: some View {
         HStack {
-            DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
-            viewModel.subView
-        }.navigationTitle(viewModel.focus.path)
+            //DependenciesView(root: viewModel.root, viewModel: viewModel.dependenciesViewModel, focus: $viewModel.focus)
+            viewModel.subView.environmentObject(config)
+        }.navigationTitle(viewModel.focus.pretty)
     }
     
 }
@@ -42,10 +43,15 @@ struct MainView_Previews: PreviewProvider {
     
     struct Preview: View {
         
-        let config = Config()
-        
         var body: some View {
-            MainView(machine: MetaMachine.initialSwiftMachine()).environmentObject(config)
+            MainView(
+                machineRef: Ref(
+                    copying: GUIMachine(
+                        machine: MetaMachine.initialSwiftMachine,
+                        layout: nil
+                    )
+                )
+            )
         }
         
     }

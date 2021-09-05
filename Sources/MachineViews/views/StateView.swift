@@ -43,7 +43,7 @@ struct StateView_Previews: PreviewProvider {
     
     struct Expanded_Preview: View {
         
-        @StateObject var viewModel = StateViewModel(machine: Ref(copying: MetaMachine.initialSwiftMachine()), index: 0)
+        @StateObject var viewModel = StateViewModel(machine: Ref(copying: MetaMachine.initialSwiftMachine), index: 0)
         
         
         @State var expanded: Bool = true
@@ -58,7 +58,7 @@ struct StateView_Previews: PreviewProvider {
     
     struct Collapsed_Preview: View {
         
-        @StateObject var viewModel = StateViewModel(machine: Ref(copying: MetaMachine.initialSwiftMachine()), index: 0)
+        @StateObject var viewModel = StateViewModel(machine: Ref(copying: MetaMachine.initialSwiftMachine), index: 0)
         
         @State var expanded: Bool = false
         

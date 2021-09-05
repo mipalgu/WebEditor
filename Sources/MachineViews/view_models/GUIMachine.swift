@@ -1,8 +1,8 @@
 /*
- * Layout.swift
+ * GUIMachine.swift
  * 
  *
- * Created by Callum McColl on 10/5/21.
+ * Created by Callum McColl on 5/9/21.
  * Copyright © 2021 Callum McColl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,56 +59,34 @@
 import Foundation
 import MetaMachines
 
-public struct Layout: PlistConvertible, Hashable, Codable {
+public struct GUIMachine: Hashable, Codable {
     
-    public struct IOError: Error {
-        
-        public var message: String
+    public var machine: MetaMachine
+    
+    public var layout: Layout
+    
+    public init(machine: MetaMachine, layout: Layout?) {
+        self.machine = machine
+        self.layout = layout ?? Layout(states: [:])
     }
     
-    public enum CodingKeys: String, Hashable, CodingKey {
-        case States
-    }
-    
-    var states: [StateName: StateLayout]
-    
-    public var plistRepresentation: String {
-        (try? PropertyListEncoder().encode(self)).flatMap { String(data: $0, encoding: .utf8) } ?? ""
-    }
-    
-    init(states: [StateName: StateLayout]) {
-        self.states = states
-    }
-    
-    public init?(fromPlistRepresentation str: String) {
-        guard let data = str.data(using: .utf8), let layout = try? PropertyListDecoder().decode(Layout.self, from: data) else {
-            return nil
+    public init(from fileWrapper: FileWrapper) throws {
+        print(fileWrapper.fileWrappers ?? [:])
+        let machine = try MetaMachine(from: fileWrapper)
+        guard let layoutWrapper = fileWrapper.fileWrappers?["Layout.plist"] else {
+            self.init(machine: machine, layout: nil)
+            return
         }
-        self = layout
-    }
-    
-    public init(from wrapper: FileWrapper) throws {
-        let decoder = PropertyListDecoder()
-        guard let data = wrapper.regularFileContents else {
-            throw IOError(message: "Unable to read \(wrapper.filename ?? "layout plist")")
-        }
-        self = try decoder.decode(Layout.self, from: data)
+        let layout = try Layout(from: layoutWrapper)
+        self.init(machine: machine, layout: layout)
     }
     
     public func fileWrapper() throws -> FileWrapper {
-        let data = try PropertyListEncoder().encode(self)
-        return FileWrapper(regularFileWithContents: data)
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let states = try container.decode([StateName: StateLayout].self, forKey: .States)
-        self.init(states: states)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(states, forKey: .States)
+        let wrapper = try machine.fileWrapper()
+        let layoutWrapper = try layout.fileWrapper()
+        layoutWrapper.preferredFilename = "Layout.plist"
+        wrapper.addFileWrapper(layoutWrapper)
+        return wrapper
     }
     
 }

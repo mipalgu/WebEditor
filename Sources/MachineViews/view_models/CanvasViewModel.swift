@@ -63,7 +63,15 @@ import Utilities
 import GUUI
 import swift_helpers
 
+protocol CanvasViewModelDelegate: AnyObject {
+    
+    func layoutDidChange(_: CanvasViewModel, layout: Layout)
+    
+}
+
 final class CanvasViewModel: ObservableObject {
+    
+    weak var delegate: CanvasViewModelDelegate?
     
     let machineRef: Ref<MetaMachine>
     
@@ -377,7 +385,10 @@ extension CanvasViewModel {
     
     func newState() {
         let result = machineRef.value.newState()
-        defer { objectWillChange.send() }
+        defer {
+            changeLayout()
+            objectWillChange.send()
+        }
         switch result {
         case .success(true), .failure:
             notifier?.send()
@@ -459,12 +470,14 @@ extension CanvasViewModel: StateViewModelDelegate {
                 sourceViewModel.viewModel(forTransition: $0).tracker.rectifyCurve(sourceTracker: sourceTracker, targetTracker: targetTracker)
             }
         }
+        changeLayout()
     }
     
     func didChangeName(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName) {
         stateViewModels[newName] = viewModel
         targetTransitions[newName] = targetTransitions[oldName]
         targetTransitions[oldName] = nil
+        changeLayout()
     }
     
     func didChangeTransitionTarget(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName, transition: TransitionViewModel) {
@@ -481,10 +494,23 @@ extension CanvasViewModel: StateViewModelDelegate {
             }
         }
         targetTransitions[newName]?.insert(transition.tracker)
+        changeLayout()
     }
     
     func didDeleteTransition(_ viewModel: StateViewModel, transition: TransitionViewModel, targeting targetStateName: StateName) {
         targetTransitions[targetStateName]?.removeAll(transition.tracker)
+        changeLayout()
+    }
+    
+    func layoutDidChange(_ viewModel: StateViewModel) {
+        changeLayout()
+    }
+    
+    private func changeLayout() {
+        guard let delegate = self.delegate else {
+            return
+        }
+        delegate.layoutDidChange(self, layout: self.layout)
     }
     
 }

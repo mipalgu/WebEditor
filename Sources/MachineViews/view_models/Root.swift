@@ -79,15 +79,6 @@ enum Root {
         }
     }
     
-    var filePath: URL {
-        switch self {
-        case .arrangement(let viewModel):
-            return viewModel.arrangement.filePath
-        case .machine(let viewModel):
-            return viewModel.machine.filePath
-        }
-    }
-    
     var arrangement: ArrangementViewModel {
         get {
             switch self {

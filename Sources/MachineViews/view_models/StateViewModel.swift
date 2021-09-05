@@ -71,6 +71,7 @@ protocol StateViewModelDelegate: AnyObject {
     func didChangeName(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName)
     func didChangeTransitionTarget(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName, transition: TransitionViewModel)
     func didDeleteTransition(_ viewModel: StateViewModel, transition: TransitionViewModel, targeting targetStateName: StateName)
+    func layoutDidChange(_ viewModel: StateViewModel)
     
 }
 
@@ -171,6 +172,7 @@ final class StateViewModel: ObservableObject, Identifiable {
             } ?? [])
         }
         self.notifier = notifier
+        self.tracker.delegate = self
     }
     
     func removeTransitionViewModels(targeting stateName: StateName) {
@@ -309,6 +311,14 @@ final class StateViewModel: ObservableObject, Identifiable {
             $0.send()
         }
         objectWillChange.send()
+    }
+    
+}
+
+extension StateViewModel: StateTrackerDelegate {
+    
+    func layoutDidChange(_: StateTracker) {
+        self.delegate?.layoutDidChange(self)
     }
     
 }
