@@ -400,7 +400,7 @@ extension CanvasViewModel {
     }
     
     func newTransition(source: MetaMachines.State, target: MetaMachines.State, suggested shape: Curve) {
-        let result = machineRef.value.newTransition(source: source.name, target: target.name, condition: "true")
+        let result = machineRef.value.newTransition(source: source.name, target: target.name, condition: "")
         guard let _ = try? result.get() else {
             return
         }
