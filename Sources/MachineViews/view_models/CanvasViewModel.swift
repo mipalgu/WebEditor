@@ -222,6 +222,7 @@ extension CanvasViewModel {
         let targetTracker = viewModel(forState: state.transitions[transitionIndex].target).tracker
         let newTracker = TransitionTracker(source: sourceViewModel.tracker, target: targetTracker)
         sourceViewModel.viewModel(forTransition: transitionIndex).tracker.curve = newTracker.curve
+        delegate?.layoutDidChange(self, layout: self.layout)
     }
     
 }
@@ -406,6 +407,7 @@ extension CanvasViewModel {
         }
         let stateViewModel = viewModel(forState: source.name)
         stateViewModel.viewModel(forTransition: source.transitions.count).tracker.curve = shape
+        delegate?.layoutDidChange(self, layout: self.layout)
         self.objectWillChange.send()
     }
     

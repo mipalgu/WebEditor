@@ -167,12 +167,12 @@ final class StateViewModel: ObservableObject, Identifiable {
         if machine.value.states[index].transitions.isEmpty {
             self.transitionViewModels = [:]
         } else {
-            self.transitionViewModels = Dictionary(uniqueKeysWithValues: Array(0..<machine.value.states[index].transitions.count).compactMap {
+            self.transitionViewModels = Dictionary(uniqueKeysWithValues: Array(0..<machine.value.states[index].transitions.count).map {
                 guard
                     let layout = layout,
                     $0 < layout.transitions.count
                 else {
-                    return nil
+                    return ($0, TransitionViewModel(machine: machine, stateIndex: index, transitionIndex: $0, layout: nil, notifier: notifier))
                 }
                 return ($0, TransitionViewModel(machine: machine, stateIndex: index, transitionIndex: $0, layout: layout.transitions[$0], notifier: notifier))
             })
