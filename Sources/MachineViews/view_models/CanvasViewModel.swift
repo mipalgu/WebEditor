@@ -551,6 +551,7 @@ extension CanvasViewModel {
                     let sourceState = self.machine.states.first(where: { self.viewModel(forState: $0.name).tracker.isWithin(point: gesture.startLocation) }),
                     let targetState = self.machine.states.first(where: { self.viewModel(forState: $0.name).tracker.isWithin(point: gesture.location) })
                 else {
+                    self.objectWillChange.send()
                     return
                 }
                 let tracker = TransitionTracker(
