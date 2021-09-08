@@ -203,12 +203,13 @@ final class StateViewModel: ObservableObject, Identifiable {
         var dict: [Int: TransitionViewModel] = [:]
         dict.reserveCapacity(count)
         var indexes = Array(0..<count)
-        indexes.remove(atOffsets: indexSet) { (index, nextIndex, previouslyDeleted) in
-            ((index + 1)..<nextIndex).forEach {
-                let viewModel = viewModel(forTransition: $0)
-                viewModel.transitionIndex -= previouslyDeleted
-                dict[viewModel.transitionIndex] = viewModel
-            }
+        indexSet.sorted(by: >).forEach {
+            indexes.remove(at: $0)
+        }
+        indexes.enumerated().forEach {
+            let viewModel = viewModel(forTransition: $1)
+            viewModel.transitionIndex = $0
+            dict[$0] = viewModel
         }
         transitionViewModels = dict
     }
@@ -236,7 +237,7 @@ final class StateViewModel: ObservableObject, Identifiable {
                 guard let transitionViewModel = viewModels[$0], let targetStateName = targetStateNames[$0] else {
                     return
                 }
-                transitionViewModels[index] = nil
+                transitionViewModels[$0] = nil
                 delegate?.didDeleteTransition(self, transition: transitionViewModel, targeting: targetStateName)
             }
             syncTransitions(afterDeleting: indexSet, countBeforeDeletion: transitions.count)
