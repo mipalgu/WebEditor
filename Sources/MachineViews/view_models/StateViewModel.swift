@@ -123,7 +123,7 @@ final class StateViewModel: ObservableObject, Identifiable {
     }
     
     lazy var nameViewModel: LineViewModel = {
-        LineViewModel(root: machineRef, path: path.name, label: "", notifier: notifier)
+        LineViewModel(root: machineRef, path: path.name, defaultValue: "", label: "", notifier: notifier, delegateFunction: { self.delegate?.didChangeName(self, from: $0, to: $1) })
     }()
     
     var name: StateName {
