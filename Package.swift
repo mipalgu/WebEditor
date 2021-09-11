@@ -12,7 +12,7 @@ let package = Package(
         .executable(name: "WebEditor", targets: ["WebEditor"])
     ],
     dependencies: ui + [
-        .package(name: "swift_helpers", url: "ssh://git.mipal.net/Users/Shared/git/swift_helpers.git", .branch("master")),
+        .package(name: "swift_helpers", url: "https://github.com/mipalgu/swift_helpers.git", .branch("main")),
         .package(name: "MetaMachines", url: "ssh://git.mipal.net/Users/Shared/git/MetaMachines.git", .branch("master")),
         .package(name: "AttributeViews", url: "ssh://git.mipal.net/Users/Shared/git/AttributeViews.git", .branch("master")),
         .package(name: "GUUI", url: "ssh://git.mipal.net/Users/Shared/git/GUUI.git", .branch("master"))
