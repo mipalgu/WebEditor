@@ -395,6 +395,12 @@ extension CanvasViewModel {
         switch result {
         case .success(true), .failure:
             notifier?.send()
+            guard machineRef.value.states.count > 0 else {
+                return
+            }
+            let stateIndex = machineRef.value.states.count - 1
+            stateViewModels[machineRef.value.states[stateIndex].name] = StateViewModel(machine: machineRef, index: stateIndex)
+            
         default:
             return
         }
@@ -479,6 +485,7 @@ extension CanvasViewModel: StateViewModelDelegate {
     
     func didChangeName(_ viewModel: StateViewModel, from oldName: StateName, to newName: StateName) {
         stateViewModels[newName] = viewModel
+        stateViewModels[oldName] = nil
         targetTransitions[newName] = targetTransitions[oldName]
         targetTransitions[oldName] = nil
         changeLayout()
