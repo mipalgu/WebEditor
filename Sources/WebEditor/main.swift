@@ -13,6 +13,30 @@ import MachineViews
 import Utilities
 import GUUI
 
+enum WindowType {
+    case undecided
+    case machine(machine: GUIMachine)
+    
+    var machine: GUIMachine {
+        get {
+            switch self {
+            case .machine(let machine):
+                return machine
+            default:
+                fatalError("Not a machine")
+            }
+        }
+        set {
+            switch self {
+            case .machine:
+                self = .machine(machine: newValue)
+            default:
+                fatalError("Not a machine")
+            }
+        }
+    }
+}
+
 struct WebEditor: App {
     
     #if canImport(SwiftUI)
@@ -35,8 +59,8 @@ struct WebEditor: App {
     #endif
     
     var body: some Scene {
-        DocumentGroup(newDocument: { MachineDocument(metaMachine: MetaMachine.initialSwiftMachine) }) { file in
-            MainView(machineRef: file.document.machineRef)
+        DocumentGroup(newDocument: { MachineDocument(type: .undecided) }) { file in
+            WindowView(viewModel: WindowViewModel(ref: file.document.ref))
         }
     }
 }
@@ -47,31 +71,36 @@ final class MachineDocument: ReferenceFileDocument {
     
     static var readableContentTypes: [UTType] = [.machine, .directory]
     
-    var machineRef: Ref<GUIMachine>
+    var ref: Ref<WindowType>
     
-    init(machineRef: Ref<GUIMachine>) {
-        self.machineRef = machineRef
+    init(ref: Ref<WindowType>) {
+        self.ref = ref
     }
     
     convenience init(metaMachine: MetaMachine) {
-        self.init(machine: GUIMachine(machine: metaMachine, layout: nil))
+        self.init(type: WindowType.machine(machine: GUIMachine(machine: metaMachine, layout: nil)))
     }
     
-    convenience init(machine: GUIMachine) {
-        self.init(machineRef: Ref(copying: machine))
+    convenience init(type: WindowType) {
+        self.init(ref: Ref(copying: type))
     }
     
     convenience init(configuration: ReadConfiguration) throws {
         let machine = try GUIMachine(from: configuration.file)
-        self.init(machine: machine)
+        self.init(type: .machine(machine: machine))
     }
     
-    func snapshot(contentType: UTType) throws -> GUIMachine {
-        machineRef.value
+    func snapshot(contentType: UTType) throws -> WindowType {
+        ref.value
     }
     
-    func fileWrapper(snapshot: GUIMachine, configuration: FileDocumentWriteConfiguration) throws -> FileWrapper {
-        return try snapshot.fileWrapper()
+    func fileWrapper(snapshot: WindowType, configuration: FileDocumentWriteConfiguration) throws -> FileWrapper {
+        switch snapshot {
+        case .machine(let machine):
+            return try machine.fileWrapper()
+        default:
+            throw AttributeError(message: "Trying to get fileWrapper for something that isn't a machine", path: MetaMachine.path)
+        }
     }
     
 }
@@ -88,6 +117,53 @@ extension UTType {
     
     static var machine: UTType {
         UTType(filenameExtension: "machine")!
+    }
+    
+}
+
+final class WindowViewModel: ObservableObject {
+    
+    var ref: Ref<WindowType>
+    
+    var type: WindowType {
+        get {
+            ref.value
+        }
+        set {
+            ref.value = newValue
+            objectWillChange.send()
+        }
+    }
+    
+    init(ref: Ref<WindowType>) {
+        self.ref = ref
+    }
+    
+}
+
+struct WindowView: View {
+    
+    @StateObject var viewModel: WindowViewModel
+    
+    init(viewModel: WindowViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+    }
+    
+    var body: some View {
+        switch viewModel.type {
+        case .machine:
+            MainView(machineRef: viewModel.ref.machine)
+        default:
+            VStack {
+                ForEach(0..<MetaMachine.supportedSemantics.count) { index in
+                    Button(action: {
+                        viewModel.type = .machine(machine: GUIMachine(machine: MetaMachine.initialMachine(forSemantics: MetaMachine.supportedSemantics[index]), layout: nil))
+                    }) {
+                        Text(MetaMachine.supportedSemantics[index].rawValue)
+                    }
+                }
+            }
+        }
     }
     
 }
