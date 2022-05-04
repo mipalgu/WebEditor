@@ -13,9 +13,9 @@ let package = Package(
     ],
     dependencies: ui + [
         .package(name: "swift_helpers", url: "https://github.com/mipalgu/swift_helpers.git", .branch("main")),
-        .package(name: "MetaMachines", url: "ssh://git.mipal.net/Users/Shared/git/MetaMachines.git", .branch("master")),
-        .package(name: "AttributeViews", url: "ssh://git.mipal.net/Users/Shared/git/AttributeViews.git", .branch("master")),
-        .package(name: "GUUI", url: "ssh://git.mipal.net/Users/Shared/git/GUUI.git", .branch("master"))
+        .package(name: "MetaMachines", url: "git@github.com:mipalgu/MetaMachines.git", .branch("main")),
+        .package(name: "AttributeViews", url: "git@github.com:mipalgu/AttributeViews.git", .branch("main")),
+        .package(name: "GUUI", url: "git@github.com:mipalgu/GUUI.git", .branch("main"))
     ],
     targets: [
         .target(name: "Utilities", dependencies: products + ["MetaMachines", "AttributeViews"]),
