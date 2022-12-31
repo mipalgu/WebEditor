@@ -56,7 +56,7 @@
  *
  */
 
-import TokamakShim
+import GUUI
 import MetaMachines
 
 struct CanvasDragTransaction {

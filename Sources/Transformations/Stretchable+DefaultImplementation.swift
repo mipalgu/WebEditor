@@ -5,7 +5,7 @@
 //  Created by Morgan McColl on 22/11/20.
 //
 
-import TokamakShim
+import GUUI
 import Foundation
 
 public extension Stretchable where Self: EdgeDetector {

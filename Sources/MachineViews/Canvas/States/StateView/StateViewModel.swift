@@ -56,7 +56,7 @@
  *
  */
 
-import TokamakShim
+import GUUI
 import Transformations
 import Attributes
 import AttributeViews

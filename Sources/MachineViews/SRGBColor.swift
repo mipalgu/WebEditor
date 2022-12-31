@@ -56,7 +56,7 @@
  *
  */
 
-import TokamakShim
+import GUUI
 
 struct SRGBColor: Hashable, Codable {
     

@@ -5,12 +5,12 @@
 //  Created by Morgan McColl on 15/11/20.
 //
 
-import TokamakShim
+import GUUI
 import MetaMachines
 import Attributes
 import AttributeViews
 
-public final class Config: ObservableObject, AttributeViewConfig {
+public final class Config: ObservableObject {
     
     #if canImport(AppKit)
     @Published public var textColor = Color(NSColor.controlTextColor)

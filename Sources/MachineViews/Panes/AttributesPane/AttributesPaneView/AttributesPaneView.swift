@@ -57,7 +57,7 @@
  *
  */
 
-import TokamakShim
+import GUUI
 
 struct AttributesPaneView: View {
     

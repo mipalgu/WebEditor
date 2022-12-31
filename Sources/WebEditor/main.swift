@@ -2,7 +2,7 @@ import MetaMachines
 import Attributes
 
 #if canImport(TokamakShim)
-import TokamakShim
+import GUUI
 typealias State = TokamakShim.State
 #else
 import SwiftUI

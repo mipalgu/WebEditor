@@ -5,7 +5,7 @@
 //  Created by Morgan McColl on 25/11/20.
 //
 
-import TokamakShim
+import GUUI
 import Foundation
 
 public protocol BoundedSize: Rigidable {

@@ -56,7 +56,7 @@
  *
  */
 
-import TokamakShim
+import GUUI
 
 #if canImport(Cocoa)
 import Cocoa

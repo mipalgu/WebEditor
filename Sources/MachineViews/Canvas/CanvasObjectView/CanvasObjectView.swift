@@ -56,7 +56,7 @@
  *
  */
 
-import TokamakShim
+import GUUI
 import Transformations
 
 typealias CanvasObjectViewModel = ObservableObject & Positionable & Stretchable & TextRepresentable

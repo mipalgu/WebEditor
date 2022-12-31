@@ -57,7 +57,7 @@
  */
 
 #if canImport(TokamakShim)
-import TokamakShim
+import GUUI
 
 public typealias State = TokamakShim.State
 #else
